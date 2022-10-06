@@ -22,5 +22,5 @@ def commands():
     Setups mrrs path and meshroom node path env variable
     """
     env.PYTHONPATH.append('{root}/mrrs')
-    env.MESHROOM_NODES_PATH.append('{root}/mrrs/mrrs/nodes')
+    env.MESHROOM_NODES_PATH.append('{root}/MeshroomResearch/mrrs/nodes')
 
