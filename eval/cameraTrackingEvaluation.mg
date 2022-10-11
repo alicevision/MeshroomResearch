@@ -3,15 +3,17 @@
         "pipelineVersion": "2.2",
         "releaseVersion": "2021.1.0",
         "fileVersion": "1.1",
-        "template": true,
+        "template": false,
         "nodesVersions": {
-            "CalibrationComparison": "3.0",
-            "FeatureExtraction": "1.1",
             "ImageMatching": "2.0",
-            "DistortionCalibration": "2.0",
+            "StructureFromMotion": "2.0",
+            "FeatureExtraction": "1.1",
+            "CalibrationComparison": "3.0",
+            "Publish": "1.2",
             "SfMAlignment": "2.0",
             "FeatureMatching": "2.0",
-            "StructureFromMotion": "2.0"
+            "DistortionCalibration": "2.0",
+            "EvaluationDataset": "1.0"
         }
     },
     "graph": {
@@ -27,11 +29,11 @@
                 "split": 1
             },
             "uids": {
-                "0": "3c861a2795b952b0fd0fba81c0b60467bcb81157"
+                "0": "aea6e1b2cbd781c2ea90ff9618525dc35303ea3a"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "",
+                "input": "{EvaluationDataset_1.fakeCamInit}",
                 "lensGrid": [],
                 "verboseLevel": "info"
             },
@@ -51,7 +53,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "081d323ca7214d2f5f2c23e21296b93433b50d2f"
+                "0": "15afb5d96b4e62c0c451d70820d7e72847daff02"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -84,11 +86,11 @@
                 "split": 1
             },
             "uids": {
-                "0": "f48e76d2c401f5e94790f09a7ccc927f72d0b2f1"
+                "0": "6ed5a48526d0d51eda38d03dbb900a95307224a5"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "",
+                "input": "{EvaluationDataset_1.fakeCamInit}",
                 "masksFolder": "",
                 "describerTypes": [
                     "dspsift"
@@ -119,7 +121,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "844fba24f620a18fc15ac8a0bf7aae927d6b3165"
+                "0": "9f4b5dc64ba78637078a46968ca67157d390fb61"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -175,7 +177,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "3efc1b6e4468a331ebc198623567311597a54f4d"
+                "0": "65f109a9915dfea7143dd03e697353818ea2b7f0"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -206,8 +208,8 @@
         "CalibrationComparison_1": {
             "nodeType": "CalibrationComparison",
             "position": [
-                1171,
-                23
+                1126,
+                245
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -215,12 +217,12 @@
                 "split": 1
             },
             "uids": {
-                "0": "93e2a0e089892c18f8c301b55107bcf8f65698d1"
+                "0": "60d3c8123fea457f73870457b26ba1952a3dc13e"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "inputSfM": "{SfMAlignment_1.outputViewsAndPoses}",
-                "inputSfMGT": "",
+                "inputSfMGT": "{EvaluationDataset_1.groundTruth}",
                 "metrics": [
                     "MSECameraCenter",
                     "AngleBetweenRotations",
@@ -237,8 +239,8 @@
         "SfMAlignment_1": {
             "nodeType": "SfMAlignment",
             "position": [
-                951,
-                12
+                923,
+                162
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -246,12 +248,12 @@
                 "split": 1
             },
             "uids": {
-                "0": "45a4dd8cd40b41a97dd3d32e546ff2a8fb513cc4"
+                "0": "1559480033de63c23df0da879ebc546bf5c96dfd"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "input": "{StructureFromMotion_1.outputViewsAndPoses}",
-                "reference": "",
+                "reference": "{EvaluationDataset_1.groundTruth}",
                 "method": "from_cameras_viewid",
                 "fileMatchingPattern": ".*\\/(.*?)\\.\\w{3}",
                 "metadataMatchingList": [],
@@ -264,6 +266,53 @@
                 "output": "{cache}/{nodeType}/{uid0}/cameras.abc",
                 "outputViewsAndPoses": "{cache}/{nodeType}/{uid0}/cameras.sfm"
             }
+        },
+        "EvaluationDataset_1": {
+            "nodeType": "EvaluationDataset",
+            "position": [
+                -172,
+                298
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "21fc0103314cb42759865ca6aaad058e23849a07"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "datasetFolder": ""
+            },
+            "outputs": {
+                "fakeCamInit": "/gt_no_pose.sfm",
+                "groundTruth": "/gt.sfm"
+            }
+        },
+        "Publish_1": {
+            "nodeType": "Publish",
+            "position": [
+                1341,
+                327
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "d9487bee9f202b13dd3e2352293f8c3984b61674"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "inputFiles": [
+                    "{CalibrationComparison_1.outputCsv}"
+                ],
+                "output": "",
+                "verboseLevel": "info"
+            },
+            "outputs": {}
         }
     }
 }

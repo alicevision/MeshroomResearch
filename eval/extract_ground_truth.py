@@ -84,7 +84,7 @@ for frame in range(scene.frame_start, scene.frame_end+1):
         'poseId': get_pose_id(frame),
         'frameId': get_frame_id(frame),
         'intrinsicId': get_intrinsic_id(),
-        'path': str(os.path.abspath('./{}/render/frame_{:04d}.exr'.format(argv[0], frame))),
+        'path': str(os.path.abspath('{}/render/frame_{:04d}.exr'.format(argv[0], frame))),
         'width': str(1920),
         'height': str(1080)
     }
@@ -106,10 +106,10 @@ gt = {
 
 
 # Save to file
-output_path = os.path.abspath('./{}/gt_no_pose.sfm'.format(argv[0]))
+output_path = os.path.abspath('{}/gt_no_pose.sfm'.format(argv[0]))
 with open(output_path, 'w') as file:
     json.dump(gt_no_pose, file, indent=4)
 
-output_path = os.path.abspath('./{}/gt.sfm'.format(argv[0]))
+output_path = os.path.abspath('{}/gt.sfm'.format(argv[0]))
 with open(output_path, 'w') as file:
     json.dump(gt, file, indent=4)
