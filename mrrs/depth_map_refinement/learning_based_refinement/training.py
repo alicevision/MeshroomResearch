@@ -25,7 +25,7 @@ from mrrs.depth_map_refinement.learning_based_refinement.models.unet_model impor
 from mrrs.core.geometry import EPSILON
 from mrrs.core.utils import recursive_call
 
-import argparse
+# import argparse {todo}
 
 # nohup "rez env mrrs-hogm tensorflow-2.4.0 -- python /s/apps/users/multiview/mrrs/hogm/mrrs/mrrs/depth_map_refinement/learning_based_refinement/training.py"&
 
@@ -93,26 +93,32 @@ if __name__ == "__main__":#FIXME: logging? instead of print
     #%% prepare data
     #make dataset
     generator = TrainingGenerator(DATASET_PATH, resize_gt=True)#For now only filtering no upsampling
-    if RANDOM_TEST and  TEST_DATASET_PATH is None:
-        print("Will use 10 percent of the input dataset as testing:")
-        nb_test = 0.1*len(generator)
-        print("%d images"%nb_test)
-        selected_views = np.random.randint(nb_test)
-        TEST_DATASET_PATH = os.path.join(DATASET_PATH+"_test", "test_set", "dummy_sequence")
-        if os.path.exists(TEST_DATASET_PATH):
-            print("Test set already exists, skipping")
-        else:
-            os.makedirs(TEST_DATASET_PATH)
-            print("Making random test set")
-            for index, dataset_item in enumerate(generator.scanned_files):#note generator shuffles by default
-                depth, image,depth_gt = dataset_item
-                shutil.move(depth, os.path.join(TEST_DATASET_PATH, os.path.basename(depth)))
-                shutil.move(image, os.path.join(TEST_DATASET_PATH, os.path.basename(image)))
-                shutil.move(depth_gt, os.path.join(TEST_DATASET_PATH, os.path.basename(depth_gt)))
 
-                if index >= nb_test:
-                    break
-            generator = TrainingGenerator(DATASET_PATH, resize_gt=True)#need to reload this because files have changed
+    #def split_dataset(dataset, test_ratio=0.30):
+        # test_indices = np.random.rand(len(dataset)) < test_ratio #fix seed
+        # return dataset[~test_indices], dataset[test_indices]
+
+
+    # if RANDOM_TEST and  TEST_DATASET_PATH is None:
+    #     print("Will use 10 percent of the input dataset as testing:")
+    #     nb_test = 0.1*len(generator)
+    #     print("%d images"%nb_test)
+    #     selected_views = np.random.randint(nb_test)
+    #     TEST_DATASET_PATH = os.path.join(DATASET_PATH+"_test", "test_set", "dummy_sequence")
+    #     if os.path.exists(TEST_DATASET_PATH):
+    #         print("Test set already exists, skipping")
+    #     else:
+    #         os.makedirs(TEST_DATASET_PATH)
+    #         print("Making random test set")
+    #         for index, dataset_item in enumerate(generator.scanned_files):#note generator shuffles by default
+    #             depth, image,depth_gt = dataset_item
+    #             shutil.move(depth, os.path.join(TEST_DATASET_PATH, os.path.basename(depth)))
+    #             shutil.move(image, os.path.join(TEST_DATASET_PATH, os.path.basename(image)))
+    #             shutil.move(depth_gt, os.path.join(TEST_DATASET_PATH, os.path.basename(depth_gt)))
+
+    #             if index >= nb_test:
+    #                 break
+    #         generator = TrainingGenerator(DATASET_PATH, resize_gt=True)#need to reload this because files have changed
 
     test_generator = TrainingGenerator(TEST_DATASET_PATH, shuffle_scenes=False) if TEST_DATASET_PATH is not None else None
     #automatically detects type and sizes

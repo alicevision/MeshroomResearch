@@ -18,13 +18,14 @@ Install meshroom: https://alicevision.org/#meshroom (or build it for yourself).
 
 Clone this repo :
 ```
-git clone ...TODO URL...
+git clone https://github.com/alicevision/MeshroomResearch
 ```
 Then install Meshroom Research with pip :
 ```
 cd MRRS
-pip install -e .
+pip install -e . [< optional features >]
 ```
+< optional features > may be onnx to install the onnx runtime, meshcomparison to install the dependencies required to handle meshes
 
 On mikros machines:
 ```
@@ -75,16 +76,16 @@ It will run n times the chamfer distance, using ramdom point sampled on the surf
 Calls the core.metric package.
 
 ### DeepDepthRefinement
-Call deep depth map refinement methods.
+Call deep depth map refinement methods: takes depths maps and corresponding images as input and returns a refined depth map.
 TBA
 
 ### DeepMVS
-Call deep multiview stereo methods methods.
+Call deep multiview stereo methods methods: takes images and calibration as input ands return corresponding depth maps.
 TBA
 
 ## Scripts&pipeline
 ### BlendedMVG benchmark for pose, depth and mesh estimation
-tba
+TBA
 
 ## Meshroom Dev quickstart
 
@@ -115,3 +116,4 @@ TBA\
 
 ## Depth map format
 
+TBA

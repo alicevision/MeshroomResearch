@@ -5,20 +5,6 @@ import numpy as np
 import logging
 from mrrs.core.utils import cross_with_broacsat, time_it, vectorised_dot
 
-def compute_normals(depth_map):
-    """
-    Computes normal from depth maps
-    """
-    gradients_y, gradients_x = np.gradient(depth_map)  #todo: add option to blur in case on noise
-    #2d normal in homogeneous coordinates
-    normal = np.dstack((-gradients_x, -gradients_y, np.ones_like(depth_map)))
-    #unhomogenize => normal in 3D
-    n = np.linalg.norm(normal, axis=2)
-    normal /= n
-    # normal[:, :, 0] /= n
-    # normal[:, :, 1] /= n
-    # normal[:, :, 2] /= n
-    return normal
 
 #what is condidered a small float
 EPSILON = 0.0000001
@@ -449,3 +435,21 @@ def rescale_and_center_sfm(extrinsics, intrinsics, depth_maps=None, center_camer
         extrinsics[:, :, 3] -= center
         extrinsics = np.linalg.inv(rotation) @ extrinsics
     return extrinsics, intrinsics, depth_maps, scale
+
+#%% depth maps
+def compute_normals(depth_map):
+    """
+    Computes normal from depth maps.
+    Normal are expressed from the current viewpoint.
+    """#TODO: pass in world cs? or compute normal with respect to the surface?
+    gradients_y, gradients_x = np.gradient(np.squeeze(depth_map))  #todo: add option to blur in case on noise
+    #2d normal in homogeneous coordinates
+    normal = np.dstack((-gradients_x, -gradients_y, np.ones_like(depth_map)))
+    #unhomogenize => normal in 3D
+    normal /= np.expand_dims(np.linalg.norm(normal, axis=2), axis=-1)
+    # n = np.linalg.norm(normal, axis=2)
+    # normal[:, :, 0] /= n
+    # normal[:, :, 1] /= n
+    # normal[:, :, 2] /= n
+    return normal
+

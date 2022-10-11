@@ -6,10 +6,12 @@ import pathlib
 from setuptools import setup
 
 #Setting env variable
-#FIXME: check env
+#FIXME: this is not working
 MLEM_path = os.path.join(str(pathlib.Path(__file__).parent.resolve()), "mrrs", "nodes")
 print("MRRS path "+MLEM_path)
 os.environ['MESHROOM_NODES_PATH'] = MLEM_path
+#move to a conda recipe
+# https://docs.conda.io/projects/conda-build/en/latest/resources/build-scripts.html
 
 setup(
     name='MRRS',
@@ -22,13 +24,10 @@ setup(
     #license='LICENSE.txt',
     description='Meshroom Research plugin and library.',
     long_description=open('README.md').read(),
-    install_requires=["numpy", "opencv-python", "pillow"],#all of this sould be in the mr env
-                     #trimesh for mesh comparison optional for meshcomparsion
-                     # optional annoy for knn? for meshcomparsion
+    install_requires=["numpy", "pillow", "opencv-python", ],#all of this sould be in the mr env already
                      # "openexr-python"],#note add mode meshroom? with oiio
-                     # onnxruntime
+
     extras_require= {
-                    # "openexr-python need conda
                     "onnx": ["onnxruntime"],#for depth map refinement
                     "meshcomparison": ["annoy", "trimesh"],
                     # "training": "tensorflow==2.4"#need conda
