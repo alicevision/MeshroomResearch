@@ -2,6 +2,7 @@ import bpy
 import sys
 import os
 import json
+import mathutils
 
 
 # Command line arguments
@@ -33,9 +34,12 @@ cam = bpy.data.cameras['Camera']
 
 # Poses
 poses = []
+mat_convert = mathutils.Matrix.Identity(4)
+mat_convert[1][1] = -1
+mat_convert[2][2] = -1
 for frame in range(scene.frame_start, scene.frame_end+1):
     scene.frame_set(frame)
-    mat = obj.matrix_world
+    mat = mat_convert @ obj.matrix_world @ mat_convert
     rotation = [
         str(mat[0][0]), str(mat[0][1]), str(mat[0][2]),
         str(mat[1][0]), str(mat[1][1]), str(mat[1][2]),

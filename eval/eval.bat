@@ -18,4 +18,4 @@ set ALICEVISION_ROOT=C:\dev\AliceVision
 set MESHROOM_NODES_PATH=C:\dev\MeshroomResearch\mrrs\nodes;C:\dev\MeshroomResearch\eval
 
 REM Launch camera tracking evaluation pipeline
-python %MESHROOM_DIR%\bin\meshroom_batch -i %DATASET_DIR% -p cameraTrackingEvaluation.mg -o %DATASET_DIR%
+python %MESHROOM_DIR%\bin\meshroom_batch -i %DATASET_DIR% -p cameraTrackingEvaluation.mg -o %DATASET_DIR% --forceCompute
