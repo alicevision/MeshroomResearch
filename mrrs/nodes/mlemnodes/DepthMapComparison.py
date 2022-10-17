@@ -1,15 +1,14 @@
 __version__ = "3.0"
 
+import logging
 import os
 import json
+import numpy as np
 
 from meshroom.core import desc
 
-from mrrs.core.ios import *
+from mrrs.core.ios import matrices_from_sfm_data, open_depth_map, open_exr, save_exr
 from mrrs.metrics.metrics import compute_depth_metric
-from mrrs.core.geometry import *
-from scripts.test_load_mvsnet import save_obj #FIXME: move to io and rename save obj pc
-
 
 class DepthMapComparison(desc.Node):
 
@@ -70,7 +69,7 @@ Autorescale may be used otherwise but it is far from ideal.
             name='maskValue',
             label='Mask Value',
             description='''If this is not None, will mask the pixels with this value in the ground truth.''',
-            value=None,
+            value='',
             uid=[0],
         ),
 

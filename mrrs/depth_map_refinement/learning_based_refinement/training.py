@@ -50,9 +50,10 @@ if __name__ == "__main__":#FIXME: logging? instead of print
         #mrrs-hogm tensorflow-2.4.0, can submit  trhu meshroom
         DATASET_PATH = "/s/prods/mvg/_source_global/users/hogm/meshroom_benchmark_outputs"#root of the training set
         TEST_DATASET_PATH = None#"C:\\runs\\testonesequence"#root of the testing set #FIXME: todo
-        RANDOM_TEST = True
         OUTPUT_PATH = "/s/prods/mvg/_source_global/users/hogm/training_depth_refinement"
         EXPORT_ONNX = None #need onnx installed
+
+    RANDOM_TEST = True
 
     RUN_NICKNAME = "AE_rm_outliers2_loss_norm"#convenient for lookup in tensorboard
     OUTPUT_PATH =  os.path.join(OUTPUT_PATH,RUN_NICKNAME) #output path for checkpoints and saved models
@@ -95,30 +96,30 @@ if __name__ == "__main__":#FIXME: logging? instead of print
     generator = TrainingGenerator(DATASET_PATH, resize_gt=True)#For now only filtering no upsampling
 
     #def split_dataset(dataset, test_ratio=0.30):
-        # test_indices = np.random.rand(len(dataset)) < test_ratio #fix seed
+        # test_indices = np.random.rand(len(dataset)) < test_ratio #fix
         # return dataset[~test_indices], dataset[test_indices]
 
 
-    # if RANDOM_TEST and  TEST_DATASET_PATH is None:
-    #     print("Will use 10 percent of the input dataset as testing:")
-    #     nb_test = 0.1*len(generator)
-    #     print("%d images"%nb_test)
-    #     selected_views = np.random.randint(nb_test)
-    #     TEST_DATASET_PATH = os.path.join(DATASET_PATH+"_test", "test_set", "dummy_sequence")
-    #     if os.path.exists(TEST_DATASET_PATH):
-    #         print("Test set already exists, skipping")
-    #     else:
-    #         os.makedirs(TEST_DATASET_PATH)
-    #         print("Making random test set")
-    #         for index, dataset_item in enumerate(generator.scanned_files):#note generator shuffles by default
-    #             depth, image,depth_gt = dataset_item
-    #             shutil.move(depth, os.path.join(TEST_DATASET_PATH, os.path.basename(depth)))
-    #             shutil.move(image, os.path.join(TEST_DATASET_PATH, os.path.basename(image)))
-    #             shutil.move(depth_gt, os.path.join(TEST_DATASET_PATH, os.path.basename(depth_gt)))
+    if RANDOM_TEST and  TEST_DATASET_PATH is None:
+        print("Will use 10 percent of the input dataset as testing:")
+        nb_test = 0.1*len(generator)
+        print("%d images"%nb_test)
+        selected_views = np.random.randint(nb_test)
+        TEST_DATASET_PATH = os.path.join(DATASET_PATH+"_test", "test_set", "dummy_sequence")
+        if os.path.exists(TEST_DATASET_PATH):
+            print("Test set already exists, skipping")
+        else:
+            os.makedirs(TEST_DATASET_PATH)
+            print("Making random test set")
+            for index, dataset_item in enumerate(generator.scanned_files):#note generator shuffles by default
+                depth, image,depth_gt = dataset_item
+                shutil.move(depth, os.path.join(TEST_DATASET_PATH, os.path.basename(depth)))
+                shutil.move(image, os.path.join(TEST_DATASET_PATH, os.path.basename(image)))
+                shutil.move(depth_gt, os.path.join(TEST_DATASET_PATH, os.path.basename(depth_gt)))
 
-    #             if index >= nb_test:
-    #                 break
-    #         generator = TrainingGenerator(DATASET_PATH, resize_gt=True)#need to reload this because files have changed
+                if index >= nb_test:
+                    break
+            generator = TrainingGenerator(DATASET_PATH, resize_gt=True)#need to reload this because files have changed
 
     test_generator = TrainingGenerator(TEST_DATASET_PATH, shuffle_scenes=False) if TEST_DATASET_PATH is not None else None
     #automatically detects type and sizes

@@ -4,6 +4,10 @@ import cv2
 from mrrs.core.ios import save_exr, save_image
 import numpy as np
 from mrrs.core.utils import cv2_resize_with_pad
+
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
 #%%
 class RobustMVDWrapper():
     """

@@ -13,24 +13,23 @@ RM_FOLDER= False#force remove folders before computation
 MOVE_IMAGES = "????????.jpg"#wildcart to move all files not respecting it in ot a folder, or None to do nothing
 COMPUTE = "1"#runs computation or not
 RESUME = True#will resum computaiton
-SUBMIT = True#will submit the job on the grid
 
 if os.name == 'nt':
     #run on local machine
-    BLENDED_MVG_ROOT = r"C:\\data\\blended_MVS_test"
-    MESHROOM_ROOT = r"C:\\Dev\\meshroom-develop"
-    MESHROOM_PIPELINE = r"c:\\Dev\\MRRS\\pipelines\\benchmark\\benchmark.mg"
-    OUTPUT_FOLDER = r"C:\\runs"
-
-    LIB_PATH = r"C:\\Dev\\AliceVision\\install\\bin;C:\\Dev\\vcpkg\\installed\\x64-windows\\bin"
-    MESHROOM_NODES_PATH = "C:/Dev/MRRS/mrrs/nodes"
+    BLENDED_MVG_ROOT = "C:\\data\\blended_MVS_test"
+    MESHROOM_ROOT = "C:\\Dev\\meshroom-develop"
+    MESHROOM_PIPELINE = "c:\\Dev\\MeshroomResearch\\pipelines\\benchmark\\benchmark.mg"
+    OUTPUT_FOLDER = "C:\\runs"
+    LIB_PATH = "C:\\Dev\\AliceVision\\install\\bin;C:\\Dev\\vcpkg\\installed\\x64-windows\\bin"
+    MESHROOM_NODES_PATH = "C:/Dev/MeshroomResearch/mrrs/nodes"
+    SUBMIT = False#will submit the job on the grid
 else:
     #run on grid in rez env meshroom-hogm  mrrs aliceVisionVocTree
     BLENDED_MVG_ROOT = "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/low_res/BlendedMVS"
     MESHROOM_ROOT = "/s/apps/users/hogm/meshroom/repo"
-    MESHROOM_PIPELINE = "/s/apps/users/multiview/mrrs/hogm/mrrs/pipelines/benchmark/benchmark.mg"#mrrs path
+    MESHROOM_PIPELINE = "/s/apps/users/multiview/MeshroomResearch/hogm/mrrs/pipelines/benchmark/benchmark.mg"#mrrs path
     OUTPUT_FOLDER = "/s/prods/mvg/_source_global/users/hogm/meshroom_benchmark_outputs"#"/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/low_res/meshroom_out"
-
+    SUBMIT = True#will submit the job on the grid
 scene_folders = os.listdir(BLENDED_MVG_ROOT)
 
 for scene_index, scene_folder in enumerate(scene_folders):
