@@ -12,7 +12,7 @@ requires=[
     'msgpack_numpy-0.4.7.1',
     'opencv_python-4.5.4.60',
     #'openexr-3.1.4', #no python binding, we have an oiio mode
-    'pyoiio-2.3.14.0'
+    'pyoiio-2.3.14.0',
     'trimesh', #needed for meshcompare but technically optional
     #'annoy', #no package send mail
     ]
@@ -22,5 +22,5 @@ def commands():
     Setups mrrs path and meshroom node path env variable
     """
     env.PYTHONPATH.append('{root}/mrrs')
-    env.MESHROOM_NODES_PATH.append('{root}/mrrs/mrrs/nodes')
+    env.MESHROOM_NODES_PATH.append('{root}/MeshroomResearch/mrrs/nodes')
 
