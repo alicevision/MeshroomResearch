@@ -3,6 +3,7 @@ __version__ = "3.0"
 import logging
 import os
 import json
+from mrrs.core.utils import listdir_fullpath
 import numpy as np
 
 from meshroom.core import desc
@@ -33,7 +34,7 @@ Autorescale may be used otherwise but it is far from ideal.
         desc.File(
             name='inputSfMGT',
             label='GtSfMData',
-            description='Ground Truth SfMData file.',
+            description='Ground Truth SfMData file. May contain ground truth depth path.',
             value='',
             uid=[0],
         ),
@@ -42,6 +43,14 @@ Autorescale may be used otherwise but it is far from ideal.
             name="depthMapsFolder",
             label="DepthMaps Folder",
             description="Input depth maps folder",
+            value="",
+            uid=[0],
+        ),
+
+        desc.File(
+            name="depthMapsFolderGT",
+            label="GT DepthMaps Folder",
+            description="Input ground truth depth maps folder",
             value="",
             uid=[0],
         ),
@@ -108,8 +117,8 @@ Autorescale may be used otherwise but it is far from ideal.
         if not chunk.node.inputSfM.value:
             chunk.logger.warning('No inputSfM in node DepthMapComparison, skipping')
             return False
-        if not chunk.node.inputSfMGT.value:
-            chunk.logger.warning('No inputSfMGT in node DepthMapComparison, skipping')
+        if chunk.node.inputSfMGT.value=='' and chunk.node.depthMapsFolderGT.value=='':
+            chunk.logger.warning('No inputSfMGT or depthMapsFolderGT in node DepthMapComparison, skipping')
             return False
         if not chunk.node.depthMapsFolder.value:
             chunk.logger.warning('No depthMapsFolder in node DepthMapComparison, skipping')
@@ -121,13 +130,24 @@ Autorescale may be used otherwise but it is far from ideal.
         Opens the necessary files and folders.
         """
         sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
-        gt_sfm_data=json.load(open(chunk.node.inputSfMGT.value,"r"))
+        gt_sfm_data=None
         views_ids = [view["viewId"] for view in sfm_data["views"]]
         depth_folder = chunk.node.depthMapsFolder.value
         depth_files = [os.path.join(depth_folder, str(views_id)+"_depthMap.exr") for views_id in views_ids]#FIXME: hardcoded filename
-        if "groudtruthDepth" not in gt_sfm_data["views"][0].keys():
-            raise RuntimeError("No groudtruthDepth found in .sfm ")
-        depth_gt_files = [view["groudtruthDepth"] for view in gt_sfm_data["views"]]
+        #open from folder (needs to have matching file names)
+        if chunk.node.depthMapsFolderGT.value is not '':
+            depth_gt_files = [os.path.join(chunk.node.depthMapsFolderGT.value, view_id+"_depthMap.exr")
+                             for view_id in views_ids]
+        #open from sfm (already in order)
+        elif chunk.node.inputSfMGT.value != '':
+            gt_sfm_data=json.load(open(chunk.node.inputSfMGT.value,"r"))
+            if "groudtruthDepth" in gt_sfm_data["views"][0].keys():
+                depth_gt_files = [view["groudtruthDepth"] for view in gt_sfm_data["views"]]
+            else:
+                raise RuntimeError("No groudtruthDepth in GtSfmData ")
+        else:
+            raise RuntimeError("No depthMapsFolderGT or groudtruthDepth passed ")
+
         if len(depth_files) != len(depth_gt_files):
             raise BaseException("Mismatching number of depth maps in source and ground truth folders (%d vs %d"%(len(depth_files), len(depth_gt_files)))
 
@@ -153,9 +173,9 @@ Autorescale may be used otherwise but it is far from ideal.
             else:
                 mask_value = float(mask_value)
 
-            #FIXME: for debug
-            extrinsics, intrinsics, _, _, _, pixel_sizes = matrices_from_sfm_data(sfm_data)
-            gt_extrinsics, gt_intrinsics, _, _, _, gt_pixel_sizes = matrices_from_sfm_data(gt_sfm_data)
+            # for debug
+            # extrinsics, intrinsics, _, _, _, pixel_sizes = matrices_from_sfm_data(sfm_data)
+            # gt_extrinsics, gt_intrinsics, _, _, _, gt_pixel_sizes = matrices_from_sfm_data(gt_sfm_data)
 
             #compute metrics
             computed_metric_values = []
