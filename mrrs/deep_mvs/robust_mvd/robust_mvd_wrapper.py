@@ -14,7 +14,9 @@ class RobustMVDWrapper():
     Wraper class around RobustMVD
     """
 
+    DO_RESIZE = False
     IMAGE_SIZE=[576, 384]
+    # IMAGE_SIZE=[1152, 768] #original size, cannot run on local
 
     def __init__(self):
         super().__init__()
@@ -58,9 +60,9 @@ class RobustMVDWrapper():
         depth_uncertainty = pred[0]["depth_uncertainty"][0][0].cpu().detach().numpy()
 
         #resize to input
-        depth_map, _ = cv2_resize_with_pad(depth_map,  self.IMAGE_SIZE)
+        if self.DO_RESIZE:
+            depth_map, _ = cv2_resize_with_pad(depth_map,  self.IMAGE_SIZE)
 
-        # # #FIXME: depth offset!
         # # #FIXME: no metadata and depth size?!
         # from mrrs.core.ios import open_exr, save_exr
         # import cv2

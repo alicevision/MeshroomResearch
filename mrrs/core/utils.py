@@ -104,7 +104,8 @@ def cv2_resize_with_pad(image, new_shape, interpolation=cv2.INTER_NEAREST, paddi
     Maintains aspect ratio and resizes with padding.
     """
     original_shape = (image.shape[1], image.shape[0])
-    ratio = float(max(new_shape))/max(original_shape)
+    # ratio = float(max(new_shape))/max(original_shape)
+    ratio = min(new_shape[0]/original_shape[0], new_shape[1]/original_shape[1])
     new_size = tuple([int(x*ratio) for x in original_shape])
     image = cv2.resize(image, new_size, interpolation=interpolation)
     delta_w = new_shape[0] - new_size[0]

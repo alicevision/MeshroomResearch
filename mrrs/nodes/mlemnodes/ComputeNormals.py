@@ -53,6 +53,15 @@ class ComputeNormals(desc.Node):
             value=desc.Node.internalFolder,
             uid=[],
         ),
+        desc.File(
+            name='normals',
+            label='Normal maps',
+            description='Generated depth maps.',
+            semantic='image',
+            value=desc.Node.internalFolder + '<VIEW_ID>.exr',
+            uid=[],
+            group='', # do not export on the command line
+        ),
     ]
 
     def check_inputs(self, chunk):
