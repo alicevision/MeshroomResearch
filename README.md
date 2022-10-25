@@ -1,7 +1,7 @@
 # Meshroom Research ![](./assets/logo-inline.png)
 
 Meshroom Research is a library and a plugin for meshroom.\
-It focuses on integrating, testing and benchmarking various ML techniques into meshroom.\
+It focuses on making, integrating, testing and benchmarking various ML techniques into meshroom.\
 Dependencies are kept to a minia, to retrain/export model you may have to do more complex install (cf each module).\
 It is implemented in python and will likely remain so.
 
@@ -32,7 +32,7 @@ On mikros machines:
 rez env meshroom mrrs
 ```
 
-## New nodes
+## New MeshroomResearch nodes
 
 The following new nodes are added to meshroom, you may find them by right click on the graph > MRRS.
 
@@ -81,6 +81,17 @@ TBA
 
 ### DeepMVS
 Call deep multiview stereo methods methods: takes images and calibration as input ands return corresponding depth maps.
+TBA
+
+## Colmap Nodes
+
+You may use colmap nodes to run colmap inside of meshroom.
+For this, you need to add colmap to your path.
+
+TBA convertions
+
+## Run the benchmark
+Download the benchmark data
 TBA
 
 ## Scripts&pipeline
