@@ -1,7 +1,7 @@
 # Meshroom Research ![](./assets/logo-inline.png)
 
 Meshroom Research is a library and a plugin for meshroom.\
-It focuses on integrating, testing and benchmarking various ML techniques into meshroom.\
+It focuses on making, integrating, testing and benchmarking various ML techniques into meshroom.\
 Dependencies are kept to a minia, to retrain/export model you may have to do more complex install (cf each module).\
 It is implemented in python and will likely remain so.
 
@@ -32,7 +32,7 @@ On mikros machines:
 rez env meshroom mrrs
 ```
 
-## New nodes
+## New MeshroomResearch nodes
 
 The following new nodes are added to meshroom, you may find them by right click on the graph > MRRS.
 
@@ -70,7 +70,7 @@ Node to benchmark the estimated calib based on a ground truth calib.\
 Will ouptut a .csv with the requested statistics.\
 Calls the core.metric package.
 
-### Meshcomparison
+### MeshComparison
 Node to benchmark the estimated mesh based on a ground truth mesh.\
 It will run n times the chamfer distance, using ramdom point sampled on the surface of the mesh.\
 Calls the core.metric package.
@@ -81,6 +81,36 @@ TBA
 
 ### DeepMVS
 Call deep multiview stereo methods methods: takes images and calibration as input ands return corresponding depth maps.
+TBA
+
+## Colmap Nodes
+
+You may use colmap nodes to run colmap inside of meshroom.
+For this, you need to add colmap to your path.
+
+TBA convertions
+
+## Run the benchmark
+Download the benchmark data.
+Run the benchmark with the command line interface
+```
+Usage: run_benchmark.py [OPTIONS] DATASET_PATH
+
+Options:
+  -o, --output_folder TEXT       Output folder to generate results into.
+  -r, --remove_folders           Force clean the content of outputs folder.
+  -m, --filter_move_images TEXT  Moves images that XXX the passed regex.
+  -c, --compute                  Runs the computation. Will just create
+                                 project otherwise.
+  -r, --resume                   Resumes computation if a folder exists, will
+                                 skip folder otherwise.
+  -s, --submit                   Will submit the computation on the grid.
+  -u, --up_to_node TEXT          If computation is enabled, will compute up to
+                                 the passed node.
+  -p, --pipeline TEXT            Path to the benchmark pipeline.
+  --help                         Show this message and exit.
+```
+You need to set your environnement variables as if you are runing meshroom and MeshroomResearch.
 TBA
 
 ## Scripts&pipeline
