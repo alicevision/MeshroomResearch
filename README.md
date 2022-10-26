@@ -1,7 +1,7 @@
 # Meshroom Research ![](./assets/logo-inline.png)
 
 Meshroom Research is a library and a plugin for meshroom.\
-It focuses on making, integrating, testing and benchmarking various ML techniques into meshroom.\
+It focuses on making, integrating, testing and benchmarking various methods easily into meshroom.\
 Dependencies are kept to a minia, to retrain/export model you may have to do more complex install (cf each module).\
 It is implemented in python and will likely remain so.
 
@@ -25,7 +25,7 @@ Then install Meshroom Research with pip :
 cd MRRS
 pip install -e . [< optional features >]
 ```
-< optional features > may be onnx to install the onnx runtime, meshcomparison to install the dependencies required to handle meshes
+< optional features > may be onnx to install the onnx runtime, meshcomparison to install the dependencies required to handle meshes.
 
 On mikros machines:
 ```
@@ -49,7 +49,7 @@ Optionally, you may specify one or several classes to be used as a mask in the r
 
 ### BlendedMVSDataset
 Will open the [BlendedMVS](https://github.com/YoYo000/BlendedMVS) dataset and convert it to the meshroom .sfm format.\
-The calibration and groud truth depth may not be in the same coordinate system as the outpût of the sfm so you may want to renscale and recenter them.
+The calibration and groud truth depth may not be in the same coordinate system as the output of the sfm so you may want to rescale and recenter them.
 
 ### InjectSFMData
 Meshroom relies internally on points in the sfm to initialise the depth estimation. Use this node with te option 'structure' to copy them into a groud truth .sfm.\
@@ -89,33 +89,46 @@ You may use colmap nodes to run colmap inside of meshroom.
 For this, you need to add colmap to your path.
 
 TBA convertions
+TBA list nodes
 
-## Run the benchmark
-Download the benchmark data.
+
+## Tools&Pipeline
+
+### Run the benchmark
+Download the benchmark data for [blendedMVS](https://github.com/YoYo000/BlendedMVS).
 Run the benchmark with the command line interface
+
 ```
-Usage: run_benchmark.py [OPTIONS] DATASET_PATH
+Usage: python -m benchmark run [OPTIONS] DATASET_PATH
+
+  Will run the passed pipeline on the passed dataset.
 
 Options:
-  -o, --output_folder TEXT       Output folder to generate results into.
-  -r, --remove_folders           Force clean the content of outputs folder.
-  -m, --filter_move_images TEXT  Moves images that XXX the passed regex.
-  -c, --compute                  Runs the computation. Will just create
-                                 project otherwise.
-  -r, --resume                   Resumes computation if a folder exists, will
-                                 skip folder otherwise.
-  -s, --submit                   Will submit the computation on the grid.
-  -u, --up_to_node TEXT          If computation is enabled, will compute up to
-                                 the passed node.
-  -p, --pipeline TEXT            Path to the benchmark pipeline.
-  --help                         Show this message and exit.
+  -o, --output_folder TEXT        Output folder to generate results into.
+  -p, --pipeline TEXT             Path to the benchmark pipeline.
+  -r, --remove_folders            Force clean the content of outputs folder.
+  -t, --dataset_type [blendedMVS]
+  -c, --compute                   Runs the computation. Will just create
+                                  project otherwise.
+  -r, --resume                    Resumes computation if a folder exists, will
+                                  skip folder otherwise.
+  -s, --submit                    Will submit the computation on the grid.
+  -u, --up_to_node TEXT           If computation is enabled, will compute up
+                                  to the passed node.
+  -e, --environnement TEXT        Runs in the specified environnement
+  --help                          Show this message and exit.
 ```
 You need to set your environnement variables as if you are runing meshroom and MeshroomResearch.
-TBA
+You may then aggregate the result with
+```
+Usage: python -m benchmark report [OPTIONS] COMPUTED_OUTPUTS_PATH
 
-## Scripts&pipeline
-### BlendedMVG benchmark for pose, depth and mesh estimation
-TBA
+  Generate a report from a computed benchmark.
+
+Options:
+  -o, --output_folder TEXT  Output folder to generate reports into.
+  --help                    Show this message and exit.
+```
 
 ## Meshroom Dev quickstart
 
