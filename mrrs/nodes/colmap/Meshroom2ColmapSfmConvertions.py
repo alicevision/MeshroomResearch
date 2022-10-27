@@ -6,7 +6,7 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
     commandLine = 'aliceVision_exportColmap {allParams}'
     size = desc.DynamicNodeSize('input')
 
-    category = 'Utils'
+    category = 'Colmap'
     documentation = ''' '''
 
     inputs = [
