@@ -30,6 +30,23 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             group=''
         ),
 
+        desc.ChoiceParam(
+            name='ImageReader.camera_model',
+            label='CameraModel',
+            description='''Camera Model.''',
+            value='PINHOLE',
+            values=['PINHOLE', 'SIMPLE_PINHOLE', 'RADIAL', 'SIMPLE_RADIAL', 'OPENCV', 'FULL_OPENCV',
+                    'SIMPLE_RADIAL_FISHEYE', 'RADIAL_FISHEYE', 'OPENCV_FISHEYE', 'FOV', 'THIN_PRISM_FISHEYE'],
+            exclusive=True,
+            uid=[],
+        ),
+        desc.BoolParam(
+            name='ImageReader.single_camera',
+            label='SingleCamera',
+            description='''If the scene has be shot with a single camera.''',
+            value=False,
+            uid=[],
+        ),
     ]
 
     outputs = [

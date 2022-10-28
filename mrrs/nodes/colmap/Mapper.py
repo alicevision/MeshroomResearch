@@ -79,7 +79,7 @@ import shutil
 
 
 class ColmapMapper(desc.CommandLineNode):
-    commandLine = 'colmap.bat mapper {allParams}'
+    commandLine = 'colmap.bat mapper {allParams}'#  --output_type TXT
 
     category = 'Colmap'
     documentation = ''''''
@@ -119,6 +119,14 @@ class ColmapMapper(desc.CommandLineNode):
             group=""
         ),
         desc.File(
+            name='cameras',
+            label='Cameras',
+            description='Ouptut camera file',
+            value=os.path.join(desc.Node.internalFolder, "0", "cameras.bin"),
+            uid=[],
+            group=""
+        ),
+        desc.File(
             name='database_path',
             label='OutputDatabasePath',
             description='Output database path',
@@ -129,5 +137,5 @@ class ColmapMapper(desc.CommandLineNode):
     ]
 
     def processChunk(self, chunk):
-        shutil.copy2(chunk.node.input_database_path.value, chunk.node.database_path.value, dirs_exist_ok=True)
+        shutil.copy2(chunk.node.input_database_path.value, chunk.node.database_path.value)
         desc.CommandLineNode.processChunk(self, chunk)

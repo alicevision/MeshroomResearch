@@ -34,5 +34,5 @@ class ColmapFeatureMatching(desc.CommandLineNode):
     ]
 
     def processChunk(self, chunk):
-        shutil.copy2(chunk.node.input_database_path.value, chunk.node.database_path.value, dirs_exist_ok=True)
+        shutil.copy2(chunk.node.input_database_path.value, chunk.node.database_path.value)
         desc.CommandLineNode.processChunk(self, chunk)
