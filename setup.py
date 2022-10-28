@@ -26,10 +26,11 @@ setup(
     long_description=open('README.md').read(),
     install_requires=["numpy", "pillow", "opencv-python", ],#all of this sould be in the mr env already
                      # "openexr-python"],#note add mode meshroom? with oiio
-
+    scripts=['clis/benchmark.py'],
     extras_require= {
                     "onnx": ["onnxruntime"],#for depth map refinement
                     "meshcomparison": ["annoy", "trimesh"],
-                    # "training": "tensorflow==2.4"#need conda
+                    "clis": ["click"]
+                     # "training": "tensorflow==2.4"#need conda
                     },
     )
