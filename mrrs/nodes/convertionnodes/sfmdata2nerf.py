@@ -253,15 +253,11 @@ class SfmData2Nerf(desc.Node):
             
             else:
                 # don't keep meshroom coords - reorient the scene to be easier to work with
-
-                print(out['frames'][0]["transform_matrix"])
-
                 up = up / np.linalg.norm(up)
                 chunk.logger.info(f"up vector was {up}")
                 R = rotmat(up,[0,0,1]) # rotate up vector to [0,0,1]
                 R = np.pad(R,[0,1])
                 R[-1, -1] = 1
-                print(R)
 
                 for f in out["frames"]:
                     f["transform_matrix"] = np.matmul(R, f["transform_matrix"]) # rotate up to be the z axis
