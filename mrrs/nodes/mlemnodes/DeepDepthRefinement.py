@@ -41,6 +41,15 @@ class DeepDepthMapRefinement(desc.Node):
             exclusive=True,
             uid=[],
         ),
+        desc.File(
+            name='depth',
+            label='Depth maps',
+            description='Generated depth maps.',
+            semantic='image',
+            value=desc.Node.internalFolder + '<VIEW_ID>_depthmap.exr',
+            uid=[],
+            group='', # do not export on the command line
+        ),
     ]
 
     outputs = [

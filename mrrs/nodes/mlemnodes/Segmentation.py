@@ -87,7 +87,7 @@ class Segmentation(desc.Node):
             description='Output folder to generate the masks.',
             value=desc.Node.internalFolder,
             uid=[],
-        ),
+        )
     ]
 
     def check_inputs(self, chunk):

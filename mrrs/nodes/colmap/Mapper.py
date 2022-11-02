@@ -118,14 +118,14 @@ class ColmapMapper(desc.CommandLineNode):
             uid=[],
             group=""
         ),
-        desc.File(
-            name='cameras',
-            label='Cameras',
-            description='Ouptut camera file',
-            value=os.path.join(desc.Node.internalFolder, "0", "cameras.bin"),
-            uid=[],
-            group=""
-        ),
+        # desc.File(
+        #     name='cameras',
+        #     label='Cameras',
+        #     description='Ouptut camera file',
+        #     value=os.path.join(desc.Node.internalFolder, "0", "cameras.bin"),
+        #     uid=[],
+        #     group=""
+        # ),
         desc.File(
             name='database_path',
             label='OutputDatabasePath',

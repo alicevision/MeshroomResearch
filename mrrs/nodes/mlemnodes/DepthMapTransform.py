@@ -132,6 +132,15 @@ class DepthMapTransform(desc.Node):
             value=desc.Node.internalFolder,
             uid=[],
         ),
+        desc.File(
+            name='depth',
+            label='Depth maps',
+            description='Generated depth maps.',
+            semantic='image',
+            value=desc.Node.internalFolder + '<VIEW_ID>_depthmap.exr',
+            uid=[],
+            group='',
+        ),
     ]
 
     def processChunk(self, chunk):

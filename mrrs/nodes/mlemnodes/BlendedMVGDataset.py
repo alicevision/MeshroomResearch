@@ -193,8 +193,8 @@ class BlendedMVGDataset(desc.Node):#FIXME: abstract this Dataset, scan folder et
                     calib_id = view["intrinsicId"]
                     folder = os.path.dirname(scene_image)
                     basename = os.path.basename(scene_image)[:-4]
-                    if basename.endswith("_masked"):#FIXME: we removed this
-                        basename=basename[:-7]
+                    # if basename.endswith("_masked"):#FIXME: we removed this, also misses the extnetion
+                    #     basename=basename[:-7]
                     scenes_calib = os.path.join(folder,"..","cams",basename+"_cam.txt")
                     scenes_depth  =  os.path.join(folder,"..","rendered_depth_maps",basename+".pfm")
                     scenes_images.append(scene_image)
