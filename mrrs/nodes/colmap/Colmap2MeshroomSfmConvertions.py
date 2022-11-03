@@ -175,8 +175,8 @@ def colmap2meshroom_extrinsics(colmap_extrinsics, colmap_intrinsics, image_folde
     camera_index = 0
     for camera_id, colmap_camera in colmap_extrinsics.items():
         path=colmap_camera.name
-        rotation = qvec2rotmat(colmap_camera.qvec)
-        translation=colmap_camera.tvec
+        rotation = np.linalg.inv(qvec2rotmat(colmap_camera.qvec))
+        translation=rotation@(-colmap_camera.tvec)
         extrinsic = {
             "poseId": camera_index,
             "pose": {
