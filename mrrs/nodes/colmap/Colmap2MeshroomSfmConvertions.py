@@ -158,13 +158,19 @@ def colmap2meshroom_instrinsics(colmap_intrinsics, sfm_data={}):
             intrinsic["distortionParams"]=[colmap_camera.params[3]]
         else:
             raise RuntimeError("Camera model not supported yet") # TODO: or colmap_camera.model == "RADIAL"
-        #principal point as delta from center (in mm)
+
         pixel_size = 1/colmap_camera.width
         #converts the focal in "mm", assuming sensor width=1
-        intrinsic["focalLength"]=100*pixel_size*intrinsic["focalLength"]
-        intrinsic["principalPoint"]=[intrinsic["principalPoint"][0]-colmap_camera.width/2.0,
-                                     intrinsic["principalPoint"][1]-colmap_camera.height/2.0,
+        intrinsic["focalLength"]=pixel_size*intrinsic["focalLength"]
+        #principal point as delta from center
+        # intrinsic["principalPoint"]=[intrinsic["principalPoint"][0]-colmap_camera.width/2.0,
+        #                              intrinsic["principalPoint"][1]-colmap_camera.height/2.0,
+        #                             ]
+        intrinsic["principalPoint"]=["-2.8952073531829345",
+                                     "-4.7954484901299397",#FIXME: check this
                                     ]
+
+
         intrinsics.append(intrinsic)
     sfm_data["intrinsics"] = intrinsics
     return sfm_data
@@ -172,13 +178,16 @@ def colmap2meshroom_instrinsics(colmap_intrinsics, sfm_data={}):
 def colmap2meshroom_extrinsics(colmap_extrinsics, colmap_intrinsics, image_folder="", sfm_data={}):
     extrinsics = []
     views = []
-    camera_index = 0
+    single_cam = False
+    if len(colmap_intrinsics)<len(colmap_extrinsics):
+        print("Assuming single camera mode")
+        single_cam = True
     for camera_id, colmap_camera in colmap_extrinsics.items():
         path=colmap_camera.name
         rotation = np.linalg.inv(qvec2rotmat(colmap_camera.qvec))
         translation=rotation@(-colmap_camera.tvec)
         extrinsic = {
-            "poseId": camera_index,
+            "poseId": camera_id,
             "pose": {
                     "transform": {
                                     "rotation": rotation.flatten().tolist(),
@@ -187,19 +196,23 @@ def colmap2meshroom_extrinsics(colmap_extrinsics, colmap_intrinsics, image_folde
                     "locked": "0"
                     }
         }
-
+        if single_cam:
+            intrinsic_id = 1
+        else:
+            intrinsic_id = camera_id
         view =  {
-                "viewId": camera_index,
-                "poseId": camera_index,
-                "frameId": camera_index,
-                "intrinsicId": camera_id,
+                "viewId": camera_id,
+                "poseId": camera_id,
+                "frameId": camera_id,
+                "intrinsicId": intrinsic_id,
                 "path": os.path.join(image_folder, path),
-                "width": colmap_intrinsics[camera_id].width,
-                "height": colmap_intrinsics[camera_id].height
+                "width": colmap_intrinsics[intrinsic_id].width,
+                "height": colmap_intrinsics[intrinsic_id].height
                 }
+
         views.append(view)
         extrinsics.append(extrinsic)
-        camera_index += 1
+
     sfm_data["views"] = views
     sfm_data["poses"] = extrinsics
     return sfm_data
