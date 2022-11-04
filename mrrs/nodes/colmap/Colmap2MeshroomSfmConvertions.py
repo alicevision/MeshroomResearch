@@ -157,19 +157,15 @@ def colmap2meshroom_instrinsics(colmap_intrinsics, sfm_data={}):
             intrinsic["principalPoint"]=[colmap_camera.params[1], colmap_camera.params[2]]
             intrinsic["distortionParams"]=[colmap_camera.params[3]]
         else:
-            raise RuntimeError("Camera model not supported yet") # TODO: or colmap_camera.model == "RADIAL"
+            raise RuntimeError("Camera model not supported yet") # TODO: colmap_camera.model == "RADIAL"
 
         pixel_size = 1/colmap_camera.width
         #converts the focal in "mm", assuming sensor width=1
         intrinsic["focalLength"]=pixel_size*intrinsic["focalLength"]
         #principal point as delta from center
-        # intrinsic["principalPoint"]=[intrinsic["principalPoint"][0]-colmap_camera.width/2.0,
-        #                              intrinsic["principalPoint"][1]-colmap_camera.height/2.0,
-        #                             ]
-        intrinsic["principalPoint"]=["-2.8952073531829345",
-                                     "-4.7954484901299397",#FIXME: check this
+        intrinsic["principalPoint"]=[intrinsic["principalPoint"][0]-colmap_camera.width/2.0,
+                                     intrinsic["principalPoint"][1]-colmap_camera.height/2.0,
                                     ]
-
 
         intrinsics.append(intrinsic)
     sfm_data["intrinsics"] = intrinsics
