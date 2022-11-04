@@ -76,35 +76,44 @@ def display_track_box(landmarks, n_planes=10):
     """
     pass
 
-def plot_landmarks_on_images(json_display, views_id, views_path, extrinsics_all_cams,
+def draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
                              intrinsics_all_cam, pixel_sizes_all_cams, output_folder):
     """
     Plot the projection of 3D landmarks onto an image
     """
-
     object_colors = (np.random.random([len(json_display), 3])*255).astype(np.int32)
     for view_id, view_path, extrinsic, intrinsic in zip(views_id, views_path, extrinsics_all_cams, intrinsics_all_cam):
         image = open_image(view_path)
         #get the projection
         for display_object, object_color in zip(json_display, object_colors):
-            # if display_object["type"] == "cone":
-            landmark  = display_object["coordinates"]
-            # landmark_projected
-            point_on_cam, z = camera_projection(np.asarray([landmark], np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
-            point_on_cam = point_on_cam[0]
-            #discard unseen pointss
-            if point_on_cam[0]<0 or point_on_cam[1]<0:
-                continue
-            if point_on_cam[0]>=image.shape[1] or point_on_cam[1]>=image.shape[0]:
-                continue
-            if z[0]<=0:
-                continue
-            image[point_on_cam[1]-5:point_on_cam[1]+5, point_on_cam[0]-5:point_on_cam[0]+5] = object_color
+            if display_object["type"] == "point":
+                coordinates  = display_object["coordinates"]
+                # landmark_projected
+                point_on_cam, z = camera_projection(np.asarray([coordinates], np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
+                point_on_cam = point_on_cam[0]
+                #discard unseen pointss
+                if point_on_cam[0]<0 or point_on_cam[1]<0:
+                    continue
+                if point_on_cam[0]>=image.shape[1] or point_on_cam[1]>=image.shape[0]:
+                    continue
+                if z[0]<=0:
+                    continue
+                image[point_on_cam[1]-5:point_on_cam[1]+5, point_on_cam[0]-5:point_on_cam[0]+5] = object_color
+            elif display_object["type"] == "cone":
+                coordinates  = display_object["coordinates"]
+                point_on_cam, z = camera_projection(np.asarray(coordinates, np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
+                #discard unseen pointss
+                if np.any(point_on_cam[:,0]<0) or np.any(point_on_cam[:,1]<0):
+                    continue
+                if np.any(point_on_cam[:,0]>=image.shape[1]) or np.any(point_on_cam[:,1]>=image.shape[0]):
+                    continue
+                if np.any(z<=0):
+                    continue
+                image[point_on_cam[0,1]-5:point_on_cam[0,1]+5, point_on_cam[0,0]-5:point_on_cam[0,0]+5] = object_color
+            else:
+                raise RuntimeError("Object vizualisation not supported yet")
 
         save_image(os.path.join(output_folder, view_id+".png"), image)
-
-
-
 
 class CreateTrackingViz(desc.Node):
 
@@ -188,7 +197,7 @@ class CreateTrackingViz(desc.Node):
             (extrinsics_all_cams, intrinsics_all_cams, views_id,
             _, _, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
             views_path = [view["path"] for view in sfm_data["views"]]
-            plot_landmarks_on_images(json_display, views_id, views_path, extrinsics_all_cams,
+            draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
                                     intrinsics_all_cams, pixel_sizes_all_cams, os.path.dirname(chunk.node.outputFile.value))
 
             # #get calib
