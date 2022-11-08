@@ -67,6 +67,13 @@ class SfmData2Nerf(desc.Node):
             value=desc.Node.internalFolder + 'train/',
             uid=[],
         ),
+        desc.File(
+            name="poseTransformFile",
+            label="poseTransformFile",
+            description="Pose transform file",
+            value=desc.Node.internalFolder + 'poseTransform.json',
+            uid=[],
+        ),
     ]
 
     def check_inputs(self, chunk):
@@ -162,7 +169,7 @@ class SfmData2Nerf(desc.Node):
             elif input_sfm_data['version'][2] == '2':
                 sensor_size = float(intrinsic['sensorWidth'])
                 fl_mm = float(intrinsic['focalLength'])
-                fl_x = fl_mm*sensor_size/max(w,h)
+                fl_x = fl_mm*max(w,h)/sensor_size
                 fl_y = fl_x
 
             k1, k2 = 0.0, 0.0
@@ -184,11 +191,11 @@ class SfmData2Nerf(desc.Node):
             i = 0
             out = {
                 "camera_angle_x": angle_x,
-                "camera_angle_y": angle_y,
-                "fl_x": fl_x,
-                "fl_y": fl_y,
-                "k1": k1,
-                "k2": k2,
+                # "camera_angle_y": angle_y,
+                # "fl_x": fl_x,
+                # "fl_y": fl_y,
+                # "k1": k1,
+                # "k2": k2,
                 "cx": cx,
                 "cy": cy,
                 "w": w,
@@ -209,7 +216,7 @@ class SfmData2Nerf(desc.Node):
                 # Save image
                 shutil.copy(view['path'],chunk.node.imagesFolder.value)
                 head_tail = os.path.split(view['path'])
-                name = os.path.join(chunk.node.imagesFolder.value,head_tail[-1])
+                name = os.path.join('./train',head_tail[-1])
                 b = sharpness(view['path'])
                 chunk.logger.info(f"{head_tail[-1]} : sharpness={b}")
 
@@ -245,13 +252,16 @@ class SfmData2Nerf(desc.Node):
                     f["transform_matrix"] = np.matmul(f["transform_matrix"], flip_mat) # flip cameras (it just works)
             
             else:
-                # don't keep colmap coords - reorient the scene to be easier to work with
+                # don't keep meshroom coords - reorient the scene to be easier to work with
+
+                print(out['frames'][0]["transform_matrix"])
 
                 up = up / np.linalg.norm(up)
                 chunk.logger.info(f"up vector was {up}")
                 R = rotmat(up,[0,0,1]) # rotate up vector to [0,0,1]
                 R = np.pad(R,[0,1])
                 R[-1, -1] = 1
+                print(R)
 
                 for f in out["frames"]:
                     f["transform_matrix"] = np.matmul(R, f["transform_matrix"]) # rotate up to be the z axis
@@ -278,9 +288,36 @@ class SfmData2Nerf(desc.Node):
                 for f in out["frames"]:
                     avglen += np.linalg.norm(f["transform_matrix"][0:3,3])
                 avglen /= nframes
-                chunk.logger.info("avg camera distance from origin", avglen)
+                chunk.logger.info(f"avg camera distance from origin {avglen}")
                 for f in out["frames"]:
                     f["transform_matrix"][0:3,3] *= 4.0 / avglen # scale to "nerf sized"
+
+                # Inverse transformation
+                R_inv = np.eye(4)
+                R_inv[0:3,0:3] = np.linalg.inv(R[0:3,0:3])
+                T = R_inv
+
+                totp_inv = np.eye(4)
+                totp_inv[0:3,3] = totp
+                T = T @ totp_inv
+
+                scale_inv = np.eye(4)
+                scale_inv[0:3,0:3] *= avglen/4.0
+                T = T @ scale_inv
+                # chunk.logger.info(f"Inverse transformation : {T}")
+
+                rot_mat = np.array([
+                    [0, 0, 1, 0],
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, 0, 1]
+                ]) # instant-ngp representation to meshroom viewer
+                T = T @ rot_mat
+                chunk.logger.info(f"Inverse transformation with axis rotation : {T}")
+
+                with open(chunk.node.poseTransformFile.value, "w") as outfile:
+                    json.dump({"transform":T.tolist()}, outfile, indent=2)
+
 
             for f in out["frames"]:
                 f["transform_matrix"] = f["transform_matrix"].tolist()
