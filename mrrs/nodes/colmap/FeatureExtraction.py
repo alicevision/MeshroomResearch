@@ -48,8 +48,9 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         #     exclusive=True,
         #     uid=[],
         # ),
+        #FIXME: todo
         # desc.BoolParam(
-        #     name='ImageReader.single_camera',
+        #     name='ImageReader-single_camera',#ImageReader.single_camera'
         #     label='SingleCamera',
         #     description='''If the scene has be shot with a single camera.''',
         #     value=False,
@@ -66,6 +67,18 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             uid=[],
         ),
     ]
+
+    def buildCommandLine(self, chunk):#FIXME: make a  for that
+        new_cmdVars = {}
+        for key, value in chunk.node._cmdVars.items():#replaces the - with .
+            if "-" in key:
+                value=value.replace("-", ".") #!!! args, alos why Value and stuff?
+            new_cmdVars[key]=value
+        old_cmdvars = chunk.node._cmdVars
+        chunk.node._cmdVars = new_cmdVars
+        comand_line = desc.CommandLineNode.buildCommandLine(self, chunk)
+        chunk.node._cmdVars = old_cmdvars
+        return comand_line
 
     def processChunk(self, chunk):
         if chunk.node.input_sfm.value != '':
