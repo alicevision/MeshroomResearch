@@ -9,9 +9,16 @@ __version__ = "2.0"
 from meshroom.core import desc
 
 import os
+from sys import platform
 
 class DelaunayMesher(desc.CommandLineNode):
-    commandLine = 'colmap.bat delaunay_mesher {allParams} --input_type dense'
+
+    if platform.startswith('win32'):
+        # Windows-specific code here...
+        commandLine = 'colmap.bat delaunay_mesher {allParams} --input_type dense'
+    elif platform.startswith('linux'):
+        # Linux-specific code here...
+        commandLine = 'colmap delaunay_mesher {allParams} --input_type dense'
 
     category = 'Colmap'
     documentation = ''''''

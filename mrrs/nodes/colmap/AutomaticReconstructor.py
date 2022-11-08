@@ -1,12 +1,19 @@
 __version__ = "4.0"
 
 import os
+from sys import platform
 
 from meshroom.core import desc
 
 
 class ColmapAutomaticReconstructor(desc.CommandLineNode):
-    commandLine = 'colmap.bat automatic_reconstructor  {allParams}'
+    
+    if platform.startswith('win32'):
+        # Windows-specific code here...
+        commandLine = 'colmap.bat automatic_reconstructor  {allParams}'
+    elif platform.startswith('linux'):
+        # Linux-specific code here...
+        commandLine = 'colmap automatic_reconstructor  {allParams}'
 
     category = 'Colmap'
     documentation = ''''''

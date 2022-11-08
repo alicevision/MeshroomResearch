@@ -76,10 +76,17 @@ from meshroom.core import desc
 
 import os
 import shutil
+from sys import platform
 
 
 class ColmapMapper(desc.CommandLineNode):
-    commandLine = 'colmap.bat mapper {allParams}'#  --output_type TXT
+
+    if platform.startswith('win32'):
+        # Windows-specific code here...
+        commandLine = 'colmap.bat mapper {allParams}'#  --output_type TXT
+    elif platform.startswith('linux'):
+        # Linux-specific code here...
+        commandLine = 'colmap mapper {allParams}'#  --output_type TXT
 
     category = 'Colmap'
     documentation = ''''''

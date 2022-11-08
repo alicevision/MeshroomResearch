@@ -5,10 +5,18 @@ from meshroom.core import desc
 
 import os
 import json
+from sys import platform
 
 class ColmapFeatureExtraction(desc.CommandLineNode):
-    commandLine = 'colmap.bat feature_extractor {allParams}'
 
+    if platform.startswith('win32'):
+        # Windows-specific code here...
+        commandLine = 'colmap.bat feature_extractor {allParams}'
+    elif platform.startswith('linux'):
+        # Linux-specific code here...
+        commandLine = 'colmap feature_extractor {allParams}'
+
+    
     category = 'Colmap'
     documentation = ''''''
 

@@ -10,9 +10,17 @@ from meshroom.core import desc
 
 import shutil
 import os
+from sys import platform
 
 class StereoFusion(desc.CommandLineNode):
-    commandLine = 'colmap.bat stereo_fusion {allParams}'
+
+    if platform.startswith('win32'):
+        # Windows-specific code here...
+        commandLine = 'colmap.bat stereo_fusion {allParams}'
+    elif platform.startswith('linux'):
+        # Linux-specific code here...
+        commandLine = 'colmap stereo_fusion {allParams}'
+    
 
     category = 'Colmap'
     documentation = ''''''

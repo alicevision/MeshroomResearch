@@ -9,9 +9,17 @@ __version__ = "2.0"
 from meshroom.core import desc
 
 import os
+from sys import platform
 
 class PoissonMesher(desc.CommandLineNode):
-    commandLine = 'colmap.bat poisson_mesher {allParams} --PoissonMeshing.trim 0'
+
+    if platform.startswith('win32'):
+        # Windows-specific code here...
+        commandLine = 'colmap.bat poisson_mesher {allParams} --PoissonMeshing.trim 0'
+    elif platform.startswith('linux'):
+        # Linux-specific code here...
+        commandLine = 'colmap poisson_mesher {allParams} --PoissonMeshing.trim 0'
+    
 
     category = 'Colmap'
     documentation = ''''''

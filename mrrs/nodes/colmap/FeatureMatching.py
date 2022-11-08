@@ -4,9 +4,17 @@ from meshroom.core import desc
 
 import os
 import shutil
+from sys import platform
 
 class ColmapFeatureMatching(desc.CommandLineNode):
-    commandLine = 'colmap.bat exhaustive_matcher {allParams}'
+
+    if platform.startswith('win32'):
+        # Windows-specific code here...
+        commandLine = 'colmap.bat exhaustive_matcher {allParams}'
+    elif platform.startswith('linux'):
+        # Linux-specific code here...
+        commandLine = 'colmap exhaustive_matcher {allParams}'
+    
 
     category = 'Colmap'
     documentation = ''''''
