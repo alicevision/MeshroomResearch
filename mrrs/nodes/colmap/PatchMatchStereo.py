@@ -46,5 +46,5 @@ class PatchMatchStereo(desc.CommandLineNode):
     ]
 
     def processChunk(self, chunk):
-        shutil.copytree(chunk.node.input_folder.value, chunk.node.workspace_path.value, dirs_exist_ok=True)
+        shutil.copytree(chunk.node.input_folder.value, chunk.node.workspace_path.value)#, dirs_exist_ok=True)
         desc.CommandLineNode.processChunk(self, chunk)
