@@ -2,8 +2,6 @@
 
 This directory contains several files used to evaluate the quality of the Camera tracking pipeline in Meshroom with synthetic datasets generated from 3D scenes made in Blender.
 
-**Warning**: Windows only for now
-
 ## Usage
 
 ### Blender file
@@ -13,9 +11,9 @@ In the output properties, set the image dimension to 1920x1080 (which is also th
 
 ### Evaluation script
 
-Once this is done, open the `eval.bat` script and set `BLENDER_FILE` and `DATASET_DIR` variables.
+Once this is done, open the `eval.bat/sh` script and set `BLENDER_FILE` and `DATASET_DIR` variables.
 
-Then, in a terminal, go to the `eval` folder and run the `eval.bat` script. 
+Then, in a terminal, go to the `eval` folder and run the `eval.bat/sh` script. 
 
 This script will do 3 things: 
 - render the images from the animation created in the Blender file (in `DATASET_DIR/render`)
