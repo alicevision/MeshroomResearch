@@ -258,6 +258,7 @@ class SfmData2Nerf(desc.Node):
                 R = rotmat(up,[0,0,1]) # rotate up vector to [0,0,1]
                 R = np.pad(R,[0,1])
                 R[-1, -1] = 1
+                print(R)
 
                 for f in out["frames"]:
                     f["transform_matrix"] = np.matmul(R, f["transform_matrix"]) # rotate up to be the z axis
