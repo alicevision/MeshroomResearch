@@ -7,6 +7,9 @@ import mathutils
 
 # Command line arguments
 argv = sys.argv[sys.argv.index('--')+1:]
+dataset_dir = argv[0]
+scene_name = argv[1]
+cam_name = argv[2]
 
 
 # ID generation
@@ -27,9 +30,9 @@ def get_frame_id(frame):
 
 
 # Blender data
-scene = bpy.data.scenes['Scene']
-obj = bpy.data.objects['Camera']
-cam = bpy.data.cameras['Camera']
+scene = bpy.data.scenes[scene_name]
+obj = bpy.data.objects[cam_name]
+cam = bpy.data.cameras[cam_name]
 
 
 # Poses
@@ -88,7 +91,7 @@ for frame in range(scene.frame_start, scene.frame_end+1):
         'poseId': get_pose_id(frame),
         'frameId': get_frame_id(frame),
         'intrinsicId': get_intrinsic_id(),
-        'path': str(os.path.abspath('{}/render/frame_{:04d}.exr'.format(argv[0], frame))),
+        'path': str(os.path.abspath('{}/render/{:04d}.jpg'.format(argv[0], frame))),
         'width': str(1920),
         'height': str(1080)
     }
@@ -110,10 +113,10 @@ gt = {
 
 
 # Save to file
-output_path = os.path.abspath('{}/gt_no_pose.sfm'.format(argv[0]))
+output_path = os.path.abspath('{}/gt_no_pose.sfm'.format(dataset_dir))
 with open(output_path, 'w') as file:
     json.dump(gt_no_pose, file, indent=4)
 
-output_path = os.path.abspath('{}/gt.sfm'.format(argv[0]))
+output_path = os.path.abspath('{}/gt.sfm'.format(dataset_dir))
 with open(output_path, 'w') as file:
     json.dump(gt, file, indent=4)
