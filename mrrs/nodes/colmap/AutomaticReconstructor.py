@@ -3,10 +3,10 @@ __version__ = "4.0"
 import os
 
 from meshroom.core import desc
-
+from . import COLMAP
 
 class ColmapAutomaticReconstructor(desc.CommandLineNode):
-    commandLine = 'colmap.bat automatic_reconstructor  {allParams}'
+    commandLine = COLMAP+' automatic_reconstructor  {allParams}'
 
     category = 'Colmap'
     documentation = ''''''

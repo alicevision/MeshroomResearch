@@ -5,13 +5,14 @@
 
 __version__ = "2.0"
 
-from meshroom.core import desc
-
 import shutil
 import os
 
+from meshroom.core import desc
+from . import COLMAP
+
 class PatchMatchStereo(desc.CommandLineNode):
-    commandLine = 'colmap.bat patch_match_stereo {allParams}'
+    commandLine = COLMAP+' patch_match_stereo {allParams}'
 
     category = 'Colmap'
     documentation = ''''''

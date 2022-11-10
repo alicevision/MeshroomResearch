@@ -7,12 +7,13 @@
 
 __version__ = "1.1"
 
-from meshroom.core import desc
-
 import os
 
+from meshroom.core import desc
+from . import COLMAP
+
 class ColmapImageUndistorder(desc.CommandLineNode):
-    commandLine = 'colmap.bat image_undistorter {allParams}'
+    commandLine = COLMAP+' image_undistorter {allParams}'
 
     category = 'Colmap'
     documentation = ''''''

@@ -72,14 +72,14 @@
 
 __version__ = "2.0"
 
-from meshroom.core import desc
-
 import os
 import shutil
 
+from meshroom.core import desc
+from . import COLMAP
 
 class ColmapMapper(desc.CommandLineNode):
-    commandLine = 'colmap.bat mapper {allParams}'#  --output_type TXT
+    commandLine = COLMAP+' mapper {allParams}'#  --output_type TXT
 
     category = 'Colmap'
     documentation = ''''''

@@ -1,12 +1,13 @@
 __version__ = "2.0"
 
-from meshroom.core import desc
-
 import os
 import shutil
 
+from meshroom.core import desc
+from . import COLMAP
+
 class ColmapFeatureMatching(desc.CommandLineNode):
-    commandLine = 'colmap.bat exhaustive_matcher {allParams}'
+    commandLine = COLMAP+' exhaustive_matcher {allParams}'
 
     category = 'Colmap'
     documentation = ''''''

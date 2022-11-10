@@ -1,12 +1,14 @@
 __version__ = "1.1"
 
-from meshroom.core import desc
 
 import os
 import json
 
+from meshroom.core import desc
+from . import COLMAP
+
 class ColmapFeatureExtraction(desc.CommandLineNode):
-    commandLine = 'colmap.bat feature_extractor {allParams} ' #FIXME --ImageReader.single_camera 1
+    commandLine = COLMAP+' feature_extractor {allParams} ' #FIXME --ImageReader.single_camera 1
 
     category = 'Colmap'
     documentation = ''''''

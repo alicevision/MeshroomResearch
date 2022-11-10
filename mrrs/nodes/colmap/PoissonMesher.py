@@ -6,12 +6,13 @@
 
 __version__ = "2.0"
 
-from meshroom.core import desc
-
 import os
 
+from meshroom.core import desc
+from . import COLMAP
+
 class PoissonMesher(desc.CommandLineNode):
-    commandLine = 'colmap.bat poisson_mesher {allParams} --PoissonMeshing.trim 0'
+    commandLine = COLMAP+' poisson_mesher {allParams} --PoissonMeshing.trim 0'
 
     category = 'Colmap'
     documentation = ''''''
