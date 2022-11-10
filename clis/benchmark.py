@@ -9,7 +9,6 @@ import subprocess
 import numpy as np
 import click
 
-
 #Sanity check
 MESHROOM_ROOT = os.getenv("MESHROOM_INSTALL_DIR")
 if MESHROOM_ROOT is None:
