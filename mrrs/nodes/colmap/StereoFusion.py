@@ -6,21 +6,15 @@
 
 __version__ = "2.0"
 
-from meshroom.core import desc
-
 import shutil
 import os
 from sys import platform
 
-class StereoFusion(desc.CommandLineNode):
+from meshroom.core import desc
+from . import COLMAP
 
-    if platform.startswith('win32'):
-        # Windows-specific code here...
-        commandLine = 'colmap.bat stereo_fusion {allParams}'
-    elif platform.startswith('linux'):
-        # Linux-specific code here...
-        commandLine = 'colmap stereo_fusion {allParams}'
-    
+class StereoFusion(desc.CommandLineNode):
+    commandLine = COLMAP+' stereo_fusion {allParams}'
 
     category = 'Colmap'
     documentation = ''''''

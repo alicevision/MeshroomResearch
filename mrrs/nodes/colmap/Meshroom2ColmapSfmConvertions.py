@@ -1,6 +1,7 @@
 __version__ = "2.0"
 
 from meshroom.core import desc
+from . import COLMAP
 
 class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
     commandLine = 'aliceVision_exportColmap {allParams}'

@@ -1,13 +1,14 @@
-
 __version__ = "1.1"
 
-from meshroom.core import desc
 
 import os
 import json
-from sys import platform
+
+from meshroom.core import desc
+from . import COLMAP
 
 class ColmapFeatureExtraction(desc.CommandLineNode):
+    commandLine = COLMAP+' feature_extractor {allParams} ' #FIXME --ImageReader.single_camera 1
 
     if platform.startswith('win32'):
         # Windows-specific code here...
@@ -48,6 +49,7 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         #     exclusive=True,
         #     uid=[],
         # ),
+
         #FIXME: todo
         # desc.BoolParam(
         #     name='ImageReader-single_camera',#ImageReader.single_camera'
@@ -68,17 +70,17 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         ),
     ]
 
-    def buildCommandLine(self, chunk):#FIXME: make a  for that
-        new_cmdVars = {}
-        for key, value in chunk.node._cmdVars.items():#replaces the - with .
-            if "-" in key:
-                value=value.replace("-", ".") #!!! args, alos why Value and stuff?
-            new_cmdVars[key]=value
-        old_cmdvars = chunk.node._cmdVars
-        chunk.node._cmdVars = new_cmdVars
-        comand_line = desc.CommandLineNode.buildCommandLine(self, chunk)
-        chunk.node._cmdVars = old_cmdvars
-        return comand_line
+    # def buildCommandLine(self, chunk):#FIXME: make a  for that
+    #     new_cmdVars = {}
+    #     for key, value in chunk.node._cmdVars.items():#replaces the - with .
+    #         if "-" in key:
+    #             value=value.replace("-", ".") #!!! args, alos why Value and stuff?
+    #         new_cmdVars[key]=value
+    #     old_cmdvars = chunk.node._cmdVars
+    #     chunk.node._cmdVars = new_cmdVars
+    #     comand_line = desc.CommandLineNode.buildCommandLine(self, chunk)
+    #     chunk.node._cmdVars = old_cmdvars
+    #     return comand_line
 
     def processChunk(self, chunk):
         if chunk.node.input_sfm.value != '':

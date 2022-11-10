@@ -5,13 +5,15 @@
 
 __version__ = "2.0"
 
-from meshroom.core import desc
-
 import shutil
 import os
 from sys import platform
 
+from meshroom.core import desc
+from . import COLMAP
+
 class PatchMatchStereo(desc.CommandLineNode):
+    commandLine = COLMAP+' patch_match_stereo {allParams}'
 
     if platform.startswith('win32'):
         # Windows-specific code here...

@@ -177,6 +177,8 @@ def open_image(image_path):
     else:
         image = np.array(Image.open(image_path))
     image = image.astype(np.float32)
+    if len(image.shape)==2:
+        image = np.expand_dims(image, -1)
     return image[:,:, 0:3]
 
 def save_image(image_path, np_array):
