@@ -7,25 +7,19 @@ import json
 from meshroom.core import desc
 from . import COLMAP
 
+
+
 class ColmapFeatureExtraction(desc.CommandLineNode):
-    commandLine = COLMAP+' feature_extractor {allParams} ' #FIXME --ImageReader.single_camera 1
+    commandLine = COLMAP+' feature_extractor {allParams}' #FIXME --ImageReader.single_camera 1
 
-    if platform.startswith('win32'):
-        # Windows-specific code here...
-        commandLine = 'colmap.bat feature_extractor {allParams}'
-    elif platform.startswith('linux'):
-        # Linux-specific code here...
-        commandLine = 'colmap feature_extractor {allParams}'
-
-    
     category = 'Colmap'
     documentation = ''''''
 
     inputs = [
         desc.File(
             name='image_path',
-            label='Image Directory',
-            description='''Path to images.''',
+            label='Images Directory',
+            description='''Path to images directory.''',
             value='',
             uid=[0],
         ),
@@ -39,6 +33,7 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             group=''
         ),
 
+        #Issue . is used to denote a group, TODO: replace with special symbol and replace in all keys
         # desc.ChoiceParam(
         #     name='ImageReader.camera_model',
         #     label='CameraModel',
@@ -68,22 +63,44 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             value=os.path.join(desc.Node.internalFolder, "colmap_database.db"),
             uid=[],
         ),
+        desc.File(
+            name='image_list_path',
+            label='Used Images',
+            description='''Used images (if from .sfm)''',
+            value=os.path.join(desc.Node.internalFolder, "used_images.txt"),
+            uid=[],
+        ),
     ]
 
     # def buildCommandLine(self, chunk):#FIXME: make a  for that
-    #     new_cmdVars = {}
-    #     for key, value in chunk.node._cmdVars.items():#replaces the - with .
-    #         if "-" in key:
-    #             value=value.replace("-", ".") #!!! args, alos why Value and stuff?
-    #         new_cmdVars[key]=value
-    #     old_cmdvars = chunk.node._cmdVars
-    #     chunk.node._cmdVars = new_cmdVars
-    #     comand_line = desc.CommandLineNode.buildCommandLine(self, chunk)
-    #     chunk.node._cmdVars = old_cmdvars
-    #     return comand_line
+        # new_cmdVars = {}
+        # for key, value in chunk.node._cmdVars.items():#replaces the - with .
+        #     if "-" in key:
+        #         value=value.replace("-", ".") #!!! args, alos why Value and stuff?
+        #     new_cmdVars[key]=value
+        # old_cmdvars = chunk.node._cmdVars
+        # chunk.node._cmdVars = new_cmdVars
+        # comand_line = desc.CommandLineNode.buildCommandLine(self, chunk)#FIXME: no, all is stored in allParams
+        # chunk.node._cmdVars = old_cmdvars
+        # return comand_line
 
     def processChunk(self, chunk):
+        if chunk.node.image_path.value == '':
+            raise RuntimeError("Need to specify input directory")
+        images_basename = os.listdir(chunk.node.image_path.value) #by default list all images in folder
+        #Will automaticcaly fill up images_path with values from sfm if it is set
         if chunk.node.input_sfm.value != '':
-            image_path = json.load(open(chunk.node.input_sfm.value))["views"][0]["path"]
-            chunk.node.image_path.value = os.path.dirname(image_path)
+            #creates image list from sfm
+            images_path = [v["path"] for v in json.load(open(chunk.node.input_sfm.value))["views"]]
+            images_base_folder = set([os.path.dirname(p) for p in images_path ])
+            images_basename = [os.path.basename(p) for p in images_path ]
+            if len(images_base_folder) > 1:
+                raise RuntimeError("Images from different folders not supported yet")
+            chunk.node.image_path.value=list(images_base_folder)[0]#set to base folder
+
+        #write image to use file
+        with open(chunk.node.image_list_path.value, "w") as images_to_use_file:
+            for image_basename in images_basename:
+                images_to_use_file.write(image_basename+"\n")
+
         desc.CommandLineNode.processChunk(self, chunk)
