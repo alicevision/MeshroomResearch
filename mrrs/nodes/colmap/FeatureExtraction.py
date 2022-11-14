@@ -85,8 +85,7 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         # return comand_line
 
     def processChunk(self, chunk):
-        if chunk.node.image_path.value == '':
-            raise RuntimeError("Need to specify input directory")
+
         images_basename = os.listdir(chunk.node.image_path.value) #by default list all images in folder
         #Will automaticcaly fill up images_path with values from sfm if it is set
         if chunk.node.input_sfm.value != '':
@@ -97,7 +96,8 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             if len(images_base_folder) > 1:
                 raise RuntimeError("Images from different folders not supported yet")
             chunk.node.image_path.value=list(images_base_folder)[0]#set to base folder
-
+        if chunk.node.image_path.value == '':
+            raise RuntimeError("Need to specify input directory")
         #write image to use file
         with open(chunk.node.image_list_path.value, "w") as images_to_use_file:
             for image_basename in images_basename:
