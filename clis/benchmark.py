@@ -9,14 +9,19 @@ import subprocess
 import numpy as np
 import click
 
-#Sanity check
+#Setup command line
+meshroom_batch_cl = "meshroom_batch"
 MESHROOM_ROOT = os.getenv("MESHROOM_INSTALL_DIR")
-if MESHROOM_ROOT is None:
-    raise BaseException("MESHROOM_INSTALL_DIR not set")
+if MESHROOM_ROOT is not None:
+    print("MESHROOM_INSTALL_DIR set, will use it")
+    meshroom_batch_cl = "python "+MESHROOM_ROOT+"/bin/meshroom_batch"
+else:
+    print("Will call meshroom_batch directly")
 
 #Auto detect and set paths
 this_file_path = os.path.abspath(__file__)
 DEFAULT_MESHROOM_PIPELINE = os.path.abspath(os.path.join(this_file_path, "../../pipelines/benchmark/benchmark.mg"))
+#no need, should be setup by user
 # MESHROOM_NODES_PATH = os.path.abspath(os.path.join(this_file_path, "../../mrrs/nodes/"))
 
 #cli group
@@ -29,7 +34,7 @@ def cli():
 @cli.command()
 @click.option('--output_folder','-o', default="./", help='Output folder to generate results into.')
 @click.option('--pipeline', '-p', default=DEFAULT_MESHROOM_PIPELINE, help='Path to the benchmark pipeline.')
-@click.option('--remove_folders', '-r', is_flag=True, help='Force clean the content of outputs folder.')
+@click.option('--delete_folders', '-d', is_flag=True, help='Force clean the content of outputs folder.')
 @click.option('--dataset_type', '-t',  type=click.Choice(['blendedMVS'], case_sensitive=False), default= "blendedMVS")
 @click.option('--compute', '-c', is_flag=True, help='Runs the computation. Will just create project otherwise.')
 @click.option('--resume', '-r', is_flag=True, help='Resumes computation if a folder exists, will skip folder otherwise.')
@@ -38,7 +43,7 @@ def cli():
 @click.option('--environnement', '-e', default=None, help='Runs in the specified environnement')
 @click.argument('dataset_path')
 def run(pipeline, output_folder,
-        remove_folders, dataset_type,
+        delete_folders, dataset_type,
         compute, resume, submit, up_to_node,
         environnement,
         dataset_path):
@@ -63,7 +68,7 @@ def run(pipeline, output_folder,
         #folder handling
         scene_output_folder = os.path.abspath(os.path.join(output_folder, scene_folder))
         if os.path.exists(scene_output_folder):
-            if remove_folders:
+            if delete_folders:
                 shutil.rmtree(scene_output_folder)
             else:
                 print("Folder for "+scene_folder+"already exists:")
@@ -76,7 +81,7 @@ def run(pipeline, output_folder,
         executable=""
         if environnement:
             executable+="conda activate "+environnement+" && "
-        executable += "python "+MESHROOM_ROOT+"/bin/meshroom_batch"
+        executable += meshroom_batch_cl
         arguments = " -i \""+input_folder+"\""+" -p "+pipeline \
                    +" -o \""+scene_output_folder+"\" --cache \""+scene_output_folder+"/MeshroomCache\""\
                    +" --save \""+os.path.join(scene_output_folder,"project.mg")+"\""\
@@ -92,8 +97,8 @@ def run(pipeline, output_folder,
             arguments += " --toNode "+up_to_node
         command = executable+" "+arguments#TODO: see if we cant direclty call api
         print(command)
-        # os.system(command)
-        subprocess.Popen(command).wait()
+        #os.system(command)
+        subprocess.Popen(command, shell=True).wait()
 
 #aggregate results and make report
 @cli.command()
