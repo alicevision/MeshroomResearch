@@ -6,6 +6,7 @@ import time
 import numpy as np
 import cv2
 import os
+import sys
 
 #%%Folder scan
 def listdir_fullpath(d):
@@ -122,3 +123,10 @@ def cv2_resize_crop(image, new_shape, crop, interpolation):
     image = image[crop[0]:-(crop[1]+1), crop[2]:-(crop[3]+1)]
     image = cv2.resize(image, new_shape, interpolation=interpolation)
     return image
+
+def do_system(arg):
+	print(f"==== running: {arg}")
+	err = os.system(arg)
+	if err:
+		print("FATAL: command failed")
+		sys.exit(err)

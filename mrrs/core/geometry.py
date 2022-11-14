@@ -398,6 +398,13 @@ def random_sample_points_mesh(mesh, target_nb_samples):
     all_samples = np.concatenate(all_samples, axis=0)
     return all_samples
 
+def mesh_transform(mesh,T):
+    """
+    Applies transformation to a mesh.
+    """
+    mesh.apply_transform(T)
+    return mesh
+
 #%% Other
 def rescale_depth(source_depth_map, target_depth_map, mask):
     """

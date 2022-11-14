@@ -8,6 +8,7 @@ from struct import unpack
 
 from PIL import Image
 import numpy as np
+import json
 
 FORCE_IOOI = False#FIXME: debug
 
