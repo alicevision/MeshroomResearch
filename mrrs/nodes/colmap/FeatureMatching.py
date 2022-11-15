@@ -22,6 +22,14 @@ class ColmapFeatureMatching(desc.CommandLineNode):
             uid=[0],
             group='',
         ),
+        desc.BoolParam(
+            name="use_gpu",
+            label = "Use GPU",
+            description='''Will use GPU for feature extraction''',
+            value=False,
+            uid=[0],
+            group='',
+        )
     ]
 
     outputs = [
@@ -37,4 +45,6 @@ class ColmapFeatureMatching(desc.CommandLineNode):
 
     def processChunk(self, chunk):
         shutil.copy2(chunk.node.input_database_path.value, chunk.node.database_path.value)
+        if not chunk.node.use_gpu.value:
+            chunk.node._cmdVars["allParams"]+=" --SiftMatching.use_gpu 0"
         desc.CommandLineNode.processChunk(self, chunk)
