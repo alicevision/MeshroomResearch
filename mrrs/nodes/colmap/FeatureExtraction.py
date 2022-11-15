@@ -85,8 +85,10 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         # return comand_line
 
     def processChunk(self, chunk):
-
-        images_basename = os.listdir(chunk.node.image_path.value) #by default list all images in folder
+        images_basename = []
+        #By default list everything in folder
+        if chunk.node.image_path.value != "":
+            images_basename = os.listdir(chunk.node.image_path.value)
         #Will automaticcaly fill up images_path with values from sfm if it is set
         if chunk.node.input_sfm.value != '':
             #creates image list from sfm
