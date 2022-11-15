@@ -33,6 +33,15 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             group=''
         ),
 
+        desc.BoolParam(
+            name="use_gpu",
+            label = "Use GPU",
+            description='''Will use GPU for feature extraction''',
+            value=False,
+            uid=[0],
+            group='',
+        ),
+
         #Issue . is used to denote a group, TODO: replace with special symbol and replace in all keys
         # desc.ChoiceParam(
         #     name='ImageReader.camera_model',
@@ -101,8 +110,12 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         if chunk.node.image_path.value == '':
             raise RuntimeError("Need to specify input directory")
         #write image to use file
+        os.makedirs(os.path.dirname(chunk.node.image_list_path.value), exist_ok=True)
         with open(chunk.node.image_list_path.value, "w") as images_to_use_file:
             for image_basename in images_basename:
                 images_to_use_file.write(image_basename+"\n")
+
+        if not chunk.node.use_gpu.value:
+            chunk.node._cmdVars["allParams"]+=" --SiftExtraction.use_gpu 0"
 
         desc.CommandLineNode.processChunk(self, chunk)
