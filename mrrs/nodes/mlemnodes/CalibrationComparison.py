@@ -44,6 +44,14 @@ class CalibrationComparison(desc.Node):
             joinChar=',',
         ),
 
+         desc.StringParam(
+            name='output_csv_name',
+            label='CSVName',
+            description='Name for the output csv.',
+            value="calibration_comparison.csv",
+            uid=[0]
+        ),
+
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
@@ -67,7 +75,7 @@ class CalibrationComparison(desc.Node):
             name='outputCsv',
             label='Output Csv',
             description='Output file to generated results.',
-            value=os.path.join(desc.Node.internalFolder, "calibration_comparison.csv"),
+            value=os.path.join(desc.Node.internalFolder, ".csv"),
             uid=[],
         )
     ]
@@ -93,6 +101,7 @@ class CalibrationComparison(desc.Node):
             #open inputs
             if not self.check_inputs(chunk):
                 return
+
             sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
             sfm_data_gt=json.load(open(chunk.node.inputSfMGT.value,"r"))
             views_ids = [view["viewId"] for view in sfm_data["views"]]
@@ -137,6 +146,9 @@ class CalibrationComparison(desc.Node):
             median_metric_values = np.median(computed_metric_values, axis=0)
             #write output file
             os.makedirs(chunk.node.outputFolder.value, exist_ok=True)
+
+            if chunk.node.output_csv_name.value != "":
+                chunk.node.outputCsv.value = os.path.join(chunk.node.outputFolder.value, chunk.node.output_csv_name.value)
 
             with open(chunk.node.outputCsv.value, "w") as csv_file:
                 #header
