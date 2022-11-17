@@ -4,33 +4,33 @@
         "releaseVersion": "2021.1.0",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "CameraInit": "8.0",
-            "ColmapFeatureMatching": "2.0",
-            "InjectSfmData": "3.0",
-            "ColmapImageUndistorder": "1.1",
             "StereoFusion": "2.0",
-            "ColmapMapper": "2.0",
-            "SfMAlignment": "2.0",
-            "FeatureMatching": "2.0",
-            "PatchMatchStereo": "2.0",
-            "PrepareDenseScene": "3.0",
-            "CalibrationComparison": "3.0",
-            "MeshFiltering": "3.0",
-            "Meshing": "7.0",
-            "PoissonMesher": "2.0",
-            "ConvertSfMFormat": "2.0",
-            "ColmapFeatureExtraction": "1.1",
-            "Colmap2MeshroomSfmConvertion": "2.0",
-            "FeatureExtraction": "1.1",
-            "ImageMatching": "2.0",
-            "DepthMapTransform": "3.0",
-            "BlendedMVGDataset": "3.0",
-            "Publish": "1.2",
-            "Texturing": "6.0",
             "DepthMap": "2.0",
             "DepthMapComparison": "3.0",
+            "PrepareDenseScene": "3.0",
+            "InjectSfmData": "3.0",
+            "ColmapFeatureMatching": "2.0",
+            "PatchMatchStereo": "2.0",
+            "ImageMatching": "2.0",
+            "CameraInit": "8.0",
+            "Colmap2MeshroomSfmConvertion": "2.0",
+            "SfMAlignment": "2.0",
+            "StructureFromMotion": "2.0",
+            "PoissonMesher": "2.0",
+            "Meshing": "7.0",
+            "CalibrationComparison": "3.0",
+            "MeshFiltering": "3.0",
             "DepthMapFilter": "3.0",
-            "StructureFromMotion": "2.0"
+            "BlendedMVGDataset": "3.0",
+            "Publish": "1.2",
+            "ConvertSfMFormat": "2.0",
+            "ColmapImageUndistorder": "1.1",
+            "ColmapMapper": "2.0",
+            "DepthMapTransform": "3.0",
+            "ColmapFeatureExtraction": "1.1",
+            "FeatureExtraction": "1.1",
+            "FeatureMatching": "2.0",
+            "Texturing": "6.0"
         },
         "template": false
     },
@@ -231,7 +231,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "67fdfe1af8ca350d1ceb23b82dcb1fe695a3adaa"
+                "0": "bd20f2274353031e85411fc6fcf862269ced78fa"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -644,7 +644,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "29acb4f9c3c1fee5bd28bc820135765ac751f2fa"
+                "0": "be1b44aa0fed52475c951d772364515c47ca5e70"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -669,7 +669,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "ef9cadf37fcbaf923f963740ca9d5126230b18f0"
+                "0": "71d84d01bf681d5fa5fb5ef5ddc89bf5e56c3708"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -691,7 +691,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "651ea6c849705115b88324368bb02543f758c43f"
+                "0": "f735aa8f63ee6a50a67315f6aa99d362860916d1"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -713,7 +713,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "6dc95b57656d5e5caad52b78e30d22af6becfca7"
+                "0": "04842217c09507ce1ca06a453ba28a306fcff77b"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -737,7 +737,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "0461303d62f55f9807c0546a248c958601a604c9"
+                "0": "efdda89e5a0e8879efc1a4eb048a93ea960f8c3c"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -762,7 +762,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "ee2cc143423484afcb4baaafc6c4a38c37588926"
+                "0": "29fa49e7f0abe38b78cbbb28903cfa0cbf18c8bf"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -785,7 +785,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "e55d92a0c5fd89adbba5a10b6ba5733455145faa"
+                "0": "0d1ed01d0f064bfdc15b2760c4612c35d0a3ab91"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -804,31 +804,6 @@
             },
             "outputs": {
                 "output": "{cache}/{nodeType}/{uid0}/sfm.{fileExtValue}"
-            }
-        },
-        "ColmapFeatureExtraction_1": {
-            "nodeType": "ColmapFeatureExtraction",
-            "position": [
-                112,
-                559
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "b7e23018577e23d20bc15dd8721e58b77929026a"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "image_path": "",
-                "input_sfm": "{BlendedMVGDataset_1.outputSfMData}",
-                "use_gpu": false
-            },
-            "outputs": {
-                "database_path": "{cache}/{nodeType}/{uid0}/colmap_database.db",
-                "image_list_path": "{cache}/{nodeType}/{uid0}/used_images.txt"
             }
         },
         "CalibrationComparison_1": {
@@ -1034,7 +1009,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "4bda515e917a9269886770e5cdb30e53f3144380"
+                "0": "c844339c3b1dfc172f543747d9c33d929692dff7"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1065,7 +1040,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "3703cd80a3265db3d5065c4de906bbfbaae4cdce"
+                "0": "be2bc94976dabc11ac5377242c6c4b562e2d4f79"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1768,6 +1743,31 @@
                 "outputMesh": "{cache}/{nodeType}/{uid0}/texturedMesh.{outputMeshFileTypeValue}",
                 "outputMaterial": "{cache}/{nodeType}/{uid0}/texturedMesh.mtl",
                 "outputTextures": "{cache}/{nodeType}/{uid0}/texture_*.png"
+            }
+        },
+        "ColmapFeatureExtraction_1": {
+            "nodeType": "ColmapFeatureExtraction",
+            "position": [
+                112,
+                559
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "b7e23018577e23d20bc15dd8721e58b77929026a"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input_sfm": "{BlendedMVGDataset_1.outputSfMData}",
+                "use_gpu": false
+            },
+            "outputs": {
+                "database_path": "{cache}/{nodeType}/{uid0}/colmap_database.db",
+                "image_list_path": "{cache}/{nodeType}/{uid0}/used_images.txt",
+                "image_path": "{cache}/{nodeType}/{uid0}/images"
             }
         }
     }
