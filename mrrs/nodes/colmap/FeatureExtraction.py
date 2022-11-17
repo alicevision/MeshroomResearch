@@ -21,7 +21,7 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             label='Images Directory',
             description='''Path to images directory.''',
             value='',
-            uid=[0],
+            uid=[],
         ),
 
         desc.File(
@@ -98,7 +98,7 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         #By default list everything in folder
         if chunk.node.image_path.value != "":
             images_basename = os.listdir(chunk.node.image_path.value)
-        #Will automaticcaly fill up images_path with values from sfm if it is set
+        #Will automaticaly fill up images_path with values from sfm if it is set
         if chunk.node.input_sfm.value != '':
             #creates image list from sfm
             images_path = [v["path"] for v in json.load(open(chunk.node.input_sfm.value))["views"]]
