@@ -7,9 +7,16 @@ import mathutils
 
 # Command line arguments
 argv = sys.argv[sys.argv.index('--')+1:]
-dataset_dir = argv[0]
+images_folder = argv[0]
 scene_name = argv[1]
 cam_name = argv[2]
+output_folder = argv[3]
+
+print('Extracting ground truth data from Blender file')
+print('Images folder: ' + images_folder)
+print('Scene name: ' + scene_name)
+print('Camera name: ' + cam_name)
+print('Output folder: ' + output_folder)
 
 
 # ID generation
@@ -36,6 +43,8 @@ cam = bpy.data.cameras[cam_name]
 
 
 # Poses
+print('Extracting poses')
+
 poses = []
 mat_convert = mathutils.Matrix.Identity(4)
 mat_convert[1][1] = -1
@@ -62,6 +71,8 @@ for frame in range(scene.frame_start, scene.frame_end+1):
 
 
 # Intrinsics
+print('Extracting intrinsics')
+
 intrinsics = [
     {
         'intrinsicId': get_intrinsic_id(),
@@ -84,6 +95,8 @@ intrinsics = [
 
 
 # Views
+print('Extracting views')
+
 views = []
 for frame in range(scene.frame_start, scene.frame_end+1):
     view = {
@@ -91,7 +104,7 @@ for frame in range(scene.frame_start, scene.frame_end+1):
         'poseId': get_pose_id(frame),
         'frameId': get_frame_id(frame),
         'intrinsicId': get_intrinsic_id(),
-        'path': str(os.path.abspath('{}/render/{:04d}.jpg'.format(argv[0], frame))),
+        'path': str(os.path.abspath('{}/{:04d}.jpg'.format(images_folder, frame))),
         'width': str(1920),
         'height': str(1080)
     }
@@ -113,10 +126,14 @@ gt = {
 
 
 # Save to file
-output_path = os.path.abspath('{}/gt_no_pose.sfm'.format(dataset_dir))
+print('Saving data in SfM files')
+
+output_path = os.path.abspath('{}/gt_no_pose.sfm'.format(output_folder))
 with open(output_path, 'w') as file:
     json.dump(gt_no_pose, file, indent=4)
 
-output_path = os.path.abspath('{}/gt.sfm'.format(dataset_dir))
+output_path = os.path.abspath('{}/gt.sfm'.format(output_folder))
 with open(output_path, 'w') as file:
     json.dump(gt, file, indent=4)
+
+print('Done')
