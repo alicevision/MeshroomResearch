@@ -1,7 +1,7 @@
 """
-This node creates some 3d markers and insert it on images.
+This node creates 3d markers from a given set of 3d landmarks.
 Usefull to test cam track.
-To be paired with an sfm transform that "straigthen" averything.
+To be paired with an sfm transform that "straigthen" everything.
 """
 __version__ = "3.0"
 
@@ -12,18 +12,19 @@ from meshroom.core import desc
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
 
+
 def filter_landmarks_per_tile(landmarks, nb_voxels, nb_landmarks_per_voxels):
     """
     Will filter out landmarks such that we only have one landmark n per voxel.
     Will select the longest track by default.
     Assumes landmarks sorted by trakc length.
     """
-    sfm_range = (np.amin(landmarks, axis = 0), np.amax(landmarks, axis = 0))
+    sfm_range = (np.amin(landmarks, axis=0), np.amax(landmarks, axis=0))
     sfm_step = (sfm_range[1]-sfm_range[0])/nb_voxels
     final_landmarks_list = []
     for voxel_x in np.arange(sfm_range[0][0], sfm_range[1][0], sfm_step[0]):
-        for voxel_y in  np.arange(sfm_range[0][1],sfm_range[1][1], sfm_step[1]):
-            for voxel_z in  np.arange(sfm_range[0][2],sfm_range[1][2], sfm_step[2]):
+        for voxel_y in np.arange(sfm_range[0][1], sfm_range[1][1], sfm_step[1]):
+            for voxel_z in np.arange(sfm_range[0][2], sfm_range[1][2], sfm_step[2]):
                 print("Filtering for voxel %f-%f %f-%f %f-%f"%(voxel_x, voxel_x+sfm_step[0],
                                                                voxel_y, voxel_y+sfm_step[1],
                                                                voxel_z, voxel_z+sfm_step[2]))
@@ -32,9 +33,10 @@ def filter_landmarks_per_tile(landmarks, nb_voxels, nb_landmarks_per_voxels):
                                                 & (voxel_z<=landmarks[:, 2])&(landmarks[:, 2]<voxel_z+sfm_step[2])
                                             ]
                 print("%d landmarks found"%len(landmarks_inside))
-                if len(landmarks_inside)>0:
-                    final_landmarks_list+=list(landmarks_inside[:min(nb_landmarks_per_voxels, len(landmarks_inside))])
+                if len(landmarks_inside) > 0:
+                    final_landmarks_list += list(landmarks_inside[:min(nb_landmarks_per_voxels, len(landmarks_inside))])
     return final_landmarks_list
+
 
 def get_landmarks_from_sfm_data(sfm_data):
     """
@@ -45,12 +47,13 @@ def get_landmarks_from_sfm_data(sfm_data):
     for landmark in sfm_data["structure"]:
         landmarks_track_length.append(len(landmark["observations"]))
         landmarks.append(landmark["X"])
-    landmarks=np.asarray(landmarks, dtype=np.float32)
-    landmarks_track_length=np.asarray(landmarks_track_length, dtype=np.int32)
+    landmarks = np.asarray(landmarks, dtype=np.float32)
+    landmarks_track_length = np.asarray(landmarks_track_length, dtype=np.int32)
     landmark_index_sort = np.argsort(landmarks_track_length)[::-1]
-    landmarks_track_length= landmarks_track_length[landmark_index_sort]
-    landmarks=landmarks[landmark_index_sort]
-    return  landmarks
+    landmarks_track_length = landmarks_track_length[landmark_index_sort]
+    landmarks = landmarks[landmark_index_sort]
+    return landmarks
+
 
 def display_track_cones(landmarks, n=1, scene_tiles=3):
     """
@@ -70,39 +73,41 @@ def display_track_cones(landmarks, n=1, scene_tiles=3):
         cones.append(cone)
     return cones
 
+
 def display_track_box(landmarks, n_planes=10):
     """
     Display boxes on dominant planes
     """
     pass
 
+
 def draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
-                             intrinsics_all_cam, pixel_sizes_all_cams, output_folder):
+                    intrinsics_all_cam, pixel_sizes_all_cams, output_folder):
     """
     Plot the projection of 3D landmarks onto an image
     """
     object_colors = (np.random.random([len(json_display), 3])*255).astype(np.int32)
     for view_id, view_path, extrinsic, intrinsic in zip(views_id, views_path, extrinsics_all_cams, intrinsics_all_cam):
         image = open_image(view_path)
-        #get the projection
+        # get the projection
         for display_object, object_color in zip(json_display, object_colors):
             if display_object["type"] == "point":
-                coordinates  = display_object["coordinates"]
+                coordinates = display_object["coordinates"]
                 # landmark_projected
                 point_on_cam, z = camera_projection(np.asarray([coordinates], np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
                 point_on_cam = point_on_cam[0]
-                #discard unseen pointss
+                # discard unseen pointss
                 if point_on_cam[0]<0 or point_on_cam[1]<0:
                     continue
-                if point_on_cam[0]>=image.shape[1] or point_on_cam[1]>=image.shape[0]:
+                if point_on_cam[0] >= image.shape[1] or point_on_cam[1] >= image.shape[0]:
                     continue
-                if z[0]<=0:
+                if z[0] <= 0:
                     continue
                 image[point_on_cam[1]-5:point_on_cam[1]+5, point_on_cam[0]-5:point_on_cam[0]+5] = object_color
             elif display_object["type"] == "cone":
-                coordinates  = display_object["coordinates"]
+                coordinates = display_object["coordinates"]
                 point_on_cam, z = camera_projection(np.asarray(coordinates, np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
-                #discard unseen pointss
+                # discard unseen pointss
                 if np.any(point_on_cam[:,0]<0) or np.any(point_on_cam[:,1]<0):
                     continue
                 if np.any(point_on_cam[:,0]>=image.shape[1]) or np.any(point_on_cam[:,1]>=image.shape[0]):
@@ -115,9 +120,10 @@ def draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
 
         save_image(os.path.join(output_folder, view_id+".png"), image)
 
-class CreateTrackingViz(desc.Node):
 
-    category = 'Meshroom Research'
+class CreateTrackingMarkers(desc.Node):
+
+    category = 'Evaluation'
 
     documentation = '''This node places some objects in the scene using the landmarks of the sfm.'''
 
@@ -178,27 +184,27 @@ class CreateTrackingViz(desc.Node):
         """
         try:
             chunk.logManager.start(chunk.node.verboseLevel.value)
-            #check inputs
+            # check inputs
             if not self.check_inputs(chunk):
                 return
             chunk.logger.info("Starts to make vizualisation")
             with open(chunk.node.sfmData.value,"r") as json_file:
-                sfm_data= json.load(json_file)
-            #get landmarks (sorted by track length)
-            landmarks=get_landmarks_from_sfm_data(sfm_data)
-            #generate json corresponding to the method
+                sfm_data = json.load(json_file)
+            # get landmarks (sorted by track length)
+            landmarks = get_landmarks_from_sfm_data(sfm_data)
+            # generate json corresponding to the method
             display_function = eval(chunk.node.mode.value)
             json_display = display_function(landmarks)
-            #write json
+            # write json
             with open(chunk.node.outputFile.value, "w") as json_file:
                 json_file.write(json.dumps(json_display, indent=4))
 
-            #debug
-            (extrinsics_all_cams, intrinsics_all_cams, views_id,
-            _, _, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
-            views_path = [view["path"] for view in sfm_data["views"]]
-            draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
-                                    intrinsics_all_cams, pixel_sizes_all_cams, os.path.dirname(chunk.node.outputFile.value))
+            # debug
+            #(extrinsics_all_cams, intrinsics_all_cams, views_id,
+            #_, _, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
+            #views_path = [view["path"] for view in sfm_data["views"]]
+            #draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
+            #                        intrinsics_all_cams, pixel_sizes_all_cams, os.path.dirname(chunk.node.outputFile.value))
 
             # #get calib
 
