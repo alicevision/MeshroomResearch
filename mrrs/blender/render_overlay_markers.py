@@ -144,7 +144,7 @@ def camera_setup(view):
 def render_setup(view):
     print('Render setup')
 
-    bpy.context.scene.render.filepath = os.path.abspath(output_folder + '/' + view['viewId'] + ".png")
+    bpy.context.scene.render.filepath = os.path.abspath(output_folder + '/' + view['frameId'] + ".png")
 
     img_name = view['path'].split('/')[-1]
     bpy.context.scene.node_tree.nodes["Image"].image = bpy.data.images[img_name]

@@ -104,7 +104,7 @@ for frame in range(scene.frame_start, scene.frame_end+1):
         'poseId': get_pose_id(frame),
         'frameId': get_frame_id(frame),
         'intrinsicId': get_intrinsic_id(),
-        'path': str(os.path.abspath('{}/render/{:04d}.jpg'.format(images_folder, frame))),
+        'path': str(os.path.abspath('{}/{:04d}.jpg'.format(images_folder, frame))),
         'width': str(1920),
         'height': str(1080)
     }
