@@ -103,8 +103,9 @@ def run(pipeline, output_folder,
 #aggregate results and make report
 @cli.command()
 @click.option('--output_folder','-o', default=None, help='Output folder to generate reports into.')
+@click.option('--csv_names','-n', multiple=True, default=["calibration_comparison.csv", "depth_maps_comparison.csv"], help='Csvs to use for reporting.')
 @click.argument('computed_outputs_path')#FIXME: inherit from group?
-def report(output_folder, computed_outputs_path):
+def report(output_folder, computed_outputs_path, csv_names):
     """
     Generate a report from a computed benchmark.
     """
@@ -113,6 +114,9 @@ def report(output_folder, computed_outputs_path):
                  if os.path.isdir(os.path.join(computed_outputs_path, directory))]
     if output_folder is None:
         output_folder = computed_outputs_path
+    print("%d sequences found"%len(sequences))
+
+    os.makedirs(output_folder, exist_ok=True)
 
     def agregate_results(csv_name):
         """
@@ -134,7 +138,7 @@ def report(output_folder, computed_outputs_path):
             result = np.loadtxt(csv_file_path, dtype=str, delimiter=",")
             #split average/med from the  rest
             header = result[0,:-1]
-            data_calib = result[1:-2, 1:-1].astype(np.float32)#FIXME: second -1 shyould not be there?
+            data_calib = result[1:-2, 1:-1].astype(np.float32)
             avg = np.nanmean(data_calib, axis =0)
             med =  np.nanmedian(data_calib, axis =0)
             if np.all(np.isnan(avg)) or np.all(np.isnan(med)):
@@ -148,7 +152,7 @@ def report(output_folder, computed_outputs_path):
         """
         Makes a mustache box from the csv.
         """
-        from matplotlib import pyplot as plt #FIXME, make option to plot to justify kazy import
+        from matplotlib import pyplot as plt #FIXME, make option to plot to justify lazy import
         header = "No valid csv"
         data_per_metric = None
         valid_sequences = []
@@ -163,7 +167,7 @@ def report(output_folder, computed_outputs_path):
             header = result[0,1:-1]
             if data_per_metric is None:
                 data_per_metric = [[] for _ in header]
-            data_calib = result[1:-2, 1:-1].astype(np.float32)#FIXME: second -1 shyould not be there?
+            data_calib = result[1:-2, 1:-1].astype(np.float32)
             views = result[1:-2:, 0]
             for metric, metric_data, data in zip(header, data_per_metric, np.transpose(data_calib)):
                 metric_data.append(data)
@@ -222,20 +226,29 @@ def report(output_folder, computed_outputs_path):
     #FIXME: hardcoded nodes names
 
     #Save csvs
-    print("Collecting numerical results")
-    calibs_results_avg, calibs_results_med, header_calib, sequences_skipped_calib = agregate_results("calibration_comparison.csv")
-    print("%d sequences skiped:"%len(sequences_skipped_calib))
-    print(sequences_skipped_calib)
+    print("Collecting numerical results for ...")
+    #calibs_results_avg, calibs_results_med, header_calib, sequences_skipped_calib = agregate_results("calibration_comparison.csv")
+    #print("%d sequences skiped:"%len(sequences_skipped_calib))
+    #print(sequences_skipped_calib)
     depth_results_avg, depth_results_med, header_depth, sequences_skipped_depth = agregate_results("depth_maps_comparison.csv")
-    print("%d sequences skiped:"%len(sequences_skipped_depth))
-    print(sequences_skipped_depth)
-    save_results('all_calibration_comparison.csv', header_calib, calibs_results_avg, calibs_results_med)
-    save_results('all_depth_comparison.csv', header_depth, depth_results_avg, depth_results_med)
+    #print("%d sequences skiped:"%len(sequences_skipped_depth))
+    #print(sequences_skipped_depth)
+    #save_results('all_calibration_comparison.csv', header_calib, calibs_results_avg, calibs_results_med)
+    #save_results('all_depth_comparison.csv', header_depth, depth_results_avg, depth_results_med)
+    for csv_name in csv_names:
+        print("\t"+csv_name)
+        results_avg, results_med, header, sequences_skipped_calib = agregate_results(csv_name)
+        print("\t%d sequences skiped:"%len(sequences_skipped_calib))
+        print("\t"+str(sequences_skipped_calib))
+        save_results("all_"+csv_name, header, results_avg, results_med)
 
     #Make plots
-    print("Making pretty plots")
-    make_plot("calibration_comparison.csv")
-    make_plot("depth_maps_comparison.csv")
+    print("Making pretty plots for ...")
+    for csv_name in csv_names:
+        print("\t"+csv_name)
+        make_plot(csv_name)
+    #make_plot("calibration_comparison.csv")
+    #make_plot("depth_maps_comparison.csv")
 
 if __name__ == '__main__':
     cli()
