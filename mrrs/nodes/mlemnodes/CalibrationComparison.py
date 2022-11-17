@@ -45,9 +45,9 @@ class CalibrationComparison(desc.Node):
         ),
 
          desc.StringParam(
-            name='output_csv_name',
-            label='CSVName',
-            description='Name for the output csv.',
+            name='csv_name',
+            label='CsvName',
+            description='Name for the csv file to be used',
             value="calibration_comparison.csv",
             uid=[0]
         ),
@@ -75,7 +75,7 @@ class CalibrationComparison(desc.Node):
             name='outputCsv',
             label='Output Csv',
             description='Output file to generated results.',
-            value=os.path.join(desc.Node.internalFolder, ".csv"),
+            value=lambda attr: os.path.join(desc.Node.internalFolder, attr.node.csv_name.value),
             uid=[],
         )
     ]
@@ -146,9 +146,6 @@ class CalibrationComparison(desc.Node):
             median_metric_values = np.median(computed_metric_values, axis=0)
             #write output file
             os.makedirs(chunk.node.outputFolder.value, exist_ok=True)
-
-            if chunk.node.output_csv_name.value != "":
-                chunk.node.outputCsv.value = os.path.join(chunk.node.outputFolder.value, chunk.node.output_csv_name.value)
 
             with open(chunk.node.outputCsv.value, "w") as csv_file:
                 #header

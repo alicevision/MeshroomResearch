@@ -4,33 +4,33 @@
         "releaseVersion": "2021.1.0",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "ColmapMapper": "2.0",
-            "CalibrationComparison": "3.0",
-            "Meshing": "7.0",
-            "ColmapFeatureMatching": "2.0",
-            "FeatureExtraction": "1.1",
-            "Colmap2MeshroomSfmConvertion": "2.0",
-            "SfMAlignment": "2.0",
-            "DepthMap": "2.0",
-            "ImageMatching": "2.0",
-            "InjectSfmData": "3.0",
             "CameraInit": "8.0",
-            "DepthMapFilter": "3.0",
-            "StereoFusion": "2.0",
-            "PrepareDenseScene": "3.0",
-            "BlendedMVGDataset": "3.0",
-            "MeshFiltering": "3.0",
+            "ColmapFeatureMatching": "2.0",
+            "InjectSfmData": "3.0",
             "ColmapImageUndistorder": "1.1",
-            "ColmapFeatureExtraction": "1.1",
-            "DepthMapComparison": "3.0",
-            "Texturing": "6.0",
-            "PoissonMesher": "2.0",
-            "Publish": "1.2",
-            "ConvertSfMFormat": "2.0",
+            "StereoFusion": "2.0",
+            "ColmapMapper": "2.0",
+            "SfMAlignment": "2.0",
             "FeatureMatching": "2.0",
             "PatchMatchStereo": "2.0",
-            "StructureFromMotion": "2.0",
-            "DepthMapTransform": "3.0"
+            "PrepareDenseScene": "3.0",
+            "CalibrationComparison": "3.0",
+            "MeshFiltering": "3.0",
+            "Meshing": "7.0",
+            "PoissonMesher": "2.0",
+            "ConvertSfMFormat": "2.0",
+            "ColmapFeatureExtraction": "1.1",
+            "Colmap2MeshroomSfmConvertion": "2.0",
+            "FeatureExtraction": "1.1",
+            "ImageMatching": "2.0",
+            "DepthMapTransform": "3.0",
+            "BlendedMVGDataset": "3.0",
+            "Publish": "1.2",
+            "Texturing": "6.0",
+            "DepthMap": "2.0",
+            "DepthMapComparison": "3.0",
+            "DepthMapFilter": "3.0",
+            "StructureFromMotion": "2.0"
         },
         "template": false
     },
@@ -231,7 +231,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "0049455ac1bdfd8c27745b423f6f34b1b68fc3d1"
+                "0": "67fdfe1af8ca350d1ceb23b82dcb1fe695a3adaa"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -247,36 +247,6 @@
                 "verboseLevel": "info"
             },
             "outputs": {}
-        },
-        "CalibrationComparison_1": {
-            "nodeType": "CalibrationComparison",
-            "position": [
-                695,
-                175
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "815ff6ea551fb68f4b1432576852f50b31a62c36"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "inputSfM": "{ConvertSfMFormat_2.output}",
-                "inputSfMGT": "{BlendedMVGDataset_1.outputSfMData}",
-                "metrics": [
-                    "MSECameraCenter",
-                    "AngleBetweenRotations"
-                ],
-                "output_csv_name": "calibration_comparison.csv",
-                "verboseLevel": "info"
-            },
-            "outputs": {
-                "outputFolder": "{cache}/{nodeType}/{uid0}/",
-                "outputCsv": "{cache}/{nodeType}/{uid0}/.csv"
-            }
         },
         "BlendedMVGDataset_1": {
             "nodeType": "BlendedMVGDataset",
@@ -861,6 +831,36 @@
                 "image_list_path": "{cache}/{nodeType}/{uid0}/used_images.txt"
             }
         },
+        "CalibrationComparison_1": {
+            "nodeType": "CalibrationComparison",
+            "position": [
+                695,
+                175
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "f83189a6875eb560ac2aa250fed27a3664d38cb1"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "inputSfM": "{ConvertSfMFormat_2.output}",
+                "inputSfMGT": "{BlendedMVGDataset_1.outputSfMData}",
+                "metrics": [
+                    "MSECameraCenter",
+                    "AngleBetweenRotations"
+                ],
+                "csv_name": "calibration_comparison.csv",
+                "verboseLevel": "info"
+            },
+            "outputs": {
+                "outputFolder": "{cache}/{nodeType}/{uid0}/",
+                "outputCsv": "{cache}/{nodeType}/{uid0}/calibration_comparison.csv"
+            }
+        },
         "Texturing_2": {
             "nodeType": "Texturing",
             "position": [
@@ -1022,38 +1022,6 @@
                 "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthmap.exr"
             }
         },
-        "CalibrationComparison_2": {
-            "nodeType": "CalibrationComparison",
-            "position": [
-                925,
-                378
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "b139b731ce3e234646ebd5b62146d822e9479e36"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "inputSfM": "{ConvertSfMFormat_1.output}",
-                "inputSfMGT": "{BlendedMVGDataset_1.outputSfMData}",
-                "metrics": [
-                    "MSECameraCenter",
-                    "AngleBetweenRotations",
-                    "MSEFocal",
-                    "MSEPrincipalPoint"
-                ],
-                "output_csv_name": "calibration_comparison_colmap.csv",
-                "verboseLevel": "info"
-            },
-            "outputs": {
-                "outputFolder": "{cache}/{nodeType}/{uid0}/",
-                "outputCsv": "{cache}/{nodeType}/{uid0}/.csv"
-            }
-        },
         "SfMAlignment_2": {
             "nodeType": "SfMAlignment",
             "position": [
@@ -1083,6 +1051,38 @@
             "outputs": {
                 "output": "{cache}/{nodeType}/{uid0}/sfmdata.abc",
                 "outputViewsAndPoses": "{cache}/{nodeType}/{uid0}/cameras.sfm"
+            }
+        },
+        "CalibrationComparison_2": {
+            "nodeType": "CalibrationComparison",
+            "position": [
+                925,
+                378
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "3703cd80a3265db3d5065c4de906bbfbaae4cdce"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "inputSfM": "{ConvertSfMFormat_1.output}",
+                "inputSfMGT": "{BlendedMVGDataset_1.outputSfMData}",
+                "metrics": [
+                    "MSECameraCenter",
+                    "AngleBetweenRotations",
+                    "MSEFocal",
+                    "MSEPrincipalPoint"
+                ],
+                "csv_name": "calibration_comparison_colmap.csv",
+                "verboseLevel": "info"
+            },
+            "outputs": {
+                "outputFolder": "{cache}/{nodeType}/{uid0}/",
+                "outputCsv": "{cache}/{nodeType}/{uid0}/calibration_comparison_colmap.csv"
             }
         },
         "Meshing_3": {
