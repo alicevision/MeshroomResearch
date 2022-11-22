@@ -191,8 +191,8 @@ def report(output_folder, computed_outputs_path, csv_names):
 
             nb_missing_views = [np.count_nonzero(np.isnan(data) )for data in metric_data ]
             valid_metric_data = [data[~np.isnan(data)] for data in metric_data ]
-            max_missing = np.max(nb_missing_views)
-            color_barplot = [ [n/max_missing,1-n/max_missing,0] for n in nb_missing_views]
+            max_missing = min(np.max(nb_missing_views), 0.00000001)
+            color_barplot = [ [n/max_missing, 1-n/max_missing, 0] for n in nb_missing_views]
             plotbox = ax.boxplot(valid_metric_data,
                                 labels=valid_sequences,
                                 patch_artist=True)#,
