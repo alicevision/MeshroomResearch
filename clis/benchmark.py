@@ -29,6 +29,7 @@ DEFAULT_MESHROOM_PIPELINE = os.path.abspath(os.path.join(this_file_path, "../../
 def cli():
     print('Hello!')
 
+
 #run the bench
 @cli.command()
 @click.option('--output_folder','-o', default="./", help='Output folder to generate results into.')
@@ -151,13 +152,13 @@ def report(output_folder, computed_outputs_path, csv_names):
         """
         Makes a mustache box from the csv.
         """
-        from matplotlib import pyplot as plt #lazy import
+        from matplotlib import pyplot as plt #FIXME, make option to plot to justify lazy import
         header = "No valid csv"
         data_per_metric = None
         valid_sequences = []
         for sequence in sequences:
             csv_file_path = os.path.join(computed_outputs_path, sequence, csv_name)
-            #make sure the computation went trhu
+            #make sure the computation when trhu
             if not os.path.exists(csv_file_path):
                 print("Issue with sequence "+sequence+" file "+csv_file_path+" skipping")
                 continue
@@ -167,7 +168,6 @@ def report(output_folder, computed_outputs_path, csv_names):
             if data_per_metric is None:
                 data_per_metric = [[] for _ in header]
             data_calib = result[1:-2, 1:-1].astype(np.float32)
-            #add labels
             views = result[1:-2:, 0]
             for metric, metric_data, data in zip(header, data_per_metric, np.transpose(data_calib)):
                 metric_data.append(data)
@@ -180,7 +180,6 @@ def report(output_folder, computed_outputs_path, csv_names):
             raise RuntimeError("No valid data was found. Check the computation.")
         figures = []
         for metric, metric_data in zip(header, data_per_metric):
-            #prettyfy stuff
             fig, ax = plt.subplots(figsize=(40, 20))
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
@@ -189,11 +188,11 @@ def report(output_folder, computed_outputs_path, csv_names):
             ax.set_title(metric)
             plt.xticks(rotation=-90)
             ax.set_yscale('log')
-            #
+
             nb_missing_views = [np.count_nonzero(np.isnan(data) )for data in metric_data ]
             valid_metric_data = [data[~np.isnan(data)] for data in metric_data ]
-            max_missing = min(np.max(nb_missing_views), 0.00001)
-            color_barplot = [ [n/max_missing, 1-n/max_missing, 0] for n in nb_missing_views]
+            max_missing = np.max(nb_missing_views)
+            color_barplot = [ [n/max_missing,1-n/max_missing,0] for n in nb_missing_views]
             plotbox = ax.boxplot(valid_metric_data,
                                 labels=valid_sequences,
                                 patch_artist=True)#,
