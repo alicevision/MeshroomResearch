@@ -1,3 +1,6 @@
 [submodule "mrrs/deep_mvs/robust_mvd/robustmvd"]
 	path = mrrs/deep_mvs/robust_mvd/robustmvd
 	url = https://github.com/lmb-freiburg/robustmvd
+[submodule "mrrs/implicit_mesh/instant_ngp/instant-ngp"]
+	path = mrrs/implicit_mesh/instant_ngp/instant-ngp
+	url = https://github.com/NVlabs/instant-ngp.git
