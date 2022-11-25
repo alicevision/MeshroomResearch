@@ -216,7 +216,6 @@ pixels_coordinates = tf.stack([xs,ys], axis=-1)
 #buffer
 latest_prediction = tf.zeros_like(depth)
 
-
 #%% train with fit
 pixels_coordinates = tf.stack([xs/depth.shape[1],ys/depth.shape[1]], axis=-1)
 gt_d=tf.reshape(depth, [-1])

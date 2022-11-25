@@ -12,12 +12,10 @@ from meshroom.core import desc
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
 
-
-def filter_landmarks_per_tile(landmarks, nb_voxels, nb_landmarks_per_voxels):
+def filter_landmarks_per_tile(landmarks, nb_voxels, nb_landmarks_per_voxels, min_landmark_per_voxel):
     """
-    Will filter out landmarks such that we only have one landmark n per voxel.
-    Will select the longest track by default.
-    Assumes landmarks sorted by trakc length.
+    Will filter out landmarks such that we only keep the first nb_landmarks_per_voxels landmark per voxel.
+    Assumes the landmarks are sorted with first landmarks to keep.
     """
     sfm_range = (np.amin(landmarks, axis=0), np.amax(landmarks, axis=0))
     sfm_step = (sfm_range[1]-sfm_range[0])/nb_voxels
@@ -33,12 +31,11 @@ def filter_landmarks_per_tile(landmarks, nb_voxels, nb_landmarks_per_voxels):
                                                 & (voxel_z<=landmarks[:, 2])&(landmarks[:, 2]<voxel_z+sfm_step[2])
                                             ]
                 print("%d landmarks found"%len(landmarks_inside))
-                if len(landmarks_inside) > 0:
+                if len(landmarks_inside) > min_landmark_per_voxel:
                     final_landmarks_list += list(landmarks_inside[:min(nb_landmarks_per_voxels, len(landmarks_inside))])
     return final_landmarks_list
 
-
-def get_landmarks_from_sfm_data(sfm_data):
+def get_landmarks_from_sfm_data(sfm_data, sort_mode="longest_tracks"):
     """
     Get landmarks (sorted by track length)
     """
@@ -48,21 +45,23 @@ def get_landmarks_from_sfm_data(sfm_data):
         landmarks_track_length.append(len(landmark["observations"]))
         landmarks.append(landmark["X"])
     landmarks = np.asarray(landmarks, dtype=np.float32)
-    landmarks_track_length = np.asarray(landmarks_track_length, dtype=np.int32)
-    landmark_index_sort = np.argsort(landmarks_track_length)[::-1]
-    landmarks_track_length = landmarks_track_length[landmark_index_sort]
-    landmarks = landmarks[landmark_index_sort]
+
     return landmarks
 
+def sort_landmarks(landmarks, sort_mode="longest_tracks"):
+    if sort_mode == "longest_tracks":
+        raise NotImplementedError("todo")
+    else:
+        raise RuntimeError("Unrecognised sort mode")
 
-def display_track_cones(landmarks, n=1, scene_tiles=3):
+def display_track_cones(landmarks, landmarks_per_voxel=1, scene_tiles=3, min_landmark_per_voxel=0):
     """
     Will return point coordinates corresponding to the longest landmarks.
     Also make sure the points are uniformly distributed, in the scene:
     will only display n points per voxels.
     """
     if scene_tiles is not None:
-        landmarks = filter_landmarks_per_tile(landmarks, scene_tiles, n)
+        landmarks = filter_landmarks_per_tile(landmarks, scene_tiles, landmarks_per_voxel, min_landmark_per_voxel)
     else:
         landmarks = landmarks[:n]
     cones = []
@@ -73,18 +72,10 @@ def display_track_cones(landmarks, n=1, scene_tiles=3):
         cones.append(cone)
     return cones
 
-
-def display_track_box(landmarks, n_planes=10):
-    """
-    Display boxes on dominant planes
-    """
-    pass
-
-
 def draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
                     intrinsics_all_cam, pixel_sizes_all_cams, output_folder):
     """
-    Plot the projection of 3D landmarks onto an image
+    Plot the projection of 3D landmarks onto an image. Used for debug mostly.
     """
     object_colors = (np.random.random([len(json_display), 3])*255).astype(np.int32)
     for view_id, view_path, extrinsic, intrinsic in zip(views_id, views_path, extrinsics_all_cams, intrinsics_all_cam):
@@ -137,16 +128,59 @@ class CreateTrackingMarkers(desc.Node):
             uid=[],
         ),
 
-
         desc.ChoiceParam(
-            name='mode',
-            label='Display Mode',
+            name='track_mode',
+            label='Track Mode',
             description='''Mode to display over the images''',
             value='display_track_cones',
-            values=['display_track_cones'],#TODO: optional paramers
+            values=['display_track_cones'],
             exclusive=True,
             uid=[0],
         ),
+
+        desc.ChoiceParam(
+            name='track_param_sort_mode',
+            label='Sorting Mode',
+            description='''Sort Mode to display Track Cones''',
+            value='longest',
+            values=['longest', 'balanced'],
+            uid=[0],
+            enabled=lambda node: node.track_mode.value=='display_track_cones',
+            exclusive=True
+        ),
+
+        #! order important for parameters
+        desc.IntParam(
+            name='param_markers_per_voxel',
+            label='Markers per voxels',
+            description=''' ''',
+            value=1,
+            range=(0, 10000, 1),
+            uid=[0],
+            enabled=lambda node: node.track_mode.value=='display_track_cones'
+        ),
+
+        desc.IntParam(
+            name='param_voxel_grid_size',
+            label='Voxel Grid Size',
+            description='''Grid size to be used. Will only keep N landmarks per voxel.''',
+            value=10,
+            range=(0, 10000, 1),
+            uid=[0],
+            enabled=lambda node: node.track_mode.value=='display_track_cones'
+        ),
+
+        desc.IntParam(
+            name='param_min_landmark_per_voxel',
+            label='Voxel Grid Size',
+            description='''Grid size to be used. Will only keep N landmarks per voxel.''',
+            value=10,
+            range=(0, 10000, 1),
+            uid=[0],
+            enabled=lambda node: node.track_mode.value=='display_track_cones'
+        ),
+
+
 
         desc.ChoiceParam(
             name='verboseLevel',
@@ -157,6 +191,8 @@ class CreateTrackingMarkers(desc.Node):
             exclusive=True,
             uid=[0],
         ),
+
+
     ]
 
     outputs = [
@@ -191,10 +227,12 @@ class CreateTrackingMarkers(desc.Node):
             with open(chunk.node.sfmData.value,"r") as json_file:
                 sfm_data = json.load(json_file)
             # get landmarks (sorted by track length)
-            landmarks = get_landmarks_from_sfm_data(sfm_data)
+            landmarks = get_landmarks_from_sfm_data(sfm_data, chunk.node.track_param_sort_mode.value)
             # generate json corresponding to the method
-            display_function = eval(chunk.node.mode.value)
-            json_display = display_function(landmarks)
+            display_function = eval(chunk.node.track_mode.value)
+            display_options = [attribute._value for attribute in chunk.node.attributes
+                               if attribute._enabled and attribute.name.startswith("param_")]#note: hacky but works
+            json_display = display_function(landmarks, *display_options)
             # write json
             with open(chunk.node.outputFile.value, "w") as json_file:
                 json_file.write(json.dumps(json_display, indent=4))
@@ -297,8 +335,6 @@ class CreateTrackingMarkers(desc.Node):
             chunk.logger.info('Vizualisation done')
         finally:
             chunk.logManager.end()
-
-
 
 
 # # #idea, use track length, texture, clustering, also viz normal and plane, planetlet
