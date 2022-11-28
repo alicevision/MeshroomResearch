@@ -1,11 +1,11 @@
-__version__ = "1.0"
+__version__ = "1.1"
 
 from meshroom.core import desc
 
 
 class RenderOverlay(desc.CommandLineNode):
     commandLine = 'blender -b -P {scriptValue} -- \
-                    {markersValue} {sfmDataValue} {outputFolderValue}'
+                    {markersValue} {sizeFactorValue} {sfmDataValue} {outputFolderValue}'
     category = 'Evaluation'
     documentation = 'This nodes creates 3D objects in a Blender scene and render them on top of the corresponding views'
     inputs = [
@@ -23,6 +23,14 @@ class RenderOverlay(desc.CommandLineNode):
             value='',
             uid=[0]
         ),
+        desc.FloatParam(
+            name='sizeFactor',
+            label='Size Factor',
+            description='Marker size factor',
+            value=1.0,
+            range=(0.0, 10.0, 0.1),
+            uid=[0]
+        ),
         desc.File(
             name='sfmData',
             label='SfM Data',
@@ -36,7 +44,15 @@ class RenderOverlay(desc.CommandLineNode):
             name='outputFolder',
             label='Folder',
             description='Output folder for generated images',
-            value=desc.Node.internalFolder, 
+            value=desc.Node.internalFolder,
+            uid=[]
+        ),
+        desc.File(
+            name='overlay',
+            label='Overlay',
+            description='Rendered views with markers overlay',
+            semantic='image',
+            value=desc.Node.internalFolder + '<VIEW_ID>.jpg',
             uid=[]
         ),
     ]
