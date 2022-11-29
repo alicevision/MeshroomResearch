@@ -29,7 +29,6 @@ DEFAULT_MESHROOM_PIPELINE = os.path.abspath(os.path.join(this_file_path, "../../
 def cli():
     print('Hello!')
 
-
 #run the bench
 @cli.command()
 @click.option('--output_folder','-o', default="./", help='Output folder to generate results into.')
@@ -104,8 +103,9 @@ def run(pipeline, output_folder,
 @cli.command()
 @click.option('--output_folder','-o', default=None, help='Output folder to generate reports into.')
 @click.option('--csv_names','-n', multiple=True, default=["calibration_comparison.csv", "depth_maps_comparison.csv"], help='Csvs to use for reporting.')
+@click.option('--ensure_complete','-c', is_flag=True, help='Will raise an exeption if a result for a sequence is not found.')
 @click.argument('computed_outputs_path')#FIXME: inherit from group?
-def report(output_folder, computed_outputs_path, csv_names):
+def report(output_folder, computed_outputs_path, csv_names, ensure_complete):
     """
     Generate a report from a computed benchmark.
     """
@@ -130,10 +130,12 @@ def report(output_folder, computed_outputs_path, csv_names):
             csv_file_path = os.path.join(computed_outputs_path, sequence, csv_name)
             #make sure the computation when trhu
             if not os.path.exists(csv_file_path):
-                print("Issue with sequence "+sequence+" file "+csv_file_path+" skipping")
                 results_avg.append("")
                 results_median.append("")
                 sequences_skipped.append(sequence)
+                if ensure_complete:
+                    raise RuntimeError("Issue with sequence "+sequence+" file "+csv_file_path+" skipping")
+                print("Issue with sequence "+sequence+" file "+csv_file_path+" skipping")
                 continue
             result = np.loadtxt(csv_file_path, dtype=str, delimiter=",")
             #split average/med from the  rest
@@ -191,11 +193,11 @@ def report(output_folder, computed_outputs_path, csv_names):
 
             nb_missing_views = [np.count_nonzero(np.isnan(data) )for data in metric_data ]
             valid_metric_data = [data[~np.isnan(data)] for data in metric_data ]
-            max_missing = min(np.max(nb_missing_views), 0.00000001)
+            max_missing = np.max(nb_missing_views+[0.00001])
             color_barplot = [ [n/max_missing, 1-n/max_missing, 0] for n in nb_missing_views]
             plotbox = ax.boxplot(valid_metric_data,
-                                labels=valid_sequences,
-                                patch_artist=True)#,
+                                 labels=valid_sequences,
+                                 patch_artist=True)#,
             for patch, color in zip(plotbox['boxes'], color_barplot):
                 patch.set_facecolor(color)
             fig.savefig(os.path.join(output_folder, metric+'.png') )
