@@ -36,7 +36,7 @@ class RenderOverlay(desc.CommandLineNode):
             name='outputFolder',
             label='Folder',
             description='Output folder for generated images',
-            value=desc.Node.internalFolder, 
+            value=desc.Node.internalFolder,
             uid=[]
         ),
     ]
