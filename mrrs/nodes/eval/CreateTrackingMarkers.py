@@ -35,24 +35,34 @@ def filter_landmarks_per_tile(landmarks, nb_voxels, nb_landmarks_per_voxels, min
                     final_landmarks_list += list(landmarks_inside[:min(nb_landmarks_per_voxels, len(landmarks_inside))])
     return final_landmarks_list
 
-def get_landmarks_from_sfm_data(sfm_data, sort_mode="longest_tracks"):
+def get_landmarks_from_sfm_data(sfm_data, sort_mode):
     """
     Get landmarks (sorted by track length)
     """
     landmarks = []
     landmarks_track_length = []
+    landmarks_track_mean_scale = []
     for landmark in sfm_data["structure"]:
         landmarks_track_length.append(len(landmark["observations"]))
+        landmarks_track_mean_scale.append(np.mean([float(l["scale"]) for l in landmark["observations"]], axis=0))
         landmarks.append(landmark["X"])
+    landmarks_track_length = np.asarray(landmarks_track_length, dtype=np.float32)
     landmarks = np.asarray(landmarks, dtype=np.float32)
+    landmarks_track_mean_scale = np.asarray(landmarks_track_mean_scale, dtype=np.float32)
 
-    return landmarks
-
-def sort_landmarks(landmarks, sort_mode="longest_tracks"):
-    if sort_mode == "longest_tracks":
-        raise NotImplementedError("todo")
+    if sort_mode == "longest":
+        order = landmarks_track_length.argsort()
+    elif sort_mode == "scale":
+        mean_scale = np.asarray(landmarks_track_mean_scale)
+        order = mean_scale.argsort()
+    elif sort_mode == "balanced":
+        raise NotImplementedError("Not implemente yet")
     else:
         raise RuntimeError("Unrecognised sort mode")
+
+    landmarks_sorted = landmarks[order]
+    return landmarks_sorted
+
 
 def display_track_cones(landmarks, landmarks_per_voxel=1, scene_tiles=3, min_landmark_per_voxel=0):
     """
@@ -60,15 +70,12 @@ def display_track_cones(landmarks, landmarks_per_voxel=1, scene_tiles=3, min_lan
     Also make sure the points are uniformly distributed, in the scene:
     will only display n points per voxels.
     """
-    if scene_tiles is not None:
-        landmarks = filter_landmarks_per_tile(landmarks, scene_tiles, landmarks_per_voxel, min_landmark_per_voxel)
-    else:
-        landmarks = landmarks[:n]
+    landmarks = filter_landmarks_per_tile(landmarks, scene_tiles, landmarks_per_voxel, min_landmark_per_voxel)
     cones = []
     for landmark_index, landmark in enumerate(landmarks):
         cone = {"type": "cone",
-                "name": "landmark_"+str(landmark_index),#FIXME: actual index
-                "coordinates": landmark.tolist()}#coordinate is the point coordinates here
+                "name": "landmark_"+str(landmark_index),
+                "coordinates": landmark.tolist()}
         cones.append(cone)
     return cones
 
@@ -143,7 +150,7 @@ class CreateTrackingMarkers(desc.Node):
             label='Sorting Mode',
             description='''Sort Mode to display Track Cones''',
             value='longest',
-            values=['longest', 'balanced'],
+            values=['longest', 'scale', 'balanced'],
             uid=[0],
             enabled=lambda node: node.track_mode.value=='display_track_cones',
             exclusive=True
@@ -172,15 +179,13 @@ class CreateTrackingMarkers(desc.Node):
 
         desc.IntParam(
             name='param_min_landmark_per_voxel',
-            label='Voxel Grid Size',
-            description='''Grid size to be used. Will only keep N landmarks per voxel.''',
+            label='Minimum landmark per voxel',
+            description='''Will only display landmarks if the voxel as this amount of ttal landmarks''',
             value=10,
             range=(0, 10000, 1),
             uid=[0],
             enabled=lambda node: node.track_mode.value=='display_track_cones'
         ),
-
-
 
         desc.ChoiceParam(
             name='verboseLevel',

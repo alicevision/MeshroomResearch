@@ -47,6 +47,7 @@ class RenderOverlay(desc.CommandLineNode):
             value=desc.Node.internalFolder,
             uid=[]
         ),
+
         desc.File(
             name='overlay',
             label='Overlay',
