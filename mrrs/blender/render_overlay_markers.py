@@ -117,7 +117,14 @@ def camera_setup(view):
     print('Camera setup')
 
     intrinsic = get_intrinsic(int(view['intrinsicId']))
-    pose = get_pose(int(view['poseId']))['pose']['transform']
+    if intrinsic is None:
+        return False
+
+    pose = get_pose(int(view['poseId']))
+    if pose is None:
+        return False
+
+    pose = pose['pose']['transform']
 
     bpy.context.scene.render.resolution_x = int(intrinsic['width'])
     bpy.context.scene.render.resolution_y = int(intrinsic['height'])
@@ -142,6 +149,8 @@ def camera_setup(view):
     tr = tr @ mat_convert
     cam_obj.matrix_world = tr
 
+    return True
+
 
 def render_setup(view):
     print('Render setup')
@@ -151,12 +160,19 @@ def render_setup(view):
     img_name = view['path'].split('/')[-1]
     bpy.context.scene.node_tree.nodes["Image"].image = bpy.data.images[img_name]
 
+    return True
+
 
 for view in views:
     print('Computing overlay for view ' + view['viewId'])
 
     img_path = os.path.abspath(view['path'])
     bpy.ops.image.open(filepath=img_path)
-    camera_setup(view)
-    render_setup(view)
+
+    if not camera_setup(view):
+        continue
+
+    if not render_setup(view):
+        continue
+
     bpy.ops.render.render(write_still=True)
