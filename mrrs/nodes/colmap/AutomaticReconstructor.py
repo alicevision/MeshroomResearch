@@ -41,3 +41,7 @@ class ColmapAutomaticReconstructor(desc.CommandLineNode):
             group='',
         ),
     ]
+
+    def buildCommandLine(self, chunk):
+        cmd = desc.buildCommandLine(self, chunk)
+        return cmd.replace(">", ".")

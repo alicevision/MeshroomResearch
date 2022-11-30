@@ -9,8 +9,9 @@ import mathutils
 # Command line arguments
 argv = sys.argv[sys.argv.index('--')+1:]
 markers_filepath = argv[0]
-sfm_filepath = argv[1]
-output_folder = argv[2]
+size_factor = float(argv[1])
+sfm_filepath = argv[2]
+output_folder = argv[3]
 
 print('Rendering 3D markers as overlay')
 print('Markers file: ' + markers_filepath)
@@ -27,6 +28,7 @@ bpy.data.objects.remove(bpy.data.objects['Cube'], do_unlink=True)
 # Compositing setup
 print('Compositing setup')
 
+bpy.context.scene.render.image_settings.file_format = 'JPEG'
 bpy.context.scene.render.film_transparent = True
 bpy.context.scene.use_nodes = True
 bpy.context.scene.node_tree.nodes.new(type="CompositorNodeAlphaOver")
@@ -63,7 +65,7 @@ for i in range(len(markers)-1):
         if min_dist < 0 or min_dist > dist:
             min_dist = dist
 
-cone_radius = min_dist
+cone_radius = min_dist * size_factor
 cone_length = cone_radius * 2
 
 
@@ -144,7 +146,7 @@ def camera_setup(view):
 def render_setup(view):
     print('Render setup')
 
-    bpy.context.scene.render.filepath = os.path.abspath(output_folder + '/' + view['frameId'] + ".png")
+    bpy.context.scene.render.filepath = os.path.abspath(output_folder + '/' + view['viewId'] + ".jpg")
 
     img_name = view['path'].split('/')[-1]
     bpy.context.scene.node_tree.nodes["Image"].image = bpy.data.images[img_name]
