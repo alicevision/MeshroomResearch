@@ -2,7 +2,6 @@ __version__ = "1.1"
 
 from meshroom.core import desc
 
-
 class RenderOverlay(desc.CommandLineNode):
     commandLine = 'blender -b -P {scriptValue} -- \
                     {markersValue} {sizeFactorValue} {sfmDataValue} {outputFolderValue}'

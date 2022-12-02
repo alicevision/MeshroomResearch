@@ -38,8 +38,8 @@ def scan_meshroom_dataset(input_folder):
         if not os.path.exists(os.path.join(scene,'MeshroomCache', 'DepthMap')):
             logging.warn("Issue with scene "+scene+". No DepthMap folder. SKipping.")
             continue
-        if not os.path.exists(os.path.join(scene,'MeshroomCache', 'BlendedMVGDataset')):
-            logging.warn("Issue with scene "+scene+". No BlendedMVGDataset folder. SKipping.")
+        if not os.path.exists(os.path.join(scene,'MeshroomCache', 'Dataset')):
+            logging.warn("Issue with scene "+scene+". No Dataset folder. SKipping.")
             continue
 
         #get folder of depth maps corresponding to depth maps from gt poses
@@ -54,7 +54,7 @@ def scan_meshroom_dataset(input_folder):
         # print("Estimatied depth map folder "+depth_maps_subfolder)
         depth_maps =    [os.path.join(depth_maps_subfolder, view_id+'_depthMap_refinedFused.exr') for view_id in view_ids]
 
-        depth_maps_gt_subfolders = listdir_fullpath(os.path.join(scene,'MeshroomCache', 'BlendedMVGDataset'))#should only be one
+        depth_maps_gt_subfolders = listdir_fullpath(os.path.join(scene,'MeshroomCache', 'Dataset'))#should only be one
         if len(depth_maps_gt_subfolders)>1:
             print("!! severeal Blendedmvg nodes found")
         depth_maps_gt_subfolder = depth_maps_gt_subfolders[0]

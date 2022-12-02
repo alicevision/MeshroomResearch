@@ -55,14 +55,11 @@ def get_landmarks_from_sfm_data(sfm_data, sort_mode):
     elif sort_mode == "scale":
         mean_scale = np.asarray(landmarks_track_mean_scale)
         order = mean_scale.argsort()
-    elif sort_mode == "balanced":
-        raise NotImplementedError("Not implemente yet")
     else:
         raise RuntimeError("Unrecognised sort mode")
 
     landmarks_sorted = landmarks[order]
     return landmarks_sorted
-
 
 def display_track_cones(landmarks, landmarks_per_voxel=1, scene_tiles=3, min_landmark_per_voxel=0):
     """
@@ -118,7 +115,6 @@ def draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
 
         save_image(os.path.join(output_folder, view_id+".png"), image)
 
-
 class CreateTrackingMarkers(desc.Node):
 
     category = 'Evaluation'
@@ -150,7 +146,7 @@ class CreateTrackingMarkers(desc.Node):
             label='Sorting Mode',
             description='''Sort Mode to display Track Cones''',
             value='longest',
-            values=['longest', 'scale', 'balanced'],
+            values=['longest', 'scale'],
             uid=[0],
             enabled=lambda node: node.track_mode.value=='display_track_cones',
             exclusive=True
@@ -196,8 +192,6 @@ class CreateTrackingMarkers(desc.Node):
             exclusive=True,
             uid=[0],
         ),
-
-
     ]
 
     outputs = [

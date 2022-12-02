@@ -30,7 +30,7 @@ setup(
     extras_require= {
                     "onnx": ["onnxruntime"],#for depth map refinement
                     "meshcomparison": ["annoy", "trimesh"],
-                    "clis": ["click"]
+                    "clis": ["click"],
                      # "training": "tensorflow==2.4"#need conda
                     },
     )

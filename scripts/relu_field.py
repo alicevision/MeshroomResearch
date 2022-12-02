@@ -217,50 +217,50 @@ pixels_coordinates = tf.stack([xs,ys], axis=-1)
 latest_prediction = tf.zeros_like(depth)
 
 #%% train with fit
-pixels_coordinates = tf.stack([xs/depth.shape[1],ys/depth.shape[1]], axis=-1)
-gt_d=tf.reshape(depth, [-1])
-field.compile(optimizer="adam", loss="mse", metrics=["mae"])
-field.fit(pixels_coordinates, gt_d, epochs=3)
+# pixels_coordinates = tf.stack([xs/depth.shape[1],ys/depth.shape[1]], axis=-1)
+# gt_d=tf.reshape(depth, [-1])
+# field.compile(optimizer="adam", loss="mse", metrics=["mae"])
+# field.fit(pixels_coordinates, gt_d, epochs=3)
 
-# # %% train custom loop
-# with summary_writer.as_default():
-#     # tf.summary.image("rgb_image", image, step=0)
-#     tf.summary.image("input_depth", depth_transform_display(depth), step=0)
-#     # tf.summary.image("confidence", confidence, step=0)
-#     tf.summary.text("loss_name", LOSS.name, step=0)
-#     tf.summary.text("optimiser_name", OPTIMISER._name, step=0)
-#     tf.summary.histogram("input_depth_hist", tf.reshape(depth, -1), step=0)
-#     summary_writer.flush()
-# print("Will optimise with %d batches of %d pixels"%( (depth.shape[1]*depth.shape[2])/BATCH_SIZE, BATCH_SIZE))
-# for epoch in range(EPOCHS):
-#     #random.shuffle(mylist)
-#     loss_values = []
-#     def chunker(seq, size):
-#         return [seq[pos:pos + size] for pos in range(0, seq.shape[0], size)]
-#     for i, pixel_coordinates in enumerate(chunker(pixels_coordinates, BATCH_SIZE)):#FIXME:  randomize
-#         with tf.GradientTape() as tape:
-#             x=pixel_coordinates[:,0]
-#             y=pixel_coordinates[:,1]
-#             norm_coordinates = tf.cast(tf.stack([x/depth.shape[2],y/depth.shape[1]], axis=-1),tf.float32)
-#             # print(coordinates)
-#             predicted_value = field(norm_coordinates)
-#             # print(predicted_value)
-#             #gt_values = tf.gather_nd(tf.squeeze(depth), pixel_coordinates)
-#             gt_values = tf.gather_nd(depth[0], pixel_coordinates)
-#             loss_value = LOSS(predicted_value, gt_values)
-#             loss_values.append(loss_value)
-#             print("Epoch %d Iteration %0.4d/%0.4d: loss %0.8f"%(epoch, i, BATCH_SIZE, loss_value ), end="\r")
-#             grads = tape.gradient(loss_value, field.trainable_weights)
-#             OPTIMISER.apply_gradients(zip(grads, field.trainable_weights))
-#         #for display
-#         #latest_prediction = tf.tensor_scatter_nd_update(tf.squeeze(latest_prediction), pixel_coordinates, predicted_value)
-#         latest_prediction = tf.tensor_scatter_nd_update(latest_prediction[0], pixel_coordinates, predicted_value)
-#         latest_prediction = tf.expand_dims(latest_prediction, 0)
-#     with summary_writer.as_default():
-#         tf.summary.image("predicted_depth", depth_transform_display(latest_prediction), step=epoch)
-#         tf.summary.scalar("loss", tf.reduce_sum(loss_values), step=epoch)
-#         tf.summary.histogram("predicted_depth_hist", tf.reshape(latest_prediction, -1), step=epoch)
-#         tf.summary.histogram("field_hist", tf.reshape(field._field, -1), step=epoch)#TODO: display hist
-#         # if PREDICT_COLORS:
-#         #     tf.summary.image("predicted_image", predicted_image, step=iteration)
-#         #     tf.summary.histogram("predicted_image_hist", tf.reshape(predicted_image, -1), step=iteration)
+# %% train custom loop
+with summary_writer.as_default():
+    # tf.summary.image("rgb_image", image, step=0)
+    tf.summary.image("input_depth", depth_transform_display(depth), step=0)
+    # tf.summary.image("confidence", confidence, step=0)
+    tf.summary.text("loss_name", LOSS.name, step=0)
+    tf.summary.text("optimiser_name", OPTIMISER._name, step=0)
+    tf.summary.histogram("input_depth_hist", tf.reshape(depth, -1), step=0)
+    summary_writer.flush()
+print("Will optimise with %d batches of %d pixels"%( (depth.shape[1]*depth.shape[2])/BATCH_SIZE, BATCH_SIZE))
+for epoch in range(EPOCHS):
+    #random.shuffle(mylist)
+    loss_values = []
+    def chunker(seq, size):
+        return [seq[pos:pos + size] for pos in range(0, seq.shape[0], size)]
+    for i, pixel_coordinates in enumerate(chunker(pixels_coordinates, BATCH_SIZE)):#FIXME:  randomize
+        with tf.GradientTape() as tape:
+            x=pixel_coordinates[:,0]
+            y=pixel_coordinates[:,1]
+            norm_coordinates = tf.cast(tf.stack([x/depth.shape[2],y/depth.shape[1]], axis=-1),tf.float32)
+            # print(coordinates)
+            predicted_value = field(norm_coordinates)
+            # print(predicted_value)
+            #gt_values = tf.gather_nd(tf.squeeze(depth), pixel_coordinates)
+            gt_values = tf.gather_nd(depth[0], pixel_coordinates)
+            loss_value = LOSS(predicted_value, gt_values)
+            loss_values.append(loss_value)
+            print("Epoch %d Iteration %0.4d/%0.4d: loss %0.8f"%(epoch, i, BATCH_SIZE, loss_value ), end="\r")
+            grads = tape.gradient(loss_value, field.trainable_weights)
+            OPTIMISER.apply_gradients(zip(grads, field.trainable_weights))
+        #for display
+        #latest_prediction = tf.tensor_scatter_nd_update(tf.squeeze(latest_prediction), pixel_coordinates, predicted_value)
+        latest_prediction = tf.tensor_scatter_nd_update(latest_prediction[0], pixel_coordinates, predicted_value)
+        latest_prediction = tf.expand_dims(latest_prediction, 0)
+    with summary_writer.as_default():
+        tf.summary.image("predicted_depth", depth_transform_display(latest_prediction), step=epoch)
+        tf.summary.scalar("loss", tf.reduce_sum(loss_values), step=epoch)
+        tf.summary.histogram("predicted_depth_hist", tf.reshape(latest_prediction, -1), step=epoch)
+        tf.summary.histogram("field_hist", tf.reshape(field._field, -1), step=epoch)#TODO: display hist
+        # if PREDICT_COLORS:
+        #     tf.summary.image("predicted_image", predicted_image, step=iteration)
+        #     tf.summary.histogram("predicted_image_hist", tf.reshape(predicted_image, -1), step=iteration)

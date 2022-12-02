@@ -209,7 +209,9 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             output_list.append(np.format_float_positional(element, precision=17, unique=False))
         return output_list
 
-    for extrinsic, pose_id in zip(extrinsics, poses_ids):#Note: in, theroy we might have a pose shared between views, in practice tis never happens
+    for extrinsic, pose_id in zip(extrinsics, poses_ids):#Note: in, theroy we might have a pose shared between views, in practice this never happens
+        if extrinsic is None:
+            continue
         # if extrinsic.shape[0] == 3:#make square for inverse
         #     extrinsic=np.concatenate([extrinsic, [[0,0,0,1]]], axis=0)
         translation = format_float_array(extrinsic[0:3,3])
@@ -299,7 +301,7 @@ def parse_extrisic_sfm_data(sfm_pose):
     """
     Extracts the relevant items from a sfm pose dictionary.
     The pose is camera to world.
-    """#FIXME: double check
+    """
     pose_id = sfm_pose['poseId']
     rotation = np.asarray(sfm_pose['pose']['transform']['rotation'], dtype=np.float32)
     rotation = rotation.reshape([3,3])

@@ -7,49 +7,60 @@ __version__ = "3.0"
 
 import os
 import json
+import re
 
 from meshroom.core import desc
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
 
-def scan_scenes(input_folder):
+def parse_xmp(xmp_file):
     """
-    Scans all folders in a given folder (ie a scene).
-    Returns the scenes names and full path
+    Parses the xmp from reality capture.
     """
-    scenes_names = os.listdir(input_folder)
-    scenes_path = [os.path.join(input_folder, scene_name) for scene_name in scenes_names]
-    return scenes_names, scenes_path
+    with open(xmp_file) as f:
+        xmp_lines = " ".join(f.readlines())
+        camera_center = re.search("<xcr:Position>(.*)</xcr:Position>", xmp_lines)
+        rotation_matrix = re.search("<xcr:Rotation>(.*)</xcr:Rotation>", xmp_lines)
+        principal_point_u = re.search("PrincipalPointU=\"(.*)\" ", xmp_lines)
+        principal_point_v = re.search("PrincipalPointV=\"(.*)\"", xmp_lines)
+        focalLength35mm = re.search("xcr:FocalLength35mm=\"(.*?)\" ", xmp_lines)
+        if camera_center is None or rotation_matrix is None or principal_point_u is None or principal_point_v is None or focalLength35mm is None:
+            return None, None
+        # DistortionCoeficients InMeshing
+        camera_center = np.asarray(camera_center.group(1).split(" "), dtype=np.float32)
+        rotation_matrix = np.asarray(rotation_matrix.group(1).split(" "), dtype=np.float32).reshape([3,3])
+        principal_point_u = np.asarray(principal_point_u.group(1).split(" "), dtype=np.float32)
+        principal_point_v =np.asarray(principal_point_v.group(1).split(" "), dtype=np.float32)
+        focalLength35mm = np.asarray(focalLength35mm.group(1).split(" "), dtype=np.float32)
+        #TODO if needed, xcr:DistortionModel="brown3" xcr:Skew="0" xcr:AspectRatio="1"
+        intrinsics=np.zeros([3,3])
+        extrinsics=np.zeros([4,4])
+        intrinsics[0,0]=focalLength35mm
+        intrinsics[1,1]=focalLength35mm
+        intrinsics[1,1]=principal_point_u
+        intrinsics[1,2]=principal_point_v
+        intrinsics[2,2]=1
+        extrinsics[0:3,0:3]=rotation_matrix
+        extrinsics[0:3,3]=camera_center
+        extrinsics[3,3]=1
 
-def scan_blendedMVG_scene(scene_folder):
-    """
-    Will returns the paths for images, calibration and depth maps for the openmvg dataset.
-    """
-    scenes_image = [os.path.join(scene_folder,"blended_images", file_name)
-                    for file_name in os.listdir(os.path.join(scene_folder,"blended_images"))
-                    if not file_name.endswith("_masked.jpg")]
-    scenes_depth = [os.path.join(scene_folder,"cams", file_name)
-                    for file_name in os.listdir(os.path.join(scene_folder,"cams"))
-                    if file_name.endswith("_cam.txt") ]
-    scenes_calib = [os.path.join(scene_folder,"rendered_depth_maps", file_name)
-                    for file_name in os.listdir(os.path.join(scene_folder,"rendered_depth_maps"))
-                    if file_name.endswith(".pfm")]
-    if not (len(scenes_image) == len(scenes_depth) == len(scenes_calib)):
-        raise RuntimeError("Mismatch in number of images for scene "+scene_folder)
-    return scenes_image, scenes_depth, scenes_calib
+        return extrinsics, intrinsics
 
-class BlendedMVGDataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
+class Dataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
 
     category = 'Meshroom Research'
 
     documentation = '''Util node to open blendedMVG data https://github.com/YoYo000/BlendedMVS'''
 
     inputs = [
-        desc.File(
-            name="blendedMVGFolder",
-            label="blendedMVG Folder",
-            description="Input root folder for blendedMVG",
-            value="",
+
+        desc.ChoiceParam(
+            name='datasetType',
+            label='Dataset Type',
+            description='''Dataset type''',
+            value='blendedMVG',
+            values=['blendedMVG', 'realityCapture'],
+            exclusive=True,
             uid=[0],
         ),
 
@@ -59,18 +70,6 @@ class BlendedMVGDataset(desc.Node):#FIXME: abstract this Dataset, scan folder et
             description="Input sfmData for blendedMVG images",
             value="",
             uid=[0],
-        ),
-
-        #FIXME: find a solution for this
-        desc.IntParam(
-            name='sceneId',
-            label='Scene Number',
-            description='Scene index to run on',
-            value=0,
-            range=(0, 100000),
-            uid=[0],
-            advanced=True,
-            enabled= lambda node: node.byPass.enabled and not node.byPass.value,
         ),
 
         desc.BoolParam(
@@ -138,8 +137,8 @@ class BlendedMVGDataset(desc.Node):#FIXME: abstract this Dataset, scan folder et
         """
         Checks that all inputs are properly set.
         """
-        if (chunk.node.blendedMVGFolder.value=='') and (chunk.node.sfmData.value==''):
-            chunk.logger.warning('No input blendedMVGFolder or sfmData in node blendMVGDataset, skipping')
+        if chunk.node.sfmData.value=='':
+            chunk.logger.warning('No input InputFolder or sfmData in node blendMVGDataset, skipping')
             return False
         return True
 
@@ -151,74 +150,60 @@ class BlendedMVGDataset(desc.Node):#FIXME: abstract this Dataset, scan folder et
             chunk.logManager.start(chunk.node.verboseLevel.value)
             if not self.check_inputs(chunk):
                 return
-            if chunk.node.blendedMVGFolder.value != '':
-                chunk.logger.info("Starts to load blendedMVG from folder")
-                scenes_names, scenes_path = scan_scenes(chunk.node.blendedMVGFolder.value)
-                # chunk.node.sceneId.values = scenes_names
-                # chunk.node.sceneId.updateInternals()
-                # chunk.node.sceneId.value = scenes_names[0]#FIXME need refresh? also how to update display
-                chunk.logger.info("%d scenes found"%len(scenes_names))
-                (scenes_images, scenes_calibs,
-                scenes_depths) = scan_blendedMVG_scene(scenes_path[(int(chunk.node.sceneId.value))])
-                chunk.logger.info("Running on "+scenes_path[(int(chunk.node.sceneId.value))])
-                #creating views in sfm
-                images_sizes = [Image.open(image).size for image in scenes_images]
-                sfm_data = {}
-                sfm_data["version"]=["1","2","2"]#FIXME: hardcoded
-                sfm_data["views"]=[]
-                for image_index, (image, depth, images_size) in enumerate(zip(scenes_images, scenes_depths, images_sizes)) :
-                    view = {"viewId":str(image_index),
-                            "poseId": str(image_index),  "frameId": str(image_index),
-                            "intrinsicId": str(image_index), "path":  image,
-                            "width": str(images_size[0]), "height": str(images_size[1]),
-                            #"groudtruthDepth":depth
-                            }
-                    sfm_data["views"].append(view)
-                views_id = range(len(scenes_images))
-                poses_id = range(len(scenes_images))
-                calibs_id = range(len(scenes_images))
-            elif chunk.node.sfmData.value:
-                chunk.logger.info("Starts to load blendedMVG from sfmdata")
-                sfm_data = json.load(open(chunk.node.sfmData.value, "r"))
-                scenes_images = []
-                scenes_calibs = []
-                scenes_depths= []
-                poses_id = []
-                calibs_id = []
-                views_id =  []
-                for view in sfm_data["views"]:
-                    view_id = view["viewId"]
-                    scene_image = view["path"]
-                    pose_id = view["poseId"]
-                    calib_id = view["intrinsicId"]
-                    folder = os.path.dirname(scene_image)
-                    basename = os.path.basename(scene_image)[:-4]
-                    # if basename.endswith("_masked"):#FIXME: we removed this, also misses the extnetion
-                    #     basename=basename[:-7]
+            chunk.logger.info("Starts to load data from sfmdata")
+            sfm_data = json.load(open(chunk.node.sfmData.value, "r"))
+            scenes_images = []
+            scenes_calibs = []
+            scenes_depths= []
+            poses_id = []
+            calibs_id = []
+            views_id =  []
+            for view in sfm_data["views"]:
+                view_id = view["viewId"]
+                scene_image = view["path"]
+                pose_id = view["poseId"]
+                calib_id = view["intrinsicId"]
+                folder = os.path.dirname(scene_image)
+                basename = os.path.basename(scene_image)[:-4]#FIXME: not great
+                if chunk.node.datasetType.value == "blendedMVG":
                     scenes_calib = os.path.join(folder,"..","cams",basename+"_cam.txt")
                     scenes_depth  =  os.path.join(folder,"..","rendered_depth_maps",basename+".pfm")
-                    scenes_images.append(scene_image)
-                    scenes_calibs.append(scenes_calib)
-                    scenes_depths.append(scenes_depth)
-                    poses_id.append(pose_id)
-                    calibs_id.append(calib_id)
-                    views_id.append(view_id)
-                images_sizes = [Image.open(image).size for image in scenes_images]
+                elif chunk.node.datasetType.value == "realityCapture":
+                    scenes_calib = os.path.join(folder,"..","calib",basename+".xmp")
+                    scenes_depth = os.path.join(folder,"..","depths",scene_image+".exr")
+                scenes_images.append(scene_image)
+                scenes_calibs.append(scenes_calib)
+                scenes_depths.append(scenes_depth)
+                poses_id.append(pose_id)
+                calibs_id.append(calib_id)
+                views_id.append(view_id)
+            images_sizes = [Image.open(image).size for image in scenes_images]
 
             chunk.logManager.start("Exporting calibration")
             #opening corresponding ground truth calibration matrix form
             gt_extrinsics = []
             gt_intrinsics = []
             for calib_gt_file in scenes_calibs:
-                gt_extrinsic, gt_intrinsic = open_txt_calibration(calib_gt_file)
-                gt_extrinsics.append(gt_extrinsic)
-                gt_intrinsics.append(gt_intrinsic)
+                if chunk.node.datasetType.value == "blendedMVG":
+                    gt_extrinsic, gt_intrinsic = open_txt_calibration(calib_gt_file)
+                    gt_extrinsics.append(gt_extrinsic)
+                    gt_intrinsics.append(gt_intrinsic)
+                elif chunk.node.datasetType.value == "realityCapture":
+                    if os.path.exists(calib_gt_file):
+                        extrinsics, intrinsics = parse_xmp(calib_gt_file)
+                        gt_extrinsics.append(extrinsics)
+                        gt_intrinsics.append(intrinsics)
+                    else:
+                        gt_extrinsics.append(None)
+                        gt_intrinsics.append(None)
+
             #stack to np arrays for convenience
-            gt_extrinsics = np.stack(gt_extrinsics, axis=0)
-            gt_intrinsics = np.stack(gt_intrinsics, axis=0)
+            # gt_extrinsics = np.stack(gt_extrinsics, axis=0)
+            # gt_intrinsics = np.stack(gt_intrinsics, axis=0)
             #exporting GT calib to sfm format
             #Note, mvsnet and meshroom store in camera to world and world to cam respectively
-            gt_extrinsics = np.linalg.inv(gt_extrinsics)
+            # gt_extrinsics = np.linalg.inv(gt_extrinsics)
+            gt_extrinsics = [None if e is None else np.linalg.inv(e) for e in gt_extrinsics]
             gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, gt_intrinsics, poses_id,
                                                  calibs_id, images_sizes, sfm_data)
             #adding gt depth
@@ -242,8 +227,8 @@ class BlendedMVGDataset(desc.Node):#FIXME: abstract this Dataset, scan folder et
             for view_id, gt_depth, gt_extrinsic, gt_intrinsic in zip(views_id, scenes_depths, gt_extrinsics, gt_intrinsics):
                 depth_map_gt = open_depth_map(gt_depth)
                 #compute projection matrices for meshroom
-                camera_center = gt_extrinsic[0:3,3]
-                inverse_intr_rot = np.linalg.inv(gt_intrinsic@np.linalg.inv(gt_extrinsic[0:3,0:3]))
+                # camera_center = gt_extrinsic[0:3,3]
+                # inverse_intr_rot = np.linalg.inv(gt_intrinsic@np.linalg.inv(gt_extrinsic[0:3,0:3]))
                 # depth_meta = {"AliceVision:CArr":[float(f) for f in (camera_center)],
                 #              "AliceVision:iCamArr":inverse_intr_rot, "AliceVision:downscale":1} #crashes
                 depth_meta = {}

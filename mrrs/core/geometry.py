@@ -38,6 +38,7 @@ def camera_projection(vertices, extrinsic, intrinsic, pixel_size):
     """
     Compute the projection of 3d points according to the pinhole camera projection model
     """
+    vertices_homo = vertices
     if vertices.shape[-1] != 4:#if not homo make homo
         vertices_homo = make_homogeneous(vertices)
     # project vertices into the camera
