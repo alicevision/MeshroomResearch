@@ -210,6 +210,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
         return output_list
 
     for extrinsic, pose_id in zip(extrinsics, poses_ids):#Note: in, theroy we might have a pose shared between views, in practice this never happens
+        #if no pose, skipping
         if extrinsic is None:
             continue
         # if extrinsic.shape[0] == 3:#make square for inverse

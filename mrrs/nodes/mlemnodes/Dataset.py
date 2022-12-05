@@ -128,9 +128,27 @@ class Dataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
             name='outputGroundTruthdepthMapsFolder',
             label='Output groud truth depth map',
             description='Output folder for generated results.',
-            value=desc.Node.internalFolder,
+            value=os.path.join(desc.Node.internalFolder,'depth_maps'),
             uid=[],
         ),
+
+        desc.File(
+            name='depthmaps',
+            label='Depth maps',
+            description='Generated depth maps.',
+            semantic='image',
+            value=os.path.join(desc.Node.internalFolder,'depth_maps') + '<VIEW_ID>.exr',
+            uid=[],
+            group='', # do not export on the command line
+        ),
+
+        # desc.File( #later
+        #     name='outputGroundTruthMask',
+        #     label='Output groud truth mask',
+        #     description='Output folder for generated results.',
+        #     value=os.path.join(desc.Node.internalFolder,'masks'),
+        #     uid=[],
+        # ),
     ]
 
     def check_inputs(self, chunk):
@@ -170,7 +188,7 @@ class Dataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
                     scenes_depth  =  os.path.join(folder,"..","rendered_depth_maps",basename+".pfm")
                 elif chunk.node.datasetType.value == "realityCapture":
                     scenes_calib = os.path.join(folder,"..","calib",basename+".xmp")
-                    scenes_depth = os.path.join(folder,"..","depths",scene_image+".exr")
+                    scenes_depth = os.path.join(folder,"..","depths",basename+".jpg.depth.exr")
                 scenes_images.append(scene_image)
                 scenes_calibs.append(scenes_calib)
                 scenes_depths.append(scenes_depth)
@@ -197,13 +215,17 @@ class Dataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
                         gt_extrinsics.append(None)
                         gt_intrinsics.append(None)
 
-            #stack to np arrays for convenience
-            # gt_extrinsics = np.stack(gt_extrinsics, axis=0)
-            # gt_intrinsics = np.stack(gt_intrinsics, axis=0)
-            #exporting GT calib to sfm format
-            #Note, mvsnet and meshroom store in camera to world and world to cam respectively
-            # gt_extrinsics = np.linalg.inv(gt_extrinsics)
-            gt_extrinsics = [None if e is None else np.linalg.inv(e) for e in gt_extrinsics]
+            #camera pose representation convertion
+            if chunk.node.datasetType.value == "blendedMVG":
+                #world to cam vs cam to world
+                gt_extrinsics = [None if e is None else np.linalg.inv(e) for e in gt_extrinsics]
+            elif chunk.node.datasetType.value == "realityCapture":
+                for e in gt_extrinsics:
+                    if e is not None:
+                        #R-1 and R-1.-T
+                        e[0:3,0:3] = np.linalg.inv(e[0:3,0:3])
+                        e[3,0:3]=e[0:3,0:3]@(-e[3,0:3])
+
             gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, gt_intrinsics, poses_id,
                                                  calibs_id, images_sizes, sfm_data)
             #adding gt depth
@@ -224,8 +246,12 @@ class Dataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
                 del gt_sfm_data["poses"]
                 json.dump(gt_sfm_data, f, indent=4)
             chunk.logManager.start("Exporting depth")
+            os.makedirs(chunk.node.outputGroundTruthdepthMapsFolder.value, exist_ok=True)
             for view_id, gt_depth, gt_extrinsic, gt_intrinsic in zip(views_id, scenes_depths, gt_extrinsics, gt_intrinsics):
-                depth_map_gt = open_depth_map(gt_depth)
+                if os.path.exists(gt_depth):
+                    depth_map_gt = open_depth_map(gt_depth)
+                else:
+                    continue
                 #compute projection matrices for meshroom
                 # camera_center = gt_extrinsic[0:3,3]
                 # inverse_intr_rot = np.linalg.inv(gt_intrinsic@np.linalg.inv(gt_extrinsic[0:3,0:3]))

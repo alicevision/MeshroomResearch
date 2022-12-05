@@ -1,14 +1,13 @@
 
 #%%
 """
-Trains a relu field to learn a depth map.
-Uses confidence to weight the relu field.
+Experiments with relu field
 """
 import os
 from datetime import datetime
 import tensorflow as tf
 
-from mrrs.core.ios import open_depth_map, open_image
+from mrrs.core.ios import open_image
 from mrrs.core.utils import norm_01
 
 print("HELLO!")
@@ -17,7 +16,6 @@ print(tf.__version__)
 print("Gpus:")
 print(tf.config.list_physical_devices('GPU'))
 
-#meshroom outputs
 IMAGE_PATH =      None#"todo\\00000004.jpg"
 DEPTH_PATH =      "C:\\runs\\test_relufield.png"#"C:\\runs\\tests_video_photog\\krab\\MeshroomCache\\DepthMap\\92b189f232a8ad5a275fe546c132c1f197ecd2cf\\50230604_depthMap.exr"
 DEPTH_GT_PATH = None
@@ -82,7 +80,7 @@ def depth_transform_display(depth): #meshroom
 #%% model def
 
 #2d bilinear interpolation
-def bilinear_interpolation2D(array, input_coordinates):
+def bilinear_interpolation_2D(array, input_coordinates):
     """
     Returns values of array at coordinates input_coordinates using bilinear interpolation.
     """
@@ -118,7 +116,7 @@ def bilinear_interpolation2D(array, input_coordinates):
     w3 = d_y1 * d_x2
     w4 = d_y2 * d_x2
 
-    # broadcast weigt along last dim!!
+    # broadcast weigth along last dim
     w1 = tf.expand_dims(w1, axis=-1)
     w2 = tf.expand_dims(w2, axis=-1)
     w3 = tf.expand_dims(w3, axis=-1)
@@ -126,7 +124,7 @@ def bilinear_interpolation2D(array, input_coordinates):
 
     return w1*pixel_0+w2*pixel_1+w3*pixel_2+w4*pixel_3
 
-def bilinear_interpolation(array, input_coordinates):
+def bilinear_interpolation_nd(array, input_coordinates):
     """
     Returns values of n-dims tensor at coordinates input_coordinates using bilinear interpolation.
     The tensor must have a final dims (even if dimentionality is 1)
@@ -162,6 +160,8 @@ def bilinear_interpolation(array, input_coordinates):
     interpolated_results = tf.reduce_sum(values*interpolation_weigts, axis=1)
 
     return interpolated_results
+
+bilinear_interpolation = bilinear_interpolation_2D
 
 class ReluField(tf.keras.Model):
     """
