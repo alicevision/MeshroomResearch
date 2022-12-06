@@ -82,6 +82,14 @@ Autorescale may be used otherwise but it is far from ideal.
             uid=[0],
         ),
 
+        desc.StringParam(
+            name='csv_name',
+            label='CsvName',
+            description='Name for the csv file to be used',
+            value="depth_map_comparison.csv",
+            uid=[0]
+        ),
+
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
@@ -105,7 +113,7 @@ Autorescale may be used otherwise but it is far from ideal.
             name='outputCsv',
             label='Output Csv',
             description='Output file to generated results.',
-            value=os.path.join(desc.Node.internalFolder, "depth_maps_comparison.csv"),
+            value=lambda attr: os.path.join(desc.Node.internalFolder, attr.node.csv_name.value),
             uid=[],
         )
     ]

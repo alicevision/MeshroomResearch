@@ -12,7 +12,7 @@ from mrrs.core.ios import *
 from mrrs.core.utils import format_float_array
 
 #FIXME: move this into a reality capture folder
-def export_reality_capture(xmp_file, extrinsics, intrinsics):
+def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size):
     """
     Saves the xmp for reality capture.
     """
@@ -119,10 +119,10 @@ class ExportXMP(desc.Node):
             poses_id, intrinsics_id, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
             chunk.logManager.start("Exporting calibration")
             images_names = [os.path.basename(view["path"])[:-4] for view in sfm_data["views"]]
-            for image_name, extrinsics, intrinsics in zip(images_names, extrinsics_all_cams, intrinsics_all_cams):
+            for image_name, extrinsics, intrinsics, pixel_size in zip(images_names, extrinsics_all_cams, intrinsics_all_cams, pixel_sizes_all_cams):
                 if extrinsics is not None:
                     xmp_file = os.path.join(chunk.node.outputFolder.value, image_name+".xmp") #FIXME: image basename+xmp
-                    export_reality_capture(xmp_file, extrinsics, intrinsics)
+                    export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size)
 
             chunk.logger.info('XMP export ends')
         finally:
