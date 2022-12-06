@@ -16,6 +16,7 @@ requires=[
     'trimesh', #needed for meshcompare but technically optional
     'click', #needed for clis otherwise optional
     #'annoy', #no package send mail
+    'matplotlib-3.4.2' #needed
     ]
 
 def commands():
