@@ -13,6 +13,7 @@ from meshroom.core import desc
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
 
+#FIXME: move this into a reality capture folder
 def parse_xmp(xmp_file):
     """
     Parses the xmp from reality capture.
@@ -46,11 +47,10 @@ def parse_xmp(xmp_file):
 
         return extrinsics, intrinsics
 
-class Dataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
-
+class Dataset(desc.Node):
     category = 'Meshroom Research'
 
-    documentation = '''Util node to open blendedMVG data https://github.com/YoYo000/BlendedMVS'''
+    documentation = '''Util node to open datasets from the images in the .sfm, assumes a file structure depending on the dataset.'''
 
     inputs = [
 
@@ -67,7 +67,7 @@ class Dataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
         desc.File(
             name="sfmData",
             label="sfmData",
-            description="Input sfmData for blendedMVG images",
+            description="Input sfmData",
             value="",
             uid=[0],
         ),
@@ -142,7 +142,7 @@ class Dataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
             group='', # do not export on the command line
         ),
 
-        # desc.File( #later
+        # desc.File( #TODO
         #     name='outputGroundTruthMask',
         #     label='Output groud truth mask',
         #     description='Output folder for generated results.',
@@ -182,7 +182,7 @@ class Dataset(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
                 pose_id = view["poseId"]
                 calib_id = view["intrinsicId"]
                 folder = os.path.dirname(scene_image)
-                basename = os.path.basename(scene_image)[:-4]#FIXME: not great
+                basename = os.path.basename(scene_image)[:-4]#FIXME: not great, use split
                 if chunk.node.datasetType.value == "blendedMVG":
                     scenes_calib = os.path.join(folder,"..","cams",basename+"_cam.txt")
                     scenes_depth  =  os.path.join(folder,"..","rendered_depth_maps",basename+".pfm")

@@ -13,6 +13,14 @@ def listdir_fullpath(d):
     return [os.path.join(d, f) for f in os.listdir(d)]
 
 #%% usefull array operations
+
+def format_float_array(np_array):
+    np_array = np_array.reshape([-1])
+    output_list = []
+    for element in np_array:
+        output_list.append(np.format_float_positional(element, precision=17, unique=False))
+    return output_list
+
 def norm_01(input_array):
     """
     Normalise an array input_array between 0 and 1.

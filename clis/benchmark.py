@@ -102,7 +102,7 @@ def run(pipeline, output_folder,
 #aggregate results and make report
 @cli.command()
 @click.option('--output_folder','-o', default=None, help='Output folder to generate reports into.')
-@click.option('--csv_names','-n', multiple=True, default=["calibration_comparison.csv", "depth_maps_comparison.csv"], help='Csvs to use for reporting.')
+@click.option('--csv_names','-n', multiple=True, default=["calibration_comparison.csv", "depth_maps_comparison.csv"], help='CSV to use for reporting.')
 @click.option('--ensure_complete','-c', is_flag=True, help='Will raise an exeption if a result for a sequence is not found.')
 @click.argument('computed_outputs_path')#FIXME: inherit from group?
 def report(output_folder, computed_outputs_path, csv_names, ensure_complete):

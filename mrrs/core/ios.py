@@ -10,6 +10,8 @@ from PIL import Image
 import numpy as np
 import json
 
+from mrrs.core.utils import format_float_array
+
 FORCE_IOOI = False#FIXME: debug
 
 #%% Images
@@ -201,13 +203,6 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
     '''
     sfm_data['poses']=[]
     sfm_data['intrinsics']=[]
-
-    def format_float_array(np_array):
-        np_array = np_array.reshape([-1])
-        output_list = []
-        for element in np_array:
-            output_list.append(np.format_float_positional(element, precision=17, unique=False))
-        return output_list
 
     for extrinsic, pose_id in zip(extrinsics, poses_ids):#Note: in, theroy we might have a pose shared between views, in practice this never happens
         #if no pose, skipping

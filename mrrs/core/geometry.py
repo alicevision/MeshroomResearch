@@ -5,7 +5,6 @@ import numpy as np
 import logging
 from mrrs.core.utils import cross_with_broacsat, time_it, vectorised_dot
 
-
 #what is condidered a small float
 EPSILON = 0.0000001
 

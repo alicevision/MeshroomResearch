@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 import tensorflow as tf
 
-from mrrs.core.ios import open_image
+from mrrs.core.ios import open_image, open_depth_map
 from mrrs.core.utils import norm_01
 
 print("HELLO!")
@@ -16,11 +16,10 @@ print(tf.__version__)
 print("Gpus:")
 print(tf.config.list_physical_devices('GPU'))
 
-IMAGE_PATH =      None#"todo\\00000004.jpg"
-DEPTH_PATH =      "C:\\runs\\test_relufield.png"#"C:\\runs\\tests_video_photog\\krab\\MeshroomCache\\DepthMap\\92b189f232a8ad5a275fe546c132c1f197ecd2cf\\50230604_depthMap.exr"
+IMAGE_PATH = "C:\\Users\\hogm\\OneDrive - Technicolor\\Documents\\data\\datasets\\diodr\\val\\outdoor\\scene_00023\\scan_00199\\00023_00199_outdoor_000_020.png"
+DEPTH_PATH = "C:\\Users\\hogm\\OneDrive - Technicolor\\Documents\\data\\datasets\\diodr\\val\\outdoor\\scene_00023\\scan_00199\\00023_00199_outdoor_000_020_depth.npy"
 DEPTH_GT_PATH = None
-# CONFIDENCE_PATH = "C:\\runs\\tests_video_photog\\krab\\MeshroomCache\\DepthMap\\92b189f232a8ad5a275fe546c132c1f197ecd2cf\\50230604_simMap.exr"
-FIELD_SIZE = [16, 16, 1]
+FIELD_SIZE = [1024, 768, 1]
 
 TENSORBOARD_LOGDIR = os.path.join("./tensorboard_logs", datetime.now().strftime('%Y-%m-%d %H-%M-%S'))
 
@@ -42,7 +41,7 @@ EPOCHS = 100000
 
 #opens and batch
 # image=open_image(IMAGE_PATH)
-depth=tf.expand_dims(open_image(DEPTH_PATH), axis=0)#tf.expand_dims(open_depth_map(DEPTH_PATH), axis=0)
+depth=tf.expand_dims(open_depth_map(DEPTH_PATH), axis=0)#tf.expand_dims(open_depth_map(DEPTH_PATH), axis=0)
 depth=norm_01(depth)
 # confidence=1-norm_01(open_exr(CONFIDENCE_PATH))#inverse confidence
 
@@ -206,8 +205,8 @@ class ReluField(tf.keras.Model):
 #create and init field
 field = ReluField(FIELD_SIZE)
 #pixel coordinates
-ys,xs = tf.meshgrid(tf.range(0, depth.shape[1]),
-                    tf.range(0, depth.shape[2]),
+ys,xs = tf.meshgrid(tf.range(0, depth.shape[2]),
+                    tf.range(0, depth.shape[1]),
                     indexing="ij")
 ys=tf.reshape(ys, [-1])
 xs=tf.reshape(xs, [-1])
@@ -264,3 +263,5 @@ for epoch in range(EPOCHS):
         # if PREDICT_COLORS:
         #     tf.summary.image("predicted_image", predicted_image, step=iteration)
         #     tf.summary.histogram("predicted_image_hist", tf.reshape(predicted_image, -1), step=iteration)
+
+# %%
