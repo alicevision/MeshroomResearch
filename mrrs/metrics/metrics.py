@@ -68,8 +68,8 @@ def compute_depth_metric(depth_map, gt_depth_map, metric,
         gt_depth_map = cv2.resize(gt_depth_map, dsize=[depth_map.shape[1], depth_map.shape[0]], interpolation=cv2.INTER_NEAREST)
     mask = None
     if mask_value is not None:#mask out all invalid values in depth gt and depth TODO: make list, separate to two?
-        mask_depth_gt = gt_depth_map==mask_value
-        mask_gt = depth_map==mask_value
+        mask_depth_gt = gt_depth_map<mask_value
+        mask_gt = depth_map<mask_value
         mask = mask_depth_gt|mask_gt
     if auto_rescale:
         #depth_map = rescale_depth(depth_map, gt_depth_map)

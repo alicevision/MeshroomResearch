@@ -77,8 +77,8 @@ Autorescale may be used otherwise but it is far from ideal.
         desc.StringParam(
             name='maskValue',
             label='Mask Value',
-            description='''If this is not None, will mask the pixels with this value in the ground truth.''',
-            value='',
+            description='''If this is not None, will mask the pixels with value bellow this (in gt and estimated).''',
+            value='0',
             uid=[0],
         ),
 
