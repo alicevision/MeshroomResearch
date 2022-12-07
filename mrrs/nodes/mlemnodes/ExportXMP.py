@@ -16,12 +16,14 @@ def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size):
     """
     Saves the xmp for reality capture.
     """
-    #TODO: convertions
-    focal = intrinsics[0,0]*35 #turn into equivalent 35mm
-    pp_u = intrinsics[0,2]
+
+    focal = intrinsics[0,0]/pixel_size #turn into equivalent 35mm FIXME: not sure there
+    pp_u = intrinsics[1,1]
     pp_v = intrinsics[1,2]
+
     rotation = np.linalg.inv(extrinsics[0:3,0:3])
-    position = -rotation@extrinsics[2,0:3]
+    #for 20201115_120317.xmp' 17.1437608286682 20.0052269517358 49.6848898252111
+    position = extrinsics[0:3, 3]
 
     def format_array(array):
         formated_str = ""
@@ -43,7 +45,7 @@ def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size):
     </rdf:Description>
   </rdf:RDF>
 </x:xmpmeta>
-""".format(str(focal), pp_u, pp_v, format_array(rotation.flatten()), format_array(position), '0 0 0')#FIXME: for now we dont support this
+""".format(str(focal), pp_u, pp_v, format_array(rotation.flatten()), format_array(position), '0 0 0')#FIXME: for now we dont support distortion?
 
     with open(xmp_file, "w") as f:
        f.write(xmp_string)
