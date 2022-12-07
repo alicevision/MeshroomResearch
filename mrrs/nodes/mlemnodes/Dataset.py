@@ -217,19 +217,26 @@ class Dataset(desc.Node):
                         gt_extrinsics.append(None)
                         gt_intrinsics.append(None)
 
-            #camera pose representation convertion
+            #camera representation convertion
+            sensor_width = 1
             if chunk.node.datasetType.value == "blendedMVG":
                 #world to cam vs cam to world
                 gt_extrinsics = [None if e is None else np.linalg.inv(e) for e in gt_extrinsics]
             elif chunk.node.datasetType.value == "realityCapture":
                 for e in gt_extrinsics:
                     if e is not None:
-                        #R-1 and R-1.-T
+                        #R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
                         e[0:3,0:3] = np.linalg.inv(e[0:3,0:3])
                         e[3,0:3]=e[0:3,0:3]@(-e[3,0:3])
+                for i in gt_intrinsics:
+                    if i is not None:
+                        #in meshroom principal point is in pixels, in RC in metrics
+                        #also focal is equivalent 35mm..., in meshroom the sensoor size balabla
+                        sensor_width = 35
+                        raise BaseException("TODO")
 
             gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, gt_intrinsics, poses_id,
-                                                 calibs_id, images_sizes, sfm_data)
+                                                 calibs_id, images_sizes, sfm_data, sensor_width)
             #adding gt depth
             for view, depth in zip(gt_sfm_data["views"], scenes_depths):
                 view["groudtruthDepth"]=depth

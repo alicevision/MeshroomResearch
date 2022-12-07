@@ -15,11 +15,12 @@ from mrrs.core.utils import format_float_array
 def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size):
     """
     Saves the xmp for reality capture.
+    Will convert meshroom sfm extrinsics and intrinsics converted to mrrs, into reality capture format.
     """
 
     focal = intrinsics[0,0]/pixel_size #turn into equivalent 35mm FIXME: not sure there
-    pp_u = intrinsics[1,1]
-    pp_v = intrinsics[1,2]
+    pp_u = intrinsics[1,1]/pixel_size
+    pp_v = intrinsics[1,2]/pixel_size #convert into metric
 
     rotation = np.linalg.inv(extrinsics[0:3,0:3])
     #for 20201115_120317.xmp' 17.1437608286682 20.0052269517358 49.6848898252111
