@@ -16,12 +16,6 @@ FORCE_IOOI = False#FIXME: debug
 
 #%% Images
 
-# def oiio_convert_to_png(image_file):
-#     """
-#     Converts values from srgb to linear
-#     """
-#     os.system("iconvert")
-#     return image
 
 def open_exr(exr_path, clip_negative=False):
     '''
