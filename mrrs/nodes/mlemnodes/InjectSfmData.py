@@ -15,6 +15,8 @@ class InjectSfmData(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
 
     documentation = '''This node injects some fields from a source sfm data to a target sfm data.'''
 
+    size = desc.DynamicNodeSize('sourceSfmData')
+
     inputs = [
 
         desc.File(

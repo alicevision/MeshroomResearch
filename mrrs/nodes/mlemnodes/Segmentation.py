@@ -22,6 +22,8 @@ class Segmentation(desc.Node):
     category = 'Meshroom Research'
     documentation = '''Node to compute the segmentation of input images. Different kind of segmentation can be used.'''
 
+    size = desc.DynamicNodeSize('sourceSfmData')
+
     inputs = [
         desc.File(
             name='input',

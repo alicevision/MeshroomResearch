@@ -38,7 +38,7 @@ def parse_xmp(xmp_file):
         extrinsics=np.zeros([4,4])
         intrinsics[0,0]=focalLength35mm
         intrinsics[1,1]=focalLength35mm
-        intrinsics[1,1]=principal_point_u
+        intrinsics[0,2]=principal_point_u
         intrinsics[1,2]=principal_point_v
         intrinsics[2,2]=1
         extrinsics[0:3,0:3]=rotation_matrix
@@ -52,7 +52,17 @@ class Dataset(desc.Node):
 
     documentation = '''Util node to open datasets from the images in the .sfm, assumes a file structure depending on the dataset.'''
 
+    size = desc.DynamicNodeSize('sfmData')
+
     inputs = [
+
+        desc.File(
+            name="sfmData",
+            label="sfmData",
+            description="Input sfmData",
+            value="",
+            uid=[0],
+        ),
 
         desc.ChoiceParam(
             name='datasetType',
@@ -61,14 +71,6 @@ class Dataset(desc.Node):
             value='blendedMVG',
             values=['blendedMVG', 'realityCapture'],
             exclusive=True,
-            uid=[0],
-        ),
-
-        desc.File(
-            name="sfmData",
-            label="sfmData",
-            description="Input sfmData",
-            value="",
             uid=[0],
         ),
 
