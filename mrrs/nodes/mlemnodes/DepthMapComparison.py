@@ -59,8 +59,8 @@ Autorescale may be used otherwise but it is far from ideal.
             name='metrics',
             label='Metrics',
             description='Metrics to be used in the comparison',
-            value=['RMSE', 'MAE'],
-            values=['RMSE', 'MAE'],
+            value=['RMSE', 'MAE', 'validity_ratio'],
+            values=['RMSE', 'MAE', 'validity_ratio'],
             exclusive=False,
             uid=[0],
             joinChar=',',
@@ -180,6 +180,7 @@ Autorescale may be used otherwise but it is far from ideal.
                 mask_value = None
             else:
                 mask_value = float(mask_value)
+                chunk.logger.info('Will ignore depth values <%f'%mask_value)
 
             # for debug
             # extrinsics, intrinsics, _, _, _, pixel_sizes = matrices_from_sfm_data(sfm_data)
@@ -228,7 +229,8 @@ Autorescale may be used otherwise but it is far from ideal.
                                                                                                   auto_resize=True, auto_rescale=auto_rescale, mask_value=mask_value)#FIXME: need to make sure the depth is at the same scale
                     metric_values.append(metric_value)
                     #usefull display
-                    save_exr(metric_per_pixel, os.path.join(chunk.node.output.value, view_id+"_distance_"+metric+"_depthMap.exr"), data_type="depth")
+                    if metric_per_pixel is not None:
+                        save_exr(metric_per_pixel, os.path.join(chunk.node.output.value, view_id+"_distance_"+metric+"_depthMap.exr"), data_type="depth")
                 computed_metric_values.append(metric_values)
 
             #stack up and compute average on dataset

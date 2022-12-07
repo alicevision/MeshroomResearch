@@ -32,6 +32,15 @@ def MAE(depth_map, gt_depth_map, mask):
         absolute_diff *= (1-mask)
     return np.mean(absolute_diff), absolute_diff
 
+def validity_ratio(depth_map, gt_depth_map, mask):
+    """
+    Compute the ammount of valid depth pixel on the gt and predicted.
+    """
+    print(np.count_nonzero(1-mask))
+    print(depth_map.shape)
+    percentage_valid =100*np.count_nonzero(1-mask)/np.prod(depth_map.shape)
+    return percentage_valid, None
+
 # def PSRM(depth_map, gt_depth_map, mask):
 #     # img1 and img2 have range [0, 255]
 #     img1 = img1.astype(np.float64)
@@ -68,8 +77,8 @@ def compute_depth_metric(depth_map, gt_depth_map, metric,
         gt_depth_map = cv2.resize(gt_depth_map, dsize=[depth_map.shape[1], depth_map.shape[0]], interpolation=cv2.INTER_NEAREST)
     mask = None
     if mask_value is not None:#mask out all invalid values in depth gt and depth TODO: make list, separate to two?
-        mask_depth_gt = gt_depth_map<mask_value
-        mask_gt = depth_map<mask_value
+        mask_depth_gt = gt_depth_map<=mask_value
+        mask_gt = depth_map<=mask_value
         mask = mask_depth_gt|mask_gt
     if auto_rescale:
         #depth_map = rescale_depth(depth_map, gt_depth_map)
