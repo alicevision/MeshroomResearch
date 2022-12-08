@@ -237,6 +237,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
                             "type": "pinhole",
                             "initializationMode": "unknown",
                             "initialFocalLength": "0.00048828125",
+                            #pass focal into "mm"
                             "focalLength": str(-intrinsic[0,0]*pixel_size), #FIXME: remove negative
                             "pixelRatio": "1",
                             "pixelRatioLocked": "false",

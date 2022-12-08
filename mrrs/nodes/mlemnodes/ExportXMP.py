@@ -18,12 +18,11 @@ def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size):
     Will convert meshroom sfm extrinsics and intrinsics converted to mrrs, into reality capture format.
     """
 
-    focal = intrinsics[0,0]/pixel_size #turn into equivalent 35mm FIXME: not sure there
-    pp_u = intrinsics[1,1]/pixel_size
-    pp_v = intrinsics[1,2]/pixel_size #convert into metric
+    focal = intrinsics[0,0]*36 #turn focal from unit sensor  into equivalent 35mm
+    principal_point_u = intrinsics[0,2]/pixel_size
+    principal_point_v = intrinsics[1,2]/pixel_size #convert back into metric principal point
 
     rotation = np.linalg.inv(extrinsics[0:3,0:3])
-    #for 20201115_120317.xmp' 17.1437608286682 20.0052269517358 49.6848898252111
     position = extrinsics[0:3, 3]
 
     def format_array(array):
@@ -46,7 +45,7 @@ def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size):
     </rdf:Description>
   </rdf:RDF>
 </x:xmpmeta>
-""".format(str(focal), pp_u, pp_v, format_array(rotation.flatten()), format_array(position), '0 0 0')#FIXME: for now we dont support distortion?
+""".format(str(focal), principal_point_u, principal_point_v, format_array(rotation.flatten()), format_array(position), '0 0 0')#FIXME: for now we dont support distortion?
 
     with open(xmp_file, "w") as f:
        f.write(xmp_string)

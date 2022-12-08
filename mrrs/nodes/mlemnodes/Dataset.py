@@ -24,28 +24,47 @@ def parse_xmp(xmp_file):
         rotation_matrix = re.search("<xcr:Rotation>(.*)</xcr:Rotation>", xmp_lines)
         principal_point_u = re.search("PrincipalPointU=\"(.*)\" ", xmp_lines)
         principal_point_v = re.search("PrincipalPointV=\"(.*)\"", xmp_lines)
-        focalLength35mm = re.search("xcr:FocalLength35mm=\"(.*?)\" ", xmp_lines)
-        if camera_center is None or rotation_matrix is None or principal_point_u is None or principal_point_v is None or focalLength35mm is None:
+        focalLength_35mm = re.search("xcr:FocalLength35mm=\"(.*?)\" ", xmp_lines)
+        if camera_center is None or rotation_matrix is None or principal_point_u is None or principal_point_v is None or focalLength_35mm is None:
             return None, None
         # DistortionCoeficients InMeshing
         camera_center = np.asarray(camera_center.group(1).split(" "), dtype=np.float32)
         rotation_matrix = np.asarray(rotation_matrix.group(1).split(" "), dtype=np.float32).reshape([3,3])
         principal_point_u = np.asarray(principal_point_u.group(1).split(" "), dtype=np.float32)
         principal_point_v =np.asarray(principal_point_v.group(1).split(" "), dtype=np.float32)
-        focalLength35mm = np.asarray(focalLength35mm.group(1).split(" "), dtype=np.float32)
+        focalLength_35mm = np.asarray(focalLength_35mm.group(1).split(" "), dtype=np.float32)
         #TODO if needed, xcr:DistortionModel="brown3" xcr:Skew="0" xcr:AspectRatio="1"
         intrinsics=np.zeros([3,3])
         extrinsics=np.zeros([4,4])
-        intrinsics[0,0]=focalLength35mm
-        intrinsics[1,1]=focalLength35mm
-        intrinsics[0,2]=principal_point_u
-        intrinsics[1,2]=principal_point_v
+        intrinsics[0,0]=focalLength_35mm
+        intrinsics[1,1]=focalLength_35mm
+        intrinsics[1,2]=principal_point_u
+        intrinsics[0,2]=principal_point_v
         intrinsics[2,2]=1
         extrinsics[0:3,0:3]=rotation_matrix
         extrinsics[0:3,3]=camera_center
         extrinsics[3,3]=1
 
         return extrinsics, intrinsics
+
+def open_calibration(scenes_calibs, dataset_type):
+    #opening corresponding ground truth calibration matrix form
+    gt_extrinsics = []
+    gt_intrinsics = []
+    for calib_gt_file in scenes_calibs:
+        if dataset_type == "blendedMVG":
+            gt_extrinsic, gt_intrinsic = open_txt_calibration(calib_gt_file)
+            gt_extrinsics.append(gt_extrinsic)
+            gt_intrinsics.append(gt_intrinsic)
+        elif dataset_type == "realityCapture":
+            if os.path.exists(calib_gt_file):
+                extrinsics, intrinsics = parse_xmp(calib_gt_file)
+                gt_extrinsics.append(extrinsics)
+                gt_intrinsics.append(intrinsics)
+            else:#some views may have been skipped
+                gt_extrinsics.append(None)
+                gt_intrinsics.append(None)
+    return gt_extrinsics, gt_intrinsics
 
 class Dataset(desc.Node):
     category = 'Meshroom Research'
@@ -143,14 +162,6 @@ class Dataset(desc.Node):
             uid=[],
             group='', # do not export on the command line
         ),
-
-        # desc.File( #TODO
-        #     name='outputGroundTruthMask',
-        #     label='Output groud truth mask',
-        #     description='Output folder for generated results.',
-        #     value=os.path.join(desc.Node.internalFolder,'masks'),
-        #     uid=[],
-        # ),
     ]
 
     def check_inputs(self, chunk):
@@ -186,7 +197,7 @@ class Dataset(desc.Node):
                 folder = os.path.dirname(scene_image)
                 basename = os.path.basename(scene_image)[:-4]#FIXME: not great, use split
                 if chunk.node.datasetType.value == "blendedMVG":
-                    scenes_calib = os.path.join(folder,"..","cams",basename+"_cam.txt")
+                    scenes_calib = os.path.join(folder,"..","cams", basename+"_cam.txt")
                     scenes_depth  =  os.path.join(folder,"..","rendered_depth_maps",basename+".pfm")
                 elif chunk.node.datasetType.value == "realityCapture":
                     scenes_calib = os.path.join(folder,"..","calib",basename+".xmp")
@@ -200,43 +211,37 @@ class Dataset(desc.Node):
             images_sizes = [Image.open(image).size for image in scenes_images]
 
             chunk.logManager.start("Exporting calibration")
-            #opening corresponding ground truth calibration matrix form
-            gt_extrinsics = []
-            gt_intrinsics = []
-            for calib_gt_file in scenes_calibs:
-                if chunk.node.datasetType.value == "blendedMVG":
-                    gt_extrinsic, gt_intrinsic = open_txt_calibration(calib_gt_file)
-                    gt_extrinsics.append(gt_extrinsic)
-                    gt_intrinsics.append(gt_intrinsic)
-                elif chunk.node.datasetType.value == "realityCapture":
-                    if os.path.exists(calib_gt_file):
-                        extrinsics, intrinsics = parse_xmp(calib_gt_file)
-                        gt_extrinsics.append(extrinsics)
-                        gt_intrinsics.append(intrinsics)
-                    else:
-                        gt_extrinsics.append(None)
-                        gt_intrinsics.append(None)
+            gt_extrinsics, gt_intrinsics= open_calibration(scenes_calibs, chunk.node.datasetType.value)
 
             #camera representation convertion
-            sensor_width = 1
             if chunk.node.datasetType.value == "blendedMVG":
-                #world to cam vs cam to world
+                #only change with meshroom is the pose world to cam vs cam to world
                 gt_extrinsics = [None if e is None else np.linalg.inv(e) for e in gt_extrinsics]
             elif chunk.node.datasetType.value == "realityCapture":
                 for e in gt_extrinsics:
                     if e is not None:
                         #R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
                         e[0:3,0:3] = np.linalg.inv(e[0:3,0:3])
-                        e[3,0:3]=e[0:3,0:3]@(-e[3,0:3])
-                for i in gt_intrinsics:
+                        e[3,0:3]=e[0:3,0:3]@(-e[3,  0:3])
+                #sensor with is equivalent 35mm in RC
+
+                for i, image_size in zip(gt_intrinsics, images_sizes):
                     if i is not None:
-                        #in meshroom principal point is in pixels, in RC in metrics
-                        #also focal is equivalent 35mm..., in meshroom the sensoor size balabla
-                        sensor_width = 35
-                        raise BaseException("TODO")
+                        #pass into focal from sensor with unit width, as in meshroom with not init
+                        i[0,0]/=36
+                        i[1,1]/=36
+                        #pixel size assuming unit sensor
+                        pixel_size = 1/image_size[0]
+                        #pass into focal in pixel units to be like blended mvsnet (even thougt we remove it later)
+                        i[0,0]/=pixel_size
+                        i[1,1]/=pixel_size
+                        #convert principal point in pixels https://support.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
+                        #dimentionless because already /35
+                        i[0,2] = image_size[0]/2-i[0,2]/pixel_size
+                        i[1,2] = image_size[1]/2-i[1,2]/pixel_size
 
             gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, gt_intrinsics, poses_id,
-                                                 calibs_id, images_sizes, sfm_data, sensor_width)
+                                                 calibs_id, images_sizes, sfm_data)
             #adding gt depth
             for view, depth in zip(gt_sfm_data["views"], scenes_depths):
                 view["groudtruthDepth"]=depth
