@@ -78,7 +78,7 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
             spec[key]=custom_header[key]
         out.open(output_file, spec)
         out.write_image(input_array)
-        out.close()#FIXME: no custom header
+        out.close()
     else:
         channel_data = []
 

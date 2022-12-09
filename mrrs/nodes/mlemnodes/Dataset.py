@@ -297,7 +297,8 @@ class Dataset(desc.Node):
                 # depth_meta = {"AliceVision:CArr":camera_center,
                             #   "AliceVision:iCamArr":inverse_intr_rot, "AliceVision:downscale":1} #TOTEST
                 depth_meta={}
-                depth_meta["worldtocamera"] = (1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+                #test from oiio not working https://openimageio.readthedocs.io/en/v2.4.6.1/imageoutput.html
+                # depth_meta["worldtocamera"] = (1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
                 #save exr
                 save_exr(depth_map_gt, os.path.join(chunk.node.outputGroundTruthdepthMapsFolder.value, str(view_id)+"_depthMap.exr"),#FIXME: harcoded names
                         data_type="depth", custom_header=depth_meta)
