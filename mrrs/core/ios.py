@@ -77,7 +77,7 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
         for key in custom_header.keys():
             # spec[key]=custom_header[key]
             print("Writting metadata "+key)
-            spec.attribute(key, "matrix", custom_header[key].flatten().tolist())
+            spec.attribute(key, "matrix", custom_header[key])
         out.open(output_file, spec)
         out.write_image(input_array)
         out.close()
