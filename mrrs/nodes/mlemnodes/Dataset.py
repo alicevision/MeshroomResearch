@@ -204,8 +204,8 @@ class Dataset(desc.Node):
                     scenes_depth  =  os.path.join(folder,"..","rendered_depth_maps",basename+".pfm")
                 elif chunk.node.datasetType.value == "realityCapture":
                     scenes_calib = os.path.join(folder,"..","calib",basename+".xmp")
-                    scenes_depth = os.path.join(folder,"..","depths",basename+".jpg.depth.exr")
-                elif chunk.node.datasetType.value == "meshroom":
+                    scenes_depth = os.path.join(folder,"..","depths",basename+".jpg.depth.exr")#FIXME: no gt
+
                 scenes_images.append(scene_image)
                 scenes_calibs.append(scenes_calib)
                 scenes_depths.append(scenes_depth)
