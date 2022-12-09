@@ -199,7 +199,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
     sfm_data['intrinsics']=[]
 
     for extrinsic, pose_id in zip(extrinsics, poses_ids):#Note: in, theroy we might have a pose shared between views, in practice this never happens
-        #if no pose, skipping
+        #if no pose, skipping, meshroom support pose_id in vews with no pose declared.
         if extrinsic is None:
             continue
         # if extrinsic.shape[0] == 3:#make square for inverse
@@ -220,10 +220,10 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
 
     already_done_intrisics = []
     for intrinsic, intrinsic_id, image_size in zip(intrinsics, intrinsics_ids, images_size):
-        if intrinsic_id in already_done_intrisics:#gets rid of the intrinsic duplication i do
-            continue
-        already_done_intrisics.append(intrinsic_id)
         if intrinsic is not None:
+            if intrinsic_id in already_done_intrisics:#gets rid of the intrinsic duplication i do
+                continue
+            already_done_intrisics.append(intrinsic_id)
             #in meshroom, principal point is delta from center of the images, in pixels
             pixel_size = (sensor_width/image_size[0])
             principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2
@@ -231,38 +231,39 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             intrinsic_sfm = {
                             "intrinsicId": str(intrinsic_id),
                             'width':str(image_size[0]), 'height':str(image_size[1]),
-                            "sensorWidth": str(-sensor_width),
-                            "sensorHeight": str(-image_size[1]/image_size[0]),#FIXME: remove negative, also option for sensor height?
+                            "sensorWidth": str(sensor_width),
+                            "sensorHeight": str(sensor_width*image_size[1]/image_size[0]),
                             "serialNumber": "0",
                             "type": "pinhole",
                             "initializationMode": "unknown",
                             "initialFocalLength": "0.00048828125",
                             #pass focal into "mm"
-                            "focalLength": str(-intrinsic[0,0]*pixel_size), #FIXME: remove negative
+                            "focalLength": str(intrinsic[0,0]*pixel_size), #FIXME: remove negative
                             "pixelRatio": "1",
                             "pixelRatioLocked": "false",
                             "principalPoint": principal_point,
                             "distortionParams": "",
                             "locked": "true"
                             }
-        else:#create with dumy paramerers
-            intrinsic_sfm = {
-                            "intrinsicId": str(intrinsic_id),
-                            'width':str(image_size[0]), 'height':str(image_size[1]),
-                            "sensorWidth": "-1",
-                            "sensorHeight": str(image_size[1]/image_size[0]),
-                            "serialNumber": "0",
-                            "type": "pinhole",
-                            "initializationMode": "unknown",
-                            "initialFocalLength": "0.00048828125",
-                            "focalLength": "-1.2071067811865475",
-                            "pixelRatio": "1",
-                            "pixelRatioLocked": "false",
-                            "principalPoint": [ "0", "0" ],
-                            "distortionParams": "",
-                            "locked": "false"
-                            }
-        sfm_data['intrinsics'].append(intrinsic_sfm)
+
+        # else:#create with dumy paramerers
+        #     intrinsic_sfm = {
+        #                     "intrinsicId": str(intrinsic_id),
+        #                     'width':str(image_size[0]), 'height':str(image_size[1]),
+        #                     "sensorWidth": "-1",
+        #                     "sensorHeight": str(image_size[1]/image_size[0]),
+        #                     "serialNumber": "0",
+        #                     "type": "pinhole",
+        #                     "initializationMode": "unknown",
+        #                     "initialFocalLength": "0.00048828125",
+        #                     "focalLength": "-1.2071067811865475",
+        #                     "pixelRatio": "1",
+        #                     "pixelRatioLocked": "false",
+        #                     "principalPoint": [ "0", "0" ],
+        #                     "distortionParams": "",
+        #                     "locked": "false"
+        #                     }
+            sfm_data['intrinsics'].append(intrinsic_sfm)
 
     return sfm_data
 

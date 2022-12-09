@@ -24,7 +24,7 @@ class InjectSfmData(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             label='Source SfmData',
             description='Input sfm file containing the fields to be injected in target sfmdata.',
             value=desc.Node.internalFolder,
-            uid=[],
+            uid=[0],
         ),
 
         desc.File(
@@ -32,7 +32,7 @@ class InjectSfmData(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             label='Target SfmData',
             description='Input sfm file containing the sfm data to be injected with fata from the source sfm data.',
             value=desc.Node.internalFolder,
-            uid=[],
+            uid=[0],
         ),
 
         desc.ChoiceParam(
@@ -42,7 +42,7 @@ class InjectSfmData(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             value=['structure'],
             values=['poses', 'views' ,'intrinsics', 'structure', 'version', 'featuresFolders', 'matchesFolders'],
             exclusive=False,
-            uid=[],
+            uid=[0],
         ),
 
         desc.ChoiceParam(
