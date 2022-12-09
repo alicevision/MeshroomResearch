@@ -296,7 +296,8 @@ class Dataset(desc.Node):
                 inverse_intr_rot = np.linalg.inv(gt_intrinsic@np.linalg.inv(gt_extrinsic[0:3,0:3]))
                 #https://openimageio.readthedocs.io/en/v2.4.6.1/imageoutput.html
                 depth_meta = {"AliceVision:CArr":camera_center,
-                              "AliceVision:iCamArr":inverse_intr_rot, "AliceVision:downscale":1} #TOTEST
+                              "AliceVision:iCamArr":inverse_intr_rot,
+                              "AliceVision:downscale":1} #TOTEST
                 # depth_meta={}
 
                 #save exr
