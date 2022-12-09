@@ -295,10 +295,10 @@ class Dataset(desc.Node):
                 camera_center = gt_extrinsic[0:3,3]
                 inverse_intr_rot = np.linalg.inv(gt_intrinsic@np.linalg.inv(gt_extrinsic[0:3,0:3]))
                 #https://openimageio.readthedocs.io/en/v2.4.6.1/imageoutput.html
-                depth_meta = {"AliceVision:CArr":camera_center.flatten().tolist(),
-                              "AliceVision:iCamArr":inverse_intr_rot.flatten().tolist(),
-                              "AliceVision:downscale":1} #FIXME: not working
-                # depth_meta={}
+                # depth_meta = {"AliceVision:CArr":camera_center.flatten().tolist(),
+                #               "AliceVision:iCamArr":inverse_intr_rot.flatten().tolist(),
+                #               "AliceVision:downscale":1} #FIXME: not working
+                depth_meta={}
 
                 #save exr
                 save_exr(depth_map_gt, os.path.join(chunk.node.outputGroundTruthdepthMapsFolder.value, str(view_id)+"_depthMap.exr"),#FIXME: harcoded names
