@@ -278,10 +278,10 @@ class Dataset(desc.Node):
                 else:
                     continue
                 #compute projection matrices for meshroom
-                # camera_center = gt_extrinsic[0:3,3]
-                # inverse_intr_rot = np.linalg.inv(gt_intrinsic@np.linalg.inv(gt_extrinsic[0:3,0:3]))
-                # depth_meta = {"AliceVision:CArr":[float(f) for f in (camera_center)],
-                #              "AliceVision:iCamArr":inverse_intr_rot, "AliceVision:downscale":1} #crashes
+                camera_center = gt_extrinsic[0:3,3]
+                inverse_intr_rot = np.linalg.inv(gt_intrinsic@np.linalg.inv(gt_extrinsic[0:3,0:3]))
+                depth_meta = {"AliceVision:CArr":camera_center,
+                              "AliceVision:iCamArr":inverse_intr_rot, "AliceVision:downscale":1} #crashes
                 depth_meta = {}
                 #save exr
                 save_exr(depth_map_gt, os.path.join(chunk.node.outputGroundTruthdepthMapsFolder.value, str(view_id)+"_depthMap.exr"),#FIXME: harcoded names
