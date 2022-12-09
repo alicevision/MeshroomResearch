@@ -22,9 +22,9 @@ def parse_xmp(xmp_file):
         xmp_lines = " ".join(f.readlines())
         camera_center = re.search("<xcr:Position>(.*)</xcr:Position>", xmp_lines)
         rotation_matrix = re.search("<xcr:Rotation>(.*)</xcr:Rotation>", xmp_lines)
-        principal_point_u = re.search("PrincipalPointU=\"(.*)\" ", xmp_lines)
-        principal_point_v = re.search("PrincipalPointV=\"(.*)\"", xmp_lines)
-        focalLength_35mm = re.search("xcr:FocalLength35mm=\"(.*?)\" ", xmp_lines)
+        principal_point_u = re.search("PrincipalPointU=\"([+-]?([0-9]*[.])?[0-9]+)\"", xmp_lines)
+        principal_point_v = re.search("PrincipalPointV=\"([+-]?([0-9]*[.])?[0-9]+)\"", xmp_lines)
+        focalLength_35mm = re.search("xcr:FocalLength35mm=\"([+-]?([0-9]*[.])?[0-9]+)\"", xmp_lines)
         if camera_center is None or rotation_matrix is None or principal_point_u is None or principal_point_v is None or focalLength_35mm is None:
             return None, None
         # DistortionCoeficients InMeshing
@@ -59,6 +59,8 @@ def open_calibration(scenes_calibs, dataset_type):
         elif dataset_type == "realityCapture":
             if os.path.exists(calib_gt_file):
                 extrinsics, intrinsics = parse_xmp(calib_gt_file)
+                if extrinsics is None:
+                    print("Invalid XMP "+calib_gt_file)
                 gt_extrinsics.append(extrinsics)
                 gt_intrinsics.append(intrinsics)
             else:#some views may have been skipped
@@ -181,6 +183,7 @@ class Dataset(desc.Node):
             chunk.logManager.start(chunk.node.verboseLevel.value)
             if not self.check_inputs(chunk):
                 return
+            #TODO: make fc
             chunk.logger.info("Starts to load data from sfmdata")
             sfm_data = json.load(open(chunk.node.sfmData.value, "r"))
             scenes_images = []
@@ -202,6 +205,7 @@ class Dataset(desc.Node):
                 elif chunk.node.datasetType.value == "realityCapture":
                     scenes_calib = os.path.join(folder,"..","calib",basename+".xmp")
                     scenes_depth = os.path.join(folder,"..","depths",basename+".jpg.depth.exr")
+                elif chunk.node.datasetType.value == "meshroom":
                 scenes_images.append(scene_image)
                 scenes_calibs.append(scenes_calib)
                 scenes_depths.append(scenes_depth)
@@ -214,22 +218,29 @@ class Dataset(desc.Node):
             gt_extrinsics, gt_intrinsics= open_calibration(scenes_calibs, chunk.node.datasetType.value)
 
             #camera representation convertion
+            #TODO: make fc
             if chunk.node.datasetType.value == "blendedMVG":
                 #only change with meshroom is the pose world to cam vs cam to world
                 gt_extrinsics = [None if e is None else np.linalg.inv(e) for e in gt_extrinsics]
             elif chunk.node.datasetType.value == "realityCapture":
+                nb_invalid = 0
                 for e in gt_extrinsics:
                     if e is not None:
                         #R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
                         e[0:3,0:3] = np.linalg.inv(e[0:3,0:3])
-                        e[3,0:3]=e[0:3,0:3]@(-e[3,  0:3])
+                        e[3,0:3]=(e[0:3,0:3]@(-e[3,  0:3]))/0.036#we pass into unit sensor
+                    else:
+                        nb_invalid+=1
+                chunk.logger.info("%d invalid calibs"%nb_invalid)
                 #sensor with is equivalent 35mm in RC
 
                 for i, image_size in zip(gt_intrinsics, images_sizes):
                     if i is not None:
                         #pass into focal from sensor with unit width, as in meshroom with not init
+                        # RC assumes the 24×36 mm film format, we use unit sensor width
                         i[0,0]/=36
                         i[1,1]/=36
+                        print(i[0,0])
                         #pixel size assuming unit sensor
                         pixel_size = 1/image_size[0]
                         #pass into focal in pixel units to be like blended mvsnet (even thougt we remove it later)

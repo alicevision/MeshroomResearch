@@ -99,6 +99,19 @@ class InjectSfmData(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
                 if field not in source_sfm_data.keys():
                     chunk.logger.info("Field "+field+" not found in "+chunk.node.sourceSfmData.value+", skipping")
                     continue
+                if field =="structure":#filter out
+                    chunk.logger.info('Removing structure with no matching views')
+                    #take advantage of the fact that a view that is not reconstructed doesnt have pose (pose and view have same id)
+                    view_id = [view["poseId"] for view in target_sfm_data['poses'] ]
+                    for landmark in source_sfm_data[field]:
+                        valid_observations =[]
+                        for observation in landmark["observations"]:
+                            if observation["observationId"]  in view_id:
+                                valid_observations.append(observation)
+                            # else:
+                            #     chunk.logger.info('Removing obervation')
+                        landmark["observations"]=valid_observations
+
                 target_sfm_data[field]=source_sfm_data[field]
 
             with open(chunk.node.outputSfMData.value,"w") as json_file:
