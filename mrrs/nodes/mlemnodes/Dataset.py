@@ -297,7 +297,7 @@ class Dataset(desc.Node):
                 #https://openimageio.readthedocs.io/en/v2.4.6.1/imageoutput.html
                 depth_meta = {"AliceVision:CArr":camera_center.flatten().tolist(),
                               "AliceVision:iCamArr":inverse_intr_rot.flatten().tolist(),
-                              "AliceVision:downscale":1} #TOTEST
+                              "AliceVision:downscale":1} #FIXME: not working
                 # depth_meta={}
 
                 #save exr
