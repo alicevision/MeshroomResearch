@@ -74,10 +74,10 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
         if out is None:
             raise RuntimeError("Could not open exr file "+output_file)
         spec = oiio.ImageSpec(input_array_size[1], input_array_size[0], input_array_size[2], 'float32')
-        out.open(output_file, spec)
-        out.write_image(input_array)
         for key in custom_header.keys():
             spec[key]=custom_header[key]
+        out.open(output_file, spec)
+        out.write_image(input_array)
         out.close()#FIXME: no custom header
     else:
         channel_data = []
