@@ -74,10 +74,19 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
         if out is None:
             raise RuntimeError("Could not open exr file "+output_file)
         spec = oiio.ImageSpec(input_array_size[1], input_array_size[0], input_array_size[2], 'float32')
-        for key in custom_header.keys():
-            spec[key]=custom_header[key] #not working
-            print("Writting metadata "+key)
-            # spec.attribute(key, "matrix", custom_header[key])
+        if custom_header is not None:
+            for key in custom_header.keys():
+                print("Writting metadata "+key)
+                print(custom_header[key])
+                if key=="AliceVision:CArr":
+                    spec.attribute(key, "float[3]", list(custom_header[key]))
+                elif key=="AliceVision:iCamArr":
+                    print(list(custom_header[key].flatten()))
+                    spec.attribute (key, oiio.TypeDesc.TypeMatrix33,  list(custom_header[key].flatten()))
+                elif key=="AliceVision:downscale":
+                    spec.attribute(key, "float", custom_header[key])
+                else:
+                    spec[key]=custom_header[key]
         out.open(output_file, spec)
         out.write_image(input_array)
         out.close()
