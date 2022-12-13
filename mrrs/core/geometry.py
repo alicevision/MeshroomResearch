@@ -29,7 +29,7 @@ def make_unit(input_array):
     make unit along the last dimention
     """
     norm = np.sqrt(np.sum(input_array**2, axis=-1))
-    input_array[..., :] /= np.stack([norm, norm, norm], axis=-1)  # need the stack for boradcasting
+    input_array[..., :] /= np.stack([norm, norm, norm], axis=-1)  # need the stack for broadcasting
     return input_array
 
 #%% Camera projections
@@ -87,10 +87,9 @@ def camera_deprojection_meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_
     Zs = depth_map.flatten()
     pixel_homo = make_homogeneous(pixels)
     inv_intrinsic = np.linalg.inv(intrinsic[0:3,0:3])
-    invextrinsic=extrinsic#np.linalg.inv(np.concatenate([extrinsic, [[0,0,0,1]]]))
-    rays = np.transpose(invextrinsic[0:3,0:3]@inv_intrinsic@np.transpose(pixel_homo))
+    rays = np.transpose(extrinsic[0:3,0:3]@inv_intrinsic@np.transpose(pixel_homo))
     unit_rays = make_unit(rays)
-    scene_points = np.expand_dims(Zs, -1)*unit_rays+invextrinsic[0:3,3]#in meshroom depth is represented using a spherical projection...
+    scene_points = np.expand_dims(Zs, -1)*unit_rays+invextrinsic[0:3,3]
     return scene_points
 
 #%% Triangle operations

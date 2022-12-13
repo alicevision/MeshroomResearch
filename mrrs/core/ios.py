@@ -15,8 +15,6 @@ from mrrs.core.utils import format_float_array
 FORCE_IOOI = False#FIXME: debug
 
 #%% Images
-
-
 def open_exr(exr_path, clip_negative=False):
     '''
     Uses OpenExr to import an EXR file.
@@ -76,12 +74,11 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
         spec = oiio.ImageSpec(input_array_size[1], input_array_size[0], input_array_size[2], 'float32')
         if custom_header is not None:
             for key in custom_header.keys():
-                print("Writting metadata "+key)
-                print(custom_header[key])
+                # print("Writting metadata "+key)
+                # print(custom_header[key])
                 if key=="AliceVision:CArr":
                     spec.attribute(key, "float[3]", list(custom_header[key]))
                 elif key=="AliceVision:iCamArr":
-                    print(list(custom_header[key].flatten()))
                     spec.attribute (key, oiio.TypeDesc.TypeMatrix33,  list(custom_header[key].flatten()))
                 elif key=="AliceVision:downscale":
                     spec.attribute(key, "float", custom_header[key])
@@ -237,7 +234,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             if intrinsic_id in already_done_intrisics:#gets rid of the intrinsic duplication i do
                 continue
             already_done_intrisics.append(intrinsic_id)
-            #in meshroom, principal point is delta from center of the images, in pixels
+            #in meshroom, principal point is delta from center of the images, in pixels, in our case its actual pp in pixel
             pixel_size = (sensor_width/image_size[0])
             principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2
             principal_point = (principal_point).astype(str).tolist()
@@ -251,31 +248,13 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
                             "initializationMode": "unknown",
                             "initialFocalLength": "0.00048828125",
                             #pass focal into "mm"
-                            "focalLength": str(intrinsic[0,0]*pixel_size), #FIXME: remove negative
+                            "focalLength": str(intrinsic[0,0]*pixel_size),
                             "pixelRatio": "1",
                             "pixelRatioLocked": "false",
                             "principalPoint": principal_point,
                             "distortionParams": "",
                             "locked": "true"
                             }
-
-        # else:#create with dumy paramerers
-        #     intrinsic_sfm = {
-        #                     "intrinsicId": str(intrinsic_id),
-        #                     'width':str(image_size[0]), 'height':str(image_size[1]),
-        #                     "sensorWidth": "-1",
-        #                     "sensorHeight": str(image_size[1]/image_size[0]),
-        #                     "serialNumber": "0",
-        #                     "type": "pinhole",
-        #                     "initializationMode": "unknown",
-        #                     "initialFocalLength": "0.00048828125",
-        #                     "focalLength": "-1.2071067811865475",
-        #                     "pixelRatio": "1",
-        #                     "pixelRatioLocked": "false",
-        #                     "principalPoint": [ "0", "0" ],
-        #                     "distortionParams": "",
-        #                     "locked": "false"
-        #                     }
             sfm_data['intrinsics'].append(intrinsic_sfm)
 
     return sfm_data

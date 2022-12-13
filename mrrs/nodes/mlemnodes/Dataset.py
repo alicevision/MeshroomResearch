@@ -225,45 +225,25 @@ class Dataset(desc.Node):
                 gt_extrinsics = [None if e is None else np.linalg.inv(e) for e in gt_extrinsics]
             elif chunk.node.datasetType.value == "realityCapture":
                 nb_invalid = 0
-                sensor_size = 35
                 for e in gt_extrinsics:
                     if e is not None:
                         #R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
                         e[0:3,0:3] = np.linalg.inv(e[0:3,0:3])
-                        #camera centers are not in the same unit as the focal =>/10
-                        #transform the camera center to match the 36mm to unit focal transform
-                        # e[0:3, 3]/=3.5
-                        # 3.41752
                     else:
                         nb_invalid+=1
                 chunk.logger.info("%d invalid calibs"%nb_invalid)
                 #sensor with is equivalent 35mm in RC
-
+                sensor_size = 35
                 for i, image_size in zip(gt_intrinsics, images_sizes):
                     if i is not None:
-                        #pass into focal from sensor with unit width, as in meshroom with not init
-                        # RC assumes the 24×36 mm film format, we use unit sensor width
-                        # i[0,0]/=35
-                        # i[1,1]/=35
-                        # print(i[0,0])
-                        # #pixel size assuming unit sensor
-                        # pixel_size = 1/image_size[0]
-                        # #pass into focal in pixel units to be like blended mvsnet (even thougt we remove it later)
-                        # i[0,0]/=pixel_size
-                        # i[1,1]/=pixel_size
-
                         #convert focal in pixels
                         pixel_size = sensor_size/image_size[0]
                         i[0,0]*=pixel_size
                         i[1,1]*=pixel_size
-
                         #convert principal point in pixels https://support.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
-                        #dimentionless because already /35
-                        i[0,2] = image_size[0]/2#image_size[0]/2-i[0,2]/pixel_size
-                        i[1,2] = image_size[1]/2#image_size[1]/2-i[1,2]/pixel_size
-
-
-
+                        #dimentionless because already /35 => we pass it into pixels
+                        i[0,2] = image_size[0]/2-i[0,2]/pixel_size
+                        i[1,2] = image_size[1]-i[1,2]/pixel_size
 
             gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, gt_intrinsics, poses_id,
                                                  calibs_id, images_sizes, sfm_data, sensor_size)

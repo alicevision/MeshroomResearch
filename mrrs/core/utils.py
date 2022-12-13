@@ -13,7 +13,6 @@ def listdir_fullpath(d):
     return [os.path.join(d, f) for f in os.listdir(d)]
 
 #%% usefull array operations
-
 def format_float_array(np_array):
     np_array = np_array.reshape([-1])
     output_list = []
