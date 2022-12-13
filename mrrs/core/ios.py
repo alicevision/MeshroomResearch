@@ -206,7 +206,8 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
     The focal and sensor width is assumed in m while the principal point is assumed in pixels, as a delta from the theoreticla center.
     '''
     sfm_data['poses']=[]
-    sfm_data['intrinsics']=[]
+    if intrinsics is not None:#needed to keep what was in sfm_data
+        sfm_data['intrinsics']=[]
 
     for extrinsic, pose_id in zip(extrinsics, poses_ids):#Note: in, theroy we might have a pose shared between views, in practice this never happens
         #if no pose, skipping, meshroom support pose_id in vews with no pose declared.
@@ -238,6 +239,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             pixel_size = (sensor_width/image_size[0])
             principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2
             principal_point = (principal_point).astype(str).tolist()
+            print(pixel_size)
             intrinsic_sfm = {
                             "intrinsicId": str(intrinsic_id),
                             'width':str(image_size[0]), 'height':str(image_size[1]),

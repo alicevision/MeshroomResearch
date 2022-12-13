@@ -103,11 +103,29 @@ class Dataset(desc.Node):
             uid=[0],
         ),
 
+        #all of these are used to debug
         desc.StringParam(
             name='permutationMatrix',
             label='Permutation Matrix',
             description='''Permutation matrix used on the camera intrinsic''',
             value='[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]',
+            uid=[0],
+        ),
+
+        desc.FloatParam(
+            name='focalOverwrite',
+            label='Focal overwrite',
+            description='''Overwrite the focal (needs to be in unit of the sfm)''',
+            value=-1.0,
+            range=(-1.0, 100.0, 1.0),
+            uid=[0],
+        ),
+
+        desc.StringParam(
+            name='principalPointOverwrite',
+            label='Principal Point Overwrite',
+            description='''Overwrite the principal point (need to be a python code). Delta from the center of the image, in pixels.''',
+            value='',
             uid=[0],
         ),
 
@@ -203,7 +221,7 @@ class Dataset(desc.Node):
                     scenes_calib = os.path.join(folder,"..","cams", basename+"_cam.txt")
                     scenes_depth  =  os.path.join(folder,"..","rendered_depth_maps",basename+".pfm")
                 elif chunk.node.datasetType.value == "realityCapture":
-                    scenes_calib = os.path.join(folder,"..","calib",basename+".xmp")
+                    scenes_calib = os.path.join(folder,"..","calib",basename+".xmp")#FIXME: actually has several intrisinc
                     scenes_depth = os.path.join(folder,"..","depths",basename+".jpg.depth.exr")#FIXME: no gt
 
                 scenes_images.append(scene_image)
@@ -219,8 +237,10 @@ class Dataset(desc.Node):
 
             #camera representation convertion
             #TODO: make fc
-            sensor_size = 1
+
             if chunk.node.datasetType.value == "blendedMVG":
+                sensor_size = 1
+                pixel_size = sensor_size/images_sizes[0][0]
                 #only change with meshroom is the pose world to cam vs cam to world
                 gt_extrinsics = [None if e is None else np.linalg.inv(e) for e in gt_extrinsics]
             elif chunk.node.datasetType.value == "realityCapture":
@@ -236,17 +256,28 @@ class Dataset(desc.Node):
                 sensor_size = 35
                 for i, image_size in zip(gt_intrinsics, images_sizes):
                     if i is not None:
-                        #convert focal in pixels
+                        #convert focal in pixels to be consitant
                         pixel_size = sensor_size/image_size[0]
-                        i[0,0]*=pixel_size
-                        i[1,1]*=pixel_size
+                        i[0,0]/=pixel_size
+                        i[1,1]/=pixel_size
                         #convert principal point in pixels https://support.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
                         #dimentionless because already /35 => we pass it into pixels
-                        i[0,2] = image_size[0]/2-i[0,2]/pixel_size
-                        i[1,2] = image_size[1]-i[1,2]/pixel_size
+                        i[0,2] = image_size[0]/2#+i[0,2]/pixel_size
+                        i[1,2] = image_size[1]/2#+i[1,2]/pixel_size
 
             gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, gt_intrinsics, poses_id,
                                                  calibs_id, images_sizes, sfm_data, sensor_size)
+
+            #to overwrite if passes
+            if chunk.node.focalOverwrite.value != -1:
+                for intrinsics in gt_intrinsics:
+                    intrinsics[0,0]=chunk.node.focalOverwrite.value*pixel_size
+                    intrinsics[1,2]=chunk.node.focalOverwrite.value*pixel_size
+            if chunk.node.principalPointOverwrite.value != "":
+                principal_point_overwrite = eval(chunk.node.principalPointOverwrite.value)
+                i[0,2] = image_size[0]/2+i[0,2]
+                i[1,2] = image_size[1]/2+i[1,2]
+
             #adding gt depth
             for view, depth in zip(gt_sfm_data["views"], scenes_depths):
                 view["groudtruthDepth"]=depth
