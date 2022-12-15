@@ -22,14 +22,14 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             label='Input mesh',
             description='Input mesh.',
             value=desc.Node.internalFolder,
-            uid=[],
+            uid=[0],
         ),
         desc.File(
             name='inputTransform',
             label='Input transform',
             description='Input transform.',
-            value=desc.Node.internalFolder,
-            uid=[],
+            value='',
+            uid=[0],
         ),
         desc.FloatParam(
             name='addGaussianNoise',
@@ -75,19 +75,24 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
         Applies transform to a mesh.
         """
         chunk.logManager.start(chunk.node.verboseLevel.value)
-        #check inputs
-        if not self.check_inputs(chunk):
-            return
-        chunk.logger.info("Starts mesh transfrom")
-
-        # Load transform
-        with open(chunk.node.inputTransform.value, "r") as json_file:
-            T_dict = json.load(json_file)
-            T = np.asarray(T_dict['transform'], np.float32)
-
-        # Load, apply transform and save mesh
         mesh = trimesh.load(chunk.node.inputMesh.value)
-        mesh_upd = mesh_transform(mesh,T)
+        if chunk.node.inputTransform.value != '':
+            #check inputs
+            if not self.check_inputs(chunk):
+                return
+            chunk.logger.info("Starts mesh transfrom")
+
+            # Load transform
+            with open(chunk.node.inputTransform.value, "r") as json_file:
+                T_dict = json.load(json_file)
+                T = np.asarray(T_dict['transform'], np.float32)
+
+            # Load, apply transform and save mesh
+            mesh = mesh_transform(mesh,T)
+
+        #apply noise if any
         if chunk.node.addGaussianNoise.value > 0:
-            raise BaseException("Not supported yet")
-        mesh_upd.export(chunk.node.outputMesh.value)
+            mesh.vertices += chunk.node.addGaussianNoise.value*np.random.random(size=mesh.vertices.shape)
+
+        #save
+        mesh.export(chunk.node.outputMesh.value)
