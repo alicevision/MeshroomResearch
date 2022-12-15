@@ -75,6 +75,21 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
         Applies transform to a mesh.
         """
         chunk.logManager.start(chunk.node.verboseLevel.value)
+
+        if chunk.node.inputMesh.value.endswith(".abc"):
+            # raise RuntimeError("Alemnbic mesh not supported yet")
+            # import alembic
+            # oarch = alembic.OArchive(chunk.node.inputMesh.value)
+            # meshObj = OPolyMesh(oarch.getTop(), "meshy")
+            # mesh = meshyObj.getSchema()
+
+            #export with blender
+            script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../blender/alembic_convert.py"))
+            command_line = "'blender -b -P "+script_path+" -- "+chunk.node.inputMesh.value+" "+\
+                            os.path.join(os.path.dirname(chunk.node.outputMesh.value), "blender.blend")+"'"
+            os.system(command_line)
+            os.popen(command_line).read()
+
         mesh = trimesh.load(chunk.node.inputMesh.value)
         if chunk.node.inputTransform.value != '':
             #check inputs
