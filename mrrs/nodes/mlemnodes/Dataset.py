@@ -44,7 +44,6 @@ def parse_xmp(xmp_file):
         extrinsics[0:3,0:3]=rotation_matrix
         extrinsics[0:3,3]=camera_center
         extrinsics[3,3]=1
-
         return extrinsics, intrinsics
 
 def open_calibration(scenes_calibs, dataset_type):
@@ -121,13 +120,13 @@ class Dataset(desc.Node):
             uid=[0],
         ),
 
-        desc.StringParam(
-            name='principalPointOverwrite',
-            label='Principal Point Overwrite',
-            description='''Overwrite the principal point (need to be a python code). Delta from the center of the image, in pixels.''',
-            value='',
-            uid=[0],
-        ),
+        # desc.StringParam(
+        #     name='principalPointOverwrite',
+        #     label='Principal Point Overwrite',
+        #     description='''Overwrite the principal point (need to be a python code). Delta from the center of the image, in pixels.''',
+        #     value='',
+        #     uid=[0],
+        # ),
 
         desc.BoolParam(
             name='inverse',
@@ -155,7 +154,7 @@ class Dataset(desc.Node):
             description='Path to the output sfmdata file, with no calibration informations',
             value=desc.Node.internalFolder + 'sfm_camerainit.sfm',
             uid=[],
-        ),#FIXME: do we really need this?
+        ),
 
         desc.File(
             name='outputSfMData',
@@ -180,7 +179,7 @@ class Dataset(desc.Node):
             semantic='image',
             value=os.path.join(desc.Node.internalFolder,'depth_maps') + '<VIEW_ID>_depthMap.exr',
             uid=[],
-            group='', # do not export on the command line
+            group='',
         ),
     ]
 
@@ -223,7 +222,6 @@ class Dataset(desc.Node):
                 elif chunk.node.datasetType.value == "realityCapture":
                     scenes_calib = os.path.join(folder,"..","calib",basename+".xmp")#FIXME: actually has several intrisinc
                     scenes_depth = os.path.join(folder,"..","depths",basename+".jpg.depth.exr")#FIXME: no gt
-
                 scenes_images.append(scene_image)
                 scenes_calibs.append(scenes_calib)
                 scenes_depths.append(scenes_depth)
@@ -236,10 +234,9 @@ class Dataset(desc.Node):
             gt_extrinsics, gt_intrinsics= open_calibration(scenes_calibs, chunk.node.datasetType.value)
 
             #camera representation convertion
-            #TODO: make fc
-
+            #make fc
+            sensor_size = 1
             if chunk.node.datasetType.value == "blendedMVG":
-                sensor_size = 1
                 pixel_size = sensor_size/images_sizes[0][0]
                 #only change with meshroom is the pose world to cam vs cam to world
                 gt_extrinsics = [None if e is None else np.linalg.inv(e) for e in gt_extrinsics]
@@ -262,22 +259,19 @@ class Dataset(desc.Node):
                         i[1,1]/=pixel_size
                         #convert principal point in pixels https://support.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
                         #dimentionless because already /35 => we pass it into pixels
-                        i[0,2] = image_size[0]/2#+i[0,2]/pixel_size
-                        i[1,2] = image_size[1]/2#+i[1,2]/pixel_size
-
+                        i[0,2] = image_size[0]/2+i[0,2]*1000000*1/image_size[0]
+                        i[1,2] = image_size[1]/2+i[1,2]*1000000*1/image_size[0]
             gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, gt_intrinsics, poses_id,
                                                  calibs_id, images_sizes, sfm_data, sensor_size)
-
             #to overwrite if passes
             if chunk.node.focalOverwrite.value != -1:
                 for intrinsics in gt_intrinsics:
                     intrinsics[0,0]=chunk.node.focalOverwrite.value*pixel_size
                     intrinsics[1,2]=chunk.node.focalOverwrite.value*pixel_size
-            if chunk.node.principalPointOverwrite.value != "":
-                principal_point_overwrite = eval(chunk.node.principalPointOverwrite.value)
-                i[0,2] = image_size[0]/2+i[0,2]
-                i[1,2] = image_size[1]/2+i[1,2]
-
+            # if chunk.node.principalPointOverwrite.value != "":
+            #     principal_point_overwrite = eval(chunk.node.principalPointOverwrite.value)
+            #     i[0,2] = image_size[0]/2+i[0,2]
+            #     i[1,2] = image_size[1]/2+i[1,2]
             #adding gt depth
             for view, depth in zip(gt_sfm_data["views"], scenes_depths):
                 view["groudtruthDepth"]=depth
@@ -318,6 +312,3 @@ class Dataset(desc.Node):
             chunk.logger.info('Dataset loading ends')
         finally:
             chunk.logManager.end()
-
-
-

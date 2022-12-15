@@ -233,7 +233,7 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete):
     #calibs_results_avg, calibs_results_med, header_calib, sequences_skipped_calib = agregate_results("calibration_comparison.csv")
     #print("%d sequences skiped:"%len(sequences_skipped_calib))
     #print(sequences_skipped_calib)
-    depth_results_avg, depth_results_med, header_depth, sequences_skipped_depth = agregate_results("depth_maps_comparison.csv")
+    # depth_results_avg, depth_results_med, header_depth, sequences_skipped_depth = agregate_results("depth_maps_comparison.csv")
     #print("%d sequences skiped:"%len(sequences_skipped_depth))
     #print(sequences_skipped_depth)
     #save_results('all_calibration_comparison.csv', header_calib, calibs_results_avg, calibs_results_med)

@@ -239,7 +239,6 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             pixel_size = (sensor_width/image_size[0])
             principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2
             principal_point = (principal_point).astype(str).tolist()
-            print(pixel_size)
             intrinsic_sfm = {
                             "intrinsicId": str(intrinsic_id),
                             'width':str(image_size[0]), 'height':str(image_size[1]),
@@ -268,7 +267,6 @@ def parse_intrisics_sfm_data(sfm_intrinsic):
     """
     intrinsic_id = sfm_intrinsic['intrinsicId']
     width=int(sfm_intrinsic["width"] )
-    # height=int(sfm_intrinsic["height"] )
     sensor_width = abs(float(sfm_intrinsic["sensorWidth"] ))
     sensor_height = abs(float(sfm_intrinsic["sensorHeight"] ))
     pixel_size = sensor_width/width

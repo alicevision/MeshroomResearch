@@ -31,6 +31,15 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             value=desc.Node.internalFolder,
             uid=[],
         ),
+        desc.FloatParam(
+            name='addGaussianNoise',
+            label='Add Gaussian Noise',
+            description='Add Gaussian Noise to the mesh vertices.',
+            value=-1.0,
+            range=(-1.0, 100.0, 1.0),
+            uid=[0],
+            ),
+
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
@@ -79,4 +88,7 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
         # Load, apply transform and save mesh
         mesh = trimesh.load(chunk.node.inputMesh.value)
         mesh_upd = mesh_transform(mesh,T)
+        if chunk.node.addGaussianNoise.value > 0:
+            mesh_upd.vertices =
+            pass
         mesh_upd.export(chunk.node.outputMesh.value)
