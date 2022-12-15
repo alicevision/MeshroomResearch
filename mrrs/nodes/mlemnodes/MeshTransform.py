@@ -89,6 +89,5 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
         mesh = trimesh.load(chunk.node.inputMesh.value)
         mesh_upd = mesh_transform(mesh,T)
         if chunk.node.addGaussianNoise.value > 0:
-            mesh_upd.vertices =
-            pass
+            raise BaseException("Not supported yet")
         mesh_upd.export(chunk.node.outputMesh.value)
