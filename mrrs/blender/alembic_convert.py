@@ -8,13 +8,22 @@ import mathutils
 # Command line arguments
 argv = sys.argv[sys.argv.index('--')+1:]
 abc_path = argv[0]
-output_file = argv[1]
+output_dir = argv[1]
 
 #import the abc into the scene
 bpy.ops.wm.alembic_import(filepath=abc_path, as_background_job=False)
 
-#saves
-# save blend
-# bpy.ops.wm.save_mainfile()
-# save as
-bpy.ops.wm.save_as_mainfile(filepath=output_file)
+#saves project (for depbug)
+bpy.ops.wm.save_as_mainfile(filepath=output_dir+"/project.blend")
+
+# #export point cloud into ply https://docs.blender.org/api/current/bpy.ops.export_mesh.html
+#not working because no faces?
+# bpy.ops.export_mesh.ply(filepath=output_dir+"/point_coud.ply", check_existing=False,
+#                          filter_glob="*.ply", use_ascii=False, use_selection=False, use_mesh_modifiers=True,
+#                          use_normals=True, use_uv_coords=True, use_colors=True, global_scale=1.0, axis_forward="Y", axis_up="Z")
+
+# export by hand
+obj = bpy.data.meshes["particleShape1"]
+with open(output_dir+"/point_cloud.obj", "w") as obj_file:
+    for vertex in obj.vertices:
+        obj_file.write("v "+ " ".join(map(str,vertex.co))+"\n")
