@@ -10,7 +10,8 @@ argv = sys.argv[sys.argv.index('--')+1:]
 images_folder = argv[0]
 scene_name = argv[1]
 cam_name = argv[2]
-output_folder = argv[3]
+frame_step = int(argv[3])
+output_folder = argv[4]
 
 print('Extracting ground truth data from Blender file')
 print('Images folder: ' + images_folder)
@@ -49,13 +50,14 @@ poses = []
 mat_convert = mathutils.Matrix.Identity(4)
 mat_convert[1][1] = -1
 mat_convert[2][2] = -1
-for frame in range(scene.frame_start, scene.frame_end+1):
+for frame in range(scene.frame_start, scene.frame_end+1, frame_step):
     scene.frame_set(frame)
-    mat = obj.matrix_world @ mat_convert
+    mat = mat_convert @ obj.matrix_world @ mat_convert.transposed()
+    mat_rot = mat.to_3x3()
     rotation = [
-        str(mat[0][0]), str(mat[0][1]), str(mat[0][2]),
-        str(mat[1][0]), str(mat[1][1]), str(mat[1][2]),
-        str(mat[2][0]), str(mat[2][1]), str(mat[2][2]),
+        str(mat_rot[0][0]), str(mat_rot[0][1]), str(mat_rot[0][2]),
+        str(mat_rot[1][0]), str(mat_rot[1][1]), str(mat_rot[1][2]),
+        str(mat_rot[2][0]), str(mat_rot[2][1]), str(mat_rot[2][2]),
     ]
     center = [
         str(mat[0][3]), str(mat[1][3]), str(mat[2][3])
@@ -98,7 +100,7 @@ intrinsics = [
 print('Extracting views')
 
 views = []
-for frame in range(scene.frame_start, scene.frame_end+1):
+for frame in range(scene.frame_start, scene.frame_end+1, frame_step):
     view = {
         'viewId': get_view_id(frame),
         'poseId': get_pose_id(frame),
