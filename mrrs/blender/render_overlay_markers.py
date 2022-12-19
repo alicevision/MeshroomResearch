@@ -157,7 +157,7 @@ def render_setup(view):
 
     bpy.context.scene.render.filepath = os.path.abspath(output_folder + '/' + view['viewId'] + ".jpg")
 
-    img_name = view['path'].split('/')[-1]
+    img_name = os.path.basename(view['path'])
     bpy.context.scene.node_tree.nodes["Image"].image = bpy.data.images[img_name]
 
     return True

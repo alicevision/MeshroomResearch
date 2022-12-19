@@ -6,7 +6,7 @@ from meshroom.core import desc
 
 class SyntheticDataset(desc.InitNode, desc.CommandLineNode):
     commandLine = 'blender -b {blenderFileValue} -P {scriptValue} \
-                    -- {imagesFolderValue} {sceneNameValue} {cameraNameValue} {outputFolderValue}'
+                    -- {imagesFolderValue} {sceneNameValue} {cameraNameValue} {frameStepValue} {outputFolderValue}'
     category = 'Evaluation'
     documentation = 'Utility node to load an evaluation dataset from a given folder.'
     inputs = [
@@ -43,6 +43,14 @@ class SyntheticDataset(desc.InitNode, desc.CommandLineNode):
             label='Camera Name',
             description='Name of the camera in Blender',
             value='Camera',
+            uid=[0]
+        ),
+        desc.IntParam(
+            name='frameStep',
+            label='Frame Step',
+            description='Step for downsampling the dataset',
+            value=1,
+            range=(1,100,1),
             uid=[0]
         ),
     ]
