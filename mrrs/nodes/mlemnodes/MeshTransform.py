@@ -75,17 +75,19 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
         Applies transform to a mesh.
         """
         chunk.logManager.start(chunk.node.verboseLevel.value)
+        mesh_file = chunk.node.inputMesh.value
 
-        if chunk.node.inputMesh.value.endswith(".abc"):
+        if mesh_file.endswith(".abc"):
+            #make sure blender is in path
+            #FIXME: todo
             #export with blender
             script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../blender/alembic_convert.py"))
-            command_line = "'blender -b -P "+script_path+" -- "+chunk.node.inputMesh.value+" "+\
+            command_line = "'blender -b -P "+script_path+" -- "+mesh_file.value+" "+\
                             os.path.join(os.path.dirname(chunk.node.outputMesh.value))+"'"
-            # os.system(command_line)
             os.popen(command_line).read()
-            chunk.node.inputMesh.value = os.path.dirname(chunk.node.outputMesh.value+"/point_cloud.obj")
+            mesh_file = os.path.dirname(chunk.node.outputMesh.value+"/point_cloud.obj")#FIXME: generalise
 
-        mesh = trimesh.load(chunk.node.inputMesh.value)
+        mesh = trimesh.load(mesh_file)
         if chunk.node.inputTransform.value != '':
             #check inputs
             if not self.check_inputs(chunk):
