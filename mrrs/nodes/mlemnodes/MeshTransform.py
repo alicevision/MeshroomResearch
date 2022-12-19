@@ -85,7 +85,7 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             command_line = "'blender -b -P "+script_path+" -- "+mesh_file.value+" "+\
                             os.path.join(os.path.dirname(chunk.node.outputMesh.value))+"'"
             os.popen(command_line).read()
-            mesh_file = os.path.dirname(chunk.node.outputMesh.value+"/point_cloud.obj")#FIXME: generalise
+            mesh_file = os.path.dirname(chunk.node.outputMesh.value+"/point_cloud.obj")#FIXME: generalise with basename
 
         mesh = trimesh.load(mesh_file)
         if chunk.node.inputTransform.value != '':
