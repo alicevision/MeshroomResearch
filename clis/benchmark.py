@@ -34,7 +34,7 @@ def cli():
 @click.option('--output_folder','-o', default="./", help='Output folder to generate results into.')
 @click.option('--pipeline', '-p', default=DEFAULT_MESHROOM_PIPELINE, help='Path to the benchmark pipeline.')
 @click.option('--delete_folders', '-d', is_flag=True, help='Force clean the content of outputs folder.')
-@click.option('--dataset_type', '-t',  type=click.Choice(['blendedMVS'], case_sensitive=False), default= "blendedMVS")
+@click.option('--dataset_type', '-t',  type=click.Choice(['blendedMVS', 'tank'], case_sensitive=False), default= "blendedMVS")
 @click.option('--compute', '-c', is_flag=True, help='Runs the computation. Will just create project otherwise.')
 @click.option('--resume', '-r', is_flag=True, help='Resumes computation if a folder exists, will skip folder otherwise.')
 @click.option('--submit', '-s', is_flag=True, help='Will submit the computation on the grid.')
@@ -62,6 +62,8 @@ def run(pipeline, output_folder,
             for invalid_image in invalid_images:
                 if os.path.isfile(invalid_image):
                     shutil.move(invalid_image, image_folder)
+        elif dataset_type=="tank":
+            input_folder = os.path.join(dataset_path, scene_folder, "images")
         else:
             raise RuntimeError("Unknown dataset type")
         #folder handling
