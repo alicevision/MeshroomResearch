@@ -40,6 +40,16 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             uid=[0],
             ),
 
+        # desc.ChoiceParam(
+        #     name='extention',
+        #     label='Extention',
+        #     description='''File format for the ouptut mesh ''',
+        #     value='.ply',
+        #     values=['.ply', '.obj'],
+        #     exclusive=True,
+        #     uid=[0],
+        # ),
+
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
@@ -56,7 +66,7 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             name='outputMesh',
             label='Output mesh',
             description='Output Mesh.',
-            value=desc.Node.internalFolder+'mesh.obj',
+            value=desc.Node.internalFolder+'/mesh.ply',#pb: not extention!!!
             uid=[],
         ),
     ]
@@ -82,10 +92,13 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             #FIXME: todo
             #export with blender
             script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../blender/alembic_convert.py"))
-            command_line = "'blender -b -P "+script_path+" -- "+mesh_file.value+" "+\
-                            os.path.join(os.path.dirname(chunk.node.outputMesh.value))+"'"
-            os.popen(command_line).read()
-            mesh_file = os.path.dirname(chunk.node.outputMesh.value+"/point_cloud.obj")#FIXME: generalise with basename
+            command_line = "blender -b -P "+script_path+" -- "+mesh_file+" "+\
+                            chunk.node.outputMesh.value[:-4]+".obj"
+            print(command_line)
+            # os.popen(command_line).read()
+            os.system(command_line)
+            mesh_file = chunk.node.outputMesh.value[:-4]+".obj"
+
 
         mesh = trimesh.load(mesh_file)
         if chunk.node.inputTransform.value != '':

@@ -7,13 +7,11 @@
 __version__ = "2.0"
 
 import os
-from sys import platform
-
 from meshroom.core import desc
 from . import COLMAP
 
 class PoissonMesher(desc.CommandLineNode):
-    commandLine = COLMAP+' poisson_mesher {allParams} --PoissonMeshing.trim 0'
+    commandLine = COLMAP+' poisson_mesher {allParams}'
 
     category = 'Colmap'
     documentation = ''''''
@@ -26,15 +24,15 @@ class PoissonMesher(desc.CommandLineNode):
             value='',
             uid=[0],
         ),
-
-
-        # desc.StringParam(
-        #     name=r'PoissonMeshing.trim',
-        #     label='PoissonMeshingTrim',
-        #     description='Poisson Meshing Triming parameters',
-        #     uid=[0],
-        #     value='0'
-        # ),
+        desc.FloatParam(
+            name='trim',
+            label='trim',
+            description='Poisson Meshing Triming parameters',
+            value=0.0,
+            range=(0.0, 100.0, 1.0),
+            uid=[0],
+            group='',
+            ),
     ]
 
     outputs = [
@@ -49,4 +47,8 @@ class PoissonMesher(desc.CommandLineNode):
     ]
 
     def processChunk(self, chunk):
+        append_param= " --PoissonMeshing.trim "+str(chunk.node.trim.value)
+        chunk.node._cmdVars["allParams"]+=append_param#FIXME: need to be done onoy once!! also messes up the save
         desc.CommandLineNode.processChunk(self, chunk)
+        chunk.node._cmdVars["allParams"]=chunk.node._cmdVars["allParams"][:-len(append_param)]
+
