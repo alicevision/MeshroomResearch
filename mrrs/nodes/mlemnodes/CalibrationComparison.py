@@ -38,7 +38,7 @@ class CalibrationComparison(desc.Node):
             label='Metrics',
             description='Metrics to be used in the comparison',
             value=['MSECameraCenter'],
-            values=['MSECameraCenter','AngleBetweenRotations','MSEFocal', 'MSEPrincipalPoint'],
+            values=['MSECameraCenter','AngleBetweenRotations','MSEFocal', 'MSEPrincipalPoint', 'validCams'],
             exclusive=False,
             uid=[0],
             joinChar=',',

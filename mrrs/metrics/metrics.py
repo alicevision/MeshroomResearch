@@ -89,6 +89,9 @@ def compute_depth_metric(depth_map, gt_depth_map, metric,
 
 #%% Calib metrics
 def MSECameraCenter(extrinsic, intrinsic, gt_extrinsic, gt_intrinsic):
+    """
+    Mean square error between camera centers.
+    """
     return np.mean(np.sqrt(np.sum((extrinsic[:,3]-gt_extrinsic[:,3])**2)))
 
 def AngleBetweenRotations(extrinsic, intrinsic, gt_extrinsic, gt_intrinsic):
@@ -102,10 +105,22 @@ def AngleBetweenRotations(extrinsic, intrinsic, gt_extrinsic, gt_intrinsic):
     return axis_angle
 
 def MSEFocal(extrinsic, intrinsic, gt_extrinsic, gt_intrinsic):
+    """
+    Mean square error between camera focals.
+    """
     return np.mean(np.sqrt(np.sum( [(intrinsic[0,0]-gt_intrinsic[0,0])**2,(intrinsic[1,1]-gt_intrinsic[1,1])**2] )))
 
 def MSEPrincipalPoint(extrinsic, intrinsic, gt_extrinsic, gt_intrinsic):
+    """
+    Mean square error between principal points.
+    """
     return np.mean(np.sqrt(np.sum((intrinsic[0:2,2]-gt_intrinsic[0:2,2])**2)))
+
+def validCams(extrinsic, intrinsic, gt_extrinsic, gt_intrinsic):
+    """
+    Return if the camera is valid or not
+    """
+    return 1 if extrinsic is not None else 0
 
 def compute_calib_metric(metric, extrinsic, intrinsic, gt_extrinsic, gt_intrinsic):
     """
