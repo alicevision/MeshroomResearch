@@ -16,6 +16,7 @@ class DeepMVS(desc.Node):
     """
     Class that wraps depth mvs algorithms and models.
     It take images + calibration as input and ouptuts depth maps.
+    Needs to be run with an environnent that supports RMVD for now.
     """
     gpu = desc.Level.INTENSIVE
     category = 'Meshroom Research'#'Dense Reconstruction'
@@ -94,8 +95,9 @@ class DeepMVS(desc.Node):
             chunk.logger.info("Reference : "+view_sorted[index]["path"])
             # selects n consequtive views
             logging.getLogger('PIL').setLevel(logging.WARNING)
+            #FIXME: use the view selection from meshroom
             selected_views_indices = index+np.arange(-nb_cams, nb_cams+1)
-            selected_views_indices=selected_views_indices[selected_views_indices!=index]#remove curretn frame
+            selected_views_indices=selected_views_indices[selected_views_indices!=index]#remove current frame
             selected_views_indices[selected_views_indices<0] += 2*nb_cams+1#eg for index 0, -5 =>6 ; -4  => 7 ...
             selected_views_indices[selected_views_indices>=len(view_sorted)] -= 2*nb_cams-1#eg for index 37,
             selected_views_indices = np.insert(selected_views_indices, 0, index)#add ref view in first position
@@ -108,10 +110,10 @@ class DeepMVS(desc.Node):
             #get corresponding instrinsics and extrinsics
             extrinsics = [np.concatenate([extrinsics_all_cams[v], [[0,0,0,1]]]) for v in view_indices]
             intrinsics = [intrinsics_all_cams[v] for v in view_indices]
+            #run
             chunk.logger.info("Running model")
-
             depth_map, _ = mvd(images, extrinsics, intrinsics, pixel_sizes_all_cams)
-
+            #save result
             save_exr(depth_map, os.path.join(chunk.node.outputDepthMapsFolder.value,
                         view_ids[view_indices[0]]+"_depthMap.exr"), data_type="depth")#FIXME: need downsample header, and resize to input size
             #, custom_header={"AliceVision:downscale"}

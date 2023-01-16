@@ -18,7 +18,7 @@ def meshroom2normal(pixels, depth_map, extrinsic, intrinsic, pixel_size):
     scene_points = camera_deprojection_meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_size)
     #reprojection used to get depth map
     _, points_distances_from_camera = camera_projection(scene_points, extrinsic, intrinsic, pixel_size)
-    depth_map_converted = np.reshape(points_distances_from_camera, depth_map.shape[0:2])
+    depth_map_converted = np.reshape(points_distances_from_camera, depth_map.shape)
     return  depth_map_converted
 
 def normal2meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_size):

@@ -4,33 +4,33 @@
         "releaseVersion": "2021.1.0",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "ColmapFeatureMatching": "2.0",
-            "PoissonMesher": "2.0",
-            "DepthMap": "2.0",
-            "ColmapImageUndistorder": "1.1",
-            "CameraInit": "8.0",
-            "FeatureMatching": "2.0",
-            "DepthMapComparison": "3.0",
-            "SfMAlignment": "2.0",
-            "ImageMatching": "2.0",
-            "StructureFromMotion": "2.0",
-            "PatchMatchStereo": "2.0",
-            "DepthMapTransform": "3.0",
-            "MeshFiltering": "3.0",
-            "Texturing": "6.0",
-            "InjectSfmData": "3.0",
-            "PrepareDenseScene": "3.0",
-            "Meshing": "7.0",
-            "DepthMapFilter": "3.0",
-            "ColmapMapper": "2.0",
-            "CalibrationComparison": "3.0",
-            "Colmap2MeshroomSfmConvertion": "2.0",
-            "Publish": "1.2",
-            "FeatureExtraction": "1.1",
             "ColmapFeatureExtraction": "1.1",
-            "StereoFusion": "2.0",
+            "ColmapFeatureMatching": "2.0",
             "Dataset": "3.0",
-            "ConvertSfMFormat": "2.0"
+            "CalibrationComparison": "3.0",
+            "Publish": "1.2",
+            "Texturing": "6.0",
+            "PrepareDenseScene": "3.0",
+            "DepthMapTransform": "3.0",
+            "StereoFusion": "2.0",
+            "ImageMatching": "2.0",
+            "DepthMap": "2.0",
+            "DepthMapFilter": "3.0",
+            "ColmapImageUndistorder": "1.1",
+            "PatchMatchStereo": "2.0",
+            "MeshFiltering": "3.0",
+            "FeatureMatching": "2.0",
+            "CameraInit": "8.0",
+            "Meshing": "7.0",
+            "FeatureExtraction": "1.1",
+            "SfMAlignment": "2.0",
+            "StructureFromMotion": "2.0",
+            "Colmap2MeshroomSfmConvertion": "2.0",
+            "ColmapMapper": "2.0",
+            "DepthMapComparison": "3.0",
+            "PoissonMesher": "2.0",
+            "ConvertSfMFormat": "2.0",
+            "InjectSfmData": "3.0"
         },
         "template": false
     },
@@ -47,7 +47,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "bce84d4310d8d7646c50c9e4e36aed6b9c4554c3"
+                "0": "fa48293c8149c29ba2bcea78c8a8972ce8579c9d"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -80,7 +80,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "0c73ade5be1676318a36325b92c6f29abc99da95"
+                "0": "d94eea168fa2f5e9e9c20b70d1ffce26c1706874"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -136,7 +136,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "9d8e5360bf3b33f99a0f5b44b487f32a344e5eb4"
+                "0": "87c960d659de0914b3009b46c881a3f05e8ef114"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -171,7 +171,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "b396028bf851b8895bea4ec999e004e94e9c37e9"
+                "0": "b1b0bd93804e613225f2162b09cf9ea79b1c01c4"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -202,7 +202,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "bc4310152fe9f00663c54f47eeaf036606db25db"
+                "0": "868f535074425f37665ca5d961c63f92a77870df"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -231,7 +231,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "a2158171675be95b918e6f8b7c85730b9bcc084b"
+                "0": "8b015c2f10df8dbe434dc2d69999d839620d2429"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -248,205 +248,6 @@
             },
             "outputs": {}
         },
-        "CameraInit_1": {
-            "nodeType": "CameraInit",
-            "position": [
-                -193,
-                194
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 16,
-                "split": 1
-            },
-            "uids": {
-                "0": "93f6ba3fdee36e56589f9d3f5254fd66658aef5c"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "viewpoints": [
-                    {
-                        "viewId": 202303598,
-                        "poseId": 202303598,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000008.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 208587566,
-                        "poseId": 208587566,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000009.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 216579329,
-                        "poseId": 216579329,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000004.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 218914715,
-                        "poseId": 218914715,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000005.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 229406600,
-                        "poseId": 229406600,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000006.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 232341184,
-                        "poseId": 232341184,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000007.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 578496603,
-                        "poseId": 578496603,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000015.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 581355225,
-                        "poseId": 581355225,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000014.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 597233910,
-                        "poseId": 597233910,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000013.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 600073058,
-                        "poseId": 600073058,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000012.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 600806697,
-                        "poseId": 600806697,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000010.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 602556050,
-                        "poseId": 602556050,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000011.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1297308600,
-                        "poseId": 1297308600,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000000.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1303301372,
-                        "poseId": 1303301372,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000001.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1312236258,
-                        "poseId": 1312236258,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000002.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1314734285,
-                        "poseId": 1314734285,
-                        "path": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images/00000003.jpg",
-                        "intrinsicId": 199173745,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"AliceVision:useWhiteBalance\": \"1\", \"ResolutionUnit\": \"none\", \"XResolution\": \"1\", \"YResolution\": \"1\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    }
-                ],
-                "intrinsics": [
-                    {
-                        "intrinsicId": 199173745,
-                        "initialFocalLength": 0.0013020833333333333,
-                        "focalLength": -1.2071067811865475,
-                        "pixelRatio": 1.0,
-                        "pixelRatioLocked": true,
-                        "type": "pinhole",
-                        "width": 768,
-                        "height": 576,
-                        "sensorWidth": -1.0,
-                        "sensorHeight": -0.75,
-                        "serialNumber": "C:/data/blended_MVSV_bugs/5aa0f9d7a9efce63548c69a1/blended_images",
-                        "principalPoint": {
-                            "x": 0.0,
-                            "y": 0.0
-                        },
-                        "initializationMode": "unknown",
-                        "distortionParams": [],
-                        "locked": false
-                    }
-                ],
-                "sensorDatabase": "",
-                "defaultFieldOfView": 45.0,
-                "groupCameraFallback": "folder",
-                "allowedCameraModels": [
-                    "pinhole"
-                ],
-                "useInternalWhiteBalance": true,
-                "viewIdMethod": "metadata",
-                "viewIdRegex": ".*?(\\d+)",
-                "verboseLevel": "info"
-            },
-            "outputs": {
-                "output": "{cache}/{nodeType}/{uid0}/cameraInit.sfm"
-            }
-        },
         "FeatureMatching_1": {
             "nodeType": "FeatureMatching",
             "position": [
@@ -459,7 +260,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "e79275585286b3aa8fcd1f0ac4a9fe73d7679e8d"
+                "0": "366ee5f0aa955b4b07aa17342a9087c1826884ae"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -499,7 +300,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "ccbe3e92d5b8f95b109eacb364bdf90366df8ed5"
+                "0": "79c042ef147ba1b3e31bc2ba8e5096841d775070"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -529,7 +330,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "c407ab9f61eb1d3af609d9f0b76bb8f1631035c2"
+                "0": "d1048a572a4781a80f0d94620ae96157fbdcab1c"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -558,7 +359,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "a8ff0d7505e3bdbd5736c80e8be49271194565a5"
+                "0": "9aee61424f9b1c0dca651e088301c0e365655af1"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -581,7 +382,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "1d0274d4185631abf4ce53ed966d6214fe19d62b"
+                "0": "d34fb763ff3dc358b4bcbb44be48bd9019f6d29f"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -606,7 +407,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "2f7275608aa13c4309cfff4b04b921a1d5825d66"
+                "0": "810cd8dc4b0371d97c523d75e45d806b440ada95"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -614,28 +415,6 @@
             },
             "outputs": {
                 "workspace_path": "{cache}/{nodeType}/{uid0}/workspace"
-            }
-        },
-        "PoissonMesher_1": {
-            "nodeType": "PoissonMesher",
-            "position": [
-                1262,
-                552
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "057de60c6c60d58c94c2b72f950a5719726f65ea"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input_path": "{StereoFusion_1.output_path}"
-            },
-            "outputs": {
-                "output_path": "{cache}/{nodeType}/{uid0}/mesh_poisson.ply"
             }
         },
         "ColmapImageUndistorder_1": {
@@ -650,7 +429,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "484df26ef44b521b4b1068e32d5d09f5c06e0eff"
+                "0": "f676757cdee5021be95bf4cf540e54c7079aefef"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -674,7 +453,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "2a1efc2a7ff609e1522e13c300e91ba4ce9ed189"
+                "0": "42872766420a711f1cf2f2f1f01562a0e4699592"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -699,7 +478,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "736a4d8718a2ec70bd897932a6d6312aa4bb8555"
+                "0": "2ee4acf8981139f77364524fb9f9b8c46d96472e"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -722,7 +501,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "f4632516308167f7e1d40fbdc5f4091ab02e70c4"
+                "0": "00920d2ca3a77fe5496c1ddee2cb9e43e985385c"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -755,7 +534,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "0a3a1011d8bd2ec35432f6bc2030e44ddb2a8492"
+                "0": "4ad39699aed3fb19670a98bf3f0a9ee01b810c34"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -763,7 +542,8 @@
                 "inputSfMGT": "{Dataset_1.outputSfMData}",
                 "metrics": [
                     "MSECameraCenter",
-                    "AngleBetweenRotations"
+                    "AngleBetweenRotations",
+                    "validCams"
                 ],
                 "csv_name": "calibration_comparison.csv",
                 "verboseLevel": "info"
@@ -785,7 +565,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "3ea878fbcb1ad74d897850dc68beba207cc6adb0"
+                "0": "78c06d16cb531c3b41df235d41f10fb29604a6d9"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -796,36 +576,6 @@
                 "database_path": "{cache}/{nodeType}/{uid0}/colmap_database.db",
                 "image_list_path": "{cache}/{nodeType}/{uid0}/used_images.txt",
                 "image_path": "{cache}/{nodeType}/{uid0}/images"
-            }
-        },
-        "Dataset_1": {
-            "nodeType": "Dataset",
-            "position": [
-                12,
-                167
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 16,
-                "split": 1
-            },
-            "uids": {
-                "0": "8f32aee7e27ec0413d2b19e99e801cf3b1f77782"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "sfmData": "{CameraInit_1.output}",
-                "datasetType": "blendedMVG",
-                "initIntrinsics": true,
-                "permutationMatrix": "[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]",
-                "inverse": false,
-                "verboseLevel": "info"
-            },
-            "outputs": {
-                "outputSfMDataCameraInit": "{cache}/{nodeType}/{uid0}/sfm_camerainit.sfm",
-                "outputSfMData": "{cache}/{nodeType}/{uid0}/sfm.sfm",
-                "outputGroundTruthdepthMapsFolder": "{cache}/{nodeType}/{uid0}/depth_maps",
-                "depthmaps": "{cache}/{nodeType}/{uid0}/depth_maps<VIEW_ID>.exr"
             }
         },
         "DepthMapComparison_1": {
@@ -840,7 +590,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "c950222d152fa82cdfbc93215198104b677134d3"
+                "0": "fba8f2dc92af0c77e95730037a662e11ea6b6433"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -863,6 +613,261 @@
                 "outputCsv": "{cache}/{nodeType}/{uid0}/depth_map_comparison.csv"
             }
         },
+        "PoissonMesher_1": {
+            "nodeType": "PoissonMesher",
+            "position": [
+                1262,
+                552
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "bfcae4073d48f65a83912083447fe15fe5061797"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input_path": "{StereoFusion_1.output_path}",
+                "trim": 0.0
+            },
+            "outputs": {
+                "output_path": "{cache}/{nodeType}/{uid0}/mesh_poisson.ply"
+            }
+        },
+        "Dataset_1": {
+            "nodeType": "Dataset",
+            "position": [
+                12,
+                167
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 16,
+                "split": 1
+            },
+            "uids": {
+                "0": "f9c329ed0bd8349ff3bef8c65648e4698ab3caa3"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "sfmData": "{CameraInit_1.output}",
+                "datasetType": "blendedMVG",
+                "initIntrinsics": true,
+                "permutationMatrix": "[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]",
+                "focalOverwrite": -1.0,
+                "inverse": false,
+                "verboseLevel": "info"
+            },
+            "outputs": {
+                "outputSfMDataCameraInit": "{cache}/{nodeType}/{uid0}/sfm_camerainit.sfm",
+                "outputSfMData": "{cache}/{nodeType}/{uid0}/sfm.sfm",
+                "outputGroundTruthdepthMapsFolder": "{cache}/{nodeType}/{uid0}/depth_maps",
+                "depthmaps": "{cache}/{nodeType}/{uid0}/depth_maps<VIEW_ID>_depthMap.exr"
+            }
+        },
+        "CameraInit_1": {
+            "nodeType": "CameraInit",
+            "position": [
+                -193,
+                194
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 16,
+                "split": 1
+            },
+            "uids": {
+                "0": "9f7912b02ff1be9cf0027d53a695dbfe623f421f"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "viewpoints": [
+                    {
+                        "viewId": 95931756,
+                        "poseId": 95931756,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000010.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 172308259,
+                        "poseId": 172308259,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000013.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 173767749,
+                        "poseId": 173767749,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000011.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 173790143,
+                        "poseId": 173790143,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000012.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 188300942,
+                        "poseId": 188300942,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000014.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 197578742,
+                        "poseId": 197578742,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000015.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 541749801,
+                        "poseId": 541749801,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000007.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 544295899,
+                        "poseId": 544295899,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000006.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 546801641,
+                        "poseId": 546801641,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000004.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 548557453,
+                        "poseId": 548557453,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000005.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 568626937,
+                        "poseId": 568626937,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000009.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 570137753,
+                        "poseId": 570137753,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000008.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1610648207,
+                        "poseId": 1610648207,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000002.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1613948207,
+                        "poseId": 1613948207,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000001.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1614110299,
+                        "poseId": 1614110299,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000000.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1671674650,
+                        "poseId": 1671674650,
+                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000003.jpg",
+                        "intrinsicId": 993703311,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"AliceVision:rawColorInterpretation\": \"librawwhitebalancing\", \"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    }
+                ],
+                "intrinsics": [
+                    {
+                        "intrinsicId": 993703311,
+                        "initialFocalLength": -1.0,
+                        "focalLength": 43.45584412271571,
+                        "pixelRatio": 1.0,
+                        "pixelRatioLocked": true,
+                        "type": "pinhole",
+                        "width": 768,
+                        "height": 576,
+                        "sensorWidth": 36.0,
+                        "sensorHeight": 27.0,
+                        "serialNumber": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images",
+                        "principalPoint": {
+                            "x": 0.0,
+                            "y": 0.0
+                        },
+                        "initializationMode": "unknown",
+                        "distortionParams": [],
+                        "locked": false
+                    }
+                ],
+                "sensorDatabase": "",
+                "colorProfileDatabase": "${ALICEVISION_COLOR_PROFILE_DB}",
+                "defaultFieldOfView": 45.0,
+                "groupCameraFallback": "folder",
+                "allowedCameraModels": [
+                    "pinhole"
+                ],
+                "rawColorInterpretation": "LibRawWhiteBalancing",
+                "errorOnMissingColorProfile": true,
+                "viewIdMethod": "metadata",
+                "viewIdRegex": ".*?(\\d+)",
+                "verboseLevel": "info"
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/cameraInit.sfm"
+            }
+        },
         "Texturing_2": {
             "nodeType": "Texturing",
             "position": [
@@ -875,7 +880,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "e6e68b62538142e26b380d1887477afe2c55cace"
+                "0": "ad9e9b6403f55271a0c3efbf156c1e14a43d9cce"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -941,7 +946,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "bd4988881cffc69f30d7a27e3c5673a5ee54a7bf"
+                "0": "c5412b562e4a7f79003e576e6308ca532b94de36"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -974,7 +979,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "1b3da1df8d50437c46972d410773085ebcfeb315"
+                "0": "bf3e9d0d65bcc76bd88eaafae1919972e45ff356"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1007,7 +1012,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "5a02ff1c24f250cab7f751e1282dc1ec2cf6a7f5"
+                "0": "b404a839014b2fd44f41313617e6595411d8dc03"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1036,7 +1041,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "dbee735f4a74e587af1819bb8069da250050794a"
+                "0": "58692d809e288760f15cfa66487571efdc3eb207"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1067,7 +1072,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "384e42e2dafc22050d0bf0906a631d006ae2f140"
+                "0": "36e9b24d70f6d545bdc468a70e8bd578ef520484"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1099,7 +1104,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "cf13cb3f8087ea70e019e6e1db718e7c3915a897"
+                "0": "f4fb57888f70472dc1eef3cfbf20c355f40d4652"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1182,7 +1187,7 @@
                 "split": 2
             },
             "uids": {
-                "0": "a47febe29c58984036393eeea535a50c1e5ec641"
+                "0": "d71975419e541ed9b59a549a96f60b6c8d9303a6"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1217,7 +1222,7 @@
                 "split": 6
             },
             "uids": {
-                "0": "63e78320709d44e2cb6837546f92fb98fa3bb341"
+                "0": "597d231fc2cfffe387e609bc107496b248a5fde8"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1271,7 +1276,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "868b56bbeda51a5a1da098d84c933adffedc2666"
+                "0": "3b858ad2ec60757ddd1b2714c6d2940061be5705"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1301,7 +1306,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "08a4ea4871c4790f845f10d69fc1cceb917b971f"
+                "0": "37194cf73af92cbc23b083091f11a9a4f732ad42"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1384,7 +1389,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "247ea272cbf3fb3627fe53cb4fbfdbdfb2d9e2c6"
+                "0": "4e5178977daa24bfd13e039606cdd0a1589e2939"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1417,7 +1422,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "220cbe594886ba95bcd8b35665262e8576cbfe8f"
+                "0": "39e96b4cd1df72b57c6b6a447cc2ae53e50f5f37"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1483,7 +1488,7 @@
                 "split": 2
             },
             "uids": {
-                "0": "1870217e56a88e76cfb42753ffaa1cffa9d3048a"
+                "0": "15b6ff6c64f439bbd21def17652d30750edd16c7"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1518,7 +1523,7 @@
                 "split": 6
             },
             "uids": {
-                "0": "bf727a2ca816c6d68d71ac63636d77fc024ee6e0"
+                "0": "a624010f45427040102325b8b6598b3431584b2b"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1572,7 +1577,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "edba55ee2f38b75c125b295e31be332567fb7551"
+                "0": "4422c1c8f2c81432a9081c0db4ecd47f9b31f679"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1602,7 +1607,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "b13eea3bad510128c5a801b29fa2cad89bfa6214"
+                "0": "5b987f8ef7bfe4a0ce450a83578a0e632f77defd"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1685,7 +1690,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "7133ea8ddc29b8beca556265184e87312c10c70b"
+                "0": "2757197ec1815a1ce284ac442893f4dc443470b4"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1718,7 +1723,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "f3627f8df0a5bb5b4f637c205f5694faf73372e3"
+                "0": "8ab9a1cf76dddb9bfd6c666b6ffde795a174063d"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {

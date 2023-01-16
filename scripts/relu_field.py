@@ -1,8 +1,7 @@
-
-#%%
 """
 Experiments with relu field
 """
+#%%
 import os
 from datetime import datetime
 import tensorflow as tf
@@ -16,8 +15,8 @@ print(tf.__version__)
 print("Gpus:")
 print(tf.config.list_physical_devices('GPU'))
 
-IMAGE_PATH = "C:\\Users\\hogm\\OneDrive - Technicolor\\Documents\\data\\datasets\\diodr\\val\\outdoor\\scene_00023\\scan_00199\\00023_00199_outdoor_000_020.png"
-DEPTH_PATH = "C:\\Users\\hogm\\OneDrive - Technicolor\\Documents\\data\\datasets\\diodr\\val\\outdoor\\scene_00023\\scan_00199\\00023_00199_outdoor_000_020_depth.npy"
+IMAGE_PATH = "C:\\data\\blended_mvg_test_sets\\5aa0f9d7a9efce63548c69a1\\rendered_depth_maps\\00000000.jpg"
+DEPTH_PATH = "C:\\data\\blended_mvg_test_sets\\5aa0f9d7a9efce63548c69a1\\rendered_depth_maps\\00000000.pfm"
 DEPTH_GT_PATH = None
 FIELD_SIZE = [1024, 768, 1]
 

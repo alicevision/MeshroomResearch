@@ -228,18 +228,8 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete):
                     csv_file.write(str(med)+",")
                 csv_file.write("\n")
 
-    #FIXME: hardcoded nodes names
-
     #Save csvs
     print("Collecting numerical results for ...")
-    #calibs_results_avg, calibs_results_med, header_calib, sequences_skipped_calib = agregate_results("calibration_comparison.csv")
-    #print("%d sequences skiped:"%len(sequences_skipped_calib))
-    #print(sequences_skipped_calib)
-    # depth_results_avg, depth_results_med, header_depth, sequences_skipped_depth = agregate_results("depth_maps_comparison.csv")
-    #print("%d sequences skiped:"%len(sequences_skipped_depth))
-    #print(sequences_skipped_depth)
-    #save_results('all_calibration_comparison.csv', header_calib, calibs_results_avg, calibs_results_med)
-    #save_results('all_depth_comparison.csv', header_depth, depth_results_avg, depth_results_med)
     for csv_name in csv_names:
         print("\t"+csv_name)
         results_avg, results_med, header, sequences_skipped_calib = agregate_results(csv_name)
@@ -252,8 +242,6 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete):
     for csv_name in csv_names:
         print("\t"+csv_name)
         make_plot(csv_name)
-    #make_plot("calibration_comparison.csv")
-    #make_plot("depth_maps_comparison.csv")
 
 if __name__ == '__main__':
     cli()

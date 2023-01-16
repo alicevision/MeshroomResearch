@@ -89,7 +89,7 @@ def camera_deprojection_meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_
     inv_intrinsic = np.linalg.inv(intrinsic[0:3,0:3])
     rays = np.transpose(extrinsic[0:3,0:3]@inv_intrinsic@np.transpose(pixel_homo))
     unit_rays = make_unit(rays)
-    scene_points = np.expand_dims(Zs, -1)*unit_rays+invextrinsic[0:3,3]
+    scene_points = np.expand_dims(Zs, -1)*unit_rays+extrinsic[0:3,3]
     return scene_points
 
 #%% Triangle operations
@@ -458,4 +458,51 @@ def compute_normals(depth_map):
     # normal[:, :, 1] /= n
     # normal[:, :, 2] /= n
     return normal
+
+#%% Point cloud
+
+# #ransac plane detection
+# from random import random
+# def ransac_plane(xyz, threshold=0.05, iterations=1000):
+#     inliers=[]
+#     n_points=len(xyz)
+#     i=1
+#     equation=None
+#     while i<iterations:
+#         #randomly sample 3 pts in pc
+#         idx_samples = random.sample(range(n_points), 3)
+#         pts = xyz[idx_samples]
+#         #get normal to plane defined by 3 pts
+#         vecA = pts[1] - pts[0]
+#         vecB = pts[2] - pts[0]
+#         normal = np.cross(vecA, vecB)
+#         #compute distance of all points to plane (with threshold to robust outlier)
+#         a,b,c = normal / np.linalg.norm(normal)
+#         d=-np.sum(normal*pts[1])
+#         distance = (a * xyz[:,0] + b * xyz[:,1] + c * xyz[:,2] + d
+#                     ) / np.sqrt(a ** 2 + b ** 2 + c ** 2)
+#         idx_candidates = np.where(np.abs(distance) <= threshold)[0]
+#         #if best plane candidate so far, save
+#         if len(idx_candidates) > len(inliers):
+#             equation = [a,b,c,d]
+#             inliers = idx_candidates
+#         i+=1
+#     return equation, inliers
+
+
+
+# #create plane to display:
+# with open("plane.obj", "w") as obj_file:
+#     obj_file.write("v "+"%f %f %f\n"%(mean_plane_landmark[0], mean_plane_landmark[1], mean_plane_landmark[2]))
+#     obj_file.write("v "+"%f %f %f\n"%(p0[0], p0[1], p0[2]))
+#     obj_file.write("v "+"%f %f %f\n"%(p1[0], p1[1], p1[2]))
+#     obj_file.write("v "+"%f %f %f\n"%(p2[0], p2[1], p2[2]))
+#     obj_file.write("v "+"%f %f %f\n"%(p3[0], p3[1], p3[2]))
+
+#     # obj_file.write("f "+"1 2 3\n")
+#     # obj_file.write("f "+"1 3 4\n")
+#     # obj_file.write("f "+"1 4 5\n")
+#     # obj_file.write("f "+"1 5 2\n")
+#     # obj_  file.write("f "+"2 3 4\n")
+#     # obj_file.write("f "+"2 5 4\n")
 
