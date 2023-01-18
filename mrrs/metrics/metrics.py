@@ -41,19 +41,6 @@ def validity_ratio(depth_map, gt_depth_map, mask):
     percentage_valid =100*np.count_nonzero(1-mask)/np.prod(depth_map.shape)
     return percentage_valid, None
 
-# def PSRM(depth_map, gt_depth_map, mask):
-#     # img1 and img2 have range [0, 255]
-#     img1 = img1.astype(np.float64)
-#     img2 = img2.astype(np.float64)
-#     mse = np.mean((img1 - img2)**2)
-#     if mse == 0:
-#         return float('inf')
-#     return 20 * math.log10(255.0 / math.sqrt(mse))
-
-#https://cvnote.ddlee.cc/2019/09/12/psnr-ssim-python
-# def SSIM():
-#     pass
-
 def compute_depth_metric(depth_map, gt_depth_map, metric,
                          auto_resize=False, auto_rescale=False,
                          mask_value=None):

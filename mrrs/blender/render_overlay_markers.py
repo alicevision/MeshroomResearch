@@ -1,3 +1,7 @@
+"""
+This scripts renders objects described by a json
+"""
+
 import os
 import sys
 import json

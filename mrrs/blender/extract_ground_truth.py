@@ -1,3 +1,7 @@
+"""
+Blender script to extract the ground truth calibration from a rendered scene.
+"""
+
 import bpy
 import sys
 import os

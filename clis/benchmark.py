@@ -1,5 +1,5 @@
 """
-Runs benchmark.
+Command line tool to runs a benchmark project on a dataset.
 """
 import os
 import shutil

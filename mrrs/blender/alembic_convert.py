@@ -1,3 +1,6 @@
+"""
+Blender script to convert an abc particleShape into vertices of an obj.
+"""
 
 import bpy
 import sys
