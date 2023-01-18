@@ -27,7 +27,7 @@ class RobustMVDWrapper():
         # self._raw_output = None#unprocessed output
         # self._output_probabilities = []
 
-        #from api #FIXME: export and test
+        #from api
         # requires install of rmvd pip install -e . (also added a __init__ in blocks )
         import rmvd
         self.model = rmvd.create_model("robust_mvd")
@@ -63,35 +63,6 @@ class RobustMVDWrapper():
         if self.DO_RESIZE:
             depth_map, _ = cv2_resize_with_pad(depth_map,  self.IMAGE_SIZE)
 
-        # # #FIXME: no metadata and depth size?!
-        # from mrrs.core.ios import open_exr, save_exr
-        # import cv2
-        # import numpy as np
-        # mr_depth, _ = open_exr("c:\Dev\MRRS\mrrs\deep_mvs\\robust_mvd\\robustmvd\MeshroomCache\DepthMapTransform\\05403a7a07c7e111c41bc70994fb65a0f2c6cba0\\1971036266_depthMap.exr")
-        # rmvd_depth, _ = open_exr("c:\Dev\MRRS\mrrs\deep_mvs\\robust_mvd\\robustmvd\MeshroomCache\DeepMVS\\34fbb55b45bea504229d9b62f717b044c2005edf\\1971036266_depthMap.exr")
-        # mr_depth_rs = cv2.resize(mr_depth[:,:,0], [rmvd_depth.shape[1], rmvd_depth.shape[0]])
-
-        # valid  = mr_depth_rs>0
-        # valid &= np.abs(rmvd_depth[:,:,0]-mr_depth_rs)<0.1
-
-        # ratios = (rmvd_depth[:,:,0]/mr_depth_rs)
-        # ratio = np.median(ratios[valid])
-
-        # X = rmvd_depth[valid].flatten()
-        # Y = mr_depth_rs[valid].flatten()
-        # a, b = np.linalg.lstsq(np.vstack([X,np.ones(len(X))]).T, Y, rcond=None)[0]
-
-        # import matplotlib.pyplot as plt
-        # plt.plot(X, Y, 'o', markersize=1)
-        # plt.plot(X, a*X + b, 'r')
-        # plt.plot(X, ratio*X, 'g')
-        # plt.show()
-
-        # save_exr(mr_depth_rs, 'c:\Dev\MRRS\\mr_depth.exr', data_type="depth")
-        # save_exr(rmvd_depth, 'c:\Dev\MRRS\\rmvd_depth.exr', data_type="depth")
-        # save_exr(np.abs(rmvd_depth[:,:,0]-mr_depth_rs), 'c:\Dev\MRRS\\diff.exr', data_type="depth")
-
-
         return depth_map, depth_uncertainty
 
     @staticmethod
@@ -113,4 +84,3 @@ class RobustMVDWrapper():
 
 if __name__ == "__main__":
     RobustMVDWrapper.export_model()
-# %%
