@@ -4,33 +4,34 @@
         "releaseVersion": "2021.1.0",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "ColmapFeatureExtraction": "1.1",
-            "ColmapFeatureMatching": "2.0",
-            "Dataset": "3.0",
-            "CalibrationComparison": "3.0",
             "Publish": "1.2",
-            "Texturing": "6.0",
-            "PrepareDenseScene": "3.0",
-            "DepthMapTransform": "3.0",
-            "StereoFusion": "2.0",
-            "ImageMatching": "2.0",
-            "DepthMap": "2.0",
-            "DepthMapFilter": "3.0",
-            "ColmapImageUndistorder": "1.1",
-            "PatchMatchStereo": "2.0",
-            "MeshFiltering": "3.0",
-            "FeatureMatching": "2.0",
-            "CameraInit": "8.0",
-            "Meshing": "7.0",
-            "FeatureExtraction": "1.1",
-            "SfMAlignment": "2.0",
-            "StructureFromMotion": "2.0",
             "Colmap2MeshroomSfmConvertion": "2.0",
-            "ColmapMapper": "2.0",
-            "DepthMapComparison": "3.0",
-            "PoissonMesher": "2.0",
+            "Dataset": "3.0",
+            "Texturing": "6.0",
+            "FeatureMatching": "2.0",
+            "DepthMap": "2.0",
+            "StereoFusion": "2.0",
+            "ColmapImageUndistorder": "1.1",
+            "DepthMapTransform": "3.0",
+            "ImageMatching": "2.0",
+            "InjectSfmData": "3.0",
+            "DepthMapFilter": "3.0",
+            "PatchMatchStereo": "2.0",
             "ConvertSfMFormat": "2.0",
-            "InjectSfmData": "3.0"
+            "DepthMapComparison": "3.0",
+            "ColmapFeatureExtraction": "1.1",
+            "CalibrationComparison": "3.0",
+            "Meshing": "7.0",
+            "MeshFiltering": "3.0",
+            "StructureFromMotion": "2.0",
+            "FeatureExtraction": "1.1",
+            "CameraInit": "8.0",
+            "ColmapFeatureMatching": "2.0",
+            "SfMAlignment": "2.0",
+            "PoissonMesher": "2.0",
+            "PrepareDenseScene": "3.0",
+            "ImplicitMesh": "3.0",
+            "ColmapMapper": "2.0"
         },
         "template": false
     },
@@ -866,6 +867,31 @@
             },
             "outputs": {
                 "output": "{cache}/{nodeType}/{uid0}/cameraInit.sfm"
+            }
+        },
+        "ImplicitMesh_1": {
+            "nodeType": "ImplicitMesh",
+            "position": [
+                -41,
+                34
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "502b8626b5596c010521eef241af83c326a94352"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "inputSfmData": "{Dataset_1.outputSfMData}",
+                "verboseLevel": "info"
+            },
+            "outputs": {
+                "outputMesh": "{cache}/{nodeType}/{uid0}/mesh.obj",
+                "nerfFile": "{cache}/{nodeType}/{uid0}/transforms.json",
+                "poseTransform": "{cache}/{nodeType}/{uid0}/poseTransform.json"
             }
         },
         "Texturing_2": {

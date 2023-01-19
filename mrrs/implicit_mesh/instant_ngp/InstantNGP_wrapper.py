@@ -13,16 +13,17 @@ import shutil
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
+NGP_COMMAND ="python "+ os.path.join(os.path.dirname(__file__), "instant-ngp/scripts/run.py")#FIXME: hardcoded
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "instant-ngp/configs/nerf/base.json")#FIXME: hardcoded
+
 def variance_of_laplacian(image):
             return cv2.Laplacian(image, cv2.CV_64F).var()
-
 
 def sharpness(imagePath):
     image = cv2.imread(imagePath)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     fm = variance_of_laplacian(gray)
     return fm
-
 
 def qvec2rotmat(qvec):
     return np.array([
@@ -82,7 +83,6 @@ class InstantNGPWrapper():
 
         head_tail = os.path.split(nerf_path)
         self.imagesfolder_path = os.path.join(head_tail[0],'train/')
-
 
     def __call__(self, input_images_path, input_poses, input_intrinsics, input_pixel_sizes):
         """
@@ -218,18 +218,20 @@ class InstantNGPWrapper():
             f["transform_matrix"] = f["transform_matrix"].tolist()
         print(f"{nframes} frames")
         print(f"writing {self.nerf_path}")
-        
+
         with open(self.nerf_path, "w") as outfile:
             json.dump(out, outfile, indent=2)
 
         # Launch instant-ngp
         head_tail = os.path.split(self.mesh_path)
         tmp_mesh_path = os.path.join(head_tail[0],'tmp_'+head_tail[-1])
-        cmd = f"/home/bbrument/anaconda3/envs/instant-ngp/bin/python /home/bbrument/dev/instant-ngp/scripts/run.py \
-            --training_data {self.nerf_path}\
-            --mode nerf\
-            --marching_cubes_res 256\
-            --save_mesh {tmp_mesh_path}"
+        #f"/home/bbrument/anaconda3/envs/instant-ngp/bin/python /home/bbrument/dev/instant-ngp/scripts/run.py \
+        #--mode nerf\
+
+        cmd = NGP_COMMAND + (f" --training_data {self.nerf_path}"
+                            +" --marching_cubes_res 256"
+                            +f" --save_mesh {tmp_mesh_path}"
+                            +f" --network {MODEL_PATH}")
         do_system(cmd)
 
         # Apply transform to the mesh

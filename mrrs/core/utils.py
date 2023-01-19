@@ -132,8 +132,9 @@ def cv2_resize_crop(image, new_shape, crop, interpolation):
     return image
 
 def do_system(arg):
-	print(f"==== running: {arg}")
-	err = os.system(arg)
-	if err:
-		print("FATAL: command failed")
-		sys.exit(err)
+    print(f"==== running: {arg}")
+    err = os.system(arg)
+    if err:
+        print("FATAL: command failed")
+        raise RuntimeError("Issue while running "+arg+" : "+str(err))
+
