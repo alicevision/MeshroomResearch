@@ -14,7 +14,9 @@ import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 NGP_COMMAND ="python "+ os.path.join(os.path.dirname(__file__), "instant-ngp/scripts/run.py")#FIXME: hardcoded
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "instant-ngp/configs/nerf/base.json")#FIXME: hardcoded
+MODEL = "instant-ngp/configs/nerf/base.json"
+# MODEL = "instant-ngp/configs/sdf/base.json"
+MODEL_PATH = os.path.join(os.path.dirname(__file__), MODEL)#FIXME: hardcoded
 
 def variance_of_laplacian(image):
             return cv2.Laplacian(image, cv2.CV_64F).var()
@@ -229,7 +231,7 @@ class InstantNGPWrapper():
         #--mode nerf\
 
         cmd = NGP_COMMAND + (f" --training_data {self.nerf_path}"
-                            +" --marching_cubes_res 256"
+                            +f" --marching_cubes_res 256"
                             +f" --save_mesh {tmp_mesh_path}"
                             +f" --network {MODEL_PATH}")
         do_system(cmd)
