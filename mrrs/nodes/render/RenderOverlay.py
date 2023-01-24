@@ -1,6 +1,9 @@
 __version__ = "1.1"
 
 from meshroom.core import desc
+import os
+
+DEFAULT_RENDER_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../blender/render_overlay_markers.py'))
 
 class RenderOverlay(desc.CommandLineNode):
     commandLine = 'blender -b -P {scriptValue} -- \
@@ -12,7 +15,7 @@ class RenderOverlay(desc.CommandLineNode):
             name='script',
             label='Script',
             description='Python script to render markers',
-            value='MeshroomResearch/mrrs/blender/render_overlay_markers.py',
+            value=DEFAULT_RENDER_SCRIPT,
             uid=[0]
         ),
         desc.File(
