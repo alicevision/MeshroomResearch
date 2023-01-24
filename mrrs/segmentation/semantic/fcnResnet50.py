@@ -67,7 +67,7 @@ class SemanticSegmentationFcnResnet50(SegmentationModel):
         #setup model and load in eval mode
         torch_model = fcn_resnet50(pretrained=True, progress=True, num_classes=21)
         torch_model.eval()
-        print(segmentor.CLASSES_NAMES)
+        # print(segmentor.CLASSES_NAMES)
         #setup input
         dummy_inputs = torch.randn(1, 3, SemanticSegmentationFcnResnet50.IMAGE_SIZE[1], SemanticSegmentationFcnResnet50.IMAGE_SIZE[0], requires_grad=True)
         with torch.no_grad():
@@ -85,20 +85,21 @@ class SemanticSegmentationFcnResnet50(SegmentationModel):
 
 #Exports and tests
 if __name__ == "__main__":
-    from mrrs.core.ios import *
-    from PIL import Image
-    # export_model()#create weigts
-    segmentor = SemanticSegmentationFcnResnet50()
-    test_image = "C:\\Users\\hogm\\Downloads\\Family\\00001.jpg"
-    img = np.asarray(Image.open(test_image))
-    segmentor = SemanticSegmentationFcnResnet50()#TODO: test result with pytorch implementation
-    output_segmentation, output_classes = segmentor(img)
-    output_segmentation_index = np.argmax(segmentor._output_probabilities, axis=0) #to get seg index
-    Image.fromarray((15*output_segmentation_index).astype(np.uint8)).save("out_model_onnx.png")
-    save_image("input_img.png", img)
-    for s, c in zip(output_segmentation, output_classes):
-        save_image("segments"+c+".png", s.astype(np.uint8) )
-    print("Done")
+    SemanticSegmentationFcnResnet50.export_model()#create weigts
+
+    # from mrrs.core.ios import *
+    # from PIL import Image
+    # segmentor = SemanticSegmentationFcnResnet50()
+    # test_image = "C:\\Users\\hogm\\Downloads\\Family\\00001.jpg"
+    # img = np.asarray(Image.open(test_image))
+    # segmentor = SemanticSegmentationFcnResnet50()#TODO: test result with pytorch implementation
+    # output_segmentation, output_classes = segmentor(img)
+    # output_segmentation_index = np.argmax(segmentor._output_probabilities, axis=0) #to get seg index
+    # Image.fromarray((15*output_segmentation_index).astype(np.uint8)).save("out_model_onnx.png")
+    # save_image("input_img.png", img)
+    # for s, c in zip(output_segmentation, output_classes):
+    #     save_image("segments"+c+".png", s.astype(np.uint8) )
+    # print("Done")
 
 
 
