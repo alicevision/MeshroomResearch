@@ -51,7 +51,7 @@ def open_exr(exr_path, clip_negative=False):
     return output_array, header
 
 def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
-            custom_header = {'AliceVision:CArr':None,'AliceVision:iCamArr':None},
+            custom_header = None,#{'AliceVision:CArr':None,'AliceVision:iCamArr':None},
             channel_names = None):
     """
     Saves an exr for meshroom, using different formats.
@@ -94,7 +94,7 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
 
         for channel_index in range(input_array.shape[-1]):
             channel_data.append(input_array[:,:,channel_index].tostring() )
-        import OpenEXR, Imath#lazy import
+        import OpenEXR, Imath#lazy importSS
         # Write the three color channels to the output file
         header = OpenEXR.Header(input_array_size[1], input_array_size[0])
         header = {**header, **custom_header}#merges two dicts
