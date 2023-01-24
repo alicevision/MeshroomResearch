@@ -31,6 +31,16 @@ class DeepMVS(desc.Node):
             uid=[0],
         ),
         desc.ChoiceParam(
+            name='model',
+            label='Model',
+            description='''Model to be used for depth map prediction.''',
+            value='robust_mvd',
+            values=['robust_mvd', 'robust_mvd_5M'], #'mvsnet_pl_wrapped', 'vis_mvsnet_wrapped',
+                            #'cvp_mvsnet_wrapped', 'patchmatchnet_wrapped'],
+            exclusive=True,
+            uid=[],
+        ),
+        desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
             description='''verbosity level (fatal, error, warning, info, debug, trace).''',
@@ -57,7 +67,7 @@ class DeepMVS(desc.Node):
             value=desc.Node.internalFolder + '<VIEW_ID>_depthMap.exr',
             uid=[],
             group='', # do not export on the command line
-        ),
+        )
     ]
 
     def check_inputs(self, chunk):
@@ -88,14 +98,14 @@ class DeepMVS(desc.Node):
 
         view_sorted =  sorted(sfm_data["views"], key=lambda x: int(x['frameId']))#sort by temporal index frameId, breaks stuff?
         #run mvs for all views
-        mvd = RobustMVDWrapper()
+        mvd = RobustMVDWrapper(chunk.node.model.value)
         nb_cams = 5#FIXME: should be a view selection, but keep slding window for now
         for index in range(len(view_sorted)):
             chunk.logger.info("View %d/%d"%(index,len(view_sorted)))
             chunk.logger.info("Reference : "+view_sorted[index]["path"])
             # selects n consequtive views
             logging.getLogger('PIL').setLevel(logging.WARNING)
-            #FIXME: use the view selection from meshroom
+            #FIXME: use the view selection from meshroom?
             selected_views_indices = index+np.arange(-nb_cams, nb_cams+1)
             selected_views_indices=selected_views_indices[selected_views_indices!=index]#remove current frame
             selected_views_indices[selected_views_indices<0] += 2*nb_cams+1#eg for index 0, -5 =>6 ; -4  => 7 ...

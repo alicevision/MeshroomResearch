@@ -18,7 +18,7 @@ class RobustMVDWrapper():
     IMAGE_SIZE=[576, 384]
     # IMAGE_SIZE=[1152, 768] #original size, cannot run on local
 
-    def __init__(self):
+    def __init__(self, model_type):
         super().__init__()
         #load file
         # this_file_path = os.path.dirname(os.path.realpath(__file__))
@@ -28,10 +28,11 @@ class RobustMVDWrapper():
         # self._output_probabilities = []
 
         #from api
-        # requires install of rmvd pip install -e . (also added a __init__ in blocks )
+        # requires install of rmvd pip install -e .
         import rmvd
-        self.model = rmvd.create_model("robust_mvd")
+        self.model = rmvd.create_model(model_type)
 
+    #TODO: use the sfm to get the depth range (needed by msvnet & cie)
     def __call__(self, input_images, input_poses, input_intrinsics, pixel_sizes):
         """
         input_images: list of images,
@@ -40,15 +41,17 @@ class RobustMVDWrapper():
         first view in the list is assumed to be the reference view
         """
         #prepare images for input_adapter
-        input_images     = np.stack([cv2_resize_with_pad(input_image, self.IMAGE_SIZE, interpolation=cv2.INTER_LINEAR)[0]
-                                     for input_image in input_images] ).astype(np.float32)
+        #FI
+        # input_images     = np.stack([cv2_resize_with_pad(input_image, self.IMAGE_SIZE, interpolation=cv2.INTER_LINEAR)[0]
+        #                              for input_image in input_images] ).astype(np.float32)
+        input_images     = np.stack([input_image for input_image in input_images] ).astype(np.float32)
         input_images     = np.expand_dims(np.transpose(input_images, [0,3,1,2]), axis=1)
         input_poses      = np.expand_dims(np.stack(input_poses).astype(np.float32), axis=1)
         input_intrinsics = np.expand_dims(np.stack(input_intrinsics).astype(np.float32), axis=1)
-        #intrinsics, turn into pixels
-        input_intrinsics = input_intrinsics/(10*pixel_sizes[0])#FIXME: frames, also dont get the 10*
+        #intrinsics, turn into pixels values,
+        input_intrinsics = input_intrinsics/pixel_sizes[0]#FIXME: frames, also *10 to pass from mm to cm
         input_intrinsics[:, :, 2, 2] = 1
-        #poses, they take the reference camera as world cs
+        #poses, take the reference camera as world cs
         input_poses = [np.linalg.inv(np.linalg.inv(input_poses[0])@input_pose) for input_pose in input_poses]#scale of pose?
 
         #pass into input prepared

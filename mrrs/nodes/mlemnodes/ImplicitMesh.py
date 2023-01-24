@@ -45,7 +45,7 @@ class ImplicitMesh(desc.Node):
             name='outputMesh',
             label='Output mesh',
             description='Output mesh.',
-            value=desc.Node.internalFolder + 'mesh.obj',
+            value=desc.Node.internalFolder + 'mesh.ply',
             uid=[],
         ),
         desc.File(
