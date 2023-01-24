@@ -22,7 +22,7 @@ class Segmentation(desc.Node):
     category = 'Meshroom Research'
     documentation = '''Node to compute the segmentation of input images. Different kind of segmentation can be used.'''
 
-    size = desc.DynamicNodeSize('input')
+    # size = desc.DynamicNodeSize('SfMData')
 
     inputs = [
         desc.File(
@@ -151,8 +151,6 @@ class Segmentation(desc.Node):
                                 mask |= output_mask
                         if chunk.node.inverseClassmask:
                             mask = 255-mask
-                        # save_exr(mask[:,:], os.path.join(chunk.node.output.value, views_id+".exr"),
-                        #         data_type="segmentation", channel_names=["Y"])
                         save_image(os.path.join(chunk.node.output.value, views_id+".png"), mask[:,:])
 
                     else:

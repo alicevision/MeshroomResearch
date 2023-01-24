@@ -50,7 +50,7 @@ class SemanticSegmentationFcnResnet50(SegmentationModel):
         output_segmentation = []
         for class_index in np.unique(output_segmentation_index):
             output_classes.append(self.CLASSES_NAMES[class_index])
-            output_segmentation.append(255*(output_segmentation_index==class_index))#FIXME255?
+            output_segmentation.append((255*(output_segmentation_index==class_index)).astype(np.uint8))#FIXME255?
         return output_segmentation, output_classes
 
     @staticmethod
