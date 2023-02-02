@@ -15,11 +15,10 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 NGP_COMMAND ="python "+ os.path.join(os.path.dirname(__file__), "instant-ngp/scripts/run.py")#FIXME: hardcoded
 MODEL = "instant-ngp/configs/nerf/base.json"
-# MODEL = "instant-ngp/configs/sdf/base.json"
 MODEL_PATH = os.path.join(os.path.dirname(__file__), MODEL)#FIXME: hardcoded
 
 def variance_of_laplacian(image):
-            return cv2.Laplacian(image, cv2.CV_64F).var()
+    return cv2.Laplacian(image, cv2.CV_64F).var()
 
 def sharpness(imagePath):
     image = cv2.imread(imagePath)
@@ -117,7 +116,7 @@ class InstantNGPWrapper():
             "cy": cy,
             "w": w,
             "h": h,
-            "aabb_scale": 1,
+            "aabb_scale": 16,#1,#to control the distance of the background
             "frames": [],
         }
 
@@ -227,9 +226,6 @@ class InstantNGPWrapper():
         # Launch instant-ngp
         head_tail = os.path.split(self.mesh_path)
         tmp_mesh_path = os.path.join(head_tail[0],'tmp_'+head_tail[-1])
-        #f"/home/bbrument/anaconda3/envs/instant-ngp/bin/python /home/bbrument/dev/instant-ngp/scripts/run.py \
-        #--mode nerf\
-
         cmd = NGP_COMMAND + (f" --training_data {self.nerf_path}"
                             +f" --marching_cubes_res 256"
                             +f" --save_mesh {tmp_mesh_path}"
