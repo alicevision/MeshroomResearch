@@ -193,7 +193,10 @@ def save_image(image_path, np_array):
     Save an image in a numpy array.
     Range must be 0-255 and channel 1 or 3.
     """
-    return Image.fromarray(np_array.astype(np.uint8)).save(image_path)
+    if image_path.endswith('.exr'):
+        save_exr(np_array, image_path)
+    else:
+        Image.fromarray(np_array.astype(np.uint8)).save(image_path)
 
 #%% SFM
 #FIXME: unify the sensor/pixel size

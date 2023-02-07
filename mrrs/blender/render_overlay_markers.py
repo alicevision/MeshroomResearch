@@ -159,7 +159,12 @@ def camera_setup(view):
 def render_setup(view):
     print('Render setup')
 
-    bpy.context.scene.render.filepath = os.path.abspath(output_folder + '/' + view['viewId'] + ".jpg")
+    # bpy.context.scene.render.filepath = os.path.abspath(output_folder + '/' + view['viewId'] + ".jpg")
+    # save using the original filename
+    rendered_image = os.path.basename(view['path'])+".png"
+    
+    bpy.context.scene.render.filepath = os.path.abspath(output_folder + '/' + rendered_image)
+    print(bpy.context.scene.render.filepath)
 
     img_name = os.path.basename(view['path'])
     bpy.context.scene.node_tree.nodes["Image"].image = bpy.data.images[img_name]
@@ -168,7 +173,7 @@ def render_setup(view):
 
 
 for view in views:
-    print('Computing overlay for view ' + view['viewId'])
+    print('Computing overlay for view ' + view['viewId']+": "+view['path'])
 
     img_path = os.path.abspath(view['path'])
     bpy.ops.image.open(filepath=img_path)
@@ -180,3 +185,4 @@ for view in views:
         continue
 
     bpy.ops.render.render(write_still=True)
+
