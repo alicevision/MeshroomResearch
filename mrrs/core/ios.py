@@ -179,8 +179,8 @@ def open_image(image_path):
     """
     Opens an image and returns it as a np array.
     """
-    if image_path.endswith('.exr'):
-        image , _ = open_exr(image_path) #FIXME: opencv image io to replace pillow?
+    if image_path.endswith('.exr') or image_path.endswith('.dpx'):
+        image , _ = open_exr(image_path) 
     else:
         image = np.array(Image.open(image_path))
     image = image.astype(np.float32)
