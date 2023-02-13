@@ -40,15 +40,18 @@ def get_landmarks_from_sfm_data(sfm_data, sort_mode):
     Get landmarks (sorted by track length)
     """
     landmarks = []
+    landmarks_color = []
     landmarks_track_length = []
     landmarks_track_mean_scale = []
     for landmark in sfm_data["structure"]:
         landmarks_track_length.append(len(landmark["observations"]))
         landmarks_track_mean_scale.append(np.mean([float(l["scale"]) for l in landmark["observations"]], axis=0))
         landmarks.append(landmark["X"])
+        landmarks_color.append(landmark["color"])
     landmarks_track_length = np.asarray(landmarks_track_length, dtype=np.float32)
     landmarks = np.asarray(landmarks, dtype=np.float32)
     landmarks_track_mean_scale = np.asarray(landmarks_track_mean_scale, dtype=np.float32)
+    landmarks_color = np.asarray(landmarks, dtype=np.uint8)
 
     if sort_mode == "longest":
         order = landmarks_track_length.argsort()
@@ -59,61 +62,70 @@ def get_landmarks_from_sfm_data(sfm_data, sort_mode):
         raise RuntimeError("Unrecognised sort mode")
 
     landmarks_sorted = landmarks[order]
-    return landmarks_sorted
+    landmarks_color = landmarks_color[order]
+    return landmarks_sorted, landmarks_color
 
-def display_track_cones(landmarks, landmarks_per_voxel=1, scene_tiles=3, min_landmark_per_voxel=0):
+def display_track_obj(obj_type, landmarks, landmarks_color, landmarks_per_voxel, scene_tiles, min_landmark_per_voxel):
     """
     Will return point coordinates corresponding to the longest landmarks.
     Also make sure the points are uniformly distributed, in the scene:
     will only display n points per voxels.
     """
     landmarks = filter_landmarks_per_tile(landmarks, scene_tiles, landmarks_per_voxel, min_landmark_per_voxel)
-    cones = []
+    objs = []
     for landmark_index, landmark in enumerate(landmarks):
-        cone = {"type": "cone",
+        obj = {"type": obj_type,
                 "name": "landmark_"+str(landmark_index),
-                "coordinates": landmark.tolist()}
-        cones.append(cone)
-    return cones
+                "coordinates": landmark.tolist(),
+                "color": landmarks_color[landmark_index].tolist()}
+        objs.append(obj)
+    return objs
+
+def display_track_cones(landmarks, landmarks_color, landmarks_per_voxel=1, scene_tiles=3, min_landmark_per_voxel=0):
+    return display_track_obj("cone", landmarks, landmarks_color, landmarks_per_voxel, scene_tiles, min_landmark_per_voxel)
+
+def display_track_spheres(landmarks, landmarks_color, landmarks_per_voxel=1, scene_tiles=3, min_landmark_per_voxel=0):
+    return display_track_obj("sphere", landmarks, landmarks_color, landmarks_per_voxel, scene_tiles, min_landmark_per_voxel)
+
+# def display_landmarks(landmarks, landmarks_color, output_obj):
+#     """
+    
+#     """
+#     #create obj from sfm data
+#     with open(output_obj, "w"):
+#         for lm, lm_color in zip(landmarks, landmarks_color):
+#             output_obj = "v %d %d %d %d %d %d"%(*lm, *lm_color)
+#     return [{"type": "obj", "name": "sfm_landmarks", "file_path":output_obj}]
 
 def draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
                     intrinsics_all_cam, pixel_sizes_all_cams, output_folder):
     """
     Plot the projection of 3D landmarks onto an image. Used for debug mostly.
     """
-    object_colors = (np.random.random([len(json_display), 3])*255).astype(np.int32)
+    POINT_THINKESS = 5
+    object_colors = (np.random.random([len(json_display), 3]))
+    color_min = 0
+    color_max = 1
     for view_id, view_path, extrinsic, intrinsic in zip(views_id, views_path, extrinsics_all_cams, intrinsics_all_cam):
         image = open_image(view_path)
+        color_min = np.amin(image)
+        color_max = np.amax(image)
         # get the projection
         for display_object, object_color in zip(json_display, object_colors):
-            if display_object["type"] == "point":
-                coordinates = display_object["coordinates"]
-                # landmark_projected
-                point_on_cam, z = camera_projection(np.asarray([coordinates], np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
-                point_on_cam = point_on_cam[0]
-                # discard unseen pointss
-                if point_on_cam[0]<0 or point_on_cam[1]<0:
-                    continue
-                if point_on_cam[0] >= image.shape[1] or point_on_cam[1] >= image.shape[0]:
-                    continue
-                if z[0] <= 0:
-                    continue
-                image[point_on_cam[1]-5:point_on_cam[1]+5, point_on_cam[0]-5:point_on_cam[0]+5] = object_color
-            elif display_object["type"] == "cone":
-                coordinates = display_object["coordinates"]
-                point_on_cam, z = camera_projection(np.asarray(coordinates, np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
-                # discard unseen pointss
-                if np.any(point_on_cam[:,0]<0) or np.any(point_on_cam[:,1]<0):
-                    continue
-                if np.any(point_on_cam[:,0]>=image.shape[1]) or np.any(point_on_cam[:,1]>=image.shape[0]):
-                    continue
-                if np.any(z<=0):
-                    continue
-                image[point_on_cam[0,1]-5:point_on_cam[0,1]+5, point_on_cam[0,0]-5:point_on_cam[0,0]+5] = object_color
-            else:
-                raise RuntimeError("Object vizualisation not supported yet")
-
-        save_image(os.path.join(output_folder, view_id+".png"), image)
+            coordinates = display_object["coordinates"]
+            # landmark_projected
+            point_on_cam, z = camera_projection(np.asarray([coordinates], np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
+            point_on_cam = point_on_cam[0]
+            # discard unseen pointss
+            if point_on_cam[0]<0 or point_on_cam[1]<0:
+                continue
+            if point_on_cam[0] >= image.shape[1] or point_on_cam[1] >= image.shape[0]:
+                continue
+            if z[0] <= 0:
+                continue
+            image[point_on_cam[1]-POINT_THINKESS:point_on_cam[1]+POINT_THINKESS, point_on_cam[0]-POINT_THINKESS:point_on_cam[0]+POINT_THINKESS] = object_color*(color_max-color_min)-color_min
+        image_extention = view_path.split(".")[-1]
+        save_image(os.path.join(output_folder, view_id+"."+image_extention), image)
 
 class CreateTrackingMarkers(desc.Node):
 
@@ -136,7 +148,7 @@ class CreateTrackingMarkers(desc.Node):
             label='Track Mode',
             description='''Mode to display over the images''',
             value='display_track_cones',
-            values=['display_track_cones'],
+            values=['display_track_cones', 'display_track_spheres'],
             exclusive=True,
             uid=[0],
         ),
@@ -148,7 +160,7 @@ class CreateTrackingMarkers(desc.Node):
             value='longest',
             values=['longest', 'scale'],
             uid=[0],
-            enabled=lambda node: node.track_mode.value=='display_track_cones',
+            enabled=lambda node: node.track_mode.value=='display_track_cones' or node.track_mode.value=='display_track_spheres',
             exclusive=True
         ),
 
@@ -160,7 +172,7 @@ class CreateTrackingMarkers(desc.Node):
             value=1,
             range=(0, 10000, 1),
             uid=[0],
-            enabled=lambda node: node.track_mode.value=='display_track_cones'
+            enabled=lambda node: node.track_mode.value=='display_track_cones' or node.track_mode.value=='display_track_spheres'
         ),
 
         desc.IntParam(
@@ -170,7 +182,7 @@ class CreateTrackingMarkers(desc.Node):
             value=10,
             range=(0, 10000, 1),
             uid=[0],
-            enabled=lambda node: node.track_mode.value=='display_track_cones'
+            enabled=lambda node: node.track_mode.value=='display_track_cones' or node.track_mode.value=='display_track_spheres'
         ),
 
         desc.IntParam(
@@ -180,7 +192,16 @@ class CreateTrackingMarkers(desc.Node):
             value=10,
             range=(0, 10000, 1),
             uid=[0],
-            enabled=lambda node: node.track_mode.value=='display_track_cones'
+            enabled=lambda node: node.track_mode.value=='display_track_cones' or node.track_mode.value=='display_track_spheres'
+        ),
+
+        desc.BoolParam(
+            name="render",
+            label = "Generate 2D renders",
+            description='''Will render the markers directly on frames ''',
+            value=False,
+            uid=[0],
+            group='',
         ),
 
         desc.ChoiceParam(
@@ -226,57 +247,24 @@ class CreateTrackingMarkers(desc.Node):
             with open(chunk.node.sfmData.value,"r") as json_file:
                 sfm_data = json.load(json_file)
             # get landmarks (sorted by track length)
-            landmarks = get_landmarks_from_sfm_data(sfm_data, chunk.node.track_param_sort_mode.value)
+            landmarks, landmarks_color = get_landmarks_from_sfm_data(sfm_data, chunk.node.track_param_sort_mode.value)
             # generate json corresponding to the method
             display_function = eval(chunk.node.track_mode.value)
             display_options = [attribute._value for attribute in chunk.node.attributes
                                if attribute._enabled and attribute.name.startswith("param_")]#note: hacky but works
-            json_display = display_function(landmarks, *display_options)
+            json_display = display_function(landmarks, landmarks_color, *display_options)
             # write json
             with open(chunk.node.outputFile.value, "w") as json_file:
                 json_file.write(json.dumps(json_display, indent=4))
 
-            # debug
-            #(extrinsics_all_cams, intrinsics_all_cams, views_id,
-            #_, _, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
-            #views_path = [view["path"] for view in sfm_data["views"]]
-            #draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
-            #                        intrinsics_all_cams, pixel_sizes_all_cams, os.path.dirname(chunk.node.outputFile.value))
-
-            # #get calib
-
-            #
-            # print("Method "+chunk.node.mode.value)
-            # vizualisation_function = eval(chunk.node.mode.value)
-            # vizualisation_function(landmarks, views_id, views_path,
-            #                         extrinsics_all_cams, intrinsics_all_cams, pixel_sizes_all_cams,
-            #                         chunk.node.outputFolder.value,
-            #                         parameters=1000)
-
-            #
-
-
-            # #test plot landmarks
-            # for view, vid, extrinsic, intrinsic in zip(sfm_data["views"], views_id, extrinsics_all_cams, intrinsics_all_cams):
-
-            #     if int(vid) != int(view["viewId"]):
-            #         raise RuntimeError("Id mismatch")
-
-            #     image = open_image(view["path"])
-            #     #get the projection
-            #     for landmark in landmarks:
-            #         # landmark_projected
-            #         point_on_cam, z = camera_projection(np.asarray([landmark], np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
-            #         point_on_cam = point_on_cam[0]
-            #         if point_on_cam[0]<0 or point_on_cam[1]<0:
-            #             continue
-            #         if point_on_cam[0]>=image.shape[1] or point_on_cam[1]>=image.shape[0]:
-            #             continue
-            #         if z[0]<=0:
-            #             continue
-            #         image[point_on_cam[1]-5:point_on_cam[1]+5, point_on_cam[0]-5:point_on_cam[0]+5] = [0,0,255]
-            #     save_image(os.path.join(chunk.node.outputFolder.value, view["viewId"]+".png"), image)
-
+            if chunk.node.render.value:
+                #sort images by shot date to be able to sort by creation date in the viewer
+                frame_ids = [view["frameId"] for view in sfm_data["views"]]
+                (extrinsics_all_cams, intrinsics_all_cams, _,
+                _, _, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
+                views_path = [view["path"] for view in sfm_data["views"]]
+                draw_on_images(json_display, frame_ids, views_path, extrinsics_all_cams,
+                               intrinsics_all_cams, pixel_sizes_all_cams, os.path.dirname(chunk.node.outputFile.value))
 
             chunk.logger.info('Vizualisation done')
         finally:
