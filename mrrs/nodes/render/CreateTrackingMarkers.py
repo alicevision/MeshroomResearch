@@ -9,8 +9,10 @@ import json
 import os
 
 from meshroom.core import desc
+from meshroom.core.node import ExecMode
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
+import trimesh
 
 def filter_landmarks_per_tile(landmarks, nb_voxels, nb_landmarks_per_voxels, min_landmark_per_voxel):
     """
@@ -39,6 +41,8 @@ def get_landmarks_from_sfm_data(sfm_data, sort_mode):
     """
     Get landmarks (sorted by track length)
     """
+    if "structure" not in sfm_data.keys():
+        return [], []
     landmarks = []
     landmarks_color = []
     landmarks_track_length = []
@@ -87,15 +91,8 @@ def display_track_cones(landmarks, landmarks_color, landmarks_per_voxel=1, scene
 def display_track_spheres(landmarks, landmarks_color, landmarks_per_voxel=1, scene_tiles=3, min_landmark_per_voxel=0):
     return display_track_obj("sphere", landmarks, landmarks_color, landmarks_per_voxel, scene_tiles, min_landmark_per_voxel)
 
-# def display_landmarks(landmarks, landmarks_color, output_obj):
-#     """
-    
-#     """
-#     #create obj from sfm data
-#     with open(output_obj, "w"):
-#         for lm, lm_color in zip(landmarks, landmarks_color):
-#             output_obj = "v %d %d %d %d %d %d"%(*lm, *lm_color)
-#     return [{"type": "obj", "name": "sfm_landmarks", "file_path":output_obj}]
+def display_no_tracks(landmarks, landmarks_color, landmarks_per_voxel=1, scene_tiles=3, min_landmark_per_voxel=0):
+    return []
 
 def draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
                     intrinsics_all_cam, pixel_sizes_all_cams, output_folder):
@@ -106,24 +103,55 @@ def draw_on_images(json_display, views_id, views_path, extrinsics_all_cams,
     object_colors = (np.random.random([len(json_display), 3]))
     color_min = 0
     color_max = 1
+  
     for view_id, view_path, extrinsic, intrinsic in zip(views_id, views_path, extrinsics_all_cams, intrinsics_all_cam):
-        image = open_image(view_path)
-        color_min = np.amin(image)
-        color_max = np.amax(image)
-        # get the projection
+        try:
+            image = open_image(view_path)
+            image = np.ascontiguousarray(image)
+            color_min = np.amin(image)
+            color_max = np.amax(image)
+        except Exception as ex:
+            print("Issue with image "+view_path+" skipping:")
+            print(ex)
+
         for display_object, object_color in zip(json_display, object_colors):
-            coordinates = display_object["coordinates"]
-            # landmark_projected
-            point_on_cam, z = camera_projection(np.asarray([coordinates], np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
-            point_on_cam = point_on_cam[0]
-            # discard unseen pointss
-            if point_on_cam[0]<0 or point_on_cam[1]<0:
-                continue
-            if point_on_cam[0] >= image.shape[1] or point_on_cam[1] >= image.shape[0]:
-                continue
-            if z[0] <= 0:
-                continue
-            image[point_on_cam[1]-POINT_THINKESS:point_on_cam[1]+POINT_THINKESS, point_on_cam[0]-POINT_THINKESS:point_on_cam[0]+POINT_THINKESS] = object_color*(color_max-color_min)-color_min
+            try:
+                if display_object["type"] == "cones" or display_object["type"] == "sphere":
+                    coordinates = display_object["coordinates"]
+                    # landmark_projected
+                    point_on_cam, z = camera_projection(np.asarray([coordinates], np.float32), extrinsic, intrinsic, pixel_sizes_all_cams[0])
+                    point_on_cam = point_on_cam[0]
+                    # discard unseen pointss
+                    if point_on_cam[0]<0 or point_on_cam[1]<0:
+                        continue
+                    if point_on_cam[0] >= image.shape[1] or point_on_cam[1] >= image.shape[0]:
+                        continue
+                    if z[0] <= 0:
+                        continue
+                    image[point_on_cam[1]-POINT_THINKESS:point_on_cam[1]+POINT_THINKESS, point_on_cam[0]-POINT_THINKESS:point_on_cam[0]+POINT_THINKESS] = object_color*(color_max-color_min)-color_min
+                elif display_object["type"] == "obj":#if mesh, display wireframe
+                    import cv2
+                    mesh = trimesh.load(display_object["file_path"])#FIXME: opens the mesh for each view
+                    vertices = mesh.vertices
+                    faces = mesh.faces
+                    #vertices associated to each face
+                    faces_vertices = vertices[faces]
+                    #vertices projections
+                    projections = [camera_projection(faces_vertices[:,i], extrinsic, intrinsic, pixel_sizes_all_cams[0]) for i in range(3)]
+                    faces_vertices_proj= np.stack([projections[i][0] for i in range(3)], axis=1)
+                    faces_vertices_z = np.stack([projections[i][1] for i in range(3)], axis=-1)
+                    #filter out faces that are not visible
+                    valid_faces = ( np.all(faces_vertices_z>0, axis=-1) &
+                                    np.all(np.all(faces_vertices_proj>0, axis=-1), axis=-1) )#&
+                                    #np.any(np.any(faces_vertices_proj[:]>0, axis=-1), axis=-1))#FIME: finish all
+                    triangles_to_display=faces_vertices_proj[valid_faces]
+                    if triangles_to_display.shape[0]==0:
+                        continue
+                    # for triangle in triangles_to_display:
+                    cv2.polylines(image, triangles_to_display, isClosed = True, color=(0, 0, 0))
+            except Exception as e:
+                print("Issue with view "+view_id+", skipping :")
+                print(e)
         image_extention = view_path.split(".")[-1]
         save_image(os.path.join(output_folder, view_id+"."+image_extention), image)
 
@@ -140,7 +168,15 @@ class CreateTrackingMarkers(desc.Node):
             label='SfmData',
             description='Input sfm file.',
             value=desc.Node.internalFolder,
-            uid=[],
+            uid=[0],
+        ),
+
+        desc.File(
+            name='objFile',
+            label='3D Object',
+            description='Input obj file to display (optional)',
+            value="",
+            uid=[0],
         ),
 
         desc.ChoiceParam(
@@ -148,7 +184,7 @@ class CreateTrackingMarkers(desc.Node):
             label='Track Mode',
             description='''Mode to display over the images''',
             value='display_track_cones',
-            values=['display_track_cones', 'display_track_spheres'],
+            values=['display_track_cones', 'display_track_spheres', 'display_no_tracks'],
             exclusive=True,
             uid=[0],
         ),
@@ -223,6 +259,13 @@ class CreateTrackingMarkers(desc.Node):
             value=os.path.join(desc.Node.internalFolder, "track_objects.json"),
             uid=[],
         ),
+        desc.File(
+            name='outputImages',
+            label='Output Images',
+            description='Output image regex if any',
+            value=os.path.join(desc.Node.internalFolder, "*.png"),
+            uid=[],
+        ),
     ]
 
     def check_inputs(self, chunk):
@@ -253,12 +296,29 @@ class CreateTrackingMarkers(desc.Node):
             display_options = [attribute._value for attribute in chunk.node.attributes
                                if attribute._enabled and attribute.name.startswith("param_")]#note: hacky but works
             json_display = display_function(landmarks, landmarks_color, *display_options)
+            #add mesh if any
+            if chunk.node.objFile.value != "":
+                import trimesh#lazy import
+                #convert mesh to obj
+                new_mesh_file = os.path.join(os.path.dirname(chunk.node.outputFile.value), os.path.basename(chunk.node.objFile.value)+".obj")
+                mesh = trimesh.load(chunk.node.objFile.value)
+                transform =  np.identity(4)
+                transform[1][1] = -1
+                transform[2][2] = -1
+                mesh.apply_transform(transform)
+                mesh.export(new_mesh_file)
+                #add mesh to json
+                json_display.append({"type": "obj",
+                                    "coordinates":(0,0,0),
+                                    "name": "3d reconstruction",
+                                    "file_path": new_mesh_file,
+                                    })
             # write json
             with open(chunk.node.outputFile.value, "w") as json_file:
                 json_file.write(json.dumps(json_display, indent=4))
 
             if chunk.node.render.value:
-                #sort images by shot date to be able to sort by creation date in the viewer
+
                 frame_ids = [view["frameId"] for view in sfm_data["views"]]
                 (extrinsics_all_cams, intrinsics_all_cams, _,
                 _, _, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
