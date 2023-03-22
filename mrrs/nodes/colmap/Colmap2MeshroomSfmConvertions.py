@@ -179,35 +179,41 @@ def colmap2meshroom_extrinsics(colmap_extrinsics, colmap_intrinsics, image_folde
         print("Assuming single camera mode")
         single_cam = True
     for camera_id, colmap_camera in colmap_extrinsics.items():
-        path=colmap_camera.name
-        rotation = np.linalg.inv(qvec2rotmat(colmap_camera.qvec))
-        translation=rotation@(-colmap_camera.tvec)
-        extrinsic = {
-            "poseId": camera_id,
-            "pose": {
-                    "transform": {
-                                    "rotation": rotation.flatten().tolist(),
-                                    "center": translation.flatten().tolist(),
-                                },
-                    "locked": "0"
-                    }
-        }
-        if single_cam:
-            intrinsic_id = 1
-        else:
-            intrinsic_id = camera_id
-        view =  {
-                "viewId": camera_id,
-                "poseId": camera_id,
-                "frameId": camera_id,
-                "intrinsicId": intrinsic_id,
-                "path": os.path.join(image_folder, path),
-                "width": colmap_intrinsics[intrinsic_id].width,
-                "height": colmap_intrinsics[intrinsic_id].height
-                }
+        try:
+            path=colmap_camera.name
+            rotation = np.linalg.inv(qvec2rotmat(colmap_camera.qvec))
+            translation=rotation@(-colmap_camera.tvec)
 
-        views.append(view)
-        extrinsics.append(extrinsic)
+            extrinsic = {
+                "poseId": camera_id,
+                "pose": {
+                        "transform": {
+                                        "rotation": rotation.flatten().tolist(),
+                                        "center": translation.flatten().tolist(),
+                                    },
+                        "locked": "0"
+                        }
+            }
+            if single_cam:
+                intrinsic_id = 1
+            else:
+                intrinsic_id = camera_id
+            view =  {
+                    "viewId": camera_id,
+                    "poseId": camera_id,
+                    "frameId": camera_id,
+                    "intrinsicId": intrinsic_id,
+                    "path": os.path.join(image_folder, path),
+                    "width": colmap_intrinsics[intrinsic_id].width,
+                    "height": colmap_intrinsics[intrinsic_id].height
+                    }
+
+            views.append(view)
+            extrinsics.append(extrinsic)
+        except Exception as ex:
+            print("Issue with view: "+str(camera_id)+" (skipping) :")
+            print(ex)
+            continue
 
     sfm_data["views"] = views
     sfm_data["poses"] = extrinsics
@@ -266,7 +272,7 @@ class Colmap2MeshroomSfmConvertion(desc.Node):
     ]
 
     def processChunk(self, chunk):
-        try:
+        # try:
             chunk.logManager.start(chunk.node.verboseLevel.value)
             if chunk.node.imageFolder.value=="" and chunk.node.inputSfm.value == "":
                 raise RuntimeError("Must input image folder or sfm data")
@@ -287,11 +293,12 @@ class Colmap2MeshroomSfmConvertion(desc.Node):
                         if os.path.basename(source_view["path"]) == os.path.basename(view["path"]):
                             view["path"] = source_view["path"]
                             view["viewId"] = source_view["viewId"]
+                            view["frameId"] = source_view["frameId"]
                             view_found = True
                             break
                     if not view_found:
                         chunk.logger.warn("View "+view["path"]+" not found in sfm")
             with open(chunk.node.outputSfm.value, "w") as json_file:
                 json_file.write(json.dumps(sfm_data, indent=4))
-        finally:
-            chunk.logManager.end()
+        # finally:
+        #     chunk.logManager.end()
