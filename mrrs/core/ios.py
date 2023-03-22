@@ -180,7 +180,9 @@ def open_image(image_path):
     Opens an image and returns it as a np array.
     """
     if image_path.endswith('.exr') or image_path.endswith('.dpx'):
-        image , _ = open_exr(image_path) 
+        image , _ = open_exr(image_path)
+        if image_path.endswith('.dpx'):
+            image = np.flipud(image)
     else:
         image = np.array(Image.open(image_path))
     image = image.astype(np.float32)
