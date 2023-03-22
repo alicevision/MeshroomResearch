@@ -97,9 +97,8 @@ if len(sphere_objects)>0:
 if len("obj")>0:
     for object in wavefront_object:
         file_path = object["file_path"]
-        imported_object = bpy.ops.import_scene.obj(filepath=file_path)
+        imported_object = bpy.ops.wm.obj_import(filepath=file_path, ) #bpy.ops.import_scene.obj(filepath=file_path)        imported_object = bpy.ops.import_scene.obj(filepath=file_path)
         sel_object = bpy.context.selected_objects[0] 
-        sel_object.name = object['name']
 
 
 # Overlay objects on views using estimated poses
