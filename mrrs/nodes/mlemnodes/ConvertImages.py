@@ -6,10 +6,10 @@ __version__ = "3.0"
 import os
 
 from mrrs.core.ios import open_image, save_image
+import cv2 
 from meshroom.core import desc
 
 import json
-import numpy as np
 
 class ConvertImages(desc.Node):
     """
@@ -40,13 +40,30 @@ class ConvertImages(desc.Node):
             uid=[0],
         ),
 
-        #for chamfer
+        #TODO: mode auto
         desc.IntParam(
             name='resampleX',
             label='Resample X',
             description='Resample by a given factor along the x dim.',
             value=1,
             range=(0, 100, 1),
+            uid=[0],
+        ),
+
+        desc.IntParam(
+            name='maxWidth',
+            label='Maximum Width',
+            description='Will resize to the max width (keep the aspect ratio)',
+            value=2024,
+            range=(0, 4096, 1),
+            uid=[0],
+        ),
+
+        desc.BoolParam(
+            name='renameSequence',
+            label='Rename Sequence',
+            description='Renames the frames by order',
+            value=False,
             uid=[0],
         ),
 
@@ -102,13 +119,21 @@ class ConvertImages(desc.Node):
                 input_image = open_image(views_original_file)
                 input_image = input_image[::chunk.node.resampleX.value,::]
                 new_filename = view_id+chunk.node.outputFormat.value
+                if chunk.node.maxWidth.value<input_image.shape[1]:
+                    height = int(input_image.shape[0]*chunk.node.maxWidth.value/input_image.shape[1])
+                    input_image = cv2.resize(input_image, (chunk.node.maxWidth.value, height))
+                if chunk.node.renameSequence.value:
+                    new_filename = "frame_%05d"%index+chunk.node.outputFormat.value
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
                 save_image(output_file, input_image)
                 sfm_data["views"][index]["path"]     = output_file
+                sfm_data["views"][index]["height"]     = int(float(sfm_data["views"][index]["height"])/chunk.node.resampleX.value)
+                
             #update intrisic pixel ratio
             for intrisic in sfm_data["intrinsics"] :
                 old_pixel_ratio = float(intrisic["pixelRatio"])
                 intrisic["pixelRatio"] = str(old_pixel_ratio/chunk.node.resampleX.value)
+                intrisic["height"]     = int(float(intrisic["height"])/chunk.node.resampleX.value)
 
             with open(chunk.node.outputSfMData.value, "w") as json_file:
                 json.dump(sfm_data, json_file, indent=2)
