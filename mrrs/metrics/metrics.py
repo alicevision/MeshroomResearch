@@ -36,8 +36,6 @@ def validity_ratio(depth_map, gt_depth_map, mask):
     """
     Compute the ammount of valid depth pixel on the gt and predicted.
     """
-    print(np.count_nonzero(1-mask))
-    print(depth_map.shape)
     percentage_valid =100*np.count_nonzero(1-mask)/np.prod(depth_map.shape)
     return percentage_valid, None
 
@@ -121,6 +119,20 @@ def compute_calib_metric(metric, extrinsic, intrinsic, gt_extrinsic, gt_intrinsi
     if np.isnan(result):
         raise RuntimeError("Compute metric returned nan")
     return result
+
+#%%Landmarks photo metric
+def MSE_patch(image_0, image_1, pixel_0, pixel_1, half_path_size=3):
+    return np.mean((image_0[pixel_0[0]-half_path_size:pixel_0[0]+half_path_size,
+                            pixel_0[1]-half_path_size:pixel_0[1]+half_path_size]-
+                    image_1[pixel_1[0]-half_path_size:pixel_1[0]+half_path_size,
+                            pixel_1[1]-half_path_size:pixel_1[1]+half_path_size]))**2
+
+def landmarks_photo_metrics(metric, landmarks, extrinsic, intrinsic, images):
+    """
+    Computes a photo loss around keypoints, using consecutive views.
+    This should give a proxy about how goo the calibration is.
+    """
+    pass #FIXME: TODO
 
 #%%Mesh metrics
 

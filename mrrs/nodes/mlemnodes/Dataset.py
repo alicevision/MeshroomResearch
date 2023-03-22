@@ -228,7 +228,7 @@ class Dataset(desc.Node):
                 poses_id.append(pose_id)
                 calibs_id.append(calib_id)
                 views_id.append(view_id)
-            images_sizes = [Image.open(image).size for image in scenes_images]
+            images_sizes = [Image.open(image).size for image in scenes_images]#FIXME: not working with exr
 
             chunk.logManager.start("Exporting calibration")
             gt_extrinsics, gt_intrinsics= open_calibration(scenes_calibs, chunk.node.datasetType.value)
