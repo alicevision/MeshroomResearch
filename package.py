@@ -11,18 +11,17 @@ requires=[
     'Pillow-8.4.0',
     'msgpack_numpy-0.4.7.1',
     'opencv_python-4.5.4.60',
-    #'openexr-3.1.4', #no python binding, we have an oiio mode
-    'pyoiio-2.3.14.0',
-    'trimesh', #needed for meshcompare but technically optional
+    'pyoiio-2.4.7.0',
+    'trimesh', 
     'click', #needed for clis otherwise optional
     #'annoy', #no package send mail
-    'matplotlib-3.4.2' #needed
+    'matplotlib-3.4.2' #needed for?
     ]
 
 def commands():
     """
     Setups mrrs path and meshroom node path env variable
     """
-    env.PYTHONPATH.append('{root}/mrrs')
+    env.PYTHONPATH.append('{root}/MeshroomResearch')
     env.MESHROOM_NODES_PATH.append('{root}/MeshroomResearch/mrrs/nodes')
 
