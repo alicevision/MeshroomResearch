@@ -33,6 +33,14 @@ class CopyData(desc.Node):
             uid=[0],
         ),
 
+        desc.StringParam(
+            name='outputName',
+            label='outputName',
+            description='''Output name''',
+            value='',
+            uid=[0],
+        ),
+
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
@@ -49,7 +57,7 @@ class CopyData(desc.Node):
             name='outputFile',
             label='Output File',
             description='Path to the output file',
-            value=lambda attr: os.path.join(desc.Node.internalFolder, os.path.basename(attr.node.inputFile.value)),
+            value=lambda attr: os.path.join(desc.Node.internalFolder, os.path.basename(attr.node.inputFile.value) if attr.node.outputName.value =="" else attr.node.outputName.value),
             uid=[],
         ),
 
