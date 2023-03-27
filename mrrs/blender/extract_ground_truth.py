@@ -3,10 +3,11 @@ Blender script to extract the ground truth calibration from a rendered scene.
 """
 
 import bpy
+import mathutils
+
 import sys
 import os
 import json
-import mathutils
 
 
 # Command line arguments
@@ -14,8 +15,10 @@ argv = sys.argv[sys.argv.index('--')+1:]
 images_folder = argv[0]
 scene_name = argv[1]
 cam_name = argv[2]
-frame_step = int(argv[3])
-output_folder = argv[4]
+frame_start = int(argv[3])
+frame_end = int(argv[4])
+frame_step = int(argv[5])
+output_folder = argv[6]
 
 print('Extracting ground truth data from Blender file')
 print('Images folder: ' + images_folder)
@@ -54,7 +57,7 @@ poses = []
 mat_convert = mathutils.Matrix.Identity(4)
 mat_convert[1][1] = -1
 mat_convert[2][2] = -1
-for frame in range(scene.frame_start, scene.frame_end+1, frame_step):
+for frame in range(frame_start, frame_end, frame_step):
     scene.frame_set(frame)
     mat = mat_convert @ obj.matrix_world @ mat_convert.transposed()
     mat_rot = mat.to_3x3()
@@ -104,7 +107,7 @@ intrinsics = [
 print('Extracting views')
 
 views = []
-for frame in range(scene.frame_start, scene.frame_end+1, frame_step):
+for frame in range(frame_start, frame_end, frame_step):
     view = {
         'viewId': get_view_id(frame),
         'poseId': get_pose_id(frame),

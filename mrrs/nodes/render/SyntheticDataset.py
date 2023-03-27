@@ -1,14 +1,30 @@
 __version__ = "1.0"
 
-import os
 from meshroom.core import desc
+
+import os
+
+
+class SyntheticDatasetNodeSize(desc.DynamicNodeSize):
+
+    def computeSize(self, node):
+        frameStart = node.attribute('frameStart').value
+        frameEnd = node.attribute('frameEnd').value
+        frameStep = node.attribute('frameStep').value
+        return (frameEnd + 1 - frameStart) / frameStep
 
 
 class SyntheticDataset(desc.InitNode, desc.CommandLineNode):
-    commandLine = 'blender -b {blenderFileValue} -P {scriptValue} \
-                    -- {imagesFolderValue} {sceneNameValue} {cameraNameValue} {frameStepValue} {outputFolderValue}'
+    commandLine = 'blender -b {blenderFileValue} -P {scriptValue} -- \
+                {imagesFolderValue} {sceneNameValue} {cameraNameValue} \
+                {frameStartValue} {frameEndValue} {frameStepValue} \
+                {outputFolderValue}'
+
+    size = SyntheticDatasetNodeSize('')
+
     category = 'Evaluation'
     documentation = 'Utility node to load an evaluation dataset from a given folder.'
+
     inputs = [
         desc.File(
             name='blenderFile',
@@ -43,6 +59,22 @@ class SyntheticDataset(desc.InitNode, desc.CommandLineNode):
             label='Camera Name',
             description='Name of the camera in Blender',
             value='Camera',
+            uid=[0]
+        ),
+        desc.IntParam(
+            name='frameStart',
+            label='Frame Start',
+            description='First frame',
+            value=0,
+            range=(0,1000,1),
+            uid=[0]
+        ),
+        desc.IntParam(
+            name='frameEnd',
+            label='Frame End',
+            description='Last Frame (excluded)',
+            value=100,
+            range=(0,1000,1),
             uid=[0]
         ),
         desc.IntParam(
