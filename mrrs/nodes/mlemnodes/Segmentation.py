@@ -149,7 +149,7 @@ class Segmentation(desc.Node):
                             output_class_radical = output_class.split("_")[0]
                             if output_class_radical in selected_masks:
                                 mask |= output_mask
-                        if chunk.node.inverseClassmask:
+                        if chunk.node.inverseClassmask.value:
                             mask = 255-mask
                         save_image(os.path.join(chunk.node.output.value, views_id+".png"), mask[:,:])
 
