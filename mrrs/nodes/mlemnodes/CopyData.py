@@ -5,10 +5,10 @@ Usefull for exposing intermediate data.
 __version__ = "3.0"
 
 import os
-import json
 
 from meshroom.core import desc
 import shutil
+from distutils.dir_util import copy_tree
 
 class CopyData(desc.Node):
     category = 'Meshroom Research'
@@ -71,9 +71,14 @@ class CopyData(desc.Node):
         try:
             chunk.logManager.start(chunk.node.verboseLevel.value)
             file_to_copy = os.path.join(os.path.dirname(chunk.node.inputFolder.value), chunk.node.inputFile.value)
-            chunk.logger.info("Copying File"+file_to_copy)
-            shutil.copyfile( file_to_copy, chunk.node.outputFile.value)
-            chunk.logger.info('Copying File ends')
+            if os.path.isdir(file_to_copy):
+                chunk.logger.info("Copying folder"+file_to_copy)
+                copy_tree( file_to_copy, chunk.node.outputFile.value)
+                chunk.logger.info('Copying folder ends')
+            else: 
+                chunk.logger.info("Copying file"+file_to_copy)
+                shutil.copyfile( file_to_copy, chunk.node.outputFile.value)
+                chunk.logger.info('Copying file ends')
         finally:
             chunk.logManager.end()
 
