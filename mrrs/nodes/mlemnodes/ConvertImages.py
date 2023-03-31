@@ -8,7 +8,7 @@ import os
 from mrrs.core.ios import open_image, save_image
 import cv2 
 from meshroom.core import desc
-
+import numpy as np
 import json
 
 class ConvertImages(desc.Node):
@@ -56,6 +56,14 @@ class ConvertImages(desc.Node):
             description='Will resize to the max width (keep the aspect ratio)',
             value=2024,
             range=(0, 4096, 1),
+            uid=[0],
+        ),
+
+        desc.BoolParam(
+            name='rotateLeft',
+            label='Rotate left',
+            description='Rotates the frames on the left',
+            value=False,
             uid=[0],
         ),
 
@@ -117,24 +125,34 @@ class ConvertImages(desc.Node):
             for index, (view_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
                 chunk.logger.info('Doing convertion for image %d/%d images'%(index, len(views_ids)))
                 input_image = open_image(views_original_file)
-                input_image = input_image[::chunk.node.resampleX.value,::]
+                input_image = input_image[::chunk.node.resampleX.value,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
-                if chunk.node.maxWidth.value<input_image.shape[1]:
+                if chunk.node.maxWidth.value<input_image.shape[1]:#max sie
                     height = int(input_image.shape[0]*chunk.node.maxWidth.value/input_image.shape[1])
                     input_image = cv2.resize(input_image, (chunk.node.maxWidth.value, height))
                 if chunk.node.renameSequence.value:
                     new_filename = "frame_%05d"%index+chunk.node.outputFormat.value
+                if chunk.node.rotateLeft.value:#rename
+                    input_image = np.rot90(input_image)
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
                 save_image(output_file, input_image)
                 sfm_data["views"][index]["path"]     = output_file
-                sfm_data["views"][index]["height"]     = int(float(sfm_data["views"][index]["height"])/chunk.node.resampleX.value)
-                
+                #not used
+                #sfm_data["views"][index]["height"]     = int(float(sfm_data["views"][index]["height"])/chunk.node.resampleX.value)
+
             #update intrisic pixel ratio
             for intrisic in sfm_data["intrinsics"] :
                 old_pixel_ratio = float(intrisic["pixelRatio"])
                 intrisic["pixelRatio"] = str(old_pixel_ratio/chunk.node.resampleX.value)
-                intrisic["height"]     = int(float(intrisic["height"])/chunk.node.resampleX.value)
-
+                if chunk.node.maxWidth.value<int(intrisic["width"]):#update image size
+                    intrisic["height"] = int(int(intrisic["height"])*chunk.node.maxWidth.value/int(intrisic["width"]))
+                    intrisic["width"] = chunk.node.maxWidth.value
+                else:
+                    intrisic["height"] = int(float(intrisic["height"])/chunk.node.resampleX.value)
+                if chunk.node.rotateLeft.value:
+                    h=intrisic["height"]
+                    intrisic["height"] = intrisic["width"]
+                    intrisic["width"] = h
             with open(chunk.node.outputSfMData.value, "w") as json_file:
                 json.dump(sfm_data, json_file, indent=2)
 
