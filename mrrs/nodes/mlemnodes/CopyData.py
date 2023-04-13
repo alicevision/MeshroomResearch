@@ -70,12 +70,15 @@ class CopyData(desc.Node):
         """
         try:
             chunk.logManager.start(chunk.node.verboseLevel.value)
-            file_to_copy = os.path.join(os.path.dirname(chunk.node.inputFolder.value), chunk.node.inputFile.value)
+            input_dir = chunk.node.inputFolder.value
+            if os.path.isfile(input_dir):
+                input_dir = os.path.dirname(input_dir)
+            file_to_copy = os.path.join(input_dir, chunk.node.inputFile.value)
             if os.path.isdir(file_to_copy):
                 chunk.logger.info("Copying folder"+file_to_copy)
                 copy_tree( file_to_copy, chunk.node.outputFile.value)
                 chunk.logger.info('Copying folder ends')
-            else: 
+            else:
                 chunk.logger.info("Copying file"+file_to_copy)
                 shutil.copyfile( file_to_copy, chunk.node.outputFile.value)
                 chunk.logger.info('Copying file ends')

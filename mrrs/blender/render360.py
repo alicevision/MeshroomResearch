@@ -44,11 +44,11 @@ cam_loc_y = cam.location.y
 dist = (target.location.xy-cam.location.xy).length
 #ugly fix to get the initial angle right
 init_angle  = (1-2*bool((cam_loc_y-t_loc_y)<0))*acos((cam_loc_x-t_loc_x)/dist)-2*pi*bool((cam_loc_y-t_loc_y)<0)
-
+bpy.ops.wm.save_as_mainfile(filepath=os.path.abspath(output_folder)+"/project.blend")
 for x in range(num_steps):
     alpha = init_angle + (x+1)*2*pi/num_steps
     cam.rotation_euler[2] = pi/2+alpha
     cam.location.x = t_loc_x+cos(alpha)*dist
     cam.location.y = t_loc_y+sin(alpha)*dist
     bpy.context.scene.render.filepath = os.path.abspath(output_folder + '/%05d'%x)
-    bpy.ops.render.render( write_still=True ) 
+    bpy.ops.render.render(write_still=True)

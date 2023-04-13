@@ -137,8 +137,9 @@ class ConvertImages(desc.Node):
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
                 save_image(output_file, input_image)
                 sfm_data["views"][index]["path"]     = output_file
-                #not used
-                #sfm_data["views"][index]["height"]     = int(float(sfm_data["views"][index]["height"])/chunk.node.resampleX.value)
+                #not used in sfm?
+                sfm_data["views"][index]["width"] = input_image.shape[1]
+                sfm_data["views"][index]["height"] = input_image.shape[0]
 
             #update intrisic pixel ratio
             for intrisic in sfm_data["intrinsics"] :

@@ -13,6 +13,7 @@ class Render360(desc.CommandLineNode):
     commandLine = 'blender -b -P {scriptValue} -- {objectFileValue}  {outputFolderValue} {renderStepsValue}'
     category = 'Evaluation'
     documentation = 'This nodes renders an object as in a turntable'
+    gpu = desc.Level.INTENSIVE
     inputs = [
         desc.File(
             name='script',
@@ -55,12 +56,3 @@ class Render360(desc.CommandLineNode):
             uid=[]
         ),
     ]
-
-    # def processChunk(self, chunk):
-    #     # center and normalise the mesh
-    #     mesh = trimesh.load(chunk.node.objectFile.value)
-    #     mesh.vertices-=np.mean(mesh.vertices, axis=-0)
-    #     new_mesh = os.path.join(chunk.node.outputFolder.value, os.path.basename(chunk.node.objectFile.value))
-    #     mesh.export(new_mesh)
-    #     chunk.node._cmdVars["allParams"].format(objectFileCenteredValue=new_mesh)
-    #     super().processChunk(chunk)
