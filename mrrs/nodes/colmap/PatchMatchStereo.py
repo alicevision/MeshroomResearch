@@ -14,13 +14,6 @@ from . import COLMAP
 
 class PatchMatchStereo(desc.CommandLineNode):
     commandLine = COLMAP+' patch_match_stereo {allParams}'
-
-    if platform.startswith('win32'):
-        # Windows-specific code here...
-        commandLine = 'colmap.bat patch_match_stereo {allParams}'
-    elif platform.startswith('linux'):
-        # Linux-specific code here...
-        commandLine = 'colmap patch_match_stereo {allParams}'
     
     category = 'Colmap'
     documentation = ''''''
