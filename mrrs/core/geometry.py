@@ -93,6 +93,22 @@ def camera_deprojection_meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_
     return scene_points
 
 #%% Triangle operations
+def distance_point_to_line(points, line_point_0, line_point_1):
+    """compute distance between points and the 
+        defined by line_point_0 and line_point_1"""
+    # normalized tangent vector of the line 
+    line_tan_vec = np.divide(line_point_1 - line_point_0, np.linalg.norm(line_point_1 - line_point_0))
+    # signed parallel distance components btw line tangeant and point-line points
+    s = np.dot(line_point_0 - points, line_tan_vec)
+    t = np.dot(points - line_point_1, line_tan_vec)
+    # clamped parallel distance
+    h = np.maximum.reduce([s, t, np.zeros_like(s)])
+    # perpendicular distance component
+    c = np.cross(points - line_point_0, line_tan_vec)
+    #point-line distance is hypotenus
+    dist = np.sqrt(h**2+np.linalg.norm(c, axis=-1)**2)
+    return dist
+
 def compute_triangle_area(triangle):
     """
     A utility function to calculate compute_triangle_area

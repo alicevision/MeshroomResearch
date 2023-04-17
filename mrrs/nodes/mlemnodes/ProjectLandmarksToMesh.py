@@ -14,10 +14,10 @@ from trimesh import load
 import yaml
 from yaml.loader import SafeLoader
 
-from mrrs.core.geometry import camera_deprojection
+from mrrs.core.geometry import camera_deprojection, distance_point_to_line
 from mrrs.core.ios import matrices_from_sfm_data
 
-DEBUG = False
+DEBUG = True
 
 class ProjectLandmarksToMesh(desc.Node):
     category = 'Meshroom Research'
@@ -117,14 +117,14 @@ class ProjectLandmarksToMesh(desc.Node):
                 except Exception as e:
                     chunk.logger.warning('Something whent wrong with file '+landmark_file+" skipping:"+str(e))
                 landmarks.append(landmark)
-                if DEBUG:
-                    from PIL import Image
-                    image_size = Image.open(image).size
-                    im = np.asarray(Image.open(image))
-                    for lm in landmark:
-                        if lm[0]>0 and lm[0] < image_size[0] and lm[1]>0 and lm[1] < image_size[1]:
-                            im[lm[1]-5:lm[1]+5, lm[0]-5:lm[0]+5]=(255,0,0)
-                    Image.fromarray(im).save(chunk.node.outputFolder.value+"/"+os.path.basename(image))
+                # if DEBUG:
+                #     from PIL import Image
+                #     image_size = Image.open(image).size
+                #     im = np.asarray(Image.open(image))
+                #     for lm in landmark:
+                #         if lm[0]>0 and lm[0] < image_size[0] and lm[1]>0 and lm[1] < image_size[1]:
+                #             im[lm[1]-5:lm[1]+5, lm[0]-5:lm[0]+5]=(255,0,0)
+                #     Image.fromarray(im).save(chunk.node.outputFolder.value+"/"+os.path.basename(image))
             landmarks = np.asarray(landmarks)
 
             #load mesh 
@@ -135,65 +135,43 @@ class ProjectLandmarksToMesh(desc.Node):
             vertices=np.transpose(transform_mat@np.transpose(vertices))
 
             ##Compute equivalence
-            def distance_point_to_line(points, line_point_0, line_point_1):
-                """compute distance between points and the 
-                 defined by line_point_0 and line_point_1"""
-                # normalized tangent vector of the line 
-                line_tan_vec = np.divide(line_point_1 - line_point_0, np.linalg.norm(line_point_1 - line_point_0))
-                # signed parallel distance components btw line tangeant and point-line points
-                s = np.dot(line_point_0 - points, line_tan_vec)
-                t = np.dot(points - line_point_1, line_tan_vec)
-                # clamped parallel distance
-                h = np.maximum.reduce([s, t, np.zeros_like(s)])
-                # perpendicular distance component
-                c = np.cross(points - line_point_0, line_tan_vec)
-                #point-line distance is hypotenus
-                dist = np.sqrt(h**2+np.linalg.norm(c, axis=-1)**2)
-                return dist
-
             #compute the vertices in the mesh closest to the ray
-            closest_per_view = []
+            # closest_per_view = [] #FIXME: save distances instead? and take the argmin at the end
+            ray_vertices_total_distance = np.zeros((landmarks.shape[1], vertices.shape[0]))
             FAR_AWAY = 10
             for lms, extrinsic, intrinsic, image  in zip(landmarks, extrinsics, intrinsics, images):
                 print("Image "+image)
                 origin = extrinsic[0:3,3]
                 point_1m = camera_deprojection(np.transpose(lms[:,0:2]), np.asarray([FAR_AWAY]), extrinsic, intrinsic, pixel_sizes[0])#fixme: could get line direclty
-
-                dist_vertex_rays = np.zeros((point_1m.shape[0],vertices.shape[0]))
                 for li,l in enumerate(point_1m):
-                    print("%d/%d"%(li, point_1m.shape[0]))
-                    dist_vertex_rays[li,:] = distance_point_to_line(vertices,origin, l)
-                closest_per_view.append(np.argmin(dist_vertex_rays, axis=-1))
-                closest = np.argmin(dist_vertex_rays, axis=-1)
+                    print("Computing distances for landmark %02d/%02d"%(li, point_1m.shape[0]), end="\r")
+                    ray_vertices_total_distance[li,:] += distance_point_to_line(vertices,origin, l)
+                if DEBUG:
+                    with open(chunk.node.outputFolder.value+"/"+os.path.basename(image)+".obj", "w") as f:
+                        f.write("v %f %f %f\n"%(origin[0],origin[1],origin[2]))
+                        for li,l in enumerate(point_1m):
+                            f.write("v %f %f %f\n"%(l[0], l[1], l[2]))
+                        for li,l in enumerate(point_1m):
+                            f.write("l %d %d\n"%(1, li+2))
 
-                # # # tmp save
+            closest_idx= np.argmin(ray_vertices_total_distance, axis=-1)
+            if DEBUG:
                 with open(chunk.node.outputFolder.value+"/"+os.path.basename(image)+".obj", "w") as f:
-                    f.write("v %f %f %f\n"%(origin[0],origin[1],origin[2]))
-                    for li,l in enumerate(point_1m):
-                        f.write("v %f %f %f\n"%(l[0], l[1], l[2]))
-                    for li,l in enumerate(point_1m):
-                        f.write("l %d %d\n"%(1, li+2))
-                    for ci,c in enumerate(closest):
+                    for c in closest_idx:
                         f.write("v %f %f %f 0 0 255\n"%(vertices[c][0], vertices[c][1], vertices[c][2]))
-
-
-                closest_per_view.append(closest)
-            
-            uniques, counts = np.unique(closest_per_view, return_counts=True, axis=0)
-            closest_idx = uniques[np.argmax(counts)].tolist()
 
             ##Save results
             print("Saving")
             with open(chunk.node.outputCorrespondances.value, "w") as f:
-                f.write(json.dumps({"idx_to_landmark_verts":closest_idx}))
-
-            #debug export mesh
-            mesh.vertices = vertices
-            mesh.export(chunk.node.outputFolder.value+"/mesh.obj")
-            #debug export landmarks vertices
-            with open(chunk.node.outputFolder.value+"/corresp.obj", "w") as f:
-                for v in vertices[closest_idx]:
-                    f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
+                f.write(json.dumps({"idx_to_landmark_verts":closest_idx.tolist()}))
+            if DEBUG:
+                #debug export mesh
+                mesh.vertices = vertices
+                mesh.export(chunk.node.outputFolder.value+"/mesh.obj")
+                #debug export landmarks vertices
+                with open(chunk.node.outputFolder.value+"/corresp.obj", "w") as f:
+                    for v in vertices[closest_idx]:
+                        f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
             print('DONE')
         finally:
             chunk.logManager.end()
