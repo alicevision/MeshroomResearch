@@ -4,7 +4,7 @@ Usefull for exposing intermediate data.
 """
 __version__ = "3.0"
 
-import json
+
 from meshroom.core import desc
 
 import numpy as np
@@ -12,24 +12,345 @@ import msgpack
 import os
 import trimesh
 import torch
+import json
 
-# LANDMARK_SELECTION = np.asarray([ #
-#                                  28,29,30,31,#nose center
-#                                  32,33,34,35,36,#nose
-#                                  37,38,39,40,41,42#reye
-#                                  43,44,45,46,47,48#leye
+#General params
+DEBUG=True
+BUFFER_EARLY_STOP = 10# how many iteration to consider in the early stopping
+EARLY_STOP_RATIO = 1/10000#stop when std of error is x smaller than N*average error
 
-#                                 ])-1#because ofc on every piture index starts at 1
+#init pose params
+LANDMARK_BLAKLIST = np.arange(0,16+1)#removes the jaw landmarks FIXME: hardcoded
+LEARNING_RATE_ALIGN  = 10e-5
+ITERATIONS_ALIGN = 10000 #max iteration alignement
 
-LANDMARK_BLAKLIST = np.arange(0,16+1)#removes the jaw landmarks
+#3dmm optim 
+VOXEL_GRID_SIZE = 1#used for voxel chopping, use smallest possible that doesnt do ooms
+LEARNING_RATE_FIT = 10e-3#10e-3 for all vertices grid
+ITERATIONS_FIT = 10000  #max iteration
+SAMPLE_STEP_LOSS = 6
+
+def _axis_angle_rotation(axis: str, angle: torch.Tensor) -> torch.Tensor:
+    """
+    Return the rotation matrices for one of the rotations about an axis
+    of which Euler angles describe, for each value of the angle given.
+    Args:
+        axis: Axis label "X" or "Y or "Z".
+        angle: any shape tensor of Euler angles in radians
+    Returns:
+        Rotation matrices as tensor of shape (..., 3, 3).
+    """
+    cos = torch.cos(angle)
+    sin = torch.sin(angle)
+    one = torch.ones_like(angle)
+    zero = torch.zeros_like(angle)
+
+    if axis == "X":
+        R_flat = (one, zero, zero, zero, cos, -sin, zero, sin, cos)
+    elif axis == "Y":
+        R_flat = (cos, zero, sin, zero, one, zero, -sin, zero, cos)
+    elif axis == "Z":
+        R_flat = (cos, -sin, zero, sin, cos, zero, zero, zero, one)
+    else:
+        raise ValueError("letter must be either X, Y or Z.")
+
+    return torch.stack(R_flat, -1).reshape(angle.shape + (3, 3))
+
+def _euler_angles_to_matrix(euler_angles: torch.Tensor, convention: str = "ZYX") -> torch.Tensor:
+    """
+    Convert rotations given as Euler angles in radians to rotation matrices.
+    Args:
+        euler_angles: Euler angles in radians as tensor of shape (..., 3).
+        convention: Convention string of three uppercase letters from
+            {"X", "Y", and "Z"}.
+    Returns:
+        Rotation matrices as tensor of shape (..., 3, 3).
+    """
+    if euler_angles.dim() == 0 or euler_angles.shape[-1] != 3:
+        raise ValueError("Invalid input euler angles.")
+    if len(convention) != 3:
+        raise ValueError("Convention must have 3 letters.")
+    if convention[1] in (convention[0], convention[2]):
+        raise ValueError(f"Invalid convention {convention}.")
+    for letter in convention:
+        if letter not in ("X", "Y", "Z"):
+            raise ValueError(f"Invalid letter {letter} in convention string.")
+    matrices = [
+        _axis_angle_rotation(c, e)
+        for c, e in zip(convention, torch.unbind(euler_angles, -1))
+    ]
+    return torch.matmul(torch.matmul(matrices[0], matrices[1]), matrices[2])
+
+def align_meshes_from_landmarks(neutral_scan_landmarks_vertices, neutral_3dmm_landmarks_vertices, debug_folder="./"):
+    ##Init scales and translation
+    #translation from barycenter scan ->  0 -> 3dmm
+    neutral_scan_barycenter = np.mean(neutral_scan_landmarks_vertices, axis=0)
+    neutral_3dmm_barycenter = np.mean(neutral_3dmm_landmarks_vertices, axis=0)
+    init_translation = neutral_3dmm_barycenter-neutral_scan_barycenter
+    #init scale from RMSD scan ->  0 -> 3dmm
+    # neutral_scan_scale = np.std(neutral_scan_landmarks_vertices-neutral_scan_barycenter, axis=0)
+    # neutral_3dmm_scale = np.std(neutral_3dmm_landmarks_vertices-neutral_3dmm_barycenter, axis=0)
+    init_scale = [1.0] #np.mean(neutral_3dmm_scale/neutral_scan_scale) #scale may not be the same in 3ds because of errors in lms
+
+    #init torch variables
+    neutral_scan_landmarks_vertices=torch.FloatTensor(neutral_scan_landmarks_vertices)
+    neutral_3dmm_landmarks_vertices=torch.FloatTensor(neutral_3dmm_landmarks_vertices)
+    translation = torch.autograd.Variable(torch.FloatTensor(init_translation), requires_grad=True)
+    rotation_euler_angles = torch.autograd.Variable(torch.FloatTensor([0,0,0]), requires_grad=True)
+    scale = torch.autograd.Variable(torch.FloatTensor(init_scale), requires_grad=True)
+
+    def tranform(vertices, scale, rotation_euler_angles, translation):
+        rot_matrix = _euler_angles_to_matrix(rotation_euler_angles)
+        return torch.matmul(rot_matrix,scale*np.transpose(vertices)).t()+translation
+
+    def loss_fc(x,y):
+        return ((x-y)**2).sum()
+
+    optimizer = torch.optim.SGD([translation, rotation_euler_angles, scale], lr=LEARNING_RATE_ALIGN, momentum=0.9)
+
+    # if DEBUG:
+    #     with open(debug_folder+"/orig.obj", "w") as f:
+    #         for v in neutral_scan_landmarks_vertices:
+    #             f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
+    #         for v in neutral_3dmm_landmarks_vertices:
+    #             f.write("v %f %f %f 0 1 0\n"%(v[0], v[1], v[2]))
+    losses = []
+    for iteration in range(ITERATIONS_ALIGN):#simple GD with loss between landmarks on the meshes
+        neutral_scan_landmarks_vertices_transformed = tranform(neutral_scan_landmarks_vertices, scale, rotation_euler_angles, translation)
+        loss = loss_fc(neutral_3dmm_landmarks_vertices,
+                        neutral_scan_landmarks_vertices_transformed)
+        print("Iteration %d loss %f scale %f translation %f %f %f rotation %f %f %f "%(iteration, loss, scale,
+                                                                                        translation[0], translation[1], translation[2],
+                                                                                        rotation_euler_angles[0], rotation_euler_angles[1], rotation_euler_angles[2],
+                                                                                        ), end="\r")
+        losses.append(loss.detach().numpy())
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+
+        #earky stopping
+        std = np.std(losses[-BUFFER_EARLY_STOP:])
+        mean = np.mean(losses[-BUFFER_EARLY_STOP:])
+        if (iteration > BUFFER_EARLY_STOP) and (std < EARLY_STOP_RATIO*mean):
+            print("\nConvergeance reached, stopping")
+            break
+    print("\n")
+
+    translation = translation.detach().numpy()
+    rot_matrix = _euler_angles_to_matrix(rotation_euler_angles).detach().numpy()  
+    scale = scale.detach().numpy()
+
+    return scale, translation, rot_matrix
+
+def _voxel_chopping(points, voxel_grid_size=3, bounding_params = None):
+    """
+    Will create groups of points inside the same voxel.
+    Return point indices, also can be duplicated
+    """
+    if bounding_params is None:
+        min_points = np.amin(points, axis=0)
+        max_points = np.amax(points, axis=0)
+    else:
+        min_points, max_points = bounding_params
+    grid_steps = (max_points-min_points)/float(voxel_grid_size)
+    hashed_vertices_list = []
+    indices = np.arange(points.shape[0])
+    for x in range(voxel_grid_size):
+        for y in range(voxel_grid_size):
+            for z in range(voxel_grid_size):
+                voxel_min = min_points+grid_steps*[x,y,z]
+                voxel_max = min_points+grid_steps*[x+1,y+1,z+1]
+                points_in_range = indices[np.all((voxel_min<=points) & (points<voxel_max), axis=-1)]
+                hashed_vertices_list.append(points_in_range)
+    return hashed_vertices_list, (min_points, max_points, grid_steps)
+
+class DistToClosest(torch.nn.Module):
+    def forward(self,x,y):
+        if x.shape[0]==0 or y.shape[0]==0:
+            return torch.tensor(0.0, device=x.get_device()), torch.zeros_like(x, device=x.get_device())
+        
+        closest_dists = []
+        for _x in x:#get closest point in y for each point in x
+            dist_x = torch.sum((y-_x)**2, axis=-1)
+            closest_dist = torch.min(dist_x)
+            closest_dists.append(closest_dist)
+        closest_dists=torch.stack(closest_dists)
+
+        # # (N,3)=>(M,N,3)
+        # y_new = torch.tile(torch.unsqueeze(y,axis=1),dims=[1,x.shape[0],1])
+        # # (M,3))=(M,N,3)
+        # x_new = torch.tile(torch.unsqueeze(x,axis=0),dims=[y.shape[0],1,1])
+        # # (M,N,3)=>(M,N)
+        # dist = torch.sum(torch.square(x_new - y_new),axis=1)
+        # #M
+        # closest_dists=torch.min(dist, axis=0).values
+
+        return torch.sum(closest_dists), closest_dists
+
+def dist_to_closest(x,y):
+        if x.shape[0]==0 or y.shape[0]==0:
+            return torch.tensor(0.0, device=x.get_device()), torch.zeros_like(x, device=x.get_device())
+        # (N,3)=>(M,N,3)
+        y_new = torch.tile(torch.unsqueeze(y,axis=1),dims=[1,x.shape[0],1])
+        # (M,3))=(M,N,3)
+        x_new = torch.tile(torch.unsqueeze(x,axis=0),dims=[y.shape[0],1,1])
+        # (M,N,3)=>(M,N)
+        dist = torch.sum(torch.square(x_new - y_new),axis=-1)
+        #M
+        closest_dists=torch.min(dist, axis=0).values
+        return torch.sum(closest_dists), closest_dists
+
+def optimise_3dmm_pca(neutral_mean_3dmm, neutral_scan, pca_mean, pca_pc, debug_folder="./"):
+    print("Building voxel chopping for efficient loss computation")
+
+    #common bounding box
+    min_points = np.amin(np.concatenate([neutral_mean_3dmm.vertices, neutral_scan.vertices], axis=0), axis=0)
+    max_points = np.amax(np.concatenate([neutral_mean_3dmm.vertices, neutral_scan.vertices], axis=0), axis=0)
+    bb=(min_points, max_points)
+    neutral_mean_3dmm_vertices_idx_hashed, _ = _voxel_chopping(neutral_mean_3dmm.vertices, VOXEL_GRID_SIZE, bb)
+    neutral_scan_vertices_idx_hashed, _ = _voxel_chopping(neutral_scan.vertices, VOXEL_GRID_SIZE, bb)
+
+    # #tmp debug: CHECK vexelisation
+    # for i in range(VOXEL_GRID_SIZE**3):
+    #     if (neutral_mean_3dmm_vertices_idx_hashed[i].shape[0]>0 and 
+    #         neutral_scan_vertices_idx_hashed[i].shape[0]>0 ):
+    #         with open(chunk.node.outputFolder.value+"/tmp_%d.obj"%i, "w") as f:
+    #             for v in neutral_mean_3dmm.vertices[neutral_mean_3dmm_vertices_idx_hashed[i]]:
+    #                 f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
+    #             for v in neutral_scan.vertices[neutral_scan_vertices_idx_hashed[i]]:
+    #                 f.write("v %f %f %f 0 1 0\n"%(v[0], v[1], v[2]))
+
+    #init
+    pca_coefficients = torch.autograd.Variable(torch.zeros((pca_pc.shape[0],1,1), device="cuda:0"), requires_grad=True)
+    optimizer = torch.optim.SGD([pca_coefficients], lr=LEARNING_RATE_FIT)
+
+    loss_fc = DistToClosest()
+    loss_fc=loss_fc.cuda()
+
+    neutral_optimized_3dmm = neutral_mean_3dmm.copy()
+    target_vertices = torch.tensor(neutral_scan.vertices, device="cuda:0")
+
+    #optim"
+    print("Optimising")
+    losses=[]
+    for iteration in range(ITERATIONS_FIT):
+        #compute vertices from pca coefs
+        # new_vertices = pca_mean + torch.sum(pca_coefficients*pca_pc, axis=0)
+        # with open(chunk.node.outputFolder.value+"/pca_%d.obj"%iteration, "w") as f:
+        #     for v in new_vertices:
+        #         f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
+        # loss = 0
+        # for i in range(VOXEL_GRID_SIZE**3):
+        #     l, d =loss_fc(new_vertices[ neutral_mean_3dmm_vertices_idx_hashed[i]],
+        #                                 target_vertices[neutral_scan_vertices_idx_hashed[i]][::SAMPLE_STEP_LOSS])
+        #     if neutral_mean_3dmm_vertices_idx_hashed[i].shape[0]==0 or neutral_scan_vertices_idx_hashed[i].shape[0]==0:
+        #         continue
+        #     # #fake color dist
+        #     # d/=torch.min(d)
+
+        #     # if iteration == 0:
+        #     #     if (neutral_mean_3dmm_vertices_idx_hashed[i].shape[0]>0 and
+        #     #         neutral_scan_vertices_idx_hashed[i].shape[0]>0 ):
+        #     #         with open(chunk.node.outputFolder.value+"/loss_%d.obj"%i, "w") as f:
+        #     #             for v,c in zip(new_vertices[neutral_mean_3dmm_vertices_idx_hashed[i]], d):
+        #     #                 f.write("v %f %f %f %f %f 0\n"%(v[0], v[1], v[2], c, 1-c))
+        #     #     else:
+        #     #         print("skip")
+
+        #     loss+=l
+
+        # #subsampling 
+        new_vertices = pca_mean[::SAMPLE_STEP_LOSS] + torch.sum(pca_coefficients*pca_pc[:, ::SAMPLE_STEP_LOSS], axis=0)
+        # loss,_=loss_fc(new_vertices,target_vertices[::SAMPLE_STEP_LOSS])
+        loss,_=dist_to_closest(new_vertices,target_vertices[::SAMPLE_STEP_LOSS])
+        
+
+
+        print("Iteration %d loss %f first coefs %f %f %f"%(iteration, loss, pca_coefficients[0],  pca_coefficients[1],  pca_coefficients[2]), end="\r")
+        loss.backward()#FIXME: takes long ! reduce nb of vertices 
+        optimizer.step()
+        optimizer.zero_grad()
+        if DEBUG:
+            if iteration%100 == 0:
+                new_vertices = pca_mean+ torch.sum(pca_coefficients*pca_pc, axis=0)
+                neutral_optimized_3dmm.vertices = new_vertices.cpu().detach().numpy()
+                neutral_optimized_3dmm.export(debug_folder+"/mesh_optimised_3dmm_%d.obj"%iteration)
+
+        #earky stopping
+        losses.append(loss.detach().cpu().numpy())
+        std = np.std(losses[-BUFFER_EARLY_STOP:])
+        mean = np.mean(losses[-BUFFER_EARLY_STOP:])
+        if (iteration > BUFFER_EARLY_STOP) and (std < EARLY_STOP_RATIO*mean):
+            print("\nConvergeance reached, stopping")
+            break
+    return new_vertices.cpu().detach().numpy()
+
+def optimise_3dmm_vertices(neutral_mean_3dmm, neutral_scan, debug_folder="./"):
+    print("Building voxel chopping for efficient loss computation")
+
+    #common bounding box
+    min_points = np.amin(np.concatenate([neutral_mean_3dmm.vertices, neutral_scan.vertices], axis=0), axis=0)
+    max_points = np.amax(np.concatenate([neutral_mean_3dmm.vertices, neutral_scan.vertices], axis=0), axis=0)
+    bb=(min_points, max_points)
+    neutral_mean_3dmm_vertices_idx_hashed, _ = _voxel_chopping(neutral_mean_3dmm.vertices, VOXEL_GRID_SIZE, bb)
+    neutral_scan_vertices_idx_hashed, _ = _voxel_chopping(neutral_scan.vertices, VOXEL_GRID_SIZE, bb)
+
+    #init
+    neutral_mean_3dmm_optimised = torch.autograd.Variable(torch.zeros_like(neutral_mean_3dmm.vertices, device="cuda:0"), requires_grad=True)
+    optimizer = torch.optim.SGD([neutral_mean_3dmm_optimised], lr=LEARNING_RATE_FIT)
+   
+    loss_fc = DistToClosest()
+    loss_fc=loss_fc.cuda()
+
+    neutral_optimized_3dmm = neutral_mean_3dmm.copy()
+    target_vertices = torch.tensor(neutral_scan.vertices, device="cuda:0")
+
+    #optim"
+    print("Optimising")
+    for iteration in range(ITERATIONS_FIT):#FIXME: put someting else
+  
+        # with open(chunk.node.outputFolder.value+"/pca_%d.obj"%iteration, "w") as f:
+        #     for v in new_vertices:
+        #         f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2])) 
+        loss = 0
+        for i in range(VOXEL_GRID_SIZE**3):
+            l, d =loss_fc(neutral_mean_3dmm_optimised[ neutral_mean_3dmm_vertices_idx_hashed[i]], 
+                          target_vertices[neutral_scan_vertices_idx_hashed[i]])
+            if neutral_mean_3dmm_vertices_idx_hashed[i].shape[0]==0 or neutral_scan_vertices_idx_hashed[i].shape[0]==0:
+                continue
+            # #fake color dist
+            # d/=torch.min(d)
+
+            # if iteration == 0:
+            #     if (neutral_mean_3dmm_vertices_idx_hashed[i].shape[0]>0 and 
+            #         neutral_scan_vertices_idx_hashed[i].shape[0]>0 ):
+            #         with open(chunk.node.outputFolder.value+"/loss_%d.obj"%i, "w") as f:
+            #             for v,c in zip(new_vertices[neutral_mean_3dmm_vertices_idx_hashed[i]], d):
+            #                 f.write("v %f %f %f %f %f 0\n"%(v[0], v[1], v[2], c, 1-c))
+            #     else:
+            #         print("skip")
+
+            loss+=l
+      
+        print("Iteration %d loss %f "%(iteration, loss), end="\r")
+        loss.backward()
+        optimizer.step()
+        optimizer.zero_grad()
+        if DEBUG:
+            if iteration%1 == 0:
+                neutral_optimized_3dmm.vertices = neutral_mean_3dmm_optimised.cpu().detach().numpy()
+                neutral_optimized_3dmm.export(debug_folder+"/mesh_optimised_vertics_%d.obj"%iteration)
+    return neutral_optimized_3dmm.cpu().detach().numpy()
+
 
 class RetopoFace(desc.Node):
     category = 'Meshroom Research'
+    gpu = desc.Level.INTENSIVE
 
-    documentation = ''' '''
+    documentation = '''This nodes takes an input scan, projected landmarks and a target actor model folder 
+                        and will optimise the actor model 3DMM to the scan topology'''
 
     inputs = [
-
         desc.File(
             name='inputMesh',
             label='Input Mesh',
@@ -37,7 +358,6 @@ class RetopoFace(desc.Node):
             value='',
             uid=[0],
         ),
-
         desc.File(
             name='landmarksCorrespondances',
             label='landmarksCorrespondances',
@@ -45,7 +365,6 @@ class RetopoFace(desc.Node):
             value='',
             uid=[0],
         ),
-
         desc.File(
             name='input3DMMFolder',
             label='input3DMMFolder',
@@ -53,10 +372,6 @@ class RetopoFace(desc.Node):
             value='/s/apps/users/multiview/faceCaptureData/develop/runtime_data/topologies/mpc/mpcHumanFemale_ICT_alb3_fine2',
             uid=[0],
         ),
-        # ---
-        # shape_ev.npy 
-        # shape_pc.npy pca princiapl comps
-
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
@@ -76,30 +391,32 @@ class RetopoFace(desc.Node):
             value=desc.Node.internalFolder,
             uid=[],
         ),
-
+        desc.File(
+            name='outputMesh',
+            label='Output Mesh',
+            description='Path to the output mesh',
+            value=os.path.join(desc.Node.internalFolder,"neutral.obj"),
+            uid=[],
+        ),
     ]
 
-
     def processChunk(self, chunk):
-        """
-        X
-        """
-        try:
-            pass
-        finally:
-            chunk.logManager.end()
-
-        ##Data loading: scan
+        #Load scan
         neutral_scan = trimesh.load(chunk.node.inputMesh.value)
         neutral_scan_vertices = neutral_scan.vertices
         with open(chunk.node.landmarksCorrespondances.value,"r") as json_file:
-                neutral_scan_landmarks_vertex_idx = np.asarray(json.load(json_file)["idx_to_landmark_verts"])
-        
-        ##Data loading: 3dmm
-        #uvmap is the mesh? shape_mean.npy => neutral? average.off?
-        neutral_3dmm = trimesh.load(os.path.join(chunk.node.input3DMMFolder.value, "average.off"))#FIXME: hardcoded
-        neutral_3dmm_vertices = neutral_3dmm.vertices
-        # neutral_3dmm_vertices = np.load(os.path.join(chunk.node.input3DMMFolder.value, "shape_mean.npy"))
+                neutral_scan_landmarks_vertex_idx = np.asarray(json.load(json_file)["idx_to_landmark_verts"])#FIXME: hardcoded
+
+        #Load 3dmm
+        # uvmap is the mesh? shape_mean.npy => neutral? average.off? should be all the same
+        neutral_mean_3dmm = trimesh.load(os.path.join(chunk.node.input3DMMFolder.value, "average.off"))#FIXME: hardcoded
+        # neutral_3dmm_vertices = neutral_mean_3dmm.vertices
+        #FIXME: for now do alignement from mean pca
+        neutral_3dmm_vertices = np.load(os.path.join(chunk.node.input3DMMFolder.value, "shape_mean.npy"))
+        # #load mask FIXME: issue there, cannot retrieve coloe
+        # vertex_mask_mesh = trimesh.load(os.path.join(chunk.node.input3DMMFolder.value, "mask.off"))
+        # np.any(vertex_mask_mesh.visual.vertex_colors==0, axis=-1)
+
         # lmm-thomas2-fan3d-9-9-5.msgpack contains the lamdnarks - vertices index correspts
         def array_from_msgpack(obj):
             array = np.frombuffer(obj[b'data'], dtype=np.dtype(obj[b'dtype'])).reshape(obj[b'shape'])
@@ -107,187 +424,29 @@ class RetopoFace(desc.Node):
         with open(os.path.join(chunk.node.input3DMMFolder.value, "lmm-thomas2-fan3d-9-9-5.msgpack"), "rb") as f:
             neutral_3dmm_landmarks_vertex_idx = msgpack.load(f)["landmark2vertex_indices"]
         neutral_3dmm_landmarks_vertex_idx=array_from_msgpack(neutral_3dmm_landmarks_vertex_idx)
-        neutral_3dmm_landmarks_vertex_idx=neutral_3dmm_landmarks_vertex_idx[:,0]    #10 closest matching vertices, we keep only one
+        neutral_3dmm_landmarks_vertex_idx=neutral_3dmm_landmarks_vertex_idx[:,0]    #10 closest matching vertices, we keep only best one as in fc
 
-
-        #filter out landmarks we dont want to use
-        #Note: in FC the extra mesh are used (eyes) 
+        # filter out landmarks we dont want to use (Note: in FC the extra mesh are used (eyes), so the indices are overflowing)
         valid_vertex_indices_mask = neutral_3dmm_landmarks_vertex_idx<neutral_3dmm_vertices.shape[0]
-        #TMP debug
-        # neutral_3dmm_landmarks_vertices=neutral_3dmm_vertices[neutral_3dmm_landmarks_vertex_idx[valid_vertex_indices_mask], :]
-        # neutral_scan_landmarks_vertices=neutral_scan_vertices[neutral_scan_landmarks_vertex_idx[valid_vertex_indices_mask]]
-        # with open(chunk.node.outputFolder.value+"/lm_nofilter.obj", "w") as f:
-        #     for v in neutral_3dmm_landmarks_vertices:
-        #         f.write("v %f %f %f 0 1 0\n"%(v[0], v[1], v[2]))
-        #     for v in neutral_scan_landmarks_vertices:
-        #         f.write("v %f %f %f 0 0 1\n"%(v[0], v[1], v[2]))
-        #blacklist
         valid_vertex_indices_mask &= [i not in LANDMARK_BLAKLIST for i,_ in enumerate(neutral_3dmm_landmarks_vertex_idx)] 
-
-        # ##aligh meshes using trimesh
-        # print("Registration with trimesh")
-        # transform, cost = trimesh.registration.mesh_other(neutral_3dmm, neutral_scan)
-        # neutral_3dmm.apply_transform(transform)
-
-        print("Done")
-        #align faces using landmarks
         neutral_3dmm_landmarks_vertices=neutral_3dmm_vertices[neutral_3dmm_landmarks_vertex_idx[valid_vertex_indices_mask], :]
         neutral_scan_landmarks_vertices=neutral_scan_vertices[neutral_scan_landmarks_vertex_idx[valid_vertex_indices_mask]]
-        print("OK")
 
-        #Init scales and translation
-        #translation from barycenter scan ->  0 -> 3dmm
-        neutral_scan_barycenter = np.mean(neutral_scan_landmarks_vertices, axis=0)
-        neutral_3dmm_barycenter = np.mean(neutral_3dmm_landmarks_vertices, axis=0)
-        init_translation = neutral_3dmm_barycenter-neutral_scan_barycenter
-        #init scale from RMSD scan ->  0 -> 3dmm
-        # neutral_scan_scale = np.std(neutral_scan_landmarks_vertices-neutral_scan_barycenter, axis=0)
-        # neutral_3dmm_scale = np.std(neutral_3dmm_landmarks_vertices-neutral_3dmm_barycenter, axis=0)
-        init_scale = [1.0] #np.mean(neutral_3dmm_scale/neutral_scan_scale) #scale may not be the same in 3ds because of errors in lms
+        #align meshes using landmarks
+        scale, translation, rot_matrix = align_meshes_from_landmarks(neutral_scan_landmarks_vertices, neutral_3dmm_landmarks_vertices, chunk.node.outputFolder.value)
 
-        ## init transform
-        neutral_scan_landmarks_vertices=torch.FloatTensor(neutral_scan_landmarks_vertices)
-        neutral_3dmm_landmarks_vertices=torch.FloatTensor(neutral_3dmm_landmarks_vertices)
-        translation = torch.autograd.Variable(torch.FloatTensor(init_translation), requires_grad=True)
-        rotation_euler_angles = torch.autograd.Variable(torch.FloatTensor([0,0,0]), requires_grad=True)
-        scale = torch.autograd.Variable(torch.FloatTensor(init_scale), requires_grad=True)
-
-        learning_rate  = 10e-5
-        iterations = 10000
-        def euler_x_angle_to_matrix(angle):
-            c=torch.cos(angle)
-            s=torch.sin(angle)
-            return torch.tensor([   [ 1, 0, 0],
-                                    [ 0, c,-s],
-                                    [ 0, s, c]  ], requires_grad=True)
-        def euler_y_angle_to_matrix(angle):
-            c=torch.cos(angle)
-            s=torch.sin(angle)
-            return torch.tensor([   [ c, 0, s],
-                                    [ 0, 1, 0],
-                                    [-s, 0, c]], requires_grad=True)
-        def euler_z_angle_to_matrix(angle):
-            c=torch.cos(angle)
-            s=torch.sin(angle)
-            return torch.tensor([   [ c, -s, 0 ],
-                                    [ s, c , 0 ],
-                                    [ 0, 0 , 1 ]], requires_grad=True)
-
-
-        def _axis_angle_rotation(axis: str, angle: torch.Tensor) -> torch.Tensor:
-            """
-            Return the rotation matrices for one of the rotations about an axis
-            of which Euler angles describe, for each value of the angle given.
-            Args:
-                axis: Axis label "X" or "Y or "Z".
-                angle: any shape tensor of Euler angles in radians
-            Returns:
-                Rotation matrices as tensor of shape (..., 3, 3).
-            """
-
-            cos = torch.cos(angle)
-            sin = torch.sin(angle)
-            one = torch.ones_like(angle)
-            zero = torch.zeros_like(angle)
-
-            if axis == "X":
-                R_flat = (one, zero, zero, zero, cos, -sin, zero, sin, cos)
-            elif axis == "Y":
-                R_flat = (cos, zero, sin, zero, one, zero, -sin, zero, cos)
-            elif axis == "Z":
-                R_flat = (cos, -sin, zero, sin, cos, zero, zero, zero, one)
-            else:
-                raise ValueError("letter must be either X, Y or Z.")
-
-            return torch.stack(R_flat, -1).reshape(angle.shape + (3, 3))
-
-
-        def euler_angles_to_matrix(euler_angles: torch.Tensor, convention: str = "ZYX") -> torch.Tensor:
-            """
-            Convert rotations given as Euler angles in radians to rotation matrices.
-            Args:
-                euler_angles: Euler angles in radians as tensor of shape (..., 3).
-                convention: Convention string of three uppercase letters from
-                    {"X", "Y", and "Z"}.
-            Returns:
-                Rotation matrices as tensor of shape (..., 3, 3).
-            """
-            if euler_angles.dim() == 0 or euler_angles.shape[-1] != 3:
-                raise ValueError("Invalid input euler angles.")
-            if len(convention) != 3:
-                raise ValueError("Convention must have 3 letters.")
-            if convention[1] in (convention[0], convention[2]):
-                raise ValueError(f"Invalid convention {convention}.")
-            for letter in convention:
-                if letter not in ("X", "Y", "Z"):
-                    raise ValueError(f"Invalid letter {letter} in convention string.")
-            matrices = [
-                _axis_angle_rotation(c, e)
-                for c, e in zip(convention, torch.unbind(euler_angles, -1))
-            ]
-            # return functools.reduce(torch.matmul, matrices)
-            return torch.matmul(torch.matmul(matrices[0], matrices[1]), matrices[2])
-
-
-        def tranform(vertices, scale, rotation_euler_angles, translation):
-            # rot_matrix = torch.matmul(euler_z_angle_to_matrix(rotation_euler_angles[0]),
-            #              torch.matmul(euler_y_angle_to_matrix(rotation_euler_angles[1]),
-            #                           euler_x_angle_to_matrix(rotation_euler_angles[2]) ) )
-            rot_matrix = euler_angles_to_matrix(rotation_euler_angles)
-            return torch.matmul(rot_matrix,scale*np.transpose(vertices)).t()+translation
-        
-        def loss_fc(x,y):
-            return ((x-y)**2).sum()
-
-        optimizer = torch.optim.SGD([translation, rotation_euler_angles, scale], lr=learning_rate, momentum=0.9)
-        
-        #tmp display
-        with open(chunk.node.outputFolder.value+"/orig.obj", "w") as f:
-            for v in neutral_scan_landmarks_vertices:
-                f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
-            for v in neutral_3dmm_landmarks_vertices:
-                f.write("v %f %f %f 0 1 0\n"%(v[0], v[1], v[2]))
-
-        prev_loss = 0
-        for iteration in range(iterations):#simple GD with loss between landmarks on the meshes
-            neutral_scan_landmarks_vertices_transformed = tranform(neutral_scan_landmarks_vertices, scale, rotation_euler_angles, translation)
-            loss = loss_fc(neutral_3dmm_landmarks_vertices,
-                           neutral_scan_landmarks_vertices_transformed)
-            print("Iteration %d loss %f scale %f translation %f %f %f rotation %f %f %f "%(iteration, loss, scale, 
-                                                                                            translation[0], translation[1], translation[2],
-                                                                                            rotation_euler_angles[0], rotation_euler_angles[1], rotation_euler_angles[2],
-                                                                                            ))
-         
-            loss.backward()
-            optimizer.step()
-            optimizer.zero_grad()
-
-            if iteration%1000 == 0:
-                with open(chunk.node.outputFolder.value+"/%d.obj"%iteration, "w+") as f:
-                    for v in neutral_scan_landmarks_vertices_transformed:
-                        f.write("v %f %f %f 0 0 1\n"%(v[0], v[1], v[2]))
-                # translation_tmp = translation.detach().numpy()
-                # rot_matrix_tmp = euler_angles_to_matrix(rotation_euler_angles).detach().numpy()  
-                # scale_tmp = scale.detach().numpy()
-                # neutral_scan_tmp = neutral_scan.copy()
-                # neutral_scan_tmp.vertices = np.transpose(rot_matrix_tmp@np.transpose(scale_tmp*neutral_scan.vertices))+ translation_tmp
-                # neutral_scan_tmp.export(chunk.node.outputFolder.value+"/mesh_transformed_%d.obj"%iteration)
-
-
-            if prev_loss == loss.detach().numpy():
-                print("Convergenance found after %d iterations"%iteration)
-                break
-            prev_loss = loss
-
-        translation = translation.detach().numpy()
-        rot_matrix = euler_angles_to_matrix(rotation_euler_angles).detach().numpy()  
-        scale = scale.detach().numpy()
         #apply tranform to mesh 
         neutral_scan.vertices = np.transpose(rot_matrix@np.transpose(scale*neutral_scan.vertices))+ translation
-        neutral_scan.export(chunk.node.outputFolder.value+"/mesh_transformed.obj")
-        neutral_3dmm.export(chunk.node.outputFolder.value+"/mesh_3dmm.obj")
+        if DEBUG:
+            neutral_scan.export(chunk.node.outputFolder.value+"/mesh_scan_transformed.obj")
+            neutral_mean_3dmm.export(chunk.node.outputFolder.value+"/mesh_mean_3dmm.obj")
 
-        ##uses closest vertex to optimise pca morphology coeficients
+        #fit 3dmm 
+        print("Loading 3dmm")
+        pca_mean = torch.tensor(np.load(os.path.join(chunk.node.input3DMMFolder.value, "shape_mean.npy")), device="cuda:0")#pca mean #FIXME: hardcoded
+        pca_pc = torch.tensor(np.load(os.path.join(chunk.node.input3DMMFolder.value, "shape_pc.npy")), device="cuda:0")#pca principal components #FIXME: hardcoded
 
-
-        ## Optimise coeficients of the PCA
+        new_neutral_scan_vertices = optimise_3dmm_pca(neutral_mean_3dmm, neutral_scan, pca_mean, pca_pc, debug_folder=chunk.node.outputFolder.value)
+        optimised_mean_3dmm = neutral_mean_3dmm.copy()
+        optimised_mean_3dmm.vertices = new_neutral_scan_vertices
+        
