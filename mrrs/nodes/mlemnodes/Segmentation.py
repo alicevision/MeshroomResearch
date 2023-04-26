@@ -11,8 +11,11 @@ import numpy as np
 from meshroom.core import desc
 
 from mrrs.core.ios import open_image, save_exr, save_image
+#FIXME: would be better with azy import?
 from mrrs.segmentation.instance_segmentation.mask_rcnn import InstanceSegmentationMaskRCNN
 from mrrs.segmentation.semantic.fcnResnet50 import SemanticSegmentationFcnResnet50
+
+from mrrs.segmentation.facial_segmentation.bisnet import BisnetSegmentation
 
 class Segmentation(desc.Node):
     """
@@ -38,7 +41,7 @@ class Segmentation(desc.Node):
             label='Segmetation Method',
             description='''Segmentation method to be used''',
             value='InstanceSegmentationMaskRCNN',
-            values=['InstanceSegmentationMaskRCNN', 'SemanticSegmentationFcnResnet50'],
+            values=['InstanceSegmentationMaskRCNN', 'SemanticSegmentationFcnResnet50', 'BisnetSegmentation'],
             exclusive=True,
             uid=[0],
         ),
@@ -129,7 +132,7 @@ class Segmentation(desc.Node):
                     # save_image("./test.png", input_image)
                     converted_path = os.path.join(chunk.node.output.value,views_id+"_converted.png")
                     os.system("iconvert "+views_original_file+" "+converted_path)
-                    input_image = open_image(converted_path)
+                    input_image, meta_image = open_image(converted_path, return_meta=True)
                     #rm file
 
                 # save_image(os.path.join(chunk.node.output.value, views_id+"_image.png"), input_image)#FIXME: to remove (used in debug)
@@ -141,7 +144,7 @@ class Segmentation(desc.Node):
                 #if a class mask is passed will create it for each channel
                 if len(chunk.node.createMask.value)>0:
                     if len(output_masks)>0:
-                        mask = np.zeros(input_image.shape[0:2], dtype=np.uint8)
+                        mask = np.zeros(output_masks[0].shape[0:2], dtype=np.uint8)
                         selected_masks = [m._value for m in chunk.node.createMask.value]
                         #creating mask by | the masks of the selected classes
                         for output_mask, output_class in zip(output_masks, output_classes):
@@ -151,7 +154,7 @@ class Segmentation(desc.Node):
                                 mask |= output_mask
                         if chunk.node.inverseClassmask.value:
                             mask = 255-mask
-                        save_image(os.path.join(chunk.node.output.value, views_id+".png"), mask[:,:])
+                        save_image(os.path.join(chunk.node.output.value, views_id+".png"), mask[:,:])#FIXME: need resize to size of the input image?
 
                     else:
                         chunk.logger.warn("No objects detected for "+views_id)
