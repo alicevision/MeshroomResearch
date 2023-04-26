@@ -216,6 +216,8 @@ def save_image(image_path, np_array, orientation=None):
     Save an image in a numpy array.
     Range must be 0-255 and channel 1 or 3.
     """
+    if len(np_array.shape)==2:
+        np_array=np.expand_dims(np_array, axis=-1)
     if image_path.endswith('.exr'):
         save_exr(np_array, image_path)
     else:
