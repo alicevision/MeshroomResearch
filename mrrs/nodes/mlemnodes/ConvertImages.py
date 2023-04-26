@@ -124,7 +124,7 @@ class ConvertImages(desc.Node):
             chunk.logger.info('Doing convertion for %d images'%len(views_ids))
             for index, (view_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
                 chunk.logger.info('Doing convertion for image %d/%d images'%(index, len(views_ids)))
-                input_image = open_image(views_original_file)
+                input_image, orientation = open_image(views_original_file, return_orientation=True)
                 input_image = input_image[::chunk.node.resampleX.value,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
                 if chunk.node.maxWidth.value<input_image.shape[1]:#max sie
@@ -135,7 +135,7 @@ class ConvertImages(desc.Node):
                 if chunk.node.rotateLeft.value:#rename
                     input_image = np.rot90(input_image)
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
-                save_image(output_file, input_image)
+                save_image(output_file, input_image, orientation)
                 sfm_data["views"][index]["path"]     = output_file
                 #not used in sfm?
                 sfm_data["views"][index]["width"] = input_image.shape[1]
