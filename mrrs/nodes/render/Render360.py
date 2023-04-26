@@ -1,14 +1,12 @@
 
 
-__version__ = "1.1"
+__version__ = "1.1"     
 
 from meshroom.core import desc
 import os
-import trimesh 
-import numpy as np
 
 DEFAULT_RENDER_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../blender/render360.py'))
-
+# COMMAND_PREFIX = "rez env blender-3.1 --"
 class Render360(desc.CommandLineNode):
     commandLine = 'blender -b -P {scriptValue} -- {objectFileValue}  {outputFolderValue} {renderStepsValue}'
     category = 'Evaluation'
