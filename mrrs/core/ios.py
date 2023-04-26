@@ -12,7 +12,7 @@ import json
 
 from mrrs.core.utils import format_float_array
 
-FORCE_IOOI = False#FIXME: debug
+FORCE_IOOI = True#FIXME: probably a good idea to open everything with openimage IO, for now not woring on windows
 
 #%% Images
 def open_exr(exr_path, clip_negative=False):
@@ -175,22 +175,43 @@ def open_depth_map(depth_file, raise_exception=True):
             print('Depth file format not recognised for '+depth_file)
     return depth_map
 
-def open_image(image_path):
+def open_image(image_path, return_orientation=False):
     """
     Opens an image and returns it as a np array.
     """
+    # 0 normal (top to bottom, left to right)
+    # 1 flipped horizontally (top to botom, right to left)
+    # 2 rotated  (bottom to top, right to left)
+    # 3 flipped vertically (bottom to top, left to right)
+    # 4 transposed (left to right, top to bottom)
+    # 5 rotated 90 clockwise (right to left, top to bottom)
+    # 6 transverse (right to left, bottom to top)
+    # 7 rotated 90 counter-clockwise (left to right, bottom to top)
+    orientation=0#oiio standard
     if image_path.endswith('.exr') or image_path.endswith('.dpx'):
-        image , _ = open_exr(image_path)
+        image, meta = open_exr(image_path)
         if image_path.endswith('.dpx'):
             image = np.flipud(image)
     else:
-        image = np.array(Image.open(image_path))
-    image = image.astype(np.float32)
+        if FORCE_IOOI:
+            import OpenImageIO as oiio
+            exr_file = oiio.ImageInput.open(image_path)
+            meta = exr_file.spec()
+            orientation = meta.get("Orientation", 0)
+            image_buff = oiio.ImageBuf(image_path)
+            image_buff = oiio.ImageBufAlgo.reorient(image_buff)
+            image = 255*image_buff.get_pixels()#return float and whole roi by default
+        else:
+            image = np.array(Image.open(image_path))
+            image = image.astype(np.float32)
     if len(image.shape)==2:
         image = np.expand_dims(image, -1)
-    return image[:,:, 0:3]
+    if return_orientation:
+        return image[:,:, 0:3], orientation 
+    else:
+        return image[:,:, 0:3]
 
-def save_image(image_path, np_array):
+def save_image(image_path, np_array, orientation=None):
     """
     Save an image in a numpy array.
     Range must be 0-255 and channel 1 or 3.
@@ -198,7 +219,25 @@ def save_image(image_path, np_array):
     if image_path.endswith('.exr'):
         save_exr(np_array, image_path)
     else:
-        Image.fromarray(np_array.astype(np.uint8)).save(image_path)
+        if FORCE_IOOI:       
+            import OpenImageIO as oiio
+            out = oiio.ImageOutput.create(image_path)
+            if out is None:
+                raise RuntimeError("Could not open exr file "+image_path)
+            spec = oiio.ImageSpec(np_array.shape[1], np_array.shape[0], np_array.shape[2], oiio.UINT8)
+            out.open(image_path, spec)
+            out.write_image(np_array.astype(np.uint8))
+            out.close()
+
+            if orientation is not None:
+                image_buff = oiio.ImageBuf(image_path)
+                image_buff.orientation=orientation
+                image_buff.write(image_path)
+   
+        else:
+            Image.fromarray(np_array.astype(np.uint8)).save(image_path)
+
+# %%
 
 #%% SFM
 #FIXME: unify the sensor/pixel size
