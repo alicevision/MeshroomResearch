@@ -122,14 +122,14 @@ class ProjectLandmarksToMesh(desc.Node):
                 except Exception as e:
                     chunk.logger.warning('Something whent wrong with file '+landmark_file+" skipping:"+str(e))
                 landmarks.append(landmark)
-                # if DEBUG:
-                #     from PIL import Image
-                #     image_size = Image.open(image).size
-                #     im = np.asarray(Image.open(image))
-                #     for lm in landmark:
-                #         if lm[0]>0 and lm[0] < image_size[0] and lm[1]>0 and lm[1] < image_size[1]:
-                #             im[lm[1]-5:lm[1]+5, lm[0]-5:lm[0]+5]=(255,0,0)
-                #     Image.fromarray(im).save(chunk.node.outputFolder.value+"/"+os.path.basename(image))
+                if DEBUG:
+                    from PIL import Image
+                    image_size = Image.open(image).size
+                    im = np.asarray(Image.open(image))
+                    for lm in landmark:
+                        if lm[0]>0 and lm[0] < image_size[0] and lm[1]>0 and lm[1] < image_size[1]:
+                            im[lm[1]-5:lm[1]+5, lm[0]-5:lm[0]+5]=(255,0,0)
+                    Image.fromarray(im).save(chunk.node.outputFolder.value+"/"+os.path.basename(image))
             
             #load mesh 
             mesh = load(chunk.node.inputMesh.value)
