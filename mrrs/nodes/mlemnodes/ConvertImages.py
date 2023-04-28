@@ -125,14 +125,18 @@ class ConvertImages(desc.Node):
             for index, (view_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
                 chunk.logger.info('Doing convertion for image %d/%d images'%(index, len(views_ids)))
                 input_image, orientation = open_image(views_original_file, return_orientation=True)
+                # chunk.logger.info('\tOrientation %d'%orientation)
                 input_image = input_image[::chunk.node.resampleX.value,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
                 if chunk.node.maxWidth.value<input_image.shape[1]:#max sie
                     height = int(input_image.shape[0]*chunk.node.maxWidth.value/input_image.shape[1])
                     input_image = cv2.resize(input_image, (chunk.node.maxWidth.value, height))
+                    chunk.logger.info('\tResizing to %d %d'%(chunk.node.maxWidth.value, height))
                 if chunk.node.renameSequence.value:
                     new_filename = "frame_%05d"%index+chunk.node.outputFormat.value
+                    chunk.logger.info("\tRenaming to to "+new_filename)
                 if chunk.node.rotateLeft.value:#rename
+                    chunk.logger.info("\tRotating left")
                     input_image = np.rot90(input_image)
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
                 save_image(output_file, input_image, orientation)
