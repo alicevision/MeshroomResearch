@@ -14,8 +14,9 @@ from mrrs.core.ios import open_image, save_exr, save_image
 #FIXME: would be better with azy import?
 from mrrs.segmentation.instance_segmentation.mask_rcnn import InstanceSegmentationMaskRCNN
 from mrrs.segmentation.semantic.fcnResnet50 import SemanticSegmentationFcnResnet50
-
 from mrrs.segmentation.facial_segmentation.bisnet import BisnetSegmentation
+
+MASK_EXTENTION = ".png"
 
 class Segmentation(desc.Node):
     """
@@ -66,6 +67,14 @@ class Segmentation(desc.Node):
             uid=[0],
         ),
 
+        desc.BoolParam(
+            name='autoRotate',
+            label='AutoRotate',
+            description='''Will automatically rotate the image using metadata''',
+            value=True,
+            uid=[0],
+        ),
+
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
@@ -92,7 +101,17 @@ class Segmentation(desc.Node):
             description='Output folder to generate the masks.',
             value=desc.Node.internalFolder,
             uid=[],
-        )
+        ),
+
+        desc.File(
+            name='outputMaskPreview',
+            label='Output Mask Preview',
+            description='Output Mask Preview',
+            semantic='image',
+            value=os.path.join(desc.Node.internalFolder,'<VIEW_ID>'+MASK_EXTENTION),
+            uid=[],
+            group='',
+        ),
     ]
 
     def check_inputs(self, chunk):
@@ -120,26 +139,18 @@ class Segmentation(desc.Node):
             for index, (views_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
                 #calling segmentation
                 chunk.logger.info('Computing segmentation for image %d/%d images'%(index, len(views_ids)))
-                input_image = open_image(views_original_file)
-                if np.amin(input_image)<0 or np.amax(input_image)>255:
-                    chunk.logger.warn("Segmentation assumes uint8 0-255 rgb values. Will attempt to convert")
-                    # def lin2srgb(image):
-                    #     mask = image> 0.0031308
-                    #     image[mask] = 1.055 * (np.power(image[mask], (1.0 / 2.4))) - 0.055
-                    #     image[~mask] = 12.92 * image[~mask]
-                    # input_image = lin2srgb(input_image)
-                    # input_image = 255*(input_image-np.amin(input_image))/(np.amax(input_image)-np.amin(input_image))
-                    # save_image("./test.png", input_image)
-                    converted_path = os.path.join(chunk.node.output.value,views_id+"_converted.png")
-                    os.system("iconvert "+views_original_file+" "+converted_path)
-                    input_image, meta_image = open_image(converted_path, return_meta=True)
-                    #rm file
-
+                input_image, orientation = open_image(views_original_file, auto_rotate=chunk.node.autoRotate.value, return_orientation=True)
+    
                 # save_image(os.path.join(chunk.node.output.value, views_id+"_image.png"), input_image)#FIXME: to remove (used in debug)
                 output_masks, output_classes = segmentor(input_image)#segmentor retrurns 1-hot vectors+corresponding class name
                 chunk.logger.info('%d objects found'%(len(output_masks)))
                 #dumps class names
                 np.savetxt(os.path.join(chunk.node.output.value, views_id+"_classes.txt" ) , output_classes, fmt="%s")
+
+                # #debug
+                # for output_mask, label in zip(output_masks, output_classes):
+                #     save_image(os.path.join(chunk.node.output.value, views_id+"_"+label+".png"),
+                #                             (input_image+np.expand_dims(output_mask, axis=-1))/2, orientation=0)
 
                 #if a class mask is passed will create it for each channel
                 if len(chunk.node.createMask.value)>0:
@@ -148,13 +159,19 @@ class Segmentation(desc.Node):
                         selected_masks = [m._value for m in chunk.node.createMask.value]
                         #creating mask by | the masks of the selected classes
                         for output_mask, output_class in zip(output_masks, output_classes):
-                            print(output_class)
                             output_class_radical = output_class.split("_")[0]
                             if output_class_radical in selected_masks:
                                 mask |= output_mask
+                                #debug
+                                # save_image(os.path.join(chunk.node.output.value, views_id+"_"+output_class+".png"),
+                                                # output_mask, orientation=0)
                         if chunk.node.inverseClassmask.value:
                             mask = 255-mask
-                        save_image(os.path.join(chunk.node.output.value, views_id+".png"), mask[:,:])#FIXME: need resize to size of the input image?
+
+                        #TMP debug 
+                        # mask=np.rot90(mask)
+                        save_image(os.path.join(chunk.node.output.value, views_id+MASK_EXTENTION),
+                                                mask[:,:], orientation=orientation, auto_rotate=True)
 
                     else:
                         chunk.logger.warn("No objects detected for "+views_id)
@@ -167,6 +184,7 @@ class Segmentation(desc.Node):
                 save_exr(output_masks, os.path.join(chunk.node.output.value, views_id+"_segmentation.exr"),
                          data_type="segmentation", channel_names=output_classes)
 
+               
             chunk.logger.info('Computing segmentation end')
         finally:
             chunk.logManager.end()
