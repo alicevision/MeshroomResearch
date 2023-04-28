@@ -175,7 +175,7 @@ def open_depth_map(depth_file, raise_exception=True):
             print('Depth file format not recognised for '+depth_file)
     return depth_map
 
-def open_image(image_path, return_orientation=False):
+def open_image(image_path, auto_rotate=False, return_orientation=False):
     """
     Opens an image and returns it as a np array.
     """
@@ -197,9 +197,10 @@ def open_image(image_path, return_orientation=False):
             import OpenImageIO as oiio
             exr_file = oiio.ImageInput.open(image_path)
             meta = exr_file.spec()
-            orientation = meta.get("Orientation", 0)
+            orientation = meta.get("Orientation", orientation)
             image_buff = oiio.ImageBuf(image_path)
-            image_buff = oiio.ImageBufAlgo.reorient(image_buff)
+            if auto_rotate:
+                image_buff = oiio.ImageBufAlgo.reorient(image_buff)#straigten the image
             image = 255*image_buff.get_pixels()#return float and whole roi by default
         else:
             image = np.array(Image.open(image_path))
@@ -211,7 +212,7 @@ def open_image(image_path, return_orientation=False):
     else:
         return image[:,:, 0:3]
 
-def save_image(image_path, np_array, orientation=None):
+def save_image(image_path, np_array, orientation=None, auto_rotate=False):
     """
     Save an image in a numpy array.
     Range must be 0-255 and channel 1 or 3.
@@ -232,10 +233,12 @@ def save_image(image_path, np_array, orientation=None):
             out.close()
 
             if orientation is not None:
-                image_buff = oiio.ImageBuf(image_path)
-                image_buff.orientation=orientation
-                image_buff.write(image_path)
-   
+                if auto_rotate :
+                    image_buff = oiio.ImageBuf(image_path)
+                    image_buff.orientation=orientation
+                    if auto_rotate:#FIXME: we assume that applying the transfrom twice is identity, make sure it happens
+                        image_buff = oiio.ImageBufAlgo.reorient(image_buff)#straigten the image
+                    image_buff.write(image_path)#issue: this is only for preview, it actually has no effect
         else:
             Image.fromarray(np_array.astype(np.uint8)).save(image_path)
 
