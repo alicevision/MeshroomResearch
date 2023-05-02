@@ -233,12 +233,32 @@ def save_image(image_path, np_array, orientation=None, auto_rotate=False):
             out.close()
 
             if orientation is not None:
-                if auto_rotate :
-                    image_buff = oiio.ImageBuf(image_path)
+                image_buff = oiio.ImageBuf(image_path)
+                image_buff.orientation=orientation
+                if auto_rotate:
+                    #reverso rotation
+                    if orientation == 1:
+                        reverse_orientation = 3
+                    elif orientation == 3:
+                        reverse_orientation = 1
+                    elif orientation == 2:
+                        reverse_orientation = 4
+                    elif orientation == 4:
+                        reverse_orientation = 2
+                    elif orientation == 5:
+                        reverse_orientation = 7
+                    elif orientation == 7:
+                        reverse_orientation = 5
+                    elif orientation == 6:
+                        reverse_orientation = 8
+                    elif orientation == 8:
+                        reverse_orientation = 6
+                    #apply inverse
+                    image_buff.orientation=reverse_orientation
+                    image_buff = oiio.ImageBufAlgo.reorient(image_buff)
+                    #but right meta
                     image_buff.orientation=orientation
-                    if auto_rotate:#FIXME: we assume that applying the transfrom twice is identity, make sure it happens
-                        image_buff = oiio.ImageBufAlgo.reorient(image_buff)#straigten the image
-                    image_buff.write(image_path)#issue: this is only for preview, it actually has no effect
+                image_buff.write(image_path)
         else:
             Image.fromarray(np_array.astype(np.uint8)).save(image_path)
 

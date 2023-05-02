@@ -59,13 +59,13 @@ class ConvertImages(desc.Node):
             uid=[0],
         ),
 
-        desc.BoolParam(
-            name='rotateLeft',
-            label='Rotate left',
-            description='Rotates the frames on the left',
-            value=False,
-            uid=[0],
-        ),
+        # desc.BoolParam(
+        #     name='rotateLeft',
+        #     label='Rotate left',
+        #     description='Rotates the frames on the left',
+        #     value=False,
+        #     uid=[0],
+        # ),
 
         desc.BoolParam(
             name='renameSequence',
@@ -125,7 +125,7 @@ class ConvertImages(desc.Node):
             for index, (view_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
                 chunk.logger.info('Doing convertion for image %d/%d images'%(index, len(views_ids)))
                 input_image, orientation = open_image(views_original_file, return_orientation=True)
-                # chunk.logger.info('\tOrientation %d'%orientation)
+                chunk.logger.info('\tOrientation %d'%orientation)
                 input_image = input_image[::chunk.node.resampleX.value,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
                 if chunk.node.maxWidth.value<input_image.shape[1]:#max sie
@@ -135,11 +135,11 @@ class ConvertImages(desc.Node):
                 if chunk.node.renameSequence.value:
                     new_filename = "frame_%05d"%index+chunk.node.outputFormat.value
                     chunk.logger.info("\tRenaming to to "+new_filename)
-                if chunk.node.rotateLeft.value:#rename
-                    chunk.logger.info("\tRotating left")
-                    input_image = np.rot90(input_image)
+                # if chunk.node.rotateLeft.value:#rename
+                #     chunk.logger.info("\tRotating left")
+                #     input_image = np.rot90(input_image)
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
-                save_image(output_file, input_image, orientation)
+                save_image(output_file, input_image, orientation=orientation)
                 sfm_data["views"][index]["path"]     = output_file
                 #not used in sfm?
                 sfm_data["views"][index]["width"] = input_image.shape[1]
@@ -154,10 +154,10 @@ class ConvertImages(desc.Node):
                     intrisic["width"] = chunk.node.maxWidth.value
                 else:
                     intrisic["height"] = int(float(intrisic["height"])/chunk.node.resampleX.value)
-                if chunk.node.rotateLeft.value:
-                    h=intrisic["height"]
-                    intrisic["height"] = intrisic["width"]
-                    intrisic["width"] = h
+                # if chunk.node.rotateLeft.value:
+                #     h=intrisic["height"]
+                #     intrisic["height"] = intrisic["width"]
+                #     intrisic["width"] = h
             with open(chunk.node.outputSfMData.value, "w") as json_file:
                 json.dump(sfm_data, json_file, indent=2)
 

@@ -140,7 +140,7 @@ class Segmentation(desc.Node):
                 #calling segmentation
                 chunk.logger.info('Computing segmentation for image %d/%d images'%(index, len(views_ids)))
                 input_image, orientation = open_image(views_original_file, auto_rotate=chunk.node.autoRotate.value, return_orientation=True)
-    
+             
                 # save_image(os.path.join(chunk.node.output.value, views_id+"_image.png"), input_image)#FIXME: to remove (used in debug)
                 output_masks, output_classes = segmentor(input_image)#segmentor retrurns 1-hot vectors+corresponding class name
                 chunk.logger.info('%d objects found'%(len(output_masks)))
@@ -149,8 +149,11 @@ class Segmentation(desc.Node):
 
                 # #debug
                 # for output_mask, label in zip(output_masks, output_classes):
-                #     save_image(os.path.join(chunk.node.output.value, views_id+"_"+label+".png"),
-                #                             (input_image+np.expand_dims(output_mask, axis=-1))/2, orientation=0)
+                #     # save_image(,
+                #     #                         (input_image+np.expand_dims(output_mask, axis=-1))/2, orientation=1)
+                #     from PIL import Image
+                #     Image.fromarray( ((input_image+np.expand_dims(output_mask, axis=-1))/2).astype(np.uint8)).save(os.path.join(chunk.node.output.value, 
+                #     views_id+"_"+label+".png"))
 
                 #if a class mask is passed will create it for each channel
                 if len(chunk.node.createMask.value)>0:
@@ -168,8 +171,6 @@ class Segmentation(desc.Node):
                         if chunk.node.inverseClassmask.value:
                             mask = 255-mask
 
-                        #TMP debug 
-                        # mask=np.rot90(mask)
                         save_image(os.path.join(chunk.node.output.value, views_id+MASK_EXTENTION),
                                                 mask[:,:], orientation=orientation, auto_rotate=True)
 
@@ -184,7 +185,7 @@ class Segmentation(desc.Node):
                 save_exr(output_masks, os.path.join(chunk.node.output.value, views_id+"_segmentation.exr"),
                          data_type="segmentation", channel_names=output_classes)
 
-               
+
             chunk.logger.info('Computing segmentation end')
         finally:
             chunk.logManager.end()

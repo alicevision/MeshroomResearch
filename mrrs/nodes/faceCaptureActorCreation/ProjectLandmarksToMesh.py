@@ -130,8 +130,8 @@ class ProjectLandmarksToMesh(desc.Node):
                         if lm[0]>0 and lm[0] < image_size[0] and lm[1]>0 and lm[1] < image_size[1]:
                             im[lm[1]-5:lm[1]+5, lm[0]-5:lm[0]+5]=(255,0,0)
                     Image.fromarray(im).save(chunk.node.outputFolder.value+"/"+os.path.basename(image))
-            
-            #load mesh 
+
+            #load mesh
             mesh = load(chunk.node.inputMesh.value)
             vertices = mesh.vertices
             #rotate because MR export meshed in CG vs CV for sfm
