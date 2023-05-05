@@ -59,13 +59,13 @@ class ConvertImages(desc.Node):
             uid=[0],
         ),
 
-        # desc.BoolParam(
-        #     name='rotateLeft',
-        #     label='Rotate left',
-        #     description='Rotates the frames on the left',
-        #     value=False,
-        #     uid=[0],
-        # ),
+        desc.BoolParam(
+            name='autoRotate',
+            label='autoRotate',
+            description='Rotates the frames using the exif flag',
+            value=False,
+            uid=[0],
+        ),
 
         desc.BoolParam(
             name='renameSequence',
@@ -124,7 +124,8 @@ class ConvertImages(desc.Node):
             chunk.logger.info('Doing convertion for %d images'%len(views_ids))
             for index, (view_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
                 chunk.logger.info('Doing convertion for image %d/%d images'%(index, len(views_ids)))
-                input_image, orientation = open_image(views_original_file, return_orientation=True)
+                input_image, orientation = open_image(views_original_file, return_orientation=True, 
+                                                      auto_rotate=chunk.node.autoRotate.value)
                 chunk.logger.info('\tOrientation %d'%orientation)
                 input_image = input_image[::chunk.node.resampleX.value,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
@@ -139,6 +140,8 @@ class ConvertImages(desc.Node):
                 #     chunk.logger.info("\tRotating left")
                 #     input_image = np.rot90(input_image)
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
+                if chunk.node.autoRotate.value:
+                    orientation=0
                 save_image(output_file, input_image, orientation=orientation)
                 sfm_data["views"][index]["path"]     = output_file
                 #not used in sfm?

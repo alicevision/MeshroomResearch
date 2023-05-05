@@ -199,7 +199,7 @@ def open_image(image_path, auto_rotate=False, return_orientation=False):
             meta = exr_file.spec()
             orientation = meta.get("Orientation", orientation)
             image_buff = oiio.ImageBuf(image_path)
-            if auto_rotate:
+            if auto_rotate and orientation !=0:
                 image_buff = oiio.ImageBufAlgo.reorient(image_buff)#straigten the image
             image = 255*image_buff.get_pixels()#return float and whole roi by default
         else:
@@ -235,7 +235,7 @@ def save_image(image_path, np_array, orientation=None, auto_rotate=False):
             if orientation is not None:
                 image_buff = oiio.ImageBuf(image_path)
                 image_buff.orientation=orientation
-                if auto_rotate:
+                if auto_rotate and orientation != 0:
                     #reverso rotation
                     if orientation == 1:
                         reverse_orientation = 3

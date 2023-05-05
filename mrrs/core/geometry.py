@@ -93,21 +93,6 @@ def camera_deprojection_meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_
     return scene_points
 
 #%% Triangle operations
-def distance_point_to_line(points, line_point_0, line_point_1):
-    """compute distance between points and the 
-        defined by line_point_0 and line_point_1"""
-    # normalized tangent vector of the line 
-    line_tan_vec = np.divide(line_point_1 - line_point_0, np.linalg.norm(line_point_1 - line_point_0))
-    # signed parallel distance components btw line tangeant and point-line points
-    s = np.dot(line_point_0 - points, line_tan_vec)
-    t = np.dot(points - line_point_1, line_tan_vec)
-    # clamped parallel distance
-    h = np.maximum.reduce([s, t, np.zeros_like(s)])
-    # perpendicular distance component
-    c = np.cross(points - line_point_0, line_tan_vec)
-    #point-line distance is hypotenus
-    dist = np.sqrt(h**2+np.linalg.norm(c, axis=-1)**2)
-    return dist
 
 def compute_triangle_area(triangle):
     """
@@ -192,6 +177,28 @@ def barycentric_to_cartesian(barycentric_coordinates, triangle):
     return np.dot(triangle, barycentric_coordinates)
 
 #%% Ray tracing
+def distance_point_to_line(points, line_point_0, line_point_1):
+    """compute distance between points and the 
+        defined by line_point_0 and line_point_1"""
+    # normalized tangent vector of the line 
+    line_tan_vec = np.divide(line_point_1 - line_point_0, np.linalg.norm(line_point_1 - line_point_0))
+    # signed parallel distance components btw line tangeant and point-line points
+    s = np.dot(line_point_0 - points, line_tan_vec)
+    t = np.dot(points - line_point_1, line_tan_vec)
+    # clamped parallel distance
+    h = np.maximum.reduce([s, t, np.zeros_like(s)])
+    # perpendicular distance component
+    c = np.cross(points - line_point_0, line_tan_vec)
+    #point-line distance is hypotenus
+    dist = np.sqrt(h**2+np.linalg.norm(c, axis=-1)**2)
+    return dist
+
+def vdot(a,b):
+    """
+    Dot product along the last dim of an array.
+    """
+    return np.sum(a*b, axis=-1)
+
 def ray_triangle_intersect(ray, triangle, epsilon=EPSILON):
     """
     Numpy implementation of the Möller–Trumbore intersection algorithm.
@@ -231,104 +238,42 @@ def ray_triangle_intersect(ray, triangle, epsilon=EPSILON):
         return np.float32(0), np.float32(-1)  # np.Infinity
     return np.float32(1), np.float32(np.dot(face_edge_1, qvec) * inv_face_0_normal_determinant)
 
-def rays_triangles_intersect_121(rays, triangles, epsilon=EPSILON):
+def ray_triangles_intersect(ray, triangles, epsilon=EPSILON):
     """
-    Same as ray_triangle_intersect but supports arbitrary number of rays and faces.
-    The number of rays should match the number of triangles.
+    Numpy implementation of the Möller–Trumbore intersection algorithm.
+    https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
+    Assumes ray direction unit.
+    Supports to be called as a ufunc.
+
+    ray is n*2*3 ((x,x,x),(x,x,x)) triangle is 3*3 ((x,x,x), (x,x,x), (x,x,x))
     """
     # unpack (cast supports tuple and np array)
-    rays = np.asarray(rays)
+    ray = np.asarray(ray)
     triangles = np.asarray(triangles)
-    ray_origin = rays[:, 0, :]
-    ray_direction = rays[:, 1, :]
+    ray_origin = ray[0, :]
+    ray_direction = ray[1, :]
     face_point_0 = triangles[:, 0, :]
     face_point_1 = triangles[:, 1, :]
     face_point_2 = triangles[:, 2, :]
     # compute face plane normal
     face_edge_0 = face_point_1 - face_point_0
     face_edge_1 = face_point_2 - face_point_0
-    face_plane_normal = np.cross(ray_direction, face_edge_1)  # cross is broacasted normally
-    face_0_normal_determinant = vectorised_dot(face_edge_0, face_plane_normal)
+    face_plane_normal = np.cross(ray_direction, face_edge_1)
+    face_0_normal_determinant = vdot(face_edge_0,face_plane_normal)
     # negative =>  triangle is backfacing
     # close to 0 => the ray misses the triangle
-    # FIXME: do we test for backface ? a > -EPSILON && a < EPSILON otherwise, or do we remove it before to save time
     intersect = face_0_normal_determinant < epsilon
     inv_face_0_normal_determinant = 1.0 / face_0_normal_determinant
     ray_origin_face_point_0_line = ray_origin - face_point_0
-    u = vectorised_dot(ray_origin_face_point_0_line, face_plane_normal) * inv_face_0_normal_determinant
+    u = vdot(ray_origin_face_point_0_line,face_plane_normal) * inv_face_0_normal_determinant
     # first test with u
-    intersect &= (u < 0) | (u > 1)
+    intersect &= (u > 0) & (u < 1)
     qvec = np.cross(ray_origin_face_point_0_line, face_edge_0)
-    v = vectorised_dot(ray_direction, qvec) * inv_face_0_normal_determinant
+    v = vdot(ray_direction, qvec) * inv_face_0_normal_determinant
     # second test with v
-    intersect &= (v < 0) | (u + v > 1)
+    intersect &= (v > 0) & (u + v < 1)
 
-    return intersect, vectorised_dot(face_edge_1, qvec) * inv_face_0_normal_determinant
-
-def rays_triangles_intersect(rays, triangles, epsilon=0.0000001):
-    """
-    Same as ray_triangle_intersect but supports arbitrary number of rays and faces.
-    No tile is necessary (broabcasting will be used)
-    """
-    # import cupy as np #tried gpu not working
-    # unpack (cast supports tuple and np array)
-    rays = np.asarray(rays)
-    triangles = np.asarray(triangles)
-    rays_origin = rays[:, 0, :]
-    rays_direction = rays[:, 1, :]
-    face_point_0 = triangles[:, 0, :]
-    face_point_1 = triangles[:, 1, :]
-    face_point_2 = triangles[:, 2, :]
-    # compute face plane normal
-    face_edge_0 = face_point_1 - face_point_0
-    face_edge_1 = face_point_2 - face_point_0
-    with time_it() as t:  # 2.7
-        face_plane_normal = cross_with_broacsat(rays_direction, face_edge_1)  # cross with broad cast will return RxFx3
-    print(t)
-    # with time_it() as t:#this is somehow as fast?! ~2.3s for decimation 50k
-    #     face_plane_normal = []
-    #     for rayd in rays_direction:
-    #         face_plane_normal.append(np.cross(rayd, face_edge_1))
-    #     face_plane_normal = np.stack(face_plane_normal, axis=0)
-    # print(t)
-
-    with time_it() as t:  # 0.6
-        face_0_normal_determinant = np.einsum(
-            "ij,kij->ki", face_edge_0, face_plane_normal
-        )  # dot along F*3 dims Fx3.RxFx3 => R*F #FIXME: check
-    print(t)
-
-    # negative =>  triangle is backfacing
-    # close to 0 => the ray misses the triangle
-    intersect = face_0_normal_determinant < epsilon
-    inv_face_0_normal_determinant = 1.0 / face_0_normal_determinant
-    with time_it() as t:  # 0.8
-        ray_origin_face_point_0_line = np.einsum(
-            "ij,kj->ikj", rays_origin, -face_point_0
-        )  # rays_origin - face_point_0 with broadcasting#FIXME need breadcast RxFx3#FIXME: check
-    print(t)
-    with time_it() as t:  # 1
-        u = (
-            np.einsum("ijk,ijk->ij", ray_origin_face_point_0_line, face_plane_normal) * inv_face_0_normal_determinant
-        )  # R*F #vectorised_dot(ray_origin_face_point_0_line, face_plane_normal) * inv_face_0_normal_determinant
-    print(t)
-    # first test with u
-    intersect &= (u < 0) | (u > 1)
-    with time_it() as t:  # 3, very slow
-        qvec = np.cross(ray_origin_face_point_0_line, face_edge_0)  # boradcast ok
-    print(t)
-    with time_it() as t:  # 0.8
-        v = (
-            np.einsum("ik,ijk->ij", rays_direction, qvec) * inv_face_0_normal_determinant
-        )  # R*F #vectorised_dot(rays_direction, qvec) * inv_face_0_normal_determinant
-    print(t)
-    # second test with v
-    intersect &= (v < 0) | (u + v > 1)
-
-    return (
-        intersect.astype(np.bool8),
-        0,
-    )  # vectorised_dot(face_edge_1,qvec) * inv_face_0_normal_determinant #dont care about distnc
+    return intersect.astype(np.bool8), vdot(face_edge_1, qvec) * inv_face_0_normal_determinant
 
 #%% Nearest n
 def nearest_neighbors_single(value, array, nb_neighbors=1, distance=lambda x, y: np.sum(np.abs(x - y) ** 2, axis=-1)):
