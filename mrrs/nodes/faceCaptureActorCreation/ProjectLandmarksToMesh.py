@@ -1,9 +1,4 @@
-"""
-Copy data that is not exposed from line_point_0 node output folder.
-Usefull for exposing intermediate data.
-"""
 __version__ = "3.0"
-
 
 import os
 import json
@@ -14,17 +9,17 @@ from trimesh import load
 
 from meshroom.core import desc
 
-from mrrs.core.geometry import camera_deprojection, distance_point_to_line, make_unit, ray_triangles_intersect
+from mrrs.core.geometry import camera_deprojection, distance_point_to_line
 from mrrs.core.ios import matrices_from_sfm_data
 
 DEBUG = True
-LM_CONFIDENCE_THRESHOLD = 0.1
+LM_CONFIDENCE_THRESHOLD = 0.1 #FIXME: put as parameter
 FAR_AWAY = 10
 
 class ProjectLandmarksToMesh(desc.Node):
     category = 'Meshroom Research'
 
-    documentation = '''This nodes projects landmarks from facecapture into the closest mesh vertex.'''
+    documentation = '''This deprojects 2D facial landmarks onton a mesh using the vertex closest to each ray flowing from the landmark.'''
 
     inputs = [
         desc.File(
@@ -70,6 +65,7 @@ class ProjectLandmarksToMesh(desc.Node):
             value=desc.Node.internalFolder,
             uid=[],
         ),
+
         desc.File(
             name='outputCorrespondances',
             label='Output Correspondances',
@@ -77,7 +73,8 @@ class ProjectLandmarksToMesh(desc.Node):
             value=os.path.join(desc.Node.internalFolder, "landmarks.json"),
             uid=[],
         ),
-        desc.File(#FIXME: used for display only
+
+        desc.File(#used for display only #FIXME: meshroom does not support to display only points
             name='outputCorrespondancesMesh',
             label='Output Correspondances Mesh',
             description='Path to the output Correspondances mesh',
@@ -89,19 +86,25 @@ class ProjectLandmarksToMesh(desc.Node):
     def processChunk(self, chunk):
         try:
             ##Loading
+
             #load sfm data
             with open(chunk.node.inputSfM.value,"r") as json_file:
                 sfm_data = json.load(json_file)
             extrinsics, intrinsics, _, _, _, pixel_sizes = matrices_from_sfm_data(sfm_data)
             images = [view["path"] for view in sfm_data["views"]]
+
             #load frame list
             with open(os.path.join(chunk.node.inputFolder.value,"project.yaml"), "r") as f :
                 frame_list = yaml.load(f, Loader=SafeLoader)["input"]["inputs"][0]["framesList"]
+
             #load yaml for bounding box for tube folder
             with open(os.path.join(chunk.node.inputFolder.value,"tubes.yaml"), "r") as f :
                 frames = yaml.load(f, Loader=SafeLoader)["tubes"]["face01"]["frames"]#load nounding boxes
                 rects = [f['rect'] for f in frames[0]]
-            scale = 2 #note in FC, the scale is harcoded to 2
+
+            #transform done in FC
+            #note in FC, the scale is harcoded to 2
+            scale = 2 
             scale = 0.5 * (scale - 1)
             origins = []
             for rect in rects:
@@ -148,75 +151,21 @@ class ProjectLandmarksToMesh(desc.Node):
             transform_mat = np.asarray([[1,0,0],[0,-1,0],[0,0,-1]])
             vertices=np.transpose(transform_mat@np.transpose(vertices))
 
-            # #"get ray-triangle intersections
-            # triangles = vertices[mesh.faces]
-            # faces_indices = np.arange(triangles.shape[0])
-
-            # ray_vertices_total_distance = np.zeros((nb_landmarks, vertices.shape[0]))
-            # for lms, extrinsic, intrinsic, px_size, image  in zip(landmarks, extrinsics, intrinsics, pixel_sizes, images):
-            #     print("Image "+image)
-            #     if extrinsic is None:
-            #         print("No calibration for "+image+" skipping")
-            #         continue
-            #     if lms is None:
-            #         print("No landmarks for "+image+" skipping")
-            #         continue
-            #     origin = extrinsic[0:3,3]
-            #     lms = np.asarray(lms)
-            #     lms_conf = lms[:,2]
-                
-            #     point_1m = camera_deprojection(np.transpose(lms[:,0:2]), np.asarray([FAR_AWAY]), 
-            #                extrinsic, intrinsic, px_size)#fixme: could get line direclty
-            #     for li,l in enumerate(point_1m):
-            #         if lms_conf[li]<LM_CONFIDENCE_THRESHOLD:
-            #             print("Unreliable landmark,  %02d/%02d skipping"%(li, point_1m.shape[0]))
-            #             continue
-            #         print("Computing intersections for landmark %02d/%02d"%(li, point_1m.shape[0]), end="\r")
-            #         d=make_unit(origin-l)
-            #         ray = np.asarray((origin, d))
-            #         intersects, dists =  ray_triangles_intersect(ray,triangles)#intersection test and distance to face
-            #         if not np.any(intersects):
-            #             print("No intersection found for lm %d on %s"%(li,image))
-            #             continue
-            #         #get intersecting closest to the cam
-            #         intersect_face_index=faces_indices[intersects][np.argmin(dists[intersects])]
-            #         #save distance with all the points 
-            #         intersect_face = mesh.faces[intersect_face_index]
-            #         intersect_vertices = vertices[intersect_face]
-            #         if DEBUG:
-            #             with open(chunk.node.outputFolder.value+"/"+"lm_%d_"%li+os.path.basename(image)+"_intersect.obj", "w+") as f:
-            #                 for v in intersect_vertices:
-            #                     f.write("v %f %f %f\n"%(v[0], v[1], v[2]))
-            #                 f.write("v %f %f %f\n"%(origin[0],origin[1],origin[2]))
-            #                 f.write("f 1 2 3\n")
-            #         #intersect_vertices_dist 
-            #         ray_vertices_total_distance[li, intersect_face] += distance_point_to_line(intersect_vertices,origin, l)
-
-            #     if DEBUG:
-            #         with open(chunk.node.outputFolder.value+"/"+os.path.basename(image)+".obj", "w") as f:
-            #             f.write("v %f %f %f\n"%(origin[0],origin[1],origin[2]))
-            #             for li,l in enumerate(point_1m):
-            #                 f.write("v %f %f %f\n"%(l[0], l[1], l[2]))
-            #     ray_vertices_total_distance[ray_vertices_total_distance==0] = np.infty
-
-
             ##Compute equivalence
             #compute the vertices in the mesh closest to the ray
             ray_vertices_total_distance = np.zeros((nb_landmarks, vertices.shape[0]))
-            
             for extrinsic, intrinsic, px_size, image  in zip(extrinsics, intrinsics, pixel_sizes, images):
-                print("Image "+image)
+                chunk.logger.info("Image "+image)
                 if image not in landmarks.keys():
-                    print("No landmark frame named "+image+" from facecapture landmarks")
+                    chunk.logger.info("No landmark frame named "+image+" from facecapture landmarks")
                     continue
                 lms = landmarks[image]#getting corresponding lms
                 if extrinsic is None:
-                    print("No calibration for "+image+" skipping")
+                    chunk.logger.info("No calibration for "+image+" skipping")
                     continue
                 if lms is None:
-                    print("No landmarks for "+image+" skipping")
+                    chunk.logger.info("No landmarks for "+image+" skipping")
                     continue
-
                 origin = extrinsic[0:3,3]
                 lms = np.asarray(lms)
                 lms_conf = lms[:,2]
@@ -225,9 +174,9 @@ class ProjectLandmarksToMesh(desc.Node):
                 distances_frame = []#FIXME: tmp
                 for li,l in enumerate(point_1m):
                     if lms_conf[li]<LM_CONFIDENCE_THRESHOLD:
-                        print("Unreliable landmark,  %02d/%02d skipping"%(li, point_1m.shape[0]))
+                        chunk.logger.info("Unreliable landmark,  %02d/%02d skipping"%(li, point_1m.shape[0]))
                         continue
-                    print("Computing distances for landmark %02d/%02d"%(li, point_1m.shape[0]), end="\r")
+                    chunk.logger.info("Computing distances for landmark %02d/%02d"%(li, point_1m.shape[0]), end="\r")
                     d = distance_point_to_line(vertices,origin, l)
                     distances_frame.append(d)
                     ray_vertices_total_distance[li,:] += d
@@ -250,18 +199,19 @@ class ProjectLandmarksToMesh(desc.Node):
                         f.write("v %f %f %f 0 0 255\n"%(vertices[c][0], vertices[c][1], vertices[c][2]))
 
             ##Save results
-            print("Saving")
+            chunk.logger.info("Saving")
             with open(chunk.node.outputCorrespondances.value, "w") as f:
                 f.write(json.dumps({"idx_to_landmark_verts":closest_idx.tolist()}))
             if DEBUG:
                 #debug export mesh
                 mesh.vertices = vertices
                 mesh.export(chunk.node.outputFolder.value+"/mesh.obj")
-           
+
             with open(chunk.node.outputCorrespondancesMesh.value, "w") as f:
                 for v in vertices[closest_idx]:
                     f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
-            print('DONE')
+
+            chunk.logger.info('Done')
         finally:
             chunk.logManager.end()
 

@@ -1,9 +1,4 @@
-"""
-Copy data that is not exposed from a node output folder.
-Usefull for exposing intermediate data.
-"""
 __version__ = "3.0"
-
 
 from meshroom.core import desc
 
@@ -246,7 +241,6 @@ def loadMeshOffFile(filename, no_colors=False):
         return vertex_data, faces
     else:        
         return vertex_data, faces, colors
-
 class RetopoFace(desc.Node):
     category = 'Meshroom Research'
     gpu = desc.Level.INTENSIVE
