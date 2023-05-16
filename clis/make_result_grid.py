@@ -2,6 +2,7 @@
 Command line tool to make a result grid.
 """
 import click
+import os 
 
 @click.command()
 @click.argument('rows', type=click.INT)
@@ -54,7 +55,7 @@ def run(rows, columns, contents, output_file, title):
                 if content.endswith((".png", ".jpg", ".gif")):
                     html_file.write("<td> <img src=\""+content+"> </td>")
                 elif content.endswith((".mp4", ".mpg", ".mpeg", ".ogg")):
-                    html_file.write("<td> <video autoplay muted loop> <source src=\""+content+"\" type=\"video/mp4\"></video> </td>\n")
+                    html_file.write("<td><p>"+content+"</p><video autoplay muted loop> <source src=\""+content+"\" type=\"video/mp4\"></video> </td>\n")
                 elif content.endswith((".obj")):
                     html_file.write("<td><model-viewer src=\""+content+"\"></model-viewer></td>\n")
                 else:
