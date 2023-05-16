@@ -18,18 +18,16 @@ import json
 
 #General params
 DEBUG=True
-BUFFER_EARLY_STOP = 10# how many iteration to consider in the early stopping
+BUFFER_EARLY_STOP = 20# how many iteration to consider in the early stopping
 EARLY_STOP_RATIO = 1/10000#stop when std of error is x smaller than N*average error
-MAX_ITERATION = 10000#max iteration
+MAX_ITERATION = 50000#max iteration FIXME: clever init might reduce iterations
 
 #init pose params
 LANDMARK_BLAKLIST = np.arange(0,16+1)#removes the jaw landmarks FIXME: hardcoded
-LEARNING_RATE_ALIGN  = 10e-5
+LEARNING_RATE_ALIGN = 10e-5
 
 #3dmm optim 
-VOXEL_GRID_SIZE = 1#used for voxel chopping, use smallest possible that doesnt do ooms
-LEARNING_RATE_FIT = 10e-3#
-SAMPLE_STEP_LOSS = 6#selects 1/N vertices to do the optimisation
+LEARNING_RATE_FIT = 10e-4#
 
 def _axis_angle_rotation(axis: str, angle: torch.Tensor) -> torch.Tensor:
     """
@@ -143,89 +141,28 @@ def align_meshes_from_landmarks(neutral_scan_landmarks_vertices, neutral_3dmm_la
 
     return scale, translation, rot_matrix
 
-def _voxel_chopping(points, voxel_grid_size=3, bounding_params = None):
-    """
-    Will create groups of points inside the same voxel.
-    Return point indices, also can be duplicated
-    """
-    if bounding_params is None:
-        min_points = np.amin(points, axis=0)
-        max_points = np.amax(points, axis=0)
-    else:
-        min_points, max_points = bounding_params
-    grid_steps = (max_points-min_points)/float(voxel_grid_size)
-    hashed_vertices_list = []
-    indices = np.arange(points.shape[0])
-    for x in range(voxel_grid_size):
-        for y in range(voxel_grid_size):
-            for z in range(voxel_grid_size):
-                voxel_min = min_points+grid_steps*[x,y,z]
-                voxel_max = min_points+grid_steps*[x+1,y+1,z+1]
-                points_in_range = indices[np.all((voxel_min<=points) & (points<voxel_max), axis=-1)]
-                hashed_vertices_list.append(points_in_range)
-    return hashed_vertices_list, (min_points, max_points, grid_steps)
-class DistToClosest(torch.nn.Module):
-    def forward(self,x,y):
-        if x.shape[0]==0 or y.shape[0]==0:
-            return torch.tensor(0.0, device=x.get_device()), torch.zeros_like(x, device=x.get_device())
-        
-        closest_dists = []
-        for _x in x:#get closest point in y for each point in x
-            dist_x = torch.sum((y-_x)**2, axis=-1)
-            closest_dist = torch.min(dist_x)
-            closest_dists.append(closest_dist)
-        closest_dists=torch.stack(closest_dists)
-
-        # # (N,3)=>(M,N,3)
-        # y_new = torch.tile(torch.unsqueeze(y,axis=1),dims=[1,x.shape[0],1])
-        # # (M,3))=(M,N,3)
-        # x_new = torch.tile(torch.unsqueeze(x,axis=0),dims=[y.shape[0],1,1])
-        # # (M,N,3)=>(M,N)
-        # dist = torch.sum(torch.square(x_new - y_new),axis=1)
-        # #M
-        # closest_dists=torch.min(dist, axis=0).values
-
-        return torch.sum(closest_dists), closest_dists
-
 def dist_to_closest(x,y):
-        if x.shape[0]==0 or y.shape[0]==0:
-            return torch.tensor(0.0, device=x.get_device()), torch.zeros_like(x, device=x.get_device())
-        # (N,3)=>(M,N,3)
-        y_new = torch.tile(torch.unsqueeze(y,axis=1),dims=[1,x.shape[0],1])
-        # (M,3))=(M,N,3)
-        x_new = torch.tile(torch.unsqueeze(x,axis=0),dims=[y.shape[0],1,1])
-        # (M,N,3)=>(M,N)
-        dist = torch.sum(torch.square(x_new - y_new),axis=-1)
-        #M
-        closest_dists=torch.min(dist, axis=0).values
-        return torch.sum(closest_dists), closest_dists
+    if x.shape[0]==0 or y.shape[0]==0:
+        return torch.tensor(0.0, device=x.get_device()), torch.zeros_like(x, device=x.get_device())
+    # (N,3)=>(M,N,3)
+    y_new = torch.tile(torch.unsqueeze(y,axis=1),dims=[1,x.shape[0],1])
+    # (M,3))=(M,N,3)
+    x_new = torch.tile(torch.unsqueeze(x,axis=0),dims=[y.shape[0],1,1])
+    # (M,N,3)=>(M,N)
+    dist = torch.sum(torch.abs(x_new - y_new),axis=-1)
+    # M
+    closest_dists=torch.min(dist, axis=0).values
+    # closets for each element if x
+    total_dist = torch.sum(closest_dists)
 
-def optimise_3dmm_pca(neutral_mean_3dmm, neutral_scan, pca_mean, pca_pc, vertex_mask= None, debug_folder="./"):
+    return total_dist, closest_dists
+
+def optimise_3dmm_pca(neutral_mean_3dmm, neutral_scan, pca_mean, pca_pc, vertex_mask= None, neutral_scan_downsampling=1, debug_folder="./"):
     print("Building voxel chopping for efficient loss computation")
-
-    #common bounding box
-    # min_points = np.amin(np.concatenate([neutral_mean_3dmm.vertices, neutral_scan.vertices], axis=0), axis=0)
-    # max_points = np.amax(np.concatenate([neutral_mean_3dmm.vertices, neutral_scan.vertices], axis=0), axis=0)
-    # bb=(min_points, max_points)
-    # neutral_mean_3dmm_vertices_idx_hashed, _ = _voxel_chopping(neutral_mean_3dmm.vertices, VOXEL_GRID_SIZE, bb)
-    # neutral_scan_vertices_idx_hashed, _ = _voxel_chopping(neutral_scan.vertices, VOXEL_GRID_SIZE, bb)
-
-    # #tmp debug: CHECK vexelisation
-    # for i in range(VOXEL_GRID_SIZE**3):
-    #     if (neutral_mean_3dmm_vertices_idx_hashed[i].shape[0]>0 and 
-    #         neutral_scan_vertices_idx_hashed[i].shape[0]>0 ):
-    #         with open(chunk.node.outputFolder.value+"/tmp_%d.obj"%i, "w") as f:
-    #             for v in neutral_mean_3dmm.vertices[neutral_mean_3dmm_vertices_idx_hashed[i]]:
-    #                 f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
-    #             for v in neutral_scan.vertices[neutral_scan_vertices_idx_hashed[i]]:
-    #                 f.write("v %f %f %f 0 1 0\n"%(v[0], v[1], v[2]))
 
     #init
     pca_coefficients = torch.autograd.Variable(torch.zeros((pca_pc.shape[0],1,1), device="cuda:0"), requires_grad=True)
     optimizer = torch.optim.SGD([pca_coefficients], lr=LEARNING_RATE_FIT)
-
-    loss_fc = DistToClosest() #FIXME: hard threshold to discard points too far away (in case the scn has holes/missing parts)
-    loss_fc=loss_fc.cuda()
 
     neutral_optimized_3dmm = neutral_mean_3dmm.copy()
     target_vertices = torch.tensor(neutral_scan.vertices, device="cuda:0")
@@ -234,43 +171,18 @@ def optimise_3dmm_pca(neutral_mean_3dmm, neutral_scan, pca_mean, pca_pc, vertex_
     print("Optimising")
     losses=[]
     for iteration in range(MAX_ITERATION):
-        #compute vertices from pca coefs
-        # new_vertices = pca_mean + torch.sum(pca_coefficients*pca_pc, axis=0)
-        # with open(chunk.node.outputFolder.value+"/pca_%d.obj"%iteration, "w") as f:
-        #     for v in new_vertices:
-        #         f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
-        # loss = 0
-        # for i in range(VOXEL_GRID_SIZE**3):
-        #     l, d =loss_fc(new_vertices[ neutral_mean_3dmm_vertices_idx_hashed[i]],
-        #                                 target_vertices[neutral_scan_vertices_idx_hashed[i]][::SAMPLE_STEP_LOSS])
-        #     if neutral_mean_3dmm_vertices_idx_hashed[i].shape[0]==0 or neutral_scan_vertices_idx_hashed[i].shape[0]==0:
-        #         continue
-        #     # #fake color dist
-        #     # d/=torch.min(d)
-
-        #     # if iteration == 0:
-        #     #     if (neutral_mean_3dmm_vertices_idx_hashed[i].shape[0]>0 and
-        #     #         neutral_scan_vertices_idx_hashed[i].shape[0]>0 ):
-        #     #         with open(chunk.node.outputFolder.value+"/loss_%d.obj"%i, "w") as f:
-        #     #             for v,c in zip(new_vertices[neutral_mean_3dmm_vertices_idx_hashed[i]], d):
-        #     #                 f.write("v %f %f %f %f %f 0\n"%(v[0], v[1], v[2], c, 1-c))
-        #     #     else:
-        #     #         print("skip")
-
-        #     loss+=l
-
-        # subsampling ad masking
-        new_vertices = pca_mean[::SAMPLE_STEP_LOSS] + torch.sum(pca_coefficients*pca_pc[:, ::SAMPLE_STEP_LOSS], axis=0)
+        # subsampling and masking
+        new_vertices = pca_mean[::neutral_scan_downsampling] + torch.sum(pca_coefficients*pca_pc[:, ::neutral_scan_downsampling], axis=0)
         if vertex_mask is not None:
-            new_vertices=new_vertices[vertex_mask[::SAMPLE_STEP_LOSS], :]
+            new_vertices=new_vertices[vertex_mask[::neutral_scan_downsampling], :]
             # with open(debug_folder+"/new_vertices_%d.obj"%iteration, "w") as f:
             #     for v in new_vertices:
             #         f.write("v %f %f %f \n"%(v[0], v[1], v[2]))
-        loss,_=loss_fc(new_vertices,target_vertices[::SAMPLE_STEP_LOSS])
-        loss,_=dist_to_closest(new_vertices,target_vertices[::SAMPLE_STEP_LOSS])
+        # loss,_=loss_fc(new_vertices,target_vertices[::neutral_scan_downsampling]) #use class
+        loss,_=dist_to_closest(new_vertices,target_vertices[::neutral_scan_downsampling]) #use fc
         
         print("Iteration %d loss %f first coefs %f %f %f"%(iteration, loss, pca_coefficients[0],  pca_coefficients[1],  pca_coefficients[2]), end="\r")
-        loss.backward()#FIXME: takes long ! reduce nb of vertices 
+        loss.backward()
         optimizer.step()
         optimizer.zero_grad()
         if DEBUG:
@@ -335,7 +247,6 @@ def loadMeshOffFile(filename, no_colors=False):
     else:        
         return vertex_data, faces, colors
 
-
 class RetopoFace(desc.Node):
     category = 'Meshroom Research'
     gpu = desc.Level.INTENSIVE
@@ -365,7 +276,21 @@ class RetopoFace(desc.Node):
             value='/s/apps/users/multiview/faceCaptureData/develop/runtime_data/topologies/mpc/mpcHumanFemale_ICT_alb3_fine2',
             uid=[0],
         ),
-
+        desc.IntParam(
+            name='downsampleScanLoss',
+            label='downsampleScanLoss',
+            description='Resample the mesh by a given factor for the loss computation',
+            value=1,
+            range=(0, 100, 1),
+            uid=[0],
+        ),
+        desc.BoolParam(
+            name='recenter',
+            label='recenter',
+            description='''Will place the optimised neutral into the scan's location''',
+            value=True,
+            uid=[0],
+        ),
         desc.BoolParam(
             name='useMask',
             label='UseMask',
@@ -427,13 +352,13 @@ class RetopoFace(desc.Node):
             # vertex_mask_mesh = trimesh.load(os.path.join(chunk.node.input3DMMFolder.value, "mask.off"))
             # vertex_mask = np.all((vertex_mask_mesh.visual.vertex_colors-[[255,0,0,255]])==0, axis=-1) 
             _, _, vertex_mask_colors = loadMeshOffFile(os.path.join(chunk.node.input3DMMFolder.value, "mask.off"))
-            vertex_mask = np.all(vertex_mask_colors == [255,0,0], axis=-1) # issue: trimesh doesnt load color form off 
+            vertex_mask = np.all(vertex_mask_colors == [255,0,0], axis=-1) 
      
         # lmm-thomas2-fan3d-9-9-5.msgpack contains the lamdnarks - vertices index correspts
         def array_from_msgpack(obj):
             array = np.frombuffer(obj[b'data'], dtype=np.dtype(obj[b'dtype'])).reshape(obj[b'shape'])
             return array
-        with open(os.path.join(chunk.node.input3DMMFolder.value, "lmm-thomas2-fan3d-9-9-5.msgpack"), "rb") as f:
+        with open(os.path.join(chunk.node.input3DMMFolder.value, "lmm-thomas2-fan3d-9-9-5.msgpack"), "rb") as f:#FIXME: hardcoded
             neutral_3dmm_landmarks_vertex_idx = msgpack.load(f)["landmark2vertex_indices"]
         neutral_3dmm_landmarks_vertex_idx=array_from_msgpack(neutral_3dmm_landmarks_vertex_idx)
         neutral_3dmm_landmarks_vertex_idx=neutral_3dmm_landmarks_vertex_idx[:,0]    #10 closest matching vertices, we keep only best one as in fc
@@ -459,9 +384,14 @@ class RetopoFace(desc.Node):
         pca_pc = np.load(os.path.join(chunk.node.input3DMMFolder.value, "shape_pc.npy"))#pca principal components #FIXME: hardcoded
 
         pca_coefs = optimise_3dmm_pca(neutral_mean_3dmm, neutral_scan, torch.tensor(pca_mean, device="cuda:0"), 
-                                      torch.tensor(pca_pc, device="cuda:0"), vertex_mask=vertex_mask, debug_folder=chunk.node.outputFolder.value)
+                                      torch.tensor(pca_pc, device="cuda:0"), neutral_scan_downsampling=chunk.node.downsampleScanLoss.value,
+                                      vertex_mask=vertex_mask, debug_folder=chunk.node.outputFolder.value)
         optimised_3dmm = neutral_mean_3dmm.copy()
         optimised_3dmm.vertices = pca_mean + np.sum(pca_coefs*pca_pc, axis=0)
+
+        #inverse transform on mesh
+        if chunk.node.recenter.value:
+            optimised_3dmm.vertices = np.transpose(np.linalg.inv(rot_matrix)@np.transpose(optimised_3dmm.vertices-translation))/scale
 
         #export result
         optimised_3dmm.export(chunk.node.outputMesh.value)

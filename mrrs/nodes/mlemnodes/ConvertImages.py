@@ -60,6 +60,14 @@ class ConvertImages(desc.Node):
         ),
 
         desc.BoolParam(
+            name='mergeInterinsics',
+            label='mergeInterinsics',
+            description='Will merge all intrinsics by taking the first one',
+            value=False,
+            uid=[0],
+        ),
+
+        desc.BoolParam(
             name='autoRotate',
             label='autoRotate',
             description='Rotates the frames using the exif flag',
@@ -161,6 +169,13 @@ class ConvertImages(desc.Node):
                 #     h=intrisic["height"]
                 #     intrisic["height"] = intrisic["width"]
                 #     intrisic["width"] = h
+
+            if chunk.node.mergeInterinsics.value:
+                intrinsic_id = sfm_data["intrinsics"][0]["intrinsicId"]
+                sfm_data["intrinsics"] = [sfm_data["intrinsics"][0]]
+                for view in sfm_data["views"]:
+                    view["intrinsicId"]=intrinsic_id
+
             with open(chunk.node.outputSfMData.value, "w") as json_file:
                 json.dump(sfm_data, json_file, indent=2)
 

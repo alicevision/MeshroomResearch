@@ -18,7 +18,7 @@ from mrrs.core.geometry import camera_deprojection, distance_point_to_line, make
 from mrrs.core.ios import matrices_from_sfm_data
 
 DEBUG = True
-LM_CONFIDENCE_THRESHOLD = 0.75
+LM_CONFIDENCE_THRESHOLD = 0.1
 FAR_AWAY = 10
 
 class ProjectLandmarksToMesh(desc.Node):
@@ -70,7 +70,6 @@ class ProjectLandmarksToMesh(desc.Node):
             value=desc.Node.internalFolder,
             uid=[],
         ),
-
         desc.File(
             name='outputCorrespondances',
             label='Output Correspondances',
@@ -78,6 +77,13 @@ class ProjectLandmarksToMesh(desc.Node):
             value=os.path.join(desc.Node.internalFolder, "landmarks.json"),
             uid=[],
         ),
+        desc.File(#FIXME: used for display only
+            name='outputCorrespondancesMesh',
+            label='Output Correspondances Mesh',
+            description='Path to the output Correspondances mesh',
+            value=os.path.join(desc.Node.internalFolder, "corespondances.obj"),
+            uid=[],
+        )
     ]
 
     def processChunk(self, chunk):
@@ -200,6 +206,9 @@ class ProjectLandmarksToMesh(desc.Node):
             
             for extrinsic, intrinsic, px_size, image  in zip(extrinsics, intrinsics, pixel_sizes, images):
                 print("Image "+image)
+                if image not in landmarks.keys():
+                    print("No landmark frame named "+image+" from facecapture landmarks")
+                    continue
                 lms = landmarks[image]#getting corresponding lms
                 if extrinsic is None:
                     print("No calibration for "+image+" skipping")
@@ -212,7 +221,7 @@ class ProjectLandmarksToMesh(desc.Node):
                 lms = np.asarray(lms)
                 lms_conf = lms[:,2]
                 point_1m = camera_deprojection(np.transpose(lms[:,0:2]), np.asarray([FAR_AWAY]), 
-                           extrinsic, intrinsic, px_size)#fixme: could get line direclty
+                                               extrinsic, intrinsic, px_size)#fixme: could get line direclty
                 distances_frame = []#FIXME: tmp
                 for li,l in enumerate(point_1m):
                     if lms_conf[li]<LM_CONFIDENCE_THRESHOLD:
@@ -248,10 +257,10 @@ class ProjectLandmarksToMesh(desc.Node):
                 #debug export mesh
                 mesh.vertices = vertices
                 mesh.export(chunk.node.outputFolder.value+"/mesh.obj")
-                #debug export landmarks vertices
-                with open(chunk.node.outputFolder.value+"/corresp.obj", "w") as f:
-                    for v in vertices[closest_idx]:
-                        f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
+           
+            with open(chunk.node.outputCorrespondancesMesh.value, "w") as f:
+                for v in vertices[closest_idx]:
+                    f.write("v %f %f %f 1 0 0\n"%(v[0], v[1], v[2]))
             print('DONE')
         finally:
             chunk.logManager.end()
