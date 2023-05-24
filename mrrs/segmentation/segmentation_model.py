@@ -2,10 +2,10 @@ class SegmentationModel():
     """
     Interface definition for SegmentationModel
     """
-    # CLASSES_NAMES = None
 
     def __init__(self):
         pass
+
     def __call__(self, input_image):
         raise RuntimeError("Abstract class SegmentationModel not meant to be used")
 

@@ -5,13 +5,13 @@ __version__ = "3.0"
 
 import os
 import json
-from PIL.Image import linear_gradient
 
 import numpy as np
 from meshroom.core import desc
 
 from mrrs.core.ios import open_image, save_exr, save_image
-#FIXME: would be better with azy import?
+
+#FIXME: would be better with lazy import?
 from mrrs.segmentation.instance_segmentation.mask_rcnn import InstanceSegmentationMaskRCNN
 from mrrs.segmentation.semantic.fcnResnet50 import SemanticSegmentationFcnResnet50
 from mrrs.segmentation.facial_segmentation.bisnet import BisnetSegmentation
@@ -140,20 +140,10 @@ class Segmentation(desc.Node):
                 #calling segmentation
                 chunk.logger.info('Computing segmentation for image %d/%d images'%(index, len(views_ids)))
                 input_image, orientation = open_image(views_original_file, auto_rotate=chunk.node.autoRotate.value, return_orientation=True)
-             
-                # save_image(os.path.join(chunk.node.output.value, views_id+"_image.png"), input_image)#FIXME: to remove (used in debug)
                 output_masks, output_classes = segmentor(input_image)#segmentor retrurns 1-hot vectors+corresponding class name
                 chunk.logger.info('%d objects found'%(len(output_masks)))
                 #dumps class names
                 np.savetxt(os.path.join(chunk.node.output.value, views_id+"_classes.txt" ) , output_classes, fmt="%s")
-
-                # #debug
-                # for output_mask, label in zip(output_masks, output_classes):
-                #     # save_image(,
-                #     #                         (input_image+np.expand_dims(output_mask, axis=-1))/2, orientation=1)
-                #     from PIL import Image
-                #     Image.fromarray( ((input_image+np.expand_dims(output_mask, axis=-1))/2).astype(np.uint8)).save(os.path.join(chunk.node.output.value, 
-                #     views_id+"_"+label+".png"))
 
                 #if a class mask is passed will create it for each channel
                 if len(chunk.node.createMask.value)>0:
@@ -165,9 +155,6 @@ class Segmentation(desc.Node):
                             output_class_radical = output_class.split("_")[0]
                             if output_class_radical in selected_masks:
                                 mask |= output_mask
-                                #debug
-                                # save_image(os.path.join(chunk.node.output.value, views_id+"_"+output_class+".png"),
-                                                # output_mask, orientation=0)
                         if chunk.node.inverseClassmask.value:
                             mask = 255-mask
 
@@ -176,6 +163,7 @@ class Segmentation(desc.Node):
 
                     else:
                         chunk.logger.warn("No objects detected for "+views_id)
+                
                 #save final images: an exr with a one hot per channel, the channel name is the class name
                 if len(output_masks) > 0:
                     output_masks = np.stack(output_masks, axis=-1)
@@ -184,7 +172,6 @@ class Segmentation(desc.Node):
                     output_classes = "unlabeled"
                 save_exr(output_masks, os.path.join(chunk.node.output.value, views_id+"_segmentation.exr"),
                          data_type="segmentation", channel_names=output_classes)
-
 
             chunk.logger.info('Computing segmentation end')
         finally:

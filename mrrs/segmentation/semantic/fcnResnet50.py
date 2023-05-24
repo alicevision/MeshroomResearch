@@ -4,7 +4,6 @@ from mrrs.segmentation.segmentation_model import SegmentationModel
 import numpy as np
 
 from mrrs.core.utils import cv2_resize_crop, cv2_resize_with_pad
-from mrrs.core.utils import get_label_colors
 
 class SemanticSegmentationFcnResnet50(SegmentationModel):
 
@@ -67,7 +66,6 @@ class SemanticSegmentationFcnResnet50(SegmentationModel):
         #setup model and load in eval mode
         torch_model = fcn_resnet50(pretrained=True, progress=True, num_classes=21)
         torch_model.eval()
-        # print(segmentor.CLASSES_NAMES)
         #setup input
         dummy_inputs = torch.randn(1, 3, SemanticSegmentationFcnResnet50.IMAGE_SIZE[1], SemanticSegmentationFcnResnet50.IMAGE_SIZE[0], requires_grad=True)
         with torch.no_grad():

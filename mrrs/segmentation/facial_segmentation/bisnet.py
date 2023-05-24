@@ -15,22 +15,9 @@ from mrrs.segmentation.segmentation_model import SegmentationModel
 class BisnetSegmentation(SegmentationModel):
 
     IMAGE_SIZE = [512, 512]
-    # CLASSES_NAMES = {
-    #                 0: 'background',	1: 'skin',	    2: 'nose',
-    #                 3: 'eye_g',	        4: 'l_eye',	    5: 'r_eye',
-    #                 6: 'l_brow',	    7: 'r_brow',    8: 'l_ear',
-    #                 9: 'r_ear',	        10: 'mouth',	11: 'u_lip',
-    #                 12: 'l_lip',	    13: 'hair',	    14: 'hat',
-    #                 15: 'ear_r',	    16: 'neck_l',	17: 'neck',
-    #                 18: 'cloth'
-    #                 }
-
     CLASSES_NAMES = ['background', 'skin', 'l_brow', 'r_brow', 'l_eye', 'r_eye', 'eye_g', 'l_ear', 'r_ear', 'ear_r',
             'nose', 'mouth', 'u_lip', 'l_lip', 'neck', 'neck_l', 'cloth', 'hair', 'hat']
-
-    # CLASSES_NAMES = ['background', 'skin', '2', '3', '4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19']
-
- 
+            
     def __init__(self):
         super().__init__()
         this_file_path = os.path.dirname(os.path.realpath(__file__))

@@ -69,13 +69,3 @@ class InstanceSegmentationMaskRCNN(SegmentationModel):
     def export_model():
         raise RuntimeError("Export not supported.")
 
-#test
-if __name__ == "__main__":
-    import numpy as np
-    test_image = r"c:\\Users\\hogm\\OneDrive - Technicolor\\Documents\\data\\datasets\\blendedMVSNEt\\low_res\\BlendedMVS\\5a3ca9cb270f0e3f14d0eddb\\blended_images\\00000000.jpg"
-    from PIL import Image
-    img = np.asarray(Image.open(test_image))
-    segmentor = InstanceSegmentationMaskRCNN()
-    print(segmentor.CLASSES_NAMES)
-    output_mask_rois, output_classes = segmentor(img)
-    print("Done")
