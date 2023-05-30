@@ -43,7 +43,7 @@
             "inputs": {
                 "viewpoints": [],
                 "intrinsics": [],
-                "sensorDatabase": "/home/bbrument/dev/alicevision/apriltag_sandbox/AliceVision/build/install/share/aliceVision/cameraSensors.db",
+                "sensorDatabase": "${ALICEVISION_SENSOR_DB}",
                 "defaultFieldOfView": 45.0,
                 "groupCameraFallback": "folder",
                 "allowedCameraModels": [
