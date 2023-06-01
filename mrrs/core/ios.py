@@ -337,7 +337,7 @@ def parse_intrisics_sfm_data(sfm_intrinsic):
     intrinsic_id = sfm_intrinsic['intrinsicId']
     width=int(sfm_intrinsic["width"] )
     sensor_width = abs(float(sfm_intrinsic["sensorWidth"] ))
-    sensor_height = abs(float(sfm_intrinsic["sensorHeight"] ))
+    sensor_height = abs(float(sfm_intrinsic["sensorHeight"] )) #FIXME: not axtually used, sensor_heightis pixelratio*sensor_widtha
     pixel_size = sensor_width/width
     #principal point is given in pixel, we pass it into metric for consistency with focal
     principal_point = np.asarray([sensor_width, sensor_height])/2\
@@ -511,6 +511,9 @@ def open_mesh(mesh_path):#FIXME: add suport to uv, texture etc
     return mesh
 
 def save_obj(file, scene_points, scene_faces=None, points_colors=None):
+    """
+    Home made obj save function
+    """
     with open(file, 'w') as objfile:
         for point_index, point in enumerate(scene_points):
             point_string = "v "+' '.join(map(str, point))
@@ -518,7 +521,6 @@ def save_obj(file, scene_points, scene_faces=None, points_colors=None):
                 point_string += " "+' '.join(map(str, points_colors[point_index]))
             objfile.write(point_string+"\n")
         if scene_faces is not None:
-            raise BaseException("To be tested")
             for face_index, face in enumerate(scene_faces):
                 face_string = "f "+' '.join(map(str, face))
                 objfile.write(face_string+"\n")

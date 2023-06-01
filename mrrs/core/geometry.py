@@ -2,6 +2,7 @@
 Module that contains 2D and 3D geometrical operations
 """
 import numpy as np
+import math
 import logging
 from mrrs.core.utils import cross_with_broacsat, time_it, vectorised_dot
 
@@ -28,7 +29,7 @@ def make_unit(input_array):
     """
     make unit along the last dimention
     """
-    norm = np.sqrt(np.sum(input_array**2, axis=-1))
+    norm = np.sqrt(np.sum(np.power(input_array,2), axis=-1))
     input_array[..., :] /= np.stack([norm, norm, norm], axis=-1)  # need the stack for broadcasting
     return input_array
 
@@ -77,7 +78,7 @@ def camera_deprojection(pixels, depth_map, extrinsic, intrinsic, pixel_size):
 
 def camera_deprojection_meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_size):
     """
-    Meshroom normalizes the rays before deprojection.
+    Meshroom make_units the rays before deprojection.
     This assumes depth maps neutralises this beforehand.
     """
     xs, ys = pixels
@@ -180,7 +181,7 @@ def barycentric_to_cartesian(barycentric_coordinates, triangle):
 def distance_point_to_line(points, line_point_0, line_point_1):
     """compute distance between points and the 
         defined by line_point_0 and line_point_1"""
-    # normalized tangent vector of the line 
+    # make_unitd tangent vector of the line 
     line_tan_vec = np.divide(line_point_1 - line_point_0, np.linalg.norm(line_point_1 - line_point_0))
     # signed parallel distance components btw line tangeant and point-line points
     s = np.dot(line_point_0 - points, line_tan_vec)
@@ -365,6 +366,34 @@ def mesh_transform(mesh,T):
     mesh.apply_transform(T)
     return mesh
 
+def get_icosahedron(radius=1, translation=[0,0,0]):
+    ''''Returns vertices and faces of a unit icosahedron. '''
+    
+    # 12 principal directions in 3D space: points on an unit icosahedron
+    phi = (1+np.sqrt(5))/2    
+    vertices = np.array([
+        [0, 1, phi], [0,-1, phi], [1, phi, 0],
+        [-1, phi, 0], [phi, 0, 1], [-phi, 0, 1]])/np.sqrt(1+phi**2)
+    vertices = np.r_[vertices,-vertices]
+    
+    # 20 faces
+    faces = np.array([
+        [0,5,1], [0,3,5], [0,2,3], [0,4,2], [0,1,4], 
+        [1,5,8], [5,3,10], [3,2,7], [2,4,11], [4,1,9], 
+        [7,11,6], [11,9,6], [9,8,6], [8,10,6], [10,7,6], 
+        [2,11,7], [4,9,11], [1,8,9], [5,10,8], [3,7,10]], dtype=int)    
+    
+    return radius*vertices+[translation], faces
+
+def transform_cg_cv(vertices):
+    """
+    Transforms vertices from computer graphics CS to computer vision space or vice versa
+    """
+    transform_mat = np.asarray([[1,0,0],[0,-1,0],[0,0,-1]])
+    vertices=np.transpose(transform_mat@np.transpose(vertices))
+    return vertices
+
+
 #%% Other
 def rescale_depth(source_depth_map, target_depth_map, mask):
     """
@@ -419,6 +448,7 @@ def compute_normals(depth_map):
     # normal[:, :, 1] /= n
     # normal[:, :, 2] /= n
     return normal
+
 
 #%% Point cloud
 
