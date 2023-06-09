@@ -8,8 +8,8 @@ It is implemented in Python and will likely remain so.
 The organisation is the following:
 - mrrs/core contains all the basic IOs, utils and common geometrical functions used through the library
 - mrrs/pipeline contains Meshrom pipeline files
-- mrrs/scripts contains all the scripts used to run the benchmark
-- mrrs/nodes contains the interface nodes for integraton in Meshroom
+- mrrs/scripts contains all the scripts, including those used to run the benchmark
+- mrrs/nodes contains the interface nodes for integration in Meshroom
 - mrrs/< feature > contains code realated to the target feature. If several methods are solving the feature task, all methods inside MUST have the same IOs. An interface/abstract class should describe this. Each feature folder should be ideally associated to a Meshroom node.
 
 ## Install
@@ -25,7 +25,7 @@ Then install Meshroom Research with pip :
 cd MRRS
 pip install -e . [< optional features >]
 ```
-< optional features > may be ONNX to install the ONNX runtime, meshcomparison to install the dependencies required to handle meshes.
+< optional features > may need other packages.
 
 On Mikros machines:
 ```
@@ -79,10 +79,6 @@ Options:
   --help                    Show this message and exit.
 ```
 
-### Pipelines
-
-TAB
-
 ## Meshroom Dev quickstart
 
 Meshroom was designed to interact with a nodal GUI; this organically defines the code's structure as independent modules with distinct inputs and outputs. All the intermetiates results of each node of the graph (the pipeline) are dumped into a cache folder eponypm to the node.\
@@ -103,13 +99,3 @@ Don't forget to add the `__init__.py` in the node folder.
 tips:
 plugin QT_DEBUG_PLUGINS=1 to debug
 
-
-### Camera .sfm format
-
-Each view is assigned an id, a pose id and intrisinc id\
-
-TBA\
-
-## Depth map format
-
-TBA
