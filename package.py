@@ -9,13 +9,12 @@ version='0.0'
 requires=[
     'python-3.7',
     'Pillow-8.4.0',
-    'msgpack_numpy-0.4.7.1',
     'opencv_python-4.5.4.60',
     'pyoiio-2.4.7.0',
     'trimesh', 
     'click', #needed for clis otherwise optional
     #'annoy', #no package send mail
-    'matplotlib-3.4.2' #needed for?
+    #'matplotlib-3.4.2' #needed for?
     ]
 
 def commands():
