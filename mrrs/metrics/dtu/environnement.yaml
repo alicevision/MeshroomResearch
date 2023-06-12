@@ -1,0 +1,11 @@
+name: dtubench
+
+dependencies:
+- python
+- numpy
+- open3d
+- scikit-learn
+- tqdm 
+- scipy
+- multiprocessing
+- argparse
