@@ -392,6 +392,7 @@ class Dataset(desc.Node):
             else:
                 gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, [None] * len(gt_intrinsics), poses_id, calibs_id,
                                                     images_sizes, sfm_data)
+                gt_sfm_data["intrinsics"] = sfm_data["intrinsics"]
             del gt_sfm_data["poses"]
 
             # Save the new generated SFM data to JSON file

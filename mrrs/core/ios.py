@@ -274,6 +274,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
     You may pass an existing sfm_data to overwrite the parameters, otherwise you need to handle views yourself.
     The focal and sensor width is assumed in m while the principal point is assumed in pixels, as a delta from the theoreticla center.
     '''
+    sfm_data = sfm_data.copy()
     sfm_data['poses']=[]
     if intrinsics is not None:#needed to keep what was in sfm_data
         sfm_data['intrinsics']=[]
