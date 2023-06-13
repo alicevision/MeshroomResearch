@@ -1,0 +1,18 @@
+{
+    "status": "ERROR",
+    "execMode": "LOCAL",
+    "nodeName": "MeshcomparisonDTU_1",
+    "nodeType": "MeshcomparisonDTU",
+    "packageName": "mlemnodes",
+    "packageVersion": null,
+    "graph": "",
+    "commandLine": "conda activate /s/apps/users/multiview/mrrs/develop/MeshroomResearch/pipelines/dtu/MeshroomCache/MeshcomparisonDTU/d0d2c1970d81916182e228bdb778843a25ce32b4/../conda_env -- ",
+    "env": null,
+    "startDateTime": "2023-06-13 09:32:54.585341",
+    "endDateTime": "",
+    "elapsedTime": 0,
+    "hostname": "frapcvfx2020.mikros.int",
+    "sessionUid": "af1c0fc0-093e-11ee-80b1-d89ef315b76e",
+    "returnCode": 1,
+    "elapsedTimeStr": "0:00:00"
+}
