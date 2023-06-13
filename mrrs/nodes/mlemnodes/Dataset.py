@@ -160,14 +160,6 @@ class Dataset(desc.Node):
             uid=[0],
         ),
 
-        desc.File(
-            name="gtPath",
-            label="Ground Truth Path",
-            description="Ground truth path for DTU.",
-            value="",
-            uid=[0],
-        ),
-
         desc.BoolParam(
             name='initIntrinsics',
             label='Initalize intrinsics',
@@ -266,10 +258,6 @@ class Dataset(desc.Node):
             chunk.logger.warning(
                 'No input InputFolder or sfmData in node blendMVGDataset, skipping')
             return False
-        if chunk.node.datasetType.value == 'DTU' and chunk.node.gtPath.value == '':
-            chunk.logger.warning(
-                'No ground truth path for DTU dataset, skipping')
-            return False
         return True
 
     def processChunk(self, chunk):
@@ -332,19 +320,19 @@ class Dataset(desc.Node):
             chunk.logManager.start("Exporting calibration")
             # Open calibrations based on the dataset type
             if chunk.node.datasetType.value == "blendedMVG" or chunk.node.datasetType.value == "realityCapture":
-                gt_extrinsics, gt_intrinsics = open_calibration(
-                    scenes_calibs, chunk.node.datasetType.value)
+                gt_extrinsics, gt_intrinsics = open_calibration(scenes_calibs, chunk.node.datasetType.value)
             elif chunk.node.datasetType.value == "DTU":
                 gt_extrinsics, gt_intrinsics, gt_scale_mat_inv = open_dtu_calibration(
                     os.path.join(folder, "..", "cameras_sphere.npz"), scenes_calibs)
                 
                 # Add DTU information to the generated SFM data
-                scan = int(scene_image.split('/')[-3].split('scan')[-1])
-                sfm_data["groundTruthDTU"] = {"gtPath":chunk.node.gtPath.value,
+                gtPath = os.path.join(folder, "..", "..", "..", "SampleSet","MVS Data")
+                scan = int(folder.split('/')[-2].split('scan')[-1])
+                sfm_data["groundTruthDTU"] = {"gtPath":gtPath,
                                       "scan":scan,
-                                      "stl":os.path.join(chunk.node.gtPath.value,'Points','stl',f'stl{scan:03}_total.ply'),
-                                      "obsMask":os.path.join(chunk.node.gtPath.value,'ObsMask',f'ObsMask{scan}_10.mat'),
-                                      "groundPlane":os.path.join(chunk.node.gtPath.value,'ObsMask',f'Plane{scan}.mat'),
+                                      "stl":os.path.join(gtPath,'Points','stl',f'stl{scan:03}_total.ply'),
+                                      "obsMask":os.path.join(gtPath,'ObsMask',f'ObsMask{scan}_10.mat'),
+                                      "groundPlane":os.path.join(gtPath,'ObsMask',f'Plane{scan}.mat'),
                                       "scaleMatInv":gt_scale_mat_inv.tolist()}
             
             # Adjust values based on the dataset type
@@ -367,10 +355,8 @@ class Dataset(desc.Node):
                         pixel_size = sensor_size / image_size[0]
                         i[0, 0] /= pixel_size
                         i[1, 1] /= pixel_size
-                        i[0, 2] = image_size[0] / 2 + \
-                            i[0, 2] * 1000000 * 1 / image_size[0]
-                        i[1, 2] = image_size[1] / 2 + \
-                            i[1, 2] * 1000000 * 1 / image_size[0]
+                        i[0, 2] = image_size[0] / 2 + i[0, 2] * 1000000 * 1 / image_size[0]
+                        i[1, 2] = image_size[1] / 2 + i[1, 2] * 1000000 * 1 / image_size[0]
                         # convert principal point in pixels 
                         # https://support.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
                         # dimentionless because already /35 => we pass it into pixels
@@ -378,8 +364,7 @@ class Dataset(desc.Node):
                 sensor_size = 36
 
             # Generate SFM data from matrices
-            gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, gt_intrinsics, poses_id, calibs_id, images_sizes, sfm_data,
-                                                sensor_size)
+            gt_sfm_data = sfm_data_from_matrices(gt_extrinsics, gt_intrinsics, poses_id, calibs_id, images_sizes, sfm_data, sensor_size)
 
             if chunk.node.focalOverwrite.value != -1:
                 pixel_size = sensor_size / images_sizes[0][0]
