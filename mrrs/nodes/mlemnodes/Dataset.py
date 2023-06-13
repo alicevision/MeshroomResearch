@@ -2,6 +2,34 @@
 This nodes opens data from OpenMVGDataset.
 It either bypasses the CameraInit node or takes an sfm data to add the depth and poses.
 It will create its own .sfm and create a ground truth depth map folder.
+
+Specific documentation for DTU dataset
+This following workspace folder structure is needed:
++---DTU_sphere #https://drive.google.com/drive/folders/1qiG2aaNRxlfJ7GscI4LRFJR6icvEY3Jm
+|   +---scan24
+|       +---images
+|       +---mask
+|       +---cameras_sphere.npz
+|   +---scan...
+|       +---images
+|       +---mask
+|       +---cameras_sphere.npz
++---SampleSet #https://roboimagedata.compute.dtu.dk/?page_id=36
+|   +---Matlab evaluation code
+|   +---MVS Data
+|       +---ObsMask
+|           +---ObsMask1_10.mat
+|           +---ObsMask..._10.mat
+|           +---ObsMask122_10.mat
+|           +---Plane1.mat
+|           +---Plane....mat
+|           +---Plane122.mat
+|       +---Points
+|           +---stl
+|               +---stl001_total.ply
+|               +---stl..._total.ply
+|               +---stl122_total.ply
+
 """
 __version__ = "3.0"
 
