@@ -1,11 +1,19 @@
 name: dtubench
-
+channels:
+  - open3d-admin
+  - conda-forge
+  - defaults
 dependencies:
-- python
-- numpy
-- open3d
-- scikit-learn
-- tqdm 
-- scipy
-- multiprocessing
-- argparse
+- python=3.9
+- pip
+- pip:
+  - open3d
+  - numpy
+  - scikit-learn
+  - tqdm 
+  - scipy
+#should be in python already
+# - multiprocessing
+#- argparse
+
+

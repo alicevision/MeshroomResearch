@@ -8,12 +8,11 @@ from meshroom.core import desc
 class CondaNode(desc.CommandLineNode):
     def __init__(self):
         super().__init__() #TODO check if conda to path
-        #path to yaml file, ned o be set in inherited class
-        env_file=""
 
     @property
     def env_file(self):
-        raise BaseException("You must ovewrite env_file in the inherited CondaNode")
+        """path to yaml file, needs to be set in inherited class"""
+        raise NotImplementedError("You must ovewrite env_file in the inherited CondaNode")
 
     def buildCommandLine(self, chunk):#move in processChunk?
         cmdPrefix = ''
@@ -24,13 +23,11 @@ class CondaNode(desc.CommandLineNode):
             if not os.path.exists(self.env_file):
                 raise RuntimeError('No yaml file found.')
             make_env_command = "conda env create --prefix {env_path} --file {env_file}".format(env_path=env_path, env_file=self.env_file)
-            print(make_env_command)
             os.system(make_env_command)
+
         #add the prefix to the command line
-        cmdPrefix = 'conda activate {env_path} -- '.format(env_path=env_path)
+        cmdPrefix = 'conda run -p {env_path} '.format(env_path=env_path)
         cmdSuffix = ''
         if chunk.node.isParallelized and chunk.node.size > 1:
             cmdSuffix = ' ' + self.commandLineRange.format(**chunk.range.toDict())
         return cmdPrefix + chunk.node.nodeDesc.commandLine.format(**chunk.node._cmdVars) + cmdSuffix
-
-    

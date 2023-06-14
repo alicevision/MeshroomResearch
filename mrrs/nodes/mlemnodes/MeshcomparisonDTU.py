@@ -1,16 +1,17 @@
 __version__ = "1.0"
-
 import os
 from meshroom.core import desc
 from mrrs.core.CondaNode import CondaNode
 from mrrs.metrics.dtu import ENV_FILE
 
 class MeshcomparisonDTU(CondaNode):
+
+    #overides the env path
     @property
     def env_file(self):
         return ENV_FILE
 
-    commandLine = ''
+    commandLine = 'python "'+os.path.join(os.path.dirname(__file__),"..", "..", "metrics", "dtu", "dtu_eval.py")+'"'
     gpu = desc.Level.NONE
 
     category = 'Meshroom Research'
