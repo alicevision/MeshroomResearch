@@ -12,6 +12,7 @@ from meshroom.core import desc
 from mrrs.core.geometry import *
 from mrrs.core.utils import *
 from mrrs.core.ios import *
+from mrrs.implicit_mesh.instant_ngp import ENV_FILE
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -25,6 +26,12 @@ class InstantNGP(desc.Node):
     """
     This node launches InstantNGP.
     """
+
+    #overides the env path
+    @property
+    def env_file(self):
+        return ENV_FILE
+    
     category = 'Meshroom Research'
     gpu = desc.Level.INTENSIVE
     documentation = '''Util node to launch instant-ngp.'''
@@ -73,7 +80,7 @@ class InstantNGP(desc.Node):
             name='outputMesh',
             label='Output mesh',
             description='Output mesh.',
-            value=desc.Node.internalFolder + 'mesh.ply',
+            value=desc.Node.internalFolder + 'mesh.obj',
             uid=[],
         ),
     ]

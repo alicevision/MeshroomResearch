@@ -285,6 +285,17 @@ class Dataset(desc.Node):
             uid=[],
             group='',
         ),
+        
+        desc.File(
+            name='transformationMatrix',
+            label='Transformation matrix',
+            description='Scale matrix from unit sphere to GT.',
+            semantic='mesh',
+            value=os.path.join(desc.Node.internalFolder,
+                               'transformationMatrix.json'),
+            uid=[],
+            group='',
+        ), #FIXME: has to disappear from Dataset, look at NormalizeCameras
 
         desc.File(#for display
             name='depthmaps',
@@ -382,6 +393,10 @@ class Dataset(desc.Node):
                                       "obsMask":os.path.join(gtPath,'ObsMask',f'ObsMask{scan}_10.mat'),
                                       "groundPlane":os.path.join(gtPath,'ObsMask',f'Plane{scan}.mat'),
                                       "scaleMatInv":gt_scale_mat_inv.tolist()}
+                
+                # Save the scale matrix
+                with open(os.path.join(chunk.node.transformationMatrix.value), 'w') as f:
+                    json.dump({'transform':sfm_data["groundTruthDTU"]["scaleMatInv"]}, f, indent=4)
 
             # Adjust values based on the dataset type
             sensor_size = 1

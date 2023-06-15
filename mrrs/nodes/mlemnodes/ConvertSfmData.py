@@ -115,8 +115,8 @@ def convert_sfmdata_to_nerf(sfm_data, actual_path):
 
                 c2w[0:3,2] *= -1 # flip the y and z axis
                 c2w[0:3,1] *= -1
-                c2w = c2w[[1,0,2,3],:]
-                c2w[2,:] *= -1 # flip whole world upside down
+                # c2w = c2w[[1,0,2,3],:]
+                # c2w[2,:] *= -1 # flip whole world upside down
 
                 frame={"file_path":name,"sharpness":b,"transform_matrix":c2w}
 
@@ -177,6 +177,15 @@ class ConvertSfmData(desc.Node):
             value=desc.Node.internalFolder,
             uid=[],
         ),
+
+        desc.File(
+            name='transformationMatrix',
+            label='Transformation matrix',
+            description='Scale matrix from unit sphere to GT.',
+            value=os.path.join(desc.Node.internalFolder,
+                               'transformationMatrix.json'),
+            uid=[],
+        ),
     ]
 
     def check_inputs(self, chunk):
@@ -210,6 +219,11 @@ class ConvertSfmData(desc.Node):
                 # Save the new generated SFM data to JSON file
                 with open(os.path.join(chunk.node.output.value,'transforms.json'), 'w') as f:
                     json.dump(output_sfm_data, f, indent=4)
+
+                # Save transformation matrix
+                T = [[0,0,1,0],[-1,0,0,0],[0,-1,0,0],[0,0,0,1]]
+                with open(os.path.join(chunk.node.transformationMatrix.value), 'w') as f:
+                    json.dump({'transform':T}, f, indent=4)
 
             elif chunk.node.outputType.value == 'IDR':
                 print('IDR')

@@ -204,5 +204,6 @@ class NormalizeCameras(desc.Node):
                 json.dump({"transform":T.tolist()}, f, indent=4)
 
             chunk.logger.info('Cameras normalization done.')
+            chunk.logger.warning('Node is not working.')
         finally:
             chunk.logManager.end()

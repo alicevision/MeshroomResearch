@@ -12,7 +12,7 @@ import json
 
 from mrrs.core.utils import format_float_array
 
-FORCE_IOOI = True#FIXME: probably a good idea to open everything with openimage IO, for now not woring on windows
+FORCE_IOOI = False#FIXME: probably a good idea to open everything with openimage IO, for now not woring on windows
 
 #%% Images
 def open_exr(exr_path, clip_negative=False):
@@ -279,7 +279,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
     if intrinsics is not None:#needed to keep what was in sfm_data
         sfm_data['intrinsics']=[]
 
-    for extrinsic, pose_id in zip(extrinsics, poses_ids):#Note: in, theroy we might have a pose shared between views, in practice this never happens
+    for extrinsic, pose_id in zip(extrinsics, poses_ids):#Note: in, theory we might have a pose shared between views, in practice this never happens
         #if no pose, skipping, meshroom support pose_id in vews with no pose declared.
         if extrinsic is None:
             continue
