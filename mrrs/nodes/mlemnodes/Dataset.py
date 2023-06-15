@@ -1,7 +1,15 @@
 """
-This nodes opens data from OpenMVGDataset.
-It either bypasses the CameraInit node or takes an sfm data to add the depth and poses.
-It will create its own .sfm and create a ground truth depth map folder.
+This nodes opens data from various dataset.
+It will overwrite calibration values in sfm data and add extra values.
+
+It uses the camera init node and relative path to find the corresponding data.
+It will create its own .sfm and create a ground truth depth map folder and mesh is applicable.
+
+Specific documentation for OpenMVGDataset:
+TODO
+
+Specific documentation for XMP from reality capture:
+TODO NOTE: sould be in a node?
 
 Specific documentation for DTU dataset
 This following workspace folder structure is needed:
@@ -37,14 +45,15 @@ import os
 import json
 import re
 import cv2
+import trimesh
 
 from meshroom.core import desc
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
 
+# FIXME: this is becoming a mess, maybe an abstract class Dataset is needed, move to a module also
+
 # FIXME: move this into a reality capture folder
-
-
 def parse_xmp(xmp_file):
     """
     Parses the xmp from reality capture.
@@ -117,7 +126,7 @@ def open_dtu_calibration(scene_calib_path, frame_ids):
                               idx].astype(np.float32) for idx in frame_ids]
     world_mats = [camera_dict['world_mat_%d' %
                               idx].astype(np.float32) for idx in frame_ids]
-    
+
     gt_scale_mat_inv = camera_dict['scale_mat_inv_0']
 
     gt_extrinsics, gt_intrinsics = [], []
@@ -267,6 +276,17 @@ class Dataset(desc.Node):
         ),
 
         desc.File(
+            name='groundTruthMesh',
+            label='Ground Truth Mesh',
+            description='Generated mesh.',
+            semantic='mesh',
+            value=os.path.join(desc.Node.internalFolder,
+                               'ground_truth_mesh.obj'),
+            uid=[],
+            group='',
+        ),
+
+        desc.File(#for display
             name='depthmaps',
             label='Depth maps',
             description='Generated depth maps.',
@@ -296,7 +316,6 @@ class Dataset(desc.Node):
             chunk.logManager.start(chunk.node.verboseLevel.value)
             if not self.check_inputs(chunk):
                 return
-            #TODO: make fc
 
             chunk.logger.info("Starts to load data from sfmdata")
             # Load SFM data from JSON file
@@ -309,6 +328,7 @@ class Dataset(desc.Node):
             poses_id = []
             calibs_id = []
             views_id = []
+            groundTruthMesh = None
 
             # Determine the paths to calibration and depth maps based on the dataset type
             for view in sfm_data["views"]:
@@ -331,7 +351,7 @@ class Dataset(desc.Node):
                     scenes_depth = os.path.join(
                         folder, "..", "depths", basename + ".jpg.depth.exr")#FIXME: no gt
                 elif chunk.node.datasetType.value == "DTU":
-                    scenes_calib = int(frame_id)
+                    scenes_calib = int(frame_id)#for dtu, simple index is enough
                     scenes_depth = None
 
                 # Append the data to the respective lists
@@ -352,7 +372,7 @@ class Dataset(desc.Node):
             elif chunk.node.datasetType.value == "DTU":
                 gt_extrinsics, gt_intrinsics, gt_scale_mat_inv = open_dtu_calibration(
                     os.path.join(folder, "..", "cameras_sphere.npz"), scenes_calibs)
-                
+
                 # Add DTU information to the generated SFM data
                 gtPath = os.path.join(folder, "..", "..", "..", "SampleSet","MVS Data")
                 scan = int(folder.split('/')[-2].split('scan')[-1])
@@ -362,7 +382,7 @@ class Dataset(desc.Node):
                                       "obsMask":os.path.join(gtPath,'ObsMask',f'ObsMask{scan}_10.mat'),
                                       "groundPlane":os.path.join(gtPath,'ObsMask',f'Plane{scan}.mat'),
                                       "scaleMatInv":gt_scale_mat_inv.tolist()}
-            
+
             # Adjust values based on the dataset type
             sensor_size = 1
             if chunk.node.datasetType.value == "blendedMVG":
@@ -385,7 +405,7 @@ class Dataset(desc.Node):
                         i[1, 1] /= pixel_size
                         i[0, 2] = image_size[0] / 2 + i[0, 2] * 1000000 * 1 / image_size[0]
                         i[1, 2] = image_size[1] / 2 + i[1, 2] * 1000000 * 1 / image_size[0]
-                        # convert principal point in pixels 
+                        # convert principal point in pixels
                         # https://support.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
                         # dimentionless because already /35 => we pass it into pixels
             elif chunk.node.datasetType.value == "DTU":
@@ -408,6 +428,16 @@ class Dataset(desc.Node):
             if chunk.node.datasetType.value == "blendedMVG" or chunk.node.datasetType.value == "realityCapture":
                 for view, depth in zip(gt_sfm_data["views"], scenes_depths):
                     view["groundTruthDepth"] = depth
+
+            # Load GT mesh depending on the dataset
+            groundTruthMesh = None
+            if chunk.node.datasetType.value == "DTU":
+                chunk.logger.warning('GT Mesh not supported ')
+
+            # Add ground truth mesh if any
+            if groundTruthMesh is not None:
+                mesh = trimesh.load(groundTruthMesh, force='mesh')
+                trimesh.exchange.obj.export_obj(mesh)
 
             # Save the generated SFM data to JSON file
             with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
@@ -453,6 +483,6 @@ class Dataset(desc.Node):
                                                         str(view_id) + "_depthMap.exr"), data_type="depth",
                             custom_header=depth_meta)
 
-                    chunk.logger.info('Dataset loading ends')
+            chunk.logger.info('Dataset loading ends')
         finally:
             chunk.logManager.end()

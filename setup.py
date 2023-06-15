@@ -24,13 +24,13 @@ setup(
     #license='LICENSE.txt',
     description='Meshroom Research plugin and library.',
     long_description=open('README.md').read(),
-    install_requires=["numpy", "pillow", "opencv-python", ],#all of this sould be in the mr env already
+    install_requires=["numpy", "pillow",
+                      "opencv-python",
+                      "trimesh", "click"],
                      # "openexr-python"],#note add mode meshroom? with oiio
     scripts=['clis/benchmark.py'],
     extras_require= {
-                    "onnx": ["onnxruntime"],#for depth map refinement
-                    "meshcomparison": ["annoy", "trimesh"],
-                    "clis": ["click"],
+                    "onnx": ["onnxruntime"],
                      # "training": "tensorflow==2.4"#need conda
                     },
     )

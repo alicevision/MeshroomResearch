@@ -1,6 +1,9 @@
 """
 This node converts sfmdata to nerf data.
 """
+
+#TODO: add colmap format here too?
+
 __version__ = "1.0"
 
 import os
@@ -54,7 +57,7 @@ def convert_sfmdata_to_nerf(sfm_data, actual_path):
         if intrinsic['distortionParams'] != '':
             k1 = float(intrinsic['distortionParams'][0])
             k2 = float(intrinsic['distortionParams'][1])
-        
+
         cx = w / 2 + float(intrinsic['principalPoint'][0])
         cy = h / 2 + float(intrinsic['principalPoint'][1])
 
@@ -201,7 +204,7 @@ class ConvertSfmData(desc.Node):
 
             # Create new object
             if chunk.node.outputType.value == 'NeRF':
-                
+
                 output_sfm_data = convert_sfmdata_to_nerf(sfm_data,chunk.node.inputSfmData.value)
 
                 # Save the new generated SFM data to JSON file
@@ -210,9 +213,9 @@ class ConvertSfmData(desc.Node):
 
             elif chunk.node.outputType.value == 'IDR':
                 print('IDR')
-            
-            
-            
+
+
+
 
             chunk.logger.info('Conversion done.')
         finally:
