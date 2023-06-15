@@ -1,12 +1,13 @@
 import os
+import multiprocessing as mp
+import argparse
+import csv
+
 import numpy as np
 import open3d as o3d
 import sklearn.neighbors as skln
 from tqdm import tqdm
 from scipy.io import loadmat
-import multiprocessing as mp
-import argparse
-import csv
 
 def sample_single_tri(input_):
     n1, n2, v1, v2, tri_vert = input_
@@ -30,9 +31,11 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, default='data_in.ply')
-    parser.add_argument('--scan', type=int, default=1)
+
+    # parser.add_argument('--scan', type=int, default=1)
     parser.add_argument('--mode', type=str, default='mesh', choices=['mesh', 'pcd'])
-    parser.add_argument('--dataset_dir', type=str, default='.')
+    # parser.add_argument('--dataset_dir', type=str, default='.')
+
     parser.add_argument('--eval_dir', type=str, default='.')
     parser.add_argument('--suffix', type=str, default='')
     parser.add_argument('--downsample_density', type=float, default=0.2)
@@ -74,7 +77,7 @@ if __name__ == '__main__':
 
         new_pts = np.concatenate(new_pts, axis=0)
         data_pcd = np.concatenate([vertices, new_pts], axis=0)
-    
+
     elif args.mode == 'pcd':
         pbar = tqdm(total=8)
         pbar.set_description('read data pcd')
@@ -211,7 +214,7 @@ if __name__ == '__main__':
         writer.writerow(['distance thr','precision','recall','f-score'])
         for ii in range(len(scores_tab)):
             writer.writerow(scores_tab[ii,:])
-    
+
     pbar.update(1)
     pbar.set_description('done')
     pbar.close()

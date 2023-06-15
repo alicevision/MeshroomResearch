@@ -9,7 +9,7 @@ from meshroom.core import desc
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
 
-class InjectSfmData(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
+class InjectSfmData(desc.Node):
 
     category = 'Meshroom Research'#Machine Learning Effort for Meshroom #'Sparse Reconstruction'
 

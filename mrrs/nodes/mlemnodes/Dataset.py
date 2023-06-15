@@ -328,7 +328,6 @@ class Dataset(desc.Node):
             poses_id = []
             calibs_id = []
             views_id = []
-            groundTruthMesh = None
 
             # Determine the paths to calibration and depth maps based on the dataset type
             for view in sfm_data["views"]:
@@ -430,14 +429,15 @@ class Dataset(desc.Node):
                     view["groundTruthDepth"] = depth
 
             # Load GT mesh depending on the dataset
-            groundTruthMesh = None
+            gt_mesh = None
             if chunk.node.datasetType.value == "DTU":
-                chunk.logger.warning('GT Mesh not supported ')
+                #get stl from last load
+                gt_mesh = os.path.abspath(os.path.join(gtPath,'Points','stl',f'stl{scan:03}_total.ply'))
 
             # Add ground truth mesh if any
-            if groundTruthMesh is not None:
-                mesh = trimesh.load(groundTruthMesh, force='mesh')
-                trimesh.exchange.obj.export_obj(mesh)
+            if gt_mesh is not None:
+                mesh = trimesh.load(gt_mesh, force='mesh')
+                mesh.export(chunk.node.groundTruthMesh.value)
 
             # Save the generated SFM data to JSON file
             with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
