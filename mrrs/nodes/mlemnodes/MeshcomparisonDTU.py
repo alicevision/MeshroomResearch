@@ -15,40 +15,98 @@ class MeshcomparisonDTU(CondaNode):
     gpu = desc.Level.NONE
 
     category = 'Meshroom Research'
-    documentation = '''Calls the dtu bechmark metrics between two meshes'''
+    documentation = '''Calls the dtu benchmark metrics between two meshes'''
 
     inputs = [
         desc.File(
             name='data',
-            label='InputPly',
-            description=''' ''',
+            label='Input Mesh',
+            description='''Ply?''',
             value='',
             uid=[0],
             ),
-         desc.File(
+
+        #TODO replace dataset_dir and scan with either mesh or sfm
+        # desc.File(
+        #     name='gTSfMData',
+        #     label='Ground Truth SfMData',
+        #     description='''Ply?''',
+        #     value='',
+        #     uid=[0],
+        #     group=''
+        #     ),
+
+        desc.File(
             name='dataset_dir',
             label='DataseDir',
-            description='''Input dataset for dtu''',#FIXE
+            description='''Input dataset for dtu''',#FIXE: remove read from data
             value='',
             uid=[0],
             ),
+
         desc.IntParam(
             name='scan',
             label='Scan',
-            description='''Index of the scanned mesh in dtu''',#FIXE
+            description='''Index of the scanned mesh in dtu''',#FIXE: remove read from data
             value=1,
             range=(0, 5000, 1),
             uid=[0],
             ),
+
         desc.ChoiceParam(
             name='mode',
             label='Mode',
-            description='''Chose mesh or poin cloud''',
+            description='''Chose mesh or point cloud''',
             value='info',
             values=['mesh', 'pcd'],
             exclusive=True,
             uid=[0],
         ),
+
+        desc.StringParam(
+            name='suffix',
+            label='saveSuffix',
+            description='''Suffix for the eval output''',
+            value='eval',
+            uid=[0],
+            ),
+
+        desc.FloatParam(
+            name='downsample_density',
+            label='downsampleDensity',
+            description='''Dowsampling of the input mesh''',
+            value=0.2,
+            range=(0.0, 1.0, 0.01),
+            uid=[0],
+            ),
+
+        desc.FloatParam(
+            name='patch_size',
+            label='pathSize',
+            description='''''',
+            value=60.0,
+            range=(0.0, 100.0, 1.0),
+            uid=[0],
+            ),
+
+        desc.FloatParam(
+            name='max_dist',
+            label='maxDist',
+            description='''''',
+            value=20.0,
+            range=(0.0, 100.0, 1.0),
+            uid=[0],
+            ),
+
+        desc.FloatParam(
+            name='visualize_threshold',
+            label='maxDist',
+            description='''''',
+            value=20.0,
+            range=(0.0, 100.0, 1.0),
+            uid=[0],
+            ),
+
     ]
 
     outputs = [
@@ -68,3 +126,14 @@ class MeshcomparisonDTU(CondaNode):
             uid=[],
             ),
     ]
+
+
+    # def processChunk(self, chunk):
+    #     try:
+    #         chunk.logger.info('Running dtu benchmark')
+
+    #         super().processChunk(self, chunk)
+    #         chunk.logger.info('Running dtu benchmark')
+    #     finally:
+    #         chunk.logManager.end()
+

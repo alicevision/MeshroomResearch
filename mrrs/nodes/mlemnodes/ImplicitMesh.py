@@ -10,8 +10,6 @@ from meshroom.core import desc
 from mrrs.core.ios import matrices_from_sfm_data
 from mrrs.implicit_mesh.instant_ngp.InstantNGP_wrapper import  InstantNGPWrapper
 
-#TODO: add abstraction for != approches
-
 class ImplicitMesh(desc.Node):
     """
     Class that wraps implicit mesh algorithms.
