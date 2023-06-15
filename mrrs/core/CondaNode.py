@@ -17,7 +17,7 @@ class CondaNode(desc.CommandLineNode):
     def buildCommandLine(self, chunk):#move in processChunk?
         cmdPrefix = ''
         #create the env in the folder above the node
-        env_path=os.path.join(chunk.node.internalFolder, "..", "conda_env")
+        env_path=os.path.join(chunk.node.internalFolder, "../conda_env")
         if not os.path.exists(env_path):
             chunk.logger.info("Creating conda env")
             if not os.path.exists(self.env_file):
