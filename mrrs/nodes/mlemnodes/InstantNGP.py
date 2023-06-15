@@ -12,7 +12,8 @@ from mrrs.implicit_mesh.instant_ngp import ENV_FILE
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 CONDA_ENV_PATH = "/home/bbrument/anaconda3/envs/instant-ngp/bin"
-NGP_COMMAND = f"{CONDA_ENV_PATH}/python "+ os.path.join(os.path.dirname(__file__), "../../implicit_mesh/instant_ngp/instant-ngp/scripts/run.py")#FIXME: hardcoded
+# NGP_COMMAND = f"{CONDA_ENV_PATH}/python "+ os.path.join(os.path.dirname(__file__), "../../implicit_mesh/instant_ngp/instant-ngp/scripts/run.py")#FIXME: hardcoded
+NGP_COMMAND = "python "+ os.path.join(os.path.dirname(__file__), "../../implicit_mesh/instant_ngp/instant-ngp/scripts/run.py")#FIXME: hardcoded
 MODEL = "instant-ngp/configs/nerf/base.json"
 # MODEL_PATH = os.path.join(os.path.dirname(__file__),"../../implicit_mesh/instant_ngp",MODEL)#FIXME: hardcoded
 
@@ -30,7 +31,7 @@ class InstantNGP(CondaNode):
     def env_file(self):
         return ENV_FILE
 
-    commandLine = NGP_COMMAND
+    commandLine = NGP_COMMAND + ' {allParams}'
 
     inputs = [
 
@@ -60,13 +61,11 @@ class InstantNGP(CondaNode):
             uid=[0],
         ),
 
-        desc.ChoiceParam(
-            name='verboseLevel',
-            label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
-            value='info',
-            values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
-            exclusive=True,
+        desc.StringParam(
+            name='mode',
+            label='Mode',
+            description='Mode.',
+            value='nerf',
             uid=[0],
         ),
     ]
