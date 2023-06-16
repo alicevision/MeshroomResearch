@@ -26,7 +26,7 @@ class CondaNode(desc.CommandLineNode):
             os.system(make_env_command)
 
         #add the prefix to the command line
-        cmdPrefix = 'conda run -p {env_path} '.format(env_path=env_path)
+        cmdPrefix = 'conda run --no-capture-output -p {env_path} '.format(env_path=env_path)
         cmdSuffix = ''
         if chunk.node.isParallelized and chunk.node.size > 1:
             cmdSuffix = ' ' + self.commandLineRange.format(**chunk.range.toDict())

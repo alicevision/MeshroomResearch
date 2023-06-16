@@ -11,7 +11,7 @@ class MeshcomparisonDTU(CondaNode):
     def env_file(self):
         return ENV_FILE
 
-    commandLine = 'python "'+os.path.join(os.path.dirname(__file__),"..", "..", "metrics", "dtu", "dtu_eval.py")+'"'
+    commandLine = 'python "'+os.path.join(os.path.dirname(__file__),"..", "..", "metrics", "dtu", "dtu_eval.py")+'" {allParams}'
     gpu = desc.Level.NONE
 
     category = 'Meshroom Research'
@@ -26,32 +26,30 @@ class MeshcomparisonDTU(CondaNode):
             uid=[0],
             ),
 
-        #TODO replace dataset_dir and scan with either mesh or sfm
-        # desc.File(
-        #     name='gTSfMData',
-        #     label='Ground Truth SfMData',
-        #     description='''Ply?''',
-        #     value='',
-        #     uid=[0],
-        #     group=''
-        #     ),
-
         desc.File(
-            name='dataset_dir',
-            label='DataseDir',
-            description='''Input dataset for dtu''',#FIXE: remove read from data
+            name='gt_sfm',
+            label='GroundTruthSfMData',
+            description='''''',
             value='',
             uid=[0],
             ),
 
-        desc.IntParam(
-            name='scan',
-            label='Scan',
-            description='''Index of the scanned mesh in dtu''',#FIXE: remove read from data
-            value=1,
-            range=(0, 5000, 1),
-            uid=[0],
-            ),
+        # desc.File(
+        #     name='dataset_dir',
+        #     label='DataseDir',
+        #     description='''Input dataset for dtu''',#FIXE: remove read from data
+        #     value='',
+        #     uid=[0],
+        #     ),
+
+        # desc.IntParam(
+        #     name='scan',
+        #     label='Scan',
+        #     description='''Index of the scanned mesh in dtu''',#FIXE: remove read from data
+        #     value=1,
+        #     range=(0, 5000, 1),
+        #     uid=[0],
+        #     ),
 
         desc.ChoiceParam(
             name='mode',
@@ -118,13 +116,13 @@ class MeshcomparisonDTU(CondaNode):
             uid=[],
             ),
 
-        desc.File(
-            name='vis_out_dir',
-            label='MeshDifference',
-            description='''''',
-            value=desc.Node.internalFolder,
-            uid=[],
-            ),
+        # desc.File(
+        #     name='vis_out_dir',
+        #     label='MeshDifference',
+        #     description='''''',
+        #     value=desc.Node.internalFolder,
+        #     uid=[],
+        #     ),
     ]
 
 

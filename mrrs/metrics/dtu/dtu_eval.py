@@ -27,25 +27,34 @@ def write_vis_pcd(file, points, colors):
     o3d.io.write_point_cloud(file, pcd)
 
 if __name__ == '__main__':
+    print("DTU Bench")
     mp.freeze_support()
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, default='data_in.ply')
-
-    # parser.add_argument('--scan', type=int, default=1)
+    parser.add_argument('--scan', type=int, default=1)
     parser.add_argument('--mode', type=str, default='mesh', choices=['mesh', 'pcd'])
-    # parser.add_argument('--dataset_dir', type=str, default='.')
-
+    parser.add_argument('--dataset_dir', type=str, default='.')
     parser.add_argument('--eval_dir', type=str, default='.')
     parser.add_argument('--suffix', type=str, default='')
     parser.add_argument('--downsample_density', type=float, default=0.2)
     parser.add_argument('--patch_size', type=float, default=60)
     parser.add_argument('--max_dist', type=float, default=20)
     parser.add_argument('--visualize_threshold', type=float, default=10)
+    parser.add_argument('--gt_sfm', type=str, default=None)
     args = parser.parse_args()
+
+    #parse the arguments from the sfm data
+    if args.gt_sfm is not None:
+        print("Loading sfm")
+        import json
+        sfm_data = json.load(open(args.gt_sfm, "r"))
+        args.dataset_dir=sfm_data["groundTruthDTU"]["gtPath"]
+        args.scan=sfm_data["groundTruthDTU"]["scan"]
 
     thresh = args.downsample_density
     if args.mode == 'mesh':
+        print("Mode mesh")
         pbar = tqdm(total=9)
         pbar.set_description('read data mesh')
         data_mesh = o3d.io.read_triangle_mesh(args.data)
@@ -79,11 +88,13 @@ if __name__ == '__main__':
         data_pcd = np.concatenate([vertices, new_pts], axis=0)
 
     elif args.mode == 'pcd':
+        print("Mode point cloud")
         pbar = tqdm(total=8)
         pbar.set_description('read data pcd')
         data_pcd_o3d = o3d.io.read_point_cloud(args.data)
         data_pcd = np.asarray(data_pcd_o3d.points)
 
+    print("\nBenching")
     # ?
     data_pcd = data_pcd[~np.isnan(data_pcd).any(axis=1),:]
 
@@ -142,6 +153,12 @@ if __name__ == '__main__':
 
     pbar.update(1)
     pbar.set_description('compute data2stl')
+    print('-----\n')
+    print(data_pcd)
+    print('-----\n')
+    print(stl_above)#FIXME
+    print('-----\n')
+    print(data_in_obs_above)#FIXME
     nn_engine.fit(stl_above)
     dist_d2s, idx_d2s = nn_engine.kneighbors(data_in_obs_above, n_neighbors=1, return_distance=True)
     max_dist = args.max_dist
