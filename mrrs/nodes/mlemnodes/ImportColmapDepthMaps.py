@@ -141,7 +141,7 @@ class ImportColmapDepthMaps(desc.Node):
                         depth_map_name = view_uid_map[depth_map_basename]+"_depthmap.exr"
                     else:
                         chunk.logger.warning('Warning depth map for view '+depth_map_path+' not found in sfm data')
-
+                #TODO: add metas
                 save_exr(depth_map,os.path.join(chunk.node.depthMapFolder.value, depth_map_name),'depth')
 
 

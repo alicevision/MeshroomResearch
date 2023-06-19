@@ -53,13 +53,12 @@ def do_transform(depth_maps_path, sfm_data, transform, output_folder):
             scale = float(depth_map_header["AliceVision:downscale"])
             depth_map = cv2.resize(depth_map, (scale*depth_map_size[::-1]).astype(np.int32))
             logging.info("Rescaling depth map with %f"%scale)
-        if pixels is None:
-            ys, xs = np.meshgrid(range(0, depth_map.shape[0]), \
-                                range(0, depth_map.shape[1]), \
-                                indexing="ij")
-            pixels = [xs, ys]
+        # if pixels is None: #depth map size can
+        ys, xs = np.meshgrid(range(0, depth_map.shape[0]), \
+                            range(0, depth_map.shape[1]), \
+                            indexing="ij")
+        pixels = [xs, ys]
         depth_map_transformed = transform(pixels, depth_map, extrinsics[index], intrinsics[index], pixel_sizes[index])
-        output_depth_map_path = os.path.join(output_folder, view_id+"_depthMap.exr")
         output_depth_map_path = os.path.join(output_folder, view_id+"_depthMap.exr")
         depth_map_transformed[depth_map<0] = 0#put 0 in places where its invalid
         if "AliceVision:downscale" in depth_map_header:
