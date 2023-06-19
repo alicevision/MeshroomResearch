@@ -144,7 +144,6 @@ class ImportColmapDepthMaps(desc.Node):
                 #TODO: add metas
                 save_exr(depth_map,os.path.join(chunk.node.depthMapFolder.value, depth_map_name),'depth')
 
-
             chunk.logger.info('Import done.')
         finally:
             chunk.logManager.end()

@@ -161,6 +161,9 @@ def colmap2meshroom_instrinsics(colmap_intrinsics, sfm_data={}):
 
         pixel_size = 1/colmap_camera.width
         #converts the focal in "mm", assuming sensor width=1
+        if isinstance(intrinsic["focalLength"], list) :
+            print("WARNING: anamorphic lenses not supported, will take mean of intrinsic")
+            intrinsic["focalLength"] = np.average(intrinsic["focalLength"])
         intrinsic["focalLength"]=pixel_size*intrinsic["focalLength"]
         # intrinsic["focalLength"]=[pixel_size*x for x in intrinsic["focalLength"]]
         #principal point as delta from center
