@@ -18,6 +18,7 @@
             "FeatureExtraction": "1.1",
             "DepthMapTransform": "3.0",
             "DepthMap": "3.0",
+            "ConvertSfMFormat": "2.0",
             "ImportColmapDepthMaps": "1.0",
             "ImageMatching": "2.0",
             "Meshing": "7.0",
@@ -1112,8 +1113,8 @@
         "SfMAlignment_1": {
             "nodeType": "SfMAlignment",
             "position": [
-                929,
-                236
+                917,
+                168
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -1274,6 +1275,45 @@
             "outputs": {
                 "outputMesh": "{cache}/{nodeType}/{uid0}/mesh.{outputMeshFileTypeValue}",
                 "output": "{cache}/{nodeType}/{uid0}/densePointCloud.abc"
+            }
+        },
+        "ConvertSfMFormat_1": {
+            "nodeType": "ConvertSfMFormat",
+            "position": [
+                651,
+                180
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "2c8a53b2b7b022116d508df81c41db2d615a6d50"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input": "{Colmap2MeshroomSfmConvertion_1.outputSfm}",
+                "fileExt": "abc",
+                "describerTypes": [
+                    "dspsift"
+                ],
+                "imageWhiteList": [],
+                "views": true,
+                "intrinsics": true,
+                "extrinsics": true,
+                "structure": true,
+                "observations": true,
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/sfm.{fileExtValue}"
             }
         }
     }
