@@ -23,7 +23,7 @@ def open_exr(exr_path, clip_negative=False):
         import OpenEXR, Imath# lazy import
         if FORCE_IOOI:
             raise RuntimeError("OpenImageIo overwite")
-    except ImportError :#openimage io fallback
+    except Exception :#openimage io fallback
         logging.info("OpenExr bindings for python unavailable, switching to openimageio")
         #logging.warning("Openimageio does not support custom header for now, this might lead to issues")
         import OpenImageIO as oiio
