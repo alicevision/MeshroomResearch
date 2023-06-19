@@ -55,7 +55,7 @@ class MeshcomparisonDTU(CondaNode):
             name='mode',
             label='Mode',
             description='''Chose mesh or point cloud''',
-            value='info',
+            value='mesh',
             values=['mesh', 'pcd'],
             exclusive=True,
             uid=[0],

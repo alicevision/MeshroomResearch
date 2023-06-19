@@ -153,12 +153,6 @@ if __name__ == '__main__':
 
     pbar.update(1)
     pbar.set_description('compute data2stl')
-    print('-----\n')
-    print(data_pcd)
-    print('-----\n')
-    print(stl_above)#FIXME
-    print('-----\n')
-    print(data_in_obs_above)#FIXME
     nn_engine.fit(stl_above)
     dist_d2s, idx_d2s = nn_engine.kneighbors(data_in_obs_above, n_neighbors=1, return_distance=True)
     max_dist = args.max_dist
