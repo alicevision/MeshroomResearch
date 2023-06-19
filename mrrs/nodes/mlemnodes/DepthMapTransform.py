@@ -145,7 +145,7 @@ class DepthMapTransform(desc.Node):
 
     def processChunk(self, chunk):
         """
-        Computes the different transforms on the dezpth maps.
+        Computes the different transforms on the depth maps.
         """
         try:
             chunk.logManager.start(chunk.node.verboseLevel.value)
