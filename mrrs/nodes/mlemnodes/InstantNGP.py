@@ -77,7 +77,6 @@ class InstantNGP(CondaNode):
             description='Output mesh.',
             value=desc.Node.internalFolder + 'mesh.obj',
             uid=[],
-            group=''
         ),
     ]
 

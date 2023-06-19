@@ -127,7 +127,7 @@ def open_dtu_calibration(scene_calib_path, frame_ids):
     world_mats = [camera_dict['world_mat_%d' %
                               idx].astype(np.float32) for idx in frame_ids]
 
-    gt_scale_mat_inv = camera_dict['scale_mat_inv_0']
+    gt_scale_mat = camera_dict['scale_mat_0']
 
     gt_extrinsics, gt_intrinsics = [], []
     n_images = len(frame_ids)
@@ -142,7 +142,7 @@ def open_dtu_calibration(scene_calib_path, frame_ids):
         gt_intrinsics.append(intrinsics)
         gt_extrinsics.append(pose)
 
-    return gt_extrinsics, gt_intrinsics, gt_scale_mat_inv
+    return gt_extrinsics, gt_intrinsics, gt_scale_mat
 
 
 def load_K_Rt_from_P(filename, P=None):
@@ -380,7 +380,7 @@ class Dataset(desc.Node):
             if chunk.node.datasetType.value == "blendedMVG" or chunk.node.datasetType.value == "realityCapture":
                 gt_extrinsics, gt_intrinsics = open_calibration(scenes_calibs, chunk.node.datasetType.value)
             elif chunk.node.datasetType.value == "DTU":
-                gt_extrinsics, gt_intrinsics, gt_scale_mat_inv = open_dtu_calibration(
+                gt_extrinsics, gt_intrinsics, gt_scale_mat = open_dtu_calibration(
                     os.path.join(folder, "..", "cameras_sphere.npz"), scenes_calibs)
 
                 # Add DTU information to the generated SFM data
@@ -391,11 +391,11 @@ class Dataset(desc.Node):
                                       "stl":os.path.join(gtPath,'Points','stl',f'stl{scan:03}_total.ply'),
                                       "obsMask":os.path.join(gtPath,'ObsMask',f'ObsMask{scan}_10.mat'),
                                       "groundPlane":os.path.join(gtPath,'ObsMask',f'Plane{scan}.mat'),
-                                      "scaleMatInv":gt_scale_mat_inv.tolist()}
+                                      "scaleMat":gt_scale_mat.tolist()}
                 
                 # Save the scale matrix
                 with open(os.path.join(chunk.node.transformationMatrix.value), 'w') as f:
-                    json.dump({'transform':sfm_data["groundTruthDTU"]["scaleMatInv"]}, f, indent=4)
+                    json.dump({'transform':sfm_data["groundTruthDTU"]["scaleMat"]}, f, indent=4)
 
             # Adjust values based on the dataset type
             sensor_size = 1

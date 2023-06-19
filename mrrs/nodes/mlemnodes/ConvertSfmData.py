@@ -221,7 +221,7 @@ class ConvertSfmData(desc.Node):
                     json.dump(output_sfm_data, f, indent=4)
 
                 # Save transformation matrix
-                T = [[0,0,1,0],[-1,0,0,0],[0,-1,0,0],[0,0,0,1]]
+                T = [[0,0,1,0],[1,0,0,0],[0,1,0,0],[0,0,0,1]]
                 with open(os.path.join(chunk.node.transformationMatrix.value), 'w') as f:
                     json.dump({'transform':T}, f, indent=4)
 
