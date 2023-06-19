@@ -120,7 +120,8 @@ class ImportColmapDepthMaps(desc.Node):
                 sfm_data = json.load(open(chunk.node.inputSfm.value, 'r'))
                 #map view path => uid
                 for view in sfm_data['views']:
-                    view_uid_map[view['path']] = view['viewId']
+                    view_basename = os.path.basename(view['path']).split(".")[0]
+                    view_uid_map[view_basename] =view['viewId']
 
             for index, (depth_map_path, normal_map_path) in enumerate(zip(depth_map_paths, normal_map_paths)):
 
@@ -135,10 +136,11 @@ class ImportColmapDepthMaps(desc.Node):
                 depth_map_name = "%d_depthmap.exr"%index
                 #if a sfmdata has been passed, matches the uid
                 if len(view_uid_map)!=  0:
-                    if depth_map_path in view_uid_map.keys():
-                        depth_map_name = view_uid_map[depth_map_path]+"_depthmap.exr"
+                    depth_map_basename=os.path.basename(depth_map_path).split(".")[0]
+                    if depth_map_basename in view_uid_map.keys():
+                        depth_map_name = view_uid_map[depth_map_basename]+"_depthmap.exr"
                     else:
-                        chunk.logger.info('Warning depth map for view '+depth_map_path+' not found in sfm data')
+                        chunk.logger.warning('Warning depth map for view '+depth_map_path+' not found in sfm data')
 
                 save_exr(depth_map,os.path.join(chunk.node.depthMapFolder.value, depth_map_name),'depth')
 

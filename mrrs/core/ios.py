@@ -51,7 +51,7 @@ def open_exr(exr_path, clip_negative=False):
     return output_array, header
 
 def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
-            custom_header = None,#{'AliceVision:CArr':None,'AliceVision:iCamArr':None},
+            custom_header = {'AliceVision:CArr':None,'AliceVision:iCamArr':None},
             channel_names = None):
     """
     Saves an exr for meshroom, using different formats.
@@ -65,7 +65,7 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
         import OpenEXR, Imath# lazy import
         if FORCE_IOOI:
             raise RuntimeError("OpenImageIo overwite")
-    except ImportError:#openimage io fallback
+    except Exception:#openimage io fallback
         logging.info("OpenExr bindings for python unavailable, switching to openimageio")
         import OpenImageIO as oiio
         out = oiio.ImageOutput.create(output_file)
@@ -208,7 +208,7 @@ def open_image(image_path, auto_rotate=False, return_orientation=False):
     if len(image.shape)==2:
         image = np.expand_dims(image, -1)
     if return_orientation:
-        return image[:,:, 0:3], orientation 
+        return image[:,:, 0:3], orientation
     else:
         return image[:,:, 0:3]
 
@@ -222,7 +222,7 @@ def save_image(image_path, np_array, orientation=None, auto_rotate=False):
     if image_path.endswith('.exr'):
         save_exr(np_array, image_path)
     else:
-        if FORCE_IOOI:       
+        if FORCE_IOOI:
             import OpenImageIO as oiio
             out = oiio.ImageOutput.create(image_path)
             if out is None:
