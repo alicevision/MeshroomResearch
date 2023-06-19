@@ -128,6 +128,7 @@ def read_images_binary(path_to_model_file):
     return images
 #
 def colmap2meshroom_instrinsics(colmap_intrinsics, sfm_data={}):
+    sfm_data = sfm_data.copy()
     intrinsics = []
     for camera_id, colmap_camera in colmap_intrinsics.items():
         intrinsic={
@@ -176,6 +177,7 @@ def colmap2meshroom_instrinsics(colmap_intrinsics, sfm_data={}):
     return sfm_data
 
 def colmap2meshroom_extrinsics(colmap_extrinsics, colmap_intrinsics, image_folder="", sfm_data={}):
+    sfm_data = sfm_data.copy()
     extrinsics = []
     views = []
     single_cam = False
