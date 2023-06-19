@@ -133,12 +133,12 @@ class ImportColmapDepthMaps(desc.Node):
                 depth_map[depth_map < min_depth] = min_depth
                 depth_map[depth_map > max_depth] = max_depth
 
-                depth_map_name = "%d_depthmap.exr"%index
+                depth_map_name = "%d_depthMap.exr"%index
                 #if a sfmdata has been passed, matches the uid
                 if len(view_uid_map)!=  0:
                     depth_map_basename=os.path.basename(depth_map_path).split(".")[0]
                     if depth_map_basename in view_uid_map.keys():
-                        depth_map_name = view_uid_map[depth_map_basename]+"_depthmap.exr"
+                        depth_map_name = view_uid_map[depth_map_basename]+"_depthMap.exr"
                     else:
                         chunk.logger.warning('Warning depth map for view '+depth_map_path+' not found in sfm data')
                 #TODO: add metas
