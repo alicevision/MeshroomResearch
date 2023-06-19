@@ -2,7 +2,7 @@ from sys import platform
 
 COLMAP=""
 if platform == "linux" or platform == "linux2":
-    COLMAP="rez env colmap-faca -- colmap"#FIXME: temp hack
+    COLMAP="colmap"
 elif platform == "darwin":
     raise RuntimeError("Apple should not be legal")
 elif platform == "win32":
