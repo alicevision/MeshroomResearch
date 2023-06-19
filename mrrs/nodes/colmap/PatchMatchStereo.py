@@ -14,7 +14,7 @@ from . import COLMAP
 
 class PatchMatchStereo(desc.CommandLineNode):
     commandLine = COLMAP+' patch_match_stereo {allParams}'
-    
+
     category = 'Colmap'
     documentation = ''''''
 

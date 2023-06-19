@@ -45,7 +45,15 @@ class ImportColmapDepthMaps(desc.Node):
         desc.File(
             name="input",
             label="Input",
-            description="COLMAP Workspace",
+            description="COLMAP Dense folder in workspace",
+            value="",
+            uid=[0],
+        ),
+
+        desc.File(
+            name="inputSfm",
+            label="InputSfm",
+            description="Input sfm data, used to match the views",
             value="",
             uid=[0],
         ),
@@ -63,6 +71,14 @@ class ImportColmapDepthMaps(desc.Node):
     ]
 
     outputs = [
+        desc.File(
+            name='depthMapFolder',
+            label='Depth maps folder',
+            description='Generated depth maps folder',
+            value=desc.Node.internalFolder,
+            uid=[],
+        ),
+        #for viz
         desc.File(
             name='depth',
             label='Depth maps',
@@ -92,14 +108,21 @@ class ImportColmapDepthMaps(desc.Node):
             chunk.logManager.start(chunk.node.verboseLevel.value)
             if not self.check_inputs(chunk):
                 return
-            
-            depth_map_folder = os.path.join(chunk.node.input.value,'dense','stereo','depth_maps')
-            normal_map_folder = os.path.join(chunk.node.input.value,'dense','stereo','normal_maps')
+
+            depth_map_folder = os.path.join(chunk.node.input.value,'stereo','depth_maps')
+            normal_map_folder = os.path.join(chunk.node.input.value,'stereo','normal_maps')
 
             depth_map_paths = [f for f in glob.glob(os.path.join(depth_map_folder,"*.*.photometric.bin"))]
             normal_map_paths = [f for f in glob.glob(os.path.join(normal_map_folder,"*.*.photometric.bin"))]
 
-            for depth_map_path, normal_map_path in zip(depth_map_paths, normal_map_paths):
+            view_uid_map = {}
+            if chunk.node.inputSfm.value != '':
+                sfm_data = json.load(open(chunk.node.inputSfm.value, 'r'))
+                #map view path => uid
+                for view in sfm_data['views']:
+                    view_uid_map[view['path']] = view['viewId']
+
+            for index, (depth_map_path, normal_map_path) in enumerate(zip(depth_map_paths, normal_map_paths)):
 
                 depth_map = read_array(depth_map_path)
                 normal_map = read_array(normal_map_path)
@@ -109,7 +132,15 @@ class ImportColmapDepthMaps(desc.Node):
                 depth_map[depth_map < min_depth] = min_depth
                 depth_map[depth_map > max_depth] = max_depth
 
-                save_exr(depth_map,,'depth')
+                depth_map_name = "%d_depthmap.exr"%index
+                #if a sfmdata has been passed, matches the uid
+                if len(view_uid_map)!=  0:
+                    if depth_map_path in view_uid_map.keys():
+                        depth_map_name = view_uid_map[depth_map_path]+"_depthmap.exr"
+                    else:
+                        chunk.logger.info('Warning depth map for view '+depth_map_path+' not found in sfm data')
+
+                save_exr(depth_map,os.path.join(chunk.node.depthMapFolder.value, depth_map_name),'depth')
 
 
             chunk.logger.info('Import done.')
