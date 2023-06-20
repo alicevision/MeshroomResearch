@@ -28,7 +28,7 @@ def open_exr(exr_path, clip_negative=False):
         #logging.warning("Openimageio does not support custom header for now, this might lead to issues")
         import OpenImageIO as oiio
         exr_file = oiio.ImageInput.open(exr_path)
-        header = exr_file.spec()
+        header = {}#exr_file.spec()#FIXME: header reading not supported with oiio yet
         if exr_file is None :
             raise RuntimeError("Could not open exr file "+exr_path)
         output_array = exr_file.read_image("float32")
@@ -167,7 +167,7 @@ def open_depth_map(depth_file, raise_exception=True):
         depth_map = open_pfm(depth_file)
         depth_map = depth_map.astype(np.float32)
     elif depth_file.endswith('.exr'):
-        depth_map, _ =  open_exr(depth_file)
+        depth_map, _ = open_exr(depth_file)
         depth_map = depth_map.astype(np.float32)
     else:
         if raise_exception:

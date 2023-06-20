@@ -49,13 +49,11 @@ def do_transform(depth_maps_path, sfm_data, transform, output_folder):
         depth_map, depth_map_header = open_exr(depth_maps_path[index])
         scale = 1
         depth_map_size = np.asarray(depth_map.shape[0:2])
-        try:
-            if "AliceVision:downscale" in depth_map_header:#FIXME: resizing is not ideal
-                scale = float(depth_map_header["AliceVision:downscale"])
-                depth_map = cv2.resize(depth_map, (scale*depth_map_size[::-1]).astype(np.int32))
-                logging.info("Rescaling depth map with %f"%scale)
-        except:
-            pass #FIXME: openexr metadata doesn't work with openimageio
+        if "AliceVision:downscale" in depth_map_header:#FIXME: resizing is not ideal
+            scale = float(depth_map_header["AliceVision:downscale"])
+            depth_map = cv2.resize(depth_map, (scale*depth_map_size[::-1]).astype(np.int32))
+            logging.info("Rescaling depth map with %f"%scale)
+
         # if pixels is None: #depth map size can
         ys, xs = np.meshgrid(range(0, depth_map.shape[0]), \
                             range(0, depth_map.shape[1]), \
@@ -64,11 +62,8 @@ def do_transform(depth_maps_path, sfm_data, transform, output_folder):
         depth_map_transformed = transform(pixels, depth_map, extrinsics[index], intrinsics[index], pixel_sizes[index])
         output_depth_map_path = os.path.join(output_folder, view_id+"_depthMap.exr")
         depth_map_transformed[depth_map<0] = 0#put 0 in places where its invalid
-        try:
-            if "AliceVision:downscale" in depth_map_header:
-                depth_map_transformed = cv2.resize(depth_map_transformed, depth_map_size[::-1])
-        except:
-            pass #FIXME: openexr metadata doesn't work with openimageio
+        if "AliceVision:downscale" in depth_map_header:
+            depth_map_transformed = cv2.resize(depth_map_transformed, depth_map_size[::-1])
         save_exr(depth_map_transformed, output_depth_map_path, data_type="depth", custom_header=depth_map_header)
         output_depth_map_paths.append(output_depth_map_path)
     return output_depth_map_paths
