@@ -137,7 +137,7 @@ class DepthMapTransform(desc.Node):
             label='Depth maps',
             description='Generated depth maps.',
             semantic='image',
-            value=desc.Node.internalFolder + '<VIEW_ID>_depthmap.exr',
+            value=desc.Node.internalFolder + '<VIEW_ID>_depthMap.exr',
             uid=[],
             group='',
         ),
