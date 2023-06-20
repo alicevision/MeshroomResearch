@@ -15,7 +15,7 @@ import glob
 from meshroom.core import desc
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
-
+from mrrs.core.utils import cv2_resize_with_pad
 
 def read_array(path):
     with open(path, "rb") as fid:
@@ -142,6 +142,12 @@ class ImportColmapDepthMaps(desc.Node):
                     else:
                         chunk.logger.warning('Warning depth map for view '+depth_map_path+' not found in sfm data')
                 #TODO: add metas
+
+                #resize
+                if chunk.node.inputSfm.value != '':
+                    size=(sfm_data['views'][index]["width"],sfm_data['views'][index]["height"])
+                    depth_map, _ =cv2_resize_with_pad(depth_map, size, padding_color=0)
+
                 save_exr(depth_map,os.path.join(chunk.node.depthMapFolder.value, depth_map_name),'depth')
 
             chunk.logger.info('Import done.')

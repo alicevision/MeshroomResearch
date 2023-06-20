@@ -38,7 +38,7 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             label = "Use GPU",
             description='''Will use GPU for feature extraction''',
             value=False,
-            uid=[0],
+            uid=[],
             group='',
         ),
 
@@ -54,14 +54,14 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         #     uid=[],
         # ),
 
-        #FIXME: todo
-        # desc.BoolParam(
-        #     name='ImageReader-single_camera',#ImageReader.single_camera'
-        #     label='SingleCamera',
-        #     description='''If the scene has be shot with a single camera.''',
-        #     value=False,
-        #     uid=[],
-        # ),
+        desc.BoolParam(
+            name='singleCam',
+            label='SingleCamera',
+            description='''If the scene has be shot with a single camera.''',
+            value=False,
+            uid=[],
+            group=''
+        ),
     ]
 
     outputs = [
@@ -126,7 +126,10 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             for image_basename in images_basename:
                 images_to_use_file.write(image_basename+"\n")
 
+        #FIXME: change the uid when saving...
         if not chunk.node.use_gpu.value:
             chunk.node._cmdVars["allParams"]+=" --SiftExtraction.use_gpu 0" #FIXME: can only happen once
+        if chunk.node.singleCam.value:
+            chunk.node._cmdVars["allParams"]+=" --ImageReader.single_camera 1"#FIXME: can only happen once
 
         desc.CommandLineNode.processChunk(self, chunk)
