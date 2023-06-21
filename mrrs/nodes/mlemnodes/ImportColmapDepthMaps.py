@@ -122,6 +122,7 @@ class ImportColmapDepthMaps(desc.Node):
                 for view in sfm_data['views']:
                     view_basename = os.path.basename(view['path']).split(".")[0]
                     view_uid_map[view_basename] =view['viewId']
+                extrinsics, intrinsics, _, _, _, pixel_sizes_all_cams=matrices_from_sfm_data(sfm_data)
 
             for index, (depth_map_path, normal_map_path) in enumerate(zip(depth_map_paths, normal_map_paths)):
 
@@ -135,20 +136,27 @@ class ImportColmapDepthMaps(desc.Node):
 
                 depth_map_name = "%d_depthMap.exr"%index
                 #if a sfmdata has been passed, matches the uid
-                if len(view_uid_map)!=  0:
+                if chunk.node.inputSfm.value != '':
                     depth_map_basename=os.path.basename(depth_map_path).split(".")[0]
                     if depth_map_basename in view_uid_map.keys():
                         depth_map_name = view_uid_map[depth_map_basename]+"_depthMap.exr"
                     else:
                         chunk.logger.warning('Warning depth map for view '+depth_map_path+' not found in sfm data')
-                #TODO: add metas
 
-                #resize
-                if chunk.node.inputSfm.value != '':
-                    size=(sfm_data['views'][index]["width"],sfm_data['views'][index]["height"])
+                    #also resize to sfm data size if any
+                    size=(int(sfm_data['views'][index]["width"]),int(sfm_data['views'][index]["height"]))
                     depth_map, _ =cv2_resize_with_pad(depth_map, size, padding_color=0)
 
-                save_exr(depth_map,os.path.join(chunk.node.depthMapFolder.value, depth_map_name),'depth')
+                    #add metadata as well (used for display)
+                    camera_center = extrinsics[index][0:3, 3]
+                    inverse_intr_rot = np.linalg.inv(
+                        intrinsics[index] @ np.linalg.inv(extrinsics[index][0:3, 0:3]))
+                    depth_meta = {
+                        "AliceVision:CArr": camera_center,
+                        "AliceVision:iCamArr": inverse_intr_rot,
+                        "AliceVision:downscale": 1
+                    }
+                    save_exr(depth_map,os.path.join(chunk.node.depthMapFolder.value, depth_map_name),'depth', custom_header=depth_meta)
 
             chunk.logger.info('Import done.')
         finally:

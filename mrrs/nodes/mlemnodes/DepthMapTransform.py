@@ -47,6 +47,7 @@ def do_transform(depth_maps_path, sfm_data, transform, output_folder):
             logging.warning(depth_maps_path[index]+" cannot be found, skipping")
             continue
         depth_map, depth_map_header = open_exr(depth_maps_path[index])
+        depth_map=depth_map.astype(np.float32)
         scale = 1
         depth_map_size = np.asarray(depth_map.shape[0:2])
         if "AliceVision:downscale" in depth_map_header:#FIXME: resizing is not ideal
@@ -54,7 +55,6 @@ def do_transform(depth_maps_path, sfm_data, transform, output_folder):
             depth_map = cv2.resize(depth_map, (scale*depth_map_size[::-1]).astype(np.int32))
             logging.info("Rescaling depth map with %f"%scale)
 
-        # if pixels is None: #depth map size can
         ys, xs = np.meshgrid(range(0, depth_map.shape[0]), \
                             range(0, depth_map.shape[1]), \
                             indexing="ij")

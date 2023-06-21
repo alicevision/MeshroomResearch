@@ -101,8 +101,8 @@ class InjectSfmData(desc.Node):
                     continue
                 if field =="structure":#filter out
                     chunk.logger.info('Removing structure with no matching views')
-                    #take advantage of the fact that a view that is not reconstructed doesnt have pose (pose and view have same id)
-                    view_id = [view["poseId"] for view in target_sfm_data['poses'] ]
+                    #make sure the viewid in obeservation is in the lisy of views, otherwise remove
+                    view_id = [view["viewId"] for view in target_sfm_data['views'] ]
                     for landmark in source_sfm_data[field]:
                         valid_observations =[]
                         for observation in landmark["observations"]:

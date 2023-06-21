@@ -2,6 +2,7 @@
 Module handling the inputs and outputs from and to Meshroom.
 """
 
+import chunk
 import logging
 import re
 from struct import unpack
@@ -28,7 +29,11 @@ def open_exr(exr_path, clip_negative=False):
         #logging.warning("Openimageio does not support custom header for now, this might lead to issues")
         import OpenImageIO as oiio
         exr_file = oiio.ImageInput.open(exr_path)
-        header = {}#exr_file.spec()#FIXME: header reading not supported with oiio yet
+        # use exra atributes as the header
+        extra_attribs = exr_file.spec().extra_attribs
+        header={}
+        for attrib in extra_attribs:
+            header[attrib.name]=attrib.value
         if exr_file is None :
             raise RuntimeError("Could not open exr file "+exr_path)
         output_array = exr_file.read_image("float32")
@@ -76,14 +81,17 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
             for key in custom_header.keys():
                 # print("Writting metadata "+key)
                 # print(custom_header[key])
-                if key=="AliceVision:CArr":
+                if key=="AliceVision:CArr":#FIXME: not working?
                     spec.attribute(key, "float[3]", list(custom_header[key]))
                 elif key=="AliceVision:iCamArr":
-                    spec.attribute (key, oiio.TypeDesc.TypeMatrix33,  list(custom_header[key].flatten()))
+                    spec.attribute(key, oiio.TypeDesc.TypeMatrix33,  list(custom_header[key].flatten()))
                 elif key=="AliceVision:downscale":
                     spec.attribute(key, "float", custom_header[key])
                 else:
-                    spec[key]=custom_header[key]
+                    try:
+                        spec[key]=custom_header[key]
+                    except:
+                        print("WARNING: could not write attribute"+key)
         out.open(output_file, spec)
         out.write_image(input_array)
         out.close()

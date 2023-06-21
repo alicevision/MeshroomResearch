@@ -1,32 +1,34 @@
 {
     "header": {
         "pipelineVersion": "2.2",
-        "releaseVersion": "2023.1.0",
+        "releaseVersion": "2023.2.0-develop",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "SfMAlignment": "2.0",
-            "MeshFiltering": "3.0",
-            "StereoFusion": "2.0",
-            "DepthMapFilter": "3.0",
-            "Colmap2MeshroomSfmConvertion": "2.0",
-            "StructureFromMotion": "2.0",
-            "Texturing": "6.0",
-            "PoissonMesher": "2.0",
-            "ColmapMapper": "2.0",
-            "ColmapFeatureExtraction": "1.1",
-            "ColmapImageUndistorder": "1.1",
             "FeatureExtraction": "1.1",
-            "DepthMapTransform": "3.0",
-            "DepthMap": "3.0",
-            "ConvertSfMFormat": "2.0",
+            "PrepareDenseScene": "3.0",
             "ImportColmapDepthMaps": "1.0",
+            "ColmapImageUndistorder": "1.1",
+            "SfMAlignment": "2.0",
+            "CameraInit": "9.0",
+            "Colmap2MeshroomSfmConvertion": "2.0",
+            "PatchMatchStereo": "2.0",
+            "FeatureMatching": "2.0",
             "ImageMatching": "2.0",
             "Meshing": "7.0",
-            "FeatureMatching": "2.0",
-            "PrepareDenseScene": "3.0",
-            "PatchMatchStereo": "2.0",
+            "ConvertSfMFormat": "2.0",
+            "ColmapMapper": "2.0",
+            "Texturing": "6.0",
+            "StructureFromMotion": "3.0",
+            "DepthMapTransform": "3.0",
             "ColmapFeatureMatching": "2.0",
-            "CameraInit": "9.0"
+            "PoissonMesher": "2.0",
+            "DepthMapFilter": "3.0",
+            "Segmentation": "3.0",
+            "StereoFusion": "2.0",
+            "MeshFiltering": "3.0",
+            "InjectSfmData": "3.0",
+            "ColmapFeatureExtraction": "1.1",
+            "DepthMap": "3.0"
         },
         "template": false
     },
@@ -43,151 +45,151 @@
                 "split": 1
             },
             "uids": {
-                "0": "d7ac34eb5d495cadde6c9c979d5e3be000978030"
+                "0": "bccfa98082ff102cf623743c3f5621410397b366"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "viewpoints": [
                     {
-                        "viewId": 95931756,
-                        "poseId": 95931756,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000010.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 7554437,
+                        "poseId": 7554437,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000004.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 172308259,
-                        "poseId": 172308259,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000013.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 77937651,
+                        "poseId": 77937651,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000013.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 173767749,
-                        "poseId": 173767749,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000011.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 246686527,
+                        "poseId": 246686527,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000003.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 173790143,
-                        "poseId": 173790143,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000012.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 328990241,
+                        "poseId": 328990241,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000000.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 188300942,
-                        "poseId": 188300942,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000014.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 335902456,
+                        "poseId": 335902456,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000001.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 197578742,
-                        "poseId": 197578742,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000015.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 435457966,
+                        "poseId": 435457966,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000005.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 541749801,
-                        "poseId": 541749801,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000007.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 475560383,
+                        "poseId": 475560383,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000008.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 544295899,
-                        "poseId": 544295899,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000006.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 538779264,
+                        "poseId": 538779264,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000014.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 546801641,
-                        "poseId": 546801641,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000004.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 623335754,
+                        "poseId": 623335754,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000002.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 548557453,
-                        "poseId": 548557453,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000005.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 1102296173,
+                        "poseId": 1102296173,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000007.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 568626937,
-                        "poseId": 568626937,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000009.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 1398374336,
+                        "poseId": 1398374336,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000012.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 570137753,
-                        "poseId": 570137753,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000008.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 1416335166,
+                        "poseId": 1416335166,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000009.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1610648207,
-                        "poseId": 1610648207,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000002.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 1566310525,
+                        "poseId": 1566310525,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000010.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1613948207,
-                        "poseId": 1613948207,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000001.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 1655582873,
+                        "poseId": 1655582873,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000011.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1614110299,
-                        "poseId": 1614110299,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000000.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 2030917626,
+                        "poseId": 2030917626,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000006.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1671674650,
-                        "poseId": 1671674650,
-                        "path": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images/00000003.jpg",
-                        "intrinsicId": 1773844615,
+                        "viewId": 2054207917,
+                        "poseId": 2054207917,
+                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images/00000015.jpg",
+                        "intrinsicId": 404732531,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"jpeg:subsampling\": \"4:2:0\", \"oiio:ColorSpace\": \"sRGB\"}"
@@ -195,7 +197,7 @@
                 ],
                 "intrinsics": [
                     {
-                        "intrinsicId": 1773844615,
+                        "intrinsicId": 404732531,
                         "initialFocalLength": -1.0,
                         "focalLength": 43.45584412271571,
                         "pixelRatio": 1.0,
@@ -205,7 +207,7 @@
                         "height": 576,
                         "sensorWidth": 36.0,
                         "sensorHeight": 27.0,
-                        "serialNumber": "C:/data/blended_mvg_test_sets/5aa0f9d7a9efce63548c69a1/blended_images",
+                        "serialNumber": "/s/prods/mvg/_source_global/users/hogm/datasets/blendedMVSNEt/debug_set/5aa0f9d7a9efce63548c69a1/blended_images",
                         "principalPoint": {
                             "x": 0.0,
                             "y": 0.0
@@ -253,132 +255,11 @@
                 "output": "{cache}/{nodeType}/{uid0}/cameraInit.sfm"
             }
         },
-        "ColmapFeatureExtraction_1": {
-            "nodeType": "ColmapFeatureExtraction",
-            "position": [
-                169,
-                450
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "0a785493172edd4ba894f91949ab3b0dcd91b62c"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input_sfm": "{CameraInit_1.output}",
-                "use_gpu": false
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "database_path": "{cache}/{nodeType}/{uid0}/colmap_database.db",
-                "image_list_path": "{cache}/{nodeType}/{uid0}/used_images.txt",
-                "image_path": "{cache}/{nodeType}/{uid0}/images"
-            }
-        },
-        "ColmapFeatureMatching_1": {
-            "nodeType": "ColmapFeatureMatching",
-            "position": [
-                371,
-                452
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "7d774129a84e8e84a4feecfa52c16669399dee72"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input_database_path": "{ColmapFeatureExtraction_1.database_path}",
-                "use_gpu": false
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "database_path": "{cache}/{nodeType}/{uid0}/colmap_database_matches.db"
-            }
-        },
-        "ColmapImageUndistorder_1": {
-            "nodeType": "ColmapImageUndistorder",
-            "position": [
-                788,
-                453
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "1a4564cbd7400f8ae066ed66afa6a32365971eb8"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "image_path": "{ColmapMapper_1.image_path}",
-                "input_path": "{ColmapMapper_1.output_path0}",
-                "max_image_size": "2000"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output_path": "{cache}/{nodeType}/{uid0}/"
-            }
-        },
-        "ColmapMapper_1": {
-            "nodeType": "ColmapMapper",
-            "position": [
-                574,
-                454
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "166938ca4bdb7eb849fc49a7f61cae50f1d9b7b6"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input_database_path": "{ColmapFeatureMatching_1.database_path}",
-                "image_path": "{ColmapFeatureExtraction_1.image_path}"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output_path": "{cache}/{nodeType}/{uid0}/",
-                "output_path0": "{cache}/{nodeType}/{uid0}/0",
-                "database_path": "{cache}/{nodeType}/{uid0}/colmap_database_mapper.db"
-            }
-        },
         "DepthMapFilter_1": {
             "nodeType": "DepthMapFilter",
             "position": [
-                1400,
-                0
+                1399,
+                28
             ],
             "parallelization": {
                 "blockSize": 10,
@@ -386,7 +267,7 @@
                 "split": 2
             },
             "uids": {
-                "0": "e386de79d54e1f6f5d085ac2775908f279c773b2"
+                "0": "a16da78437decc441a3a0eb247b5a3a66cd4db6a"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -427,13 +308,13 @@
                 "split": 6
             },
             "uids": {
-                "0": "451e02d42f95b3dfc5f78e5c05be2a01cc54efc0"
+                "0": "198347abd0fd07429d559c263ea41d5e951aebfe"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "input": "{PrepareDenseScene_1.input}",
                 "imagesFolder": "{PrepareDenseScene_1.output}",
-                "downscale": 2,
+                "downscale": 1,
                 "minViewAngle": 2.0,
                 "maxViewAngle": 70.0,
                 "tiling": {
@@ -514,7 +395,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "7906182b8c67a63d6bdb5db79eb3762db7cff0b3"
+                "0": "0ce6a78386decb3a3cac1fce40ccb6fe5b84dd3e"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -555,7 +436,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "4b24843e83d5ae22372db243acceab936d38d51f"
+                "0": "283f52d51e608f8c6f5076046a61c99a3f80d3f4"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -601,7 +482,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "bdf5b1d329707be2d731433f9544aa04b651d81d"
+                "0": "cf8b589a4558eee74a1f0e074c327e494197ce63"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -640,7 +521,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "b6995d953da6b7d409bbd5202c875a5bc9b1e7d1"
+                "0": "16d938d05607ddb0ff29ca8b38a77760bbd795db"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -679,7 +560,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "daeddc8ba35b82fdece7bd8092c15b335edd0f1c"
+                "0": "98a31047d1c6c3d5612e31332ac38dcbc0c11cce"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -756,63 +637,6 @@
                 "output": "{cache}/{nodeType}/{uid0}/densePointCloud.abc"
             }
         },
-        "PatchMatchStereo_1": {
-            "nodeType": "PatchMatchStereo",
-            "position": [
-                995,
-                453
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "1f4086db41c877492b42d5d156cab519a82989d0"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input_folder": "{ColmapImageUndistorder_1.output_path}"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "workspace_path": "{cache}/{nodeType}/{uid0}/workspace"
-            }
-        },
-        "PoissonMesher_1": {
-            "nodeType": "PoissonMesher",
-            "position": [
-                1412,
-                452
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "e79d175026824f779459d53580d9164433ec76eb"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input_path": "{StereoFusion_1.output_path}",
-                "trim": 0.0
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output_path": "{cache}/{nodeType}/{uid0}/mesh_poisson.ply"
-            }
-        },
         "PrepareDenseScene_1": {
             "nodeType": "PrepareDenseScene",
             "position": [
@@ -825,7 +649,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "240eaa3adcc672a15b88a3a0bea29d0bdd4ac912"
+                "0": "67ba149d6b5a3c4024f8ab750bf257fcab0581ed"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -849,97 +673,6 @@
                 "undistorted": "{cache}/{nodeType}/{uid0}/<VIEW_ID>.{outputFileTypeValue}"
             }
         },
-        "StereoFusion_1": {
-            "nodeType": "StereoFusion",
-            "position": [
-                1211,
-                451
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "0c9594c7ce4f3e6013273039d0ac02a0b41b3f8b"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input_folder": "{PatchMatchStereo_1.workspace_path}"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output_path": "{cache}/{nodeType}/{uid0}/workspace\\fused.ply",
-                "workspace_path": "{cache}/{nodeType}/{uid0}/workspace"
-            }
-        },
-        "StructureFromMotion_1": {
-            "nodeType": "StructureFromMotion",
-            "position": [
-                800,
-                0
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 16,
-                "split": 1
-            },
-            "uids": {
-                "0": "09ea4883b6fc572069885555b4edd532202eb26c"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input": "{FeatureMatching_1.input}",
-                "featuresFolders": "{FeatureMatching_1.featuresFolders}",
-                "matchesFolders": [
-                    "{FeatureMatching_1.output}"
-                ],
-                "describerTypes": "{FeatureMatching_1.describerTypes}",
-                "localizerEstimator": "acransac",
-                "observationConstraint": "Scale",
-                "localizerEstimatorMaxIterations": 4096,
-                "localizerEstimatorError": 0.0,
-                "lockScenePreviouslyReconstructed": false,
-                "useLocalBA": true,
-                "localBAGraphDistance": 1,
-                "maxNumberOfMatches": 0,
-                "minNumberOfMatches": 0,
-                "minInputTrackLength": 2,
-                "minNumberOfObservationsForTriangulation": 2,
-                "minAngleForTriangulation": 3.0,
-                "minAngleForLandmark": 2.0,
-                "maxReprojectionError": 4.0,
-                "minAngleInitialPair": 5.0,
-                "maxAngleInitialPair": 40.0,
-                "useOnlyMatchesFromInputFolder": false,
-                "useRigConstraint": true,
-                "rigMinNbCamerasForCalibration": 20,
-                "lockAllIntrinsics": false,
-                "minNbCamerasToRefinePrincipalPoint": 3,
-                "filterTrackForks": false,
-                "computeStructureColor": true,
-                "initialPairA": "",
-                "initialPairB": "",
-                "interFileExtension": ".abc",
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output": "{cache}/{nodeType}/{uid0}/sfm.abc",
-                "outputViewsAndPoses": "{cache}/{nodeType}/{uid0}/cameras.sfm",
-                "extraInfoFolder": "{cache}/{nodeType}/{uid0}/"
-            }
-        },
         "Texturing_1": {
             "nodeType": "Texturing",
             "position": [
@@ -952,7 +685,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "622561e0e86cdfa2b563e611a8259f7e071b4aae"
+                "0": "9295d2b4e5ce934eee1959a8f199f9c7d5a9b83e"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1016,8 +749,8 @@
         "Colmap2MeshroomSfmConvertion_1": {
             "nodeType": "Colmap2MeshroomSfmConvertion",
             "position": [
-                734,
-                318
+                656,
+                375
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -1025,11 +758,11 @@
                 "split": 1
             },
             "uids": {
-                "0": "b26e318481046c2b8ac2290985658db14290165a"
+                "0": "1f48afa2127251d5f523f760842148c987150431"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "{ColmapMapper_1.output_path0}",
+                "input": "{ColmapMapper_2.output_path0}",
                 "inputSfm": "{CameraInit_1.output}",
                 "imageFolder": "",
                 "verboseLevel": "info"
@@ -1047,8 +780,8 @@
         "ImportColmapDepthMaps_1": {
             "nodeType": "ImportColmapDepthMaps",
             "position": [
-                1163,
-                283
+                1066,
+                357
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -1056,11 +789,11 @@
                 "split": 1
             },
             "uids": {
-                "0": "9b010bd973fd6bda4203c3324c711470ef60f597"
+                "0": "5f4a7669ccb2ab2371d8db3e3959090f4ea92875"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "{PatchMatchStereo_1.workspace_path}",
+                "input": "{PatchMatchStereo_2.workspace_path}",
                 "inputSfm": "{Colmap2MeshroomSfmConvertion_1.outputSfm}",
                 "verboseLevel": "info"
             },
@@ -1072,14 +805,14 @@
             },
             "outputs": {
                 "depthMapFolder": "{cache}/{nodeType}/{uid0}/",
-                "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthmap.exr"
+                "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthMap.exr"
             }
         },
         "DepthMapTransform_1": {
             "nodeType": "DepthMapTransform",
             "position": [
-                1358,
-                284
+                1254,
+                357
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -1087,13 +820,13 @@
                 "split": 1
             },
             "uids": {
-                "0": "4d39c35ed7ad57978c8612ac37d5569894e86b31"
+                "0": "58ff863d7a817181d8eb6bfa391ccf7d87fc4ae2"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "inputSfM": "{ImportColmapDepthMaps_1.inputSfm}",
                 "depthMapsFolder": "{ImportColmapDepthMaps_1.depthMapFolder}",
-                "transform": "meshroom2normal",
+                "transform": "normal2meshroom",
                 "processDepthMap": [
                     "folder"
                 ],
@@ -1107,27 +840,27 @@
             },
             "outputs": {
                 "output": "{cache}/{nodeType}/{uid0}/",
-                "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthmap.exr"
+                "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthMap.exr"
             }
         },
         "SfMAlignment_1": {
             "nodeType": "SfMAlignment",
             "position": [
-                917,
-                168
+                906,
+                198
             ],
             "parallelization": {
                 "blockSize": 0,
-                "size": 1,
+                "size": 16,
                 "split": 1
             },
             "uids": {
-                "0": "9b925530b5e539bdda04ca933e9d29d9109fad3c"
+                "0": "1e8f8a7449fb815fca51cbc8650dcbf8e4fb5bb7"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "{Colmap2MeshroomSfmConvertion_1.outputSfm}",
-                "reference": "{StructureFromMotion_1.output}",
+                "input": "{StructureFromMotion_1.output}",
+                "reference": "{Colmap2MeshroomSfmConvertion_1.outputSfm}",
                 "method": "from_cameras_viewid",
                 "fileMatchingPattern": ".*\\/(.*?)\\.\\w{3}",
                 "metadataMatchingList": [],
@@ -1143,30 +876,203 @@
                 "color": ""
             },
             "outputs": {
-                "output": "{cache}/{nodeType}/{uid0}/sfmdata.abc",
+                "output": "{cache}/{nodeType}/{uid0}/sfm.abc",
                 "outputViewsAndPoses": "{cache}/{nodeType}/{uid0}/cameras.sfm"
+            }
+        },
+        "ConvertSfMFormat_1": {
+            "nodeType": "ConvertSfMFormat",
+            "position": [
+                694,
+                213
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "359568fe1835648cea63aa59613a725e0e2688e3"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input": "{Colmap2MeshroomSfmConvertion_1.outputSfm}",
+                "fileExt": "abc",
+                "describerTypes": [
+                    "dspsift"
+                ],
+                "imageWhiteList": [],
+                "views": true,
+                "intrinsics": true,
+                "extrinsics": true,
+                "structure": true,
+                "observations": true,
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": "#000000"
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/sfm.{fileExtValue}"
+            }
+        },
+        "StructureFromMotion_1": {
+            "nodeType": "StructureFromMotion",
+            "position": [
+                800,
+                0
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 16,
+                "split": 1
+            },
+            "uids": {
+                "0": "e3844a8de642e93b3d782fe0f43393589860727b"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input": "{FeatureMatching_1.input}",
+                "featuresFolders": "{FeatureMatching_1.featuresFolders}",
+                "matchesFolders": [
+                    "{FeatureMatching_1.output}"
+                ],
+                "describerTypes": "{FeatureMatching_1.describerTypes}",
+                "localizerEstimator": "acransac",
+                "observationConstraint": "Scale",
+                "localizerEstimatorMaxIterations": 4096,
+                "localizerEstimatorError": 0.0,
+                "lockScenePreviouslyReconstructed": false,
+                "useLocalBA": true,
+                "localBAGraphDistance": 1,
+                "nbFirstUnstableCameras": 30,
+                "maxImagesPerGroup": 30,
+                "maxNumberOfMatches": 0,
+                "minNumberOfMatches": 0,
+                "minInputTrackLength": 2,
+                "minNumberOfObservationsForTriangulation": 2,
+                "minAngleForTriangulation": 3.0,
+                "minAngleForLandmark": 2.0,
+                "maxReprojectionError": 4.0,
+                "minAngleInitialPair": 5.0,
+                "maxAngleInitialPair": 40.0,
+                "useOnlyMatchesFromInputFolder": false,
+                "useRigConstraint": true,
+                "rigMinNbCamerasForCalibration": 20,
+                "lockAllIntrinsics": false,
+                "minNbCamerasToRefinePrincipalPoint": 3,
+                "filterTrackForks": false,
+                "computeStructureColor": true,
+                "initialPairA": "",
+                "initialPairB": "",
+                "interFileExtension": ".abc",
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/sfm.abc",
+                "outputViewsAndPoses": "{cache}/{nodeType}/{uid0}/cameras.sfm",
+                "extraInfoFolder": "{cache}/{nodeType}/{uid0}/"
+            }
+        },
+        "InjectSfmData_1": {
+            "nodeType": "InjectSfmData",
+            "position": [
+                1405,
+                208
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 16,
+                "split": 1
+            },
+            "uids": {
+                "0": "a27beccb8f671f922e5a49c52f84c41422a8570d"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "sourceSfmData": "{ConvertSfMFormat_3.output}",
+                "targetSfmData": "{ConvertSfMFormat_2.output}",
+                "exportedFields": [
+                    "structure",
+                    "matchesFolders",
+                    "featuresFolders"
+                ],
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "outputSfMData": "{cache}/{nodeType}/{uid0}/sfm.sfm"
+            }
+        },
+        "Segmentation_1": {
+            "nodeType": "Segmentation",
+            "position": [
+                141,
+                142
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 16,
+                "split": 1
+            },
+            "uids": {
+                "0": "99c73770b668d77f5885a54053de3e42e0474636"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input": "{CameraInit_1.output}",
+                "segmentationMethod": "SemanticSegmentationFcnResnet50",
+                "createMask": [],
+                "inverseClassmask": true,
+                "autoRotate": true,
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/",
+                "outputMask": "{cache}/{nodeType}/{uid0}/",
+                "outputMaskPreview": "{cache}/{nodeType}/{uid0}/<VIEW_ID>.png"
             }
         },
         "DepthMapFilter_2": {
             "nodeType": "DepthMapFilter",
             "position": [
-                1546,
-                206
+                1707,
+                242
             ],
             "parallelization": {
                 "blockSize": 10,
-                "size": 1,
-                "split": 1
+                "size": 16,
+                "split": 2
             },
             "uids": {
-                "0": "8f2b7cfff32294eb696b28d02165332ea94f7d6d"
+                "0": "b60c82ef3167b3089ddf32a3c598d863adb31222"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "{DepthMapTransform_1.inputSfM}",
-                "depthMapsFolder": "{DepthMapTransform_1.depthMapsFolder}",
+                "input": "{InjectSfmData_1.outputSfMData}",
+                "depthMapsFolder": "{DepthMapTransform_1.output}",
                 "minViewAngle": 2.0,
-                "maxViewAngle": 120.0,
+                "maxViewAngle": 70.0,
                 "nNearestCams": 10,
                 "minNumOfConsistentCams": 3,
                 "minNumOfConsistentCamsWithLowSimilarity": 4,
@@ -1191,8 +1097,8 @@
         "Meshing_2": {
             "nodeType": "Meshing",
             "position": [
-                1553,
-                326
+                1914,
+                252
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -1200,32 +1106,32 @@
                 "split": 1
             },
             "uids": {
-                "0": "9bfc2121dc4c7a82c7c6a7fbed6136acc021ef9a"
+                "0": "86bd65634b73aaf2c52d72d878ecf8f54b297f76"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "{DepthMapTransform_1.inputSfM}",
-                "depthMapsFolder": "{DepthMapTransform_1.depthMapsFolder}",
+                "input": "{DepthMapFilter_2.input}",
+                "depthMapsFolder": "{DepthMapFilter_2.output}",
                 "outputMeshFileType": "obj",
                 "useBoundingBox": false,
                 "boundingBox": {
                     "bboxTranslation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                        "x": 0.09201394766569138,
+                        "y": -1.4628298004026874e-06,
+                        "z": 1.7557281255722046
                     },
                     "bboxRotation": {
-                        "x": 0.0,
-                        "y": 0.0,
-                        "z": 0.0
+                        "x": 3.410013596294448e-05,
+                        "y": 3.0000014305114746,
+                        "z": 2.387559788985527e-06
                     },
                     "bboxScale": {
-                        "x": 1.0,
-                        "y": 1.0,
-                        "z": 1.0
+                        "x": 2.7069594860076904,
+                        "y": 1.8825119733810425,
+                        "z": 2.0161778926849365
                     }
                 },
-                "estimateSpaceFromSfM": false,
+                "estimateSpaceFromSfM": true,
                 "estimateSpaceMinObservations": 3,
                 "estimateSpaceMinObservationAngle": 10.0,
                 "maxInputPoints": 50000000,
@@ -1277,11 +1183,11 @@
                 "output": "{cache}/{nodeType}/{uid0}/densePointCloud.abc"
             }
         },
-        "ConvertSfMFormat_1": {
-            "nodeType": "ConvertSfMFormat",
+        "ColmapFeatureExtraction_2": {
+            "nodeType": "ColmapFeatureExtraction",
             "position": [
-                651,
-                180
+                205,
+                493
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -1289,12 +1195,259 @@
                 "split": 1
             },
             "uids": {
-                "0": "2c8a53b2b7b022116d508df81c41db2d615a6d50"
+                "0": "8f09193a61027b55a31ed502b59a959062dd6d9b"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "input": "{Colmap2MeshroomSfmConvertion_1.outputSfm}",
-                "fileExt": "abc",
+                "input_sfm": "{CameraInit_1.output}",
+                "use_gpu": false,
+                "singleCam": true
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "database_path": "{cache}/{nodeType}/{uid0}/colmap_database.db",
+                "image_list_path": "{cache}/{nodeType}/{uid0}/used_images.txt",
+                "image_path": "{cache}/{nodeType}/{uid0}/images"
+            }
+        },
+        "ColmapFeatureMatching_2": {
+            "nodeType": "ColmapFeatureMatching",
+            "position": [
+                447,
+                490
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "3f87e477f08e6d0b700d0cf047e642af63979e46"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input_database_path": "{ColmapFeatureExtraction_2.database_path}",
+                "use_gpu": false
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "database_path": "{cache}/{nodeType}/{uid0}/colmap_database_matches.db"
+            }
+        },
+        "ColmapImageUndistorder_2": {
+            "nodeType": "ColmapImageUndistorder",
+            "position": [
+                864,
+                491
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "a813fc10d8ebdb3d46feb9d5628a3ba90abc7690"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "image_path": "{ColmapMapper_2.image_path}",
+                "input_path": "{ColmapMapper_2.output_path0}",
+                "max_image_size": "2000"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output_path": "{cache}/{nodeType}/{uid0}/"
+            }
+        },
+        "ColmapMapper_2": {
+            "nodeType": "ColmapMapper",
+            "position": [
+                650,
+                492
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "412e54497fe84b06c5de7b9364bcc19073969b22"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input_database_path": "{ColmapFeatureMatching_2.database_path}",
+                "image_path": "{ColmapFeatureExtraction_2.image_path}"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output_path": "{cache}/{nodeType}/{uid0}/",
+                "output_path0": "{cache}/{nodeType}/{uid0}/0",
+                "database_path": "{cache}/{nodeType}/{uid0}/colmap_database_mapper.db"
+            }
+        },
+        "PatchMatchStereo_2": {
+            "nodeType": "PatchMatchStereo",
+            "position": [
+                1071,
+                491
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "e90df2e63be801d79449ee3b42addcf155622c9b"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input_folder": "{ColmapImageUndistorder_2.output_path}"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "workspace_path": "{cache}/{nodeType}/{uid0}/workspace"
+            }
+        },
+        "PoissonMesher_2": {
+            "nodeType": "PoissonMesher",
+            "position": [
+                1488,
+                490
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "deed9b7f6c095b8446162314cc41c4b957e883f8"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input_path": "{StereoFusion_2.output_path}",
+                "trim": 0.0
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output_path": "{cache}/{nodeType}/{uid0}/mesh_poisson.ply"
+            }
+        },
+        "StereoFusion_2": {
+            "nodeType": "StereoFusion",
+            "position": [
+                1287,
+                489
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "9579f6cfdee995e5deb1252661f90b2c939bbcee"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input_folder": "{PatchMatchStereo_2.workspace_path}"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output_path": "{cache}/{nodeType}/{uid0}/workspace/fused.ply",
+                "workspace_path": "{cache}/{nodeType}/{uid0}/workspace"
+            }
+        },
+        "ConvertSfMFormat_2": {
+            "nodeType": "ConvertSfMFormat",
+            "position": [
+                1092,
+                163
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 16,
+                "split": 1
+            },
+            "uids": {
+                "0": "70af7c97a7203358cac037618b750adf41fe625b"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input": "{SfMAlignment_1.reference}",
+                "fileExt": "sfm",
+                "describerTypes": [
+                    "dspsift"
+                ],
+                "imageWhiteList": [],
+                "views": true,
+                "intrinsics": true,
+                "extrinsics": true,
+                "structure": true,
+                "observations": true,
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/sfm.{fileExtValue}"
+            }
+        },
+        "ConvertSfMFormat_3": {
+            "nodeType": "ConvertSfMFormat",
+            "position": [
+                1093,
+                256
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 16,
+                "split": 1
+            },
+            "uids": {
+                "0": "0ae1f3c0906c5580d7a77832280855fa210a2fb0"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input": "{SfMAlignment_1.output}",
+                "fileExt": "sfm",
                 "describerTypes": [
                     "dspsift"
                 ],

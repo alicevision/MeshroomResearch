@@ -64,10 +64,11 @@ class SemanticSegmentationFcnResnet50(SegmentationModel):
         from torchvision.models.segmentation import fcn_resnet50
         import torch.onnx
         #setup model and load in eval mode
-        torch_model = fcn_resnet50(pretrained=True, progress=True, num_classes=21)
+        torch_model = fcn_resnet50(pretrained=True, progress=True, num_classes=21).cuda()
         torch_model.eval()
         #setup input
-        dummy_inputs = torch.randn(1, 3, SemanticSegmentationFcnResnet50.IMAGE_SIZE[1], SemanticSegmentationFcnResnet50.IMAGE_SIZE[0], requires_grad=True)
+        dummy_inputs = torch.randn(1, 3, SemanticSegmentationFcnResnet50.IMAGE_SIZE[1], 
+                                  SemanticSegmentationFcnResnet50.IMAGE_SIZE[0], requires_grad=True).cuda()
         with torch.no_grad():
             torch_out = torch_model(dummy_inputs)
         _ = torch_out['out'][0].detach().cpu().numpy()
