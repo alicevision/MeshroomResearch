@@ -31,6 +31,13 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             value='',
             uid=[0],
         ),
+        desc.BoolParam(
+            name='flipCG_CV',
+            label='flipCG_CV',
+            description='Flip from a CG to a CV cs or vice versa',
+            value=False,
+            uid=[0],
+        ),
         desc.FloatParam(
             name='addGaussianNoise',
             label='Add Gaussian Noise',
@@ -114,6 +121,9 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
 
             # Load, apply transform and save mesh
             mesh = mesh_transform(mesh,T)
+
+        if chunk.node.flipCG_CV.value:
+            mesh.vertices = transform_cg_cv(mesh.vertices)
 
         #apply noise if any
         if chunk.node.addGaussianNoise.value > 0:

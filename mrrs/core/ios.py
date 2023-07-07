@@ -13,7 +13,7 @@ import json
 
 from mrrs.core.utils import format_float_array
 
-FORCE_IOOI = False#FIXME: probably a good idea to open everything with openimage IO, for now not woring on windows
+FORCE_IOOI = True#FIXME: probably a good idea to open everything with openimage IO, for now not woring on windows
 
 #%% Images
 def open_exr(exr_path, clip_negative=False):

@@ -38,7 +38,7 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             label = "Use GPU",
             description='''Will use GPU for feature extraction''',
             value=False,
-            uid=[],
+            uid=[0],
             group='',
         ),
 
@@ -59,7 +59,7 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             label='SingleCamera',
             description='''If the scene has be shot with a single camera.''',
             value=False,
-            uid=[],
+            uid=[0],
             group=''
         ),
     ]
@@ -88,17 +88,14 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         ),
     ]
 
-    # def buildCommandLine(self, chunk):#FIXME: make a  for that
-        # new_cmdVars = {}
-        # for key, value in chunk.node._cmdVars.items():#replaces the - with .
-        #     if "-" in key:
-        #         value=value.replace("-", ".") #!!! args, alos why Value and stuff?
-        #     new_cmdVars[key]=value
-        # old_cmdvars = chunk.node._cmdVars
-        # chunk.node._cmdVars = new_cmdVars
-        # comand_line = desc.CommandLineNode.buildCommandLine(self, chunk)#FIXME: no, all is stored in allParams
-        # chunk.node._cmdVars = old_cmdvars
-        # return comand_line
+    def buildCommandLine(self, chunk):
+        command_line = desc.CommandLineNode.buildCommandLine(self, chunk)#as default
+        #add the extra params
+        if not chunk.node.use_gpu.value:
+            command_line+=" --SiftExtraction.use_gpu 0" 
+        if chunk.node.singleCam.value:
+            command_line+=" --ImageReader.single_camera 1"
+        return command_line
 
     def processChunk(self, chunk):
         images_basename = []
@@ -127,9 +124,9 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
                 images_to_use_file.write(image_basename+"\n")
 
         #FIXME: change the uid when saving...
-        if not chunk.node.use_gpu.value:
-            chunk.node._cmdVars["allParams"]+=" --SiftExtraction.use_gpu 0" #FIXME: can only happen once
-        if chunk.node.singleCam.value:
-            chunk.node._cmdVars["allParams"]+=" --ImageReader.single_camera 1"#FIXME: can only happen once
+        # if not chunk.node.use_gpu.value:
+        #     chunk.node._cmdVars["allParams"]+=" --SiftExtraction.use_gpu 0" #FIXME: can only happen once
+        # if chunk.node.singleCam.value:
+        #     chunk.node._cmdVars["allParams"]+=" --ImageReader.single_camera 1"#FIXME: can only happen once
 
         desc.CommandLineNode.processChunk(self, chunk)

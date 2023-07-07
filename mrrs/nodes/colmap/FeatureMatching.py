@@ -43,8 +43,13 @@ class ColmapFeatureMatching(desc.CommandLineNode):
         ),
     ]
 
+    def buildCommandLine(self, chunk):
+        command_line = desc.CommandLineNode.buildCommandLine(self, chunk)#as default
+        #add the extra params
+        if not chunk.node.use_gpu.value:
+            command_line+=" --SiftExtraction.use_gpu 0" 
+        return command_line
+
     def processChunk(self, chunk):
         shutil.copy2(chunk.node.input_database_path.value, chunk.node.database_path.value)
-        if not chunk.node.use_gpu.value:
-            chunk.node._cmdVars["allParams"]+=" --SiftMatching.use_gpu 0"
         desc.CommandLineNode.processChunk(self, chunk)
