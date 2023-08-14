@@ -13,7 +13,7 @@ You might want to rescale and recenter the calibration and ground truth depth si
 Meshroom relies internally on feature points from the SfM to initialise the depth estimation. Use this node with te option 'structure' to copy them into a ground truth .sfm.\
 You can also use this node to overwrite some fields in the .sfm.
 
-### TransformDepth
+### DepthMapTransform
 Meshroom does not represent the depth map using a conventional representation.\
 It uses instead the ray unit vectors*depth to get a point distance from camera.\
 This node passes from one representation to another.
