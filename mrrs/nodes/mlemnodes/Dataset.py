@@ -382,15 +382,15 @@ class Dataset(desc.Node):
             elif chunk.node.datasetType.value == "DTU":
                 gt_extrinsics, gt_intrinsics, gt_scale_mat = open_dtu_calibration(
                     os.path.join(folder, "..", "cameras_sphere.npz"), scenes_calibs)
-
                 # Add DTU information to the generated SFM data
                 gtPath = os.path.join(folder, "..", "..", "..", "SampleSet","MVS Data")
                 scan = int(folder.split('/')[-2].split('scan')[-1])
                 sfm_data["groundTruthDTU"] = {"gtPath":gtPath,
                                       "scan":scan,
                                       "stl":os.path.join(gtPath,'Points','stl',f'stl{scan:03}_total.ply'),
-                                      "obsMask":os.path.join(gtPath,'ObsMask',f'ObsMask{scan}_10.mat'),
-                                      "groundPlane":os.path.join(gtPath,'ObsMask',f'Plane{scan}.mat'),
+                                    #   "obsMask":os.path.join(gtPath,'ObsMask',f'ObsMask{scan}_10.mat'),
+                                    #   "groundPlane":os.path.join(gtPath,'ObsMask',f'Plane{scan}.mat'),
+                                      "obsMaskFolder":os.path.join(folder,'..','mask'),
                                       "scaleMat":gt_scale_mat.tolist()}
                 
                 # Save the scale matrix

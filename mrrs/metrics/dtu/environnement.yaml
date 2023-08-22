@@ -1,20 +1,21 @@
 name: dtubench
 channels:
-  # - open3d-admin
   - conda-forge
   - defaults
 dependencies:
 - python=3.9
-# - pip
-# - pip:
-  # - open3d
 - numpy
 - scikit-learn
+- scikit-image
 - tqdm 
 - scipy
 - trimesh
-#should be in python already
-# - multiprocessing
-#- argparse
+- pillow
+- opencv
+- pip
+# #FIXME: install mrrs not working?
+# - pip:
+#   - "../../../." --install-option="-e -v"
+
 
 

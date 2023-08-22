@@ -84,7 +84,7 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             label='Images Directory',
             description='''Path to images directory.''',
             value=os.path.join(desc.Node.internalFolder, "images"),
-            uid=[0],
+            uid=[],
         ),
     ]
 

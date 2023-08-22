@@ -6,7 +6,7 @@ import pathlib
 from setuptools import setup
 
 #Setting env variable
-#FIXME: this is not working
+#FIXME: this is not working, it only sets for the current env
 MLEM_path = os.path.join(str(pathlib.Path(__file__).parent.resolve()), "mrrs", "nodes")
 print("MRRS path "+MLEM_path)
 os.environ['MESHROOM_NODES_PATH'] = MLEM_path

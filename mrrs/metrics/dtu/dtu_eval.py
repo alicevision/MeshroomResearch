@@ -2,11 +2,25 @@ import os
 import multiprocessing as mp
 import argparse
 import csv
+from PIL import Image
 
 import numpy as np
 import sklearn.neighbors as skln
 from tqdm import tqdm
 from scipy.io import loadmat
+
+from skimage.morphology import binary_dilation
+from skimage.draw import disk
+
+
+mrrs_path=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+print("mrrs path "+mrrs_path)
+# FIXME: not sure why the pip install in the env does not work, maybe because of the unsets
+import sys 
+sys.path.insert(0, mrrs_path)
+
+from mrrs.core.ios import matrices_from_sfm_data 
+from mrrs.core.geometry import camera_projection
 
 # import open3d as o3d
 import trimesh
@@ -46,6 +60,8 @@ if __name__ == '__main__':
     parser.add_argument('--visualize_threshold', type=float, default=10)
     parser.add_argument('--gt_sfm', type=str, default=None)
     #args for mask filtering
+    parser.add_argument("--dilatation_radius", type=int, default=12, help="Radius for mask dilatation (default: 12)")
+    parser.add_argument("--not_main_component", action="store_true", default=False, help="Not to keep the largest main component")
     
     args = parser.parse_args()
 
@@ -55,15 +71,98 @@ if __name__ == '__main__':
         import json
         sfm_data = json.load(open(args.gt_sfm, "r"))
         args.dataset_dir=sfm_data["groundTruthDTU"]["gtPath"]
+        print("Dataset dir: "+args.dataset_dir)
         args.scan=sfm_data["groundTruthDTU"]["scan"]
+        # obsmasks = sfm_data["groundTruthDTU"]["obsMask"]
 
     thresh = args.downsample_density
     if args.mode == 'mesh':
         print("Mode mesh")
-        pbar = tqdm(total=9)
+        pbar = tqdm(total=10)
         pbar.set_description('read data mesh')
         data_mesh = trimesh.load(args.data)#o3d.io.read_triangle_mesh(args.data)
         data_mesh.remove_unreferenced_vertices()
+
+        ##Added filtering
+        print("\nFiltering")
+
+        # Load masks
+        # FIXME: need to make sure same order
+        masks = sorted([os.path.join(sfm_data["groundTruthDTU"]["obsMaskFolder"], img) for img in os.listdir(sfm_data["groundTruthDTU"]["obsMaskFolder"]) if img.endswith('.png')])
+        nMasks = len(masks)
+
+        # print([sfm_data[]])
+    
+        # FIXME: need to make sure same order
+        extrinsics_all_cams, intrinsics_all_cams, _, _, _, pixel_sizes_all_cams = matrices_from_sfm_data(sfm_data)
+
+        dilatation_radius = args.dilatation_radius
+        circle_image = np.zeros((2 * dilatation_radius - 1, 2 * dilatation_radius - 1))
+        circle_image[disk((dilatation_radius - 1, dilatation_radius - 1), dilatation_radius)] = 1
+
+        # Clean mesh using masks and camera poses
+        pbar.update(1)
+        pbar.set_description('project points in dilated masks')
+        if len(intrinsics_all_cams) != nMasks:
+            raise RuntimeError("Nonmatching mask and intrinsic resolution %d vs %d"%(nMasks, len(intrinsics_all_cams)))
+        for i in tqdm(range(nMasks)):
+            # Load mask image
+            mask_image_path = masks[i]
+            print("Opening "+mask_image_path)
+            mask_image = np.array(Image.open(mask_image_path))[:, :, 0] > 0  # Assuming mask is stored in the red channel
+            # print(loadmat(obsmask))
+            # print(loadmat(obsmask)["ObsMask"].shape)
+            # mask_image = np.array(loadmat(obsmask)["ObsMask"])[:, :, 0] > 0
+           
+            # Dilate mask
+            dilated_mask = binary_dilation(mask_image, circle_image)
+
+            # # Project 3D points onto the mask
+            # points = mesh.vertices
+            # projected_points = trimesh.transformations.transform_points(points, worldMats[i])
+            # projected_points[:, :2] /= projected_points[:, 2, np.newaxis]  # Normalize projected points
+            # projected_points = projected_points[:, :2]
+            projected_points, _ = camera_projection(data_mesh.vertices, extrinsics_all_cams[i], 
+                                                 intrinsics_all_cams[i], pixel_sizes_all_cams[i])
+          
+            # Find points inside the image bounds
+            image_height, image_width = dilated_mask.shape
+            valid_points = (
+                (projected_points[:, 0] >= 0) &
+                (projected_points[:, 0] < image_width) &
+                (projected_points[:, 1] >= 0) &
+                (projected_points[:, 1] < image_height)
+            )
+            # Find points inside the mask
+            points_inside_mask = dilated_mask[
+                np.floor(projected_points[valid_points, 1]).astype(int),
+                np.floor(projected_points[valid_points, 0]).astype(int)
+            ]
+            # Ensure both arrays have the same size
+            valid_points_inside_mask = np.ones_like(valid_points, dtype=bool)
+            valid_points_inside_mask[valid_points] = points_inside_mask
+            # Remove points and corresponding faces outside the mask
+            valid_faces = np.any(valid_points_inside_mask[data_mesh.faces], axis=1)
+            data_mesh = data_mesh.submesh([valid_faces])[0]
+
+        # Ensure only one component of the mesh is kept
+        pbar.update(1)
+        pbar.set_description('keep only the largest component mesh')
+        if not args.not_main_component:
+            mesh_components = data_mesh.split(only_watertight=False)
+            largest_component = max(mesh_components, key=lambda comp: len(comp.vertices))
+            mesh = largest_component
+
+        # Save cleaned mesh
+        pbar.update(1)
+        pbar.set_description('export cleaned mesh')
+        data_mesh.export(f'{args.eval_dir}/cleaned_mesh.ply')
+
+        pbar.update(1)
+        pbar.set_description('done')
+        pbar.close()
+        #-----
+
 
         mp.freeze_support()
 
@@ -96,7 +195,7 @@ if __name__ == '__main__':
 
     elif args.mode == 'pcd':
         print("Mode point cloud")
-        pbar = tqdm(total=8)
+        pbar = tqdm(total=9)
         pbar.set_description('read data pcd')
         # data_pcd_o3d = o3d.io.read_point_cloud(args.data)
         # data_pcd = np.asarray(data_pcd_o3d.points)
@@ -104,7 +203,6 @@ if __name__ == '__main__':
         data_pcd=mesh.vertices
 
     print("\nBenching")
-    # ?
     data_pcd = data_pcd[~np.isnan(data_pcd).any(axis=1),:]
     pbar.update(1)
     pbar.set_description('random shuffle pcd index')
@@ -140,7 +238,6 @@ if __name__ == '__main__':
                     mask[curr] = 1
             
         data_down = data_pcd[mask]
-        print(data_down.shape)
         print("saving tmp file in "+'{args.eval_dir}/data_down.ply')
         trimesh.PointCloud(data_down).export(f'{args.eval_dir}/data_down.ply', "ply")
 

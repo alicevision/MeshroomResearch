@@ -65,7 +65,7 @@ class CondaNode(desc.CommandLineNode):
 
                 #unset doesnt work with subprocess, and removing the variables from the env dict does not work either
                 chunk.status.returnCode = os.system(cmd)
-                logContent="log unavailable"
+                logContent=""
 
             if chunk.status.returnCode != 0:
                 with open(chunk.logFile, 'r') as logF:
