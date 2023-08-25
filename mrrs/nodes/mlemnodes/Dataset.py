@@ -388,8 +388,6 @@ class Dataset(desc.Node):
                 sfm_data["groundTruthDTU"] = {"gtPath":gtPath,
                                       "scan":scan,
                                       "stl":os.path.join(gtPath,'Points','stl',f'stl{scan:03}_total.ply'),
-                                    #   "obsMask":os.path.join(gtPath,'ObsMask',f'ObsMask{scan}_10.mat'),
-                                    #   "groundPlane":os.path.join(gtPath,'ObsMask',f'Plane{scan}.mat'),
                                       "obsMaskFolder":os.path.join(folder,'..','mask'),
                                       "scaleMat":gt_scale_mat.tolist()}
                 

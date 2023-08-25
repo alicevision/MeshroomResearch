@@ -20,7 +20,7 @@ import sys
 sys.path.insert(0, mrrs_path)
 
 from mrrs.core.ios import matrices_from_sfm_data 
-from mrrs.core.geometry import camera_projection
+from mrrs.core.geometry import camera_projection, transform_cg_cv
 
 # import open3d as o3d
 import trimesh
@@ -87,13 +87,18 @@ if __name__ == '__main__':
         print("\nFiltering")
 
         # Load masks
-        # FIXME: need to make sure same order
-        masks = sorted([os.path.join(sfm_data["groundTruthDTU"]["obsMaskFolder"], img) for img in os.listdir(sfm_data["groundTruthDTU"]["obsMaskFolder"]) if img.endswith('.png')])
-        nMasks = len(masks)
 
-        # print([sfm_data[]])
-    
-        # FIXME: need to make sure same order
+        # NOTE: masks are not in the same order
+        # masks_list = [os.path.join(sfm_data["groundTruthDTU"]["obsMaskFolder"], img) 
+        #         for img in os.listdir(sfm_data["groundTruthDTU"]["obsMaskFolder"]) if img.endswith('.png')]
+        
+        #opens masks in the same order as the input sfm
+        masks = []
+        for view in sfm_data["views"]:
+            view_number = int(os.path.basename(view["path"]).split(".")[0])
+            masks.append(os.path.join(sfm_data["groundTruthDTU"]["obsMaskFolder"],"%03d.png"%view_number))
+        nb_images = len(masks) 
+
         extrinsics_all_cams, intrinsics_all_cams, _, _, _, pixel_sizes_all_cams = matrices_from_sfm_data(sfm_data)
 
         dilatation_radius = args.dilatation_radius
@@ -103,12 +108,13 @@ if __name__ == '__main__':
         # Clean mesh using masks and camera poses
         pbar.update(1)
         pbar.set_description('project points in dilated masks')
-        if len(intrinsics_all_cams) != nMasks:
-            raise RuntimeError("Nonmatching mask and intrinsic resolution %d vs %d"%(nMasks, len(intrinsics_all_cams)))
-        for i in tqdm(range(nMasks)):
+        if len(intrinsics_all_cams) != nb_images:
+            raise RuntimeError("Nonmatching mask and intrinsic resolution %d vs %d"%(nb_images, len(intrinsics_all_cams)))
+        for i in tqdm(range(nb_images)):
             # Load mask image
             mask_image_path = masks[i]
-            print("Opening "+mask_image_path)
+            print("\n")
+            print("Opening "+mask_image_path +" view "+sfm_data["views"][i]["path"])
             mask_image = np.array(Image.open(mask_image_path))[:, :, 0] > 0  # Assuming mask is stored in the red channel
             # print(loadmat(obsmask))
             # print(loadmat(obsmask)["ObsMask"].shape)
@@ -122,9 +128,14 @@ if __name__ == '__main__':
             # projected_points = trimesh.transformations.transform_points(points, worldMats[i])
             # projected_points[:, :2] /= projected_points[:, 2, np.newaxis]  # Normalize projected points
             # projected_points = projected_points[:, :2]
-            projected_points, _ = camera_projection(data_mesh.vertices, extrinsics_all_cams[i], 
-                                                 intrinsics_all_cams[i], pixel_sizes_all_cams[i])
-          
+
+
+            vertices = transform_cg_cv(data_mesh.vertices)
+            projected_points, _ = camera_projection(vertices, extrinsics_all_cams[i], 
+                                                    intrinsics_all_cams[i], pixel_sizes_all_cams[i])
+            print(data_mesh.vertices)
+            print(projected_points)
+            
             # Find points inside the image bounds
             image_height, image_width = dilated_mask.shape
             valid_points = (
@@ -133,6 +144,12 @@ if __name__ == '__main__':
                 (projected_points[:, 1] >= 0) &
                 (projected_points[:, 1] < image_height)
             )
+            print("%d valid points"%projected_points[valid_points].shape[0])
+            img=np.array(Image.open(sfm_data["views"][i]["path"]))
+            for p in projected_points[valid_points]:
+                img[p[1],p[0],:]=[255,0,0]
+            Image.fromarray(img).save(f'{args.eval_dir}/%d.png'%i)
+            exit()
             # Find points inside the mask
             points_inside_mask = dilated_mask[
                 np.floor(projected_points[valid_points, 1]).astype(int),

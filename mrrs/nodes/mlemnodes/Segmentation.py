@@ -14,7 +14,11 @@ from mrrs.core.ios import open_image, save_exr, save_image
 #FIXME: would be better with lazy import?
 from mrrs.segmentation.instance_segmentation.mask_rcnn import InstanceSegmentationMaskRCNN
 from mrrs.segmentation.semantic.fcnResnet50 import SemanticSegmentationFcnResnet50
-# from mrrs.segmentation.facial_segmentation.bisnet import BisnetSegmentation
+try:
+    from mrrs.segmentation.facial_segmentation.bisnet import BisnetSegmentation
+except Exception as ex:
+    print("WARNING, something went wrong with BisnetSegmentation, will not be available:")
+    print(ex)
 
 MASK_EXTENTION = ".png"
 
