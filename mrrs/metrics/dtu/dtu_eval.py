@@ -73,7 +73,6 @@ if __name__ == '__main__':
         args.dataset_dir=sfm_data["groundTruthDTU"]["gtPath"]
         print("Dataset dir: "+args.dataset_dir)
         args.scan=sfm_data["groundTruthDTU"]["scan"]
-        # obsmasks = sfm_data["groundTruthDTU"]["obsMask"]
 
     thresh = args.downsample_density
     if args.mode == 'mesh':
@@ -87,11 +86,6 @@ if __name__ == '__main__':
         print("\nFiltering")
 
         # Load masks
-
-        # NOTE: masks are not in the same order
-        # masks_list = [os.path.join(sfm_data["groundTruthDTU"]["obsMaskFolder"], img) 
-        #         for img in os.listdir(sfm_data["groundTruthDTU"]["obsMaskFolder"]) if img.endswith('.png')]
-        
         #opens masks in the same order as the input sfm
         masks = []
         for view in sfm_data["views"]:
@@ -110,16 +104,14 @@ if __name__ == '__main__':
         pbar.set_description('project points in dilated masks')
         if len(intrinsics_all_cams) != nb_images:
             raise RuntimeError("Nonmatching mask and intrinsic resolution %d vs %d"%(nb_images, len(intrinsics_all_cams)))
+        
         for i in tqdm(range(nb_images)):
             # Load mask image
             mask_image_path = masks[i]
             print("\n")
             print("Opening "+mask_image_path +" view "+sfm_data["views"][i]["path"])
             mask_image = np.array(Image.open(mask_image_path))[:, :, 0] > 0  # Assuming mask is stored in the red channel
-            # print(loadmat(obsmask))
-            # print(loadmat(obsmask)["ObsMask"].shape)
-            # mask_image = np.array(loadmat(obsmask)["ObsMask"])[:, :, 0] > 0
-           
+       
             # Dilate mask
             dilated_mask = binary_dilation(mask_image, circle_image)
 
@@ -129,10 +121,10 @@ if __name__ == '__main__':
             # projected_points[:, :2] /= projected_points[:, 2, np.newaxis]  # Normalize projected points
             # projected_points = projected_points[:, :2]
 
-
             vertices = transform_cg_cv(data_mesh.vertices)
             projected_points, _ = camera_projection(vertices, extrinsics_all_cams[i], 
                                                     intrinsics_all_cams[i], pixel_sizes_all_cams[i])
+            #FIXME: projection issues?
             print(data_mesh.vertices)
             print(projected_points)
             
@@ -149,7 +141,7 @@ if __name__ == '__main__':
             for p in projected_points[valid_points]:
                 img[p[1],p[0],:]=[255,0,0]
             Image.fromarray(img).save(f'{args.eval_dir}/%d.png'%i)
-            exit()
+            
             # Find points inside the mask
             points_inside_mask = dilated_mask[
                 np.floor(projected_points[valid_points, 1]).astype(int),
@@ -168,7 +160,7 @@ if __name__ == '__main__':
         if not args.not_main_component:
             mesh_components = data_mesh.split(only_watertight=False)
             largest_component = max(mesh_components, key=lambda comp: len(comp.vertices))
-            mesh = largest_component
+            data_mesh = largest_component
 
         # Save cleaned mesh
         pbar.update(1)
@@ -179,7 +171,6 @@ if __name__ == '__main__':
         pbar.set_description('done')
         pbar.close()
         #-----
-
 
         mp.freeze_support()
 
