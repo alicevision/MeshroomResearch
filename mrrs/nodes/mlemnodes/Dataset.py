@@ -303,7 +303,7 @@ class Dataset(desc.Node):
             description='Generated depth maps.',
             semantic='image',
             value=os.path.join(desc.Node.internalFolder,
-                               'depth_maps') + '<VIEW_ID>_depthMap.exr',
+                               'depth_maps', '<VIEW_ID>_depthMap.exr'),
             uid=[],
             group='',
         ),
