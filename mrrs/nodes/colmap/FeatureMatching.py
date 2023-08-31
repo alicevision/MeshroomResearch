@@ -47,7 +47,7 @@ class ColmapFeatureMatching(desc.CommandLineNode):
         command_line = desc.CommandLineNode.buildCommandLine(self, chunk)#as default
         #add the extra params
         if not chunk.node.use_gpu.value:
-            command_line+=" --SiftExtraction.use_gpu 0" 
+            command_line+=" --SiftMatching.use_gpu 0" 
         return command_line
 
     def processChunk(self, chunk):
