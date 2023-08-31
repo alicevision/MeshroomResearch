@@ -64,6 +64,17 @@ def do_transform(depth_maps_path, sfm_data, transform, output_folder):
         depth_map_transformed[depth_map<0] = 0#put 0 in places where its invalid
         if "AliceVision:downscale" in depth_map_header:
             depth_map_transformed = cv2.resize(depth_map_transformed, depth_map_size[::-1])
+        else:
+            depth_map_header["AliceVision:downscale"]=1
+        #add header for vizualisation
+        if "AliceVision:CArr" not in depth_map_header: 
+            camera_center = extrinsics[index][0:3, 3].tolist()
+            inverse_intr_rot = np.linalg.inv(
+                    intrinsics[index] @ np.linalg.inv(extrinsics[index][0:3, 0:3]))
+
+            depth_map_header["AliceVision:CArr"] = camera_center
+            depth_map_header["AliceVision:iCamArr"]= inverse_intr_rot
+            
         save_exr(depth_map_transformed, output_depth_map_path, data_type="depth", custom_header=depth_map_header)
         output_depth_map_paths.append(output_depth_map_path)
     return output_depth_map_paths
