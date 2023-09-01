@@ -44,6 +44,7 @@ __version__ = "3.0"
 import os 
 
 import trimesh
+import numpy as np
 
 from meshroom.core import desc
 from mrrs.core.geometry import *
@@ -52,6 +53,7 @@ from mrrs.core.ios import *
 from mrrs.datasets.blendedMVG import open_txt_calibration_blendedMVG
 from mrrs.datasets.dtu import open_dtu_calibration
 
+#TODO: add option to emulate sfm points (needed in gt sfm)
 class LoadDataset(desc.Node):
     category = 'Meshroom Research'
 
@@ -79,9 +81,7 @@ class LoadDataset(desc.Node):
             uid=[0],
         ),
 
-        #advanced
-
-        # all of these are used to debug
+        #advanced, all of these are used to debug
         desc.StringParam(
             name='permutationMatrix',
             label='Permutation Matrix',
@@ -95,6 +95,15 @@ class LoadDataset(desc.Node):
             name='inverse',
             label='inverse',
             description='''Will inverse extrinsic''',
+            value=False,
+            uid=[0],
+            advanced=True
+        ),
+
+        desc.BoolParam(
+            name='initSfmLandmarks',
+            label='initSfmLandmarks',
+            description='''Will initalise sfmLandmarks with the vertices ground truth mesh (if any)''',
             value=False,
             uid=[0],
             advanced=True
@@ -186,115 +195,130 @@ class LoadDataset(desc.Node):
         """
         Opens the dataset data.
         """
-        try:
-            chunk.logManager.start(chunk.node.verboseLevel.value)
-            if not self.check_inputs(chunk):
-                return False
 
-            chunk.logger.info("*LoadDataset Starting")
+        chunk.logManager.start(chunk.node.verboseLevel.value)
+        if not self.check_inputs(chunk):
+            return False
 
-            chunk.logger.info("**Importing data")
+        chunk.logger.info("*LoadDataset Starting")
 
-            # Load SFM data from JSON file
-            sfm_data = json.load(open(chunk.node.sfmData.value, "r"))
-            # pose IDs, calibration IDs, and view IDs (one per view)
-            poses_id = [v["poseId"] for v in sfm_data["views"]]
-            instrinsics_id = [v["instrinsicsId"] for v in sfm_data["views"]]
-            views_id = [v["viewId"] for v in sfm_data["views"]]
+        chunk.logger.info("**Importing data")
 
-            # Initialize lists to store scene images, calibrations, depths and masks
-            images = []
-            depth_maps = []
-            masks = []
-            extrinsics = []
-            intrinsics = []
-            sensor_size = 1 #note, by default the sensor size is set to a virtual sensor size of 1
+        # Load SFM data from JSON file
+        sfm_data = json.load(open(chunk.node.sfmData.value, "r"))
+        # pose IDs, calibration IDs, and view IDs (one per view)
+        poses_id = [v["poseId"] for v in sfm_data["views"]]
+        instrinsics_id = [v["intrinsicId"] for v in sfm_data["views"]]
+        views_id = [v["viewId"] for v in sfm_data["views"]]
 
-            # Initialise geometry (one per scene)
-            mesh = None
-            observation_mask = None
+        # Initialize lists to store scene images, calibrations, depths and masks
+        images = []
+        depth_maps = []
+        masks = []
+        extrinsics = []
+        intrinsics = []
+        sensor_size = 1 #note, by default the sensor size is set to a virtual sensor size of 1
 
-            # Load data
-            if chunk.node.datasetType.value == "blendedMVG":
-                chunk.logger.info("**Importing blendedMVG data")
-                for view in sfm_data["views"]:
-                    image = view["path"]
-                    folder = os.path.dirname(image)
-                    basename = os.path.basename(image)[:-4]#FIXME: not great, use split
-                    calib = os.path.join(folder, "..", "cams", basename + "_cam.txt")
-                    depth_map = os.path.join(folder, "..", "rendered_depth_maps", basename + ".pfm")
-                    mask=None #FIXME: we actually have it
-                    E, I = open_txt_calibration_blendedMVG(calib)
-                    # pixel_size = sensor_size / images_sizes[0][0]
-                    extrinsics = [np.linalg.inv(e) if e is not None else None for e in extrinsics] # R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
-                    depth_maps.append(depth_map)
-                    extrinsics.append(E)
-                    intrinsics.append(I)
-                    masks.append(mask)
+        # Initialise geometry (one per scene)
+        mesh = None
+        observation_mask = None
+        ground_plane = None
 
-            elif chunk.node.datasetType.value == "DTU":
-                chunk.logger.info("***Importing DTU data")
-                #FIXME: check order!!! with frame id
-                image_folder = os.path.abspath(os.dirname(sfm_data["views"][0][["path"]]))
-                extrinsics, intrinsics, gt_scale_mat = open_dtu_calibration( os.path.join(image_folder, "..", "cameras_sphere.npz"))
-                scan_nb = int(image_folder.split('/')[-2].split('scan')[-1])
-                mesh = os.path.join(image_folder,'Points','stl',f'stl{scan_nb:03}_total.ply'),
-                #TODO
-                observation_mask = None#f'{args.dataset_dir}/ObsMask/ObsMask{args.scan}_10.mat'
-                masks = None
-                mesh = None#os.path.abspath(os.path.join(gtPath,'Points','stl',f'stl{scan:03}_total.ply'))
-            elif chunk.node.datasetType.value == "ETH3D":
-                RuntimeError("ETH3D support TBA") 
+        # Load data
+        if chunk.node.datasetType.value == "blendedMVG":
+            chunk.logger.info("**Importing blendedMVG data")
+            for view in sfm_data["views"]:
+                image = view["path"]
+                folder = os.path.dirname(image)
+                basename = os.path.basename(image)[:-4]#FIXME: not great, use split
+                calib = os.path.join(folder, "..", "cams", basename + "_cam.txt")
+                depth_map = os.path.join(folder, "..", "rendered_depth_maps", basename + ".pfm")
+                E, I = open_txt_calibration_blendedMVG(calib)
+                # pixel_size = sensor_size / images_sizes[0][0]
+                images.append(image)
+                depth_maps.append(depth_map)
+                extrinsics.append(E)
+                intrinsics.append(I)
+            extrinsics = [np.linalg.inv(e) if e is not None else None for e in extrinsics] # R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
+
+        elif chunk.node.datasetType.value == "DTU":
+            chunk.logger.info("***Importing DTU data")
+            #FIXME: check order!!! with frame id
+            image_folder = os.path.abspath(os.dirname(sfm_data["views"][0][["path"]]))
+            extrinsics, intrinsics, gt_scale_mat = open_dtu_calibration( os.path.join(image_folder, "..", "cameras_sphere.npz"))
+            scan_nb = int(image_folder.split('/')[-2].split('scan')[-1])
+            mesh = os.path.join(image_folder,'Points','stl',f'stl{scan_nb:03}_total.ply'),
+            #TODO
+            observation_mask = None#f'{args.dataset_dir}/ObsMask/ObsMask{args.scan}_10.mat'
+            masks = None
+            mesh = None#os.path.abspath(os.path.join(gtPath,'Points','stl',f'stl{scan:03}_total.ply'))
+            ground_plane = None
+        elif chunk.node.datasetType.value == "ETH3D":
+            RuntimeError("ETH3D support TBA") 
+        else:
+            raise RuntimeError("Dataset type not supported")
+
+        chunk.logger.info("**Exporting data")
+        
+        # generate SFM data from matrices
+        images_sizes = [Image.open(image).size for image in images] #FIXME: not working with exr
+        gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, 
+                                             images_sizes, sfm_data, sensor_size)
+
+        # Exports ------
+
+        if chunk.node.initSfmLandmarks.value:
+            if mesh is None:
+                raise RuntimeError("Cannot initialise landmarks with no mesh")
+            mesh_data = trimesh.load(mesh, force='mesh')
+            structure = []
+            # for v in mesh_data.vertices:
+            #     structure.append()
+            gt_sfm_data["structure"] = structure
+            raise RuntimeError("WIP")
+
+        # Save the generated SFM data to JSON file
+        with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
+            json.dump(gt_sfm_data, f, indent=4)
+
+        #save depth maps if any
+        os.makedirs(chunk.node.depthMapsFolder.value, exist_ok=True)
+        for view_id, depth_map, gt_extrinsic, gt_intrinsic in zip(views_id, depth_maps, extrinsics, intrinsics):
+            if os.path.exists(depth_map):
+                depth_map_gt = open_depth_map(depth_map)
             else:
-                raise RuntimeError("Dataset type not supported")
+                continue
 
-            chunk.logger.info("**Exporting data")
-            
-            # generate SFM data from matrices
-            images_sizes = [Image.open(image).size for image in images] #FIXME: not working with exr
-            gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, images_sizes, sfm_data, sensor_size)
+            camera_center = gt_extrinsic[0:3, 3]
+            inverse_intr_rot = np.linalg.inv(
+                gt_intrinsic @ np.linalg.inv(gt_extrinsic[0:3, 0:3]))
+            #https://openimageio.readthedocs.io/en/v2.4.6.1/imageoutput.html
+            depth_meta = {
+                "AliceVision:CArr": camera_center,
+                "AliceVision:iCamArr": inverse_intr_rot,
+                "AliceVision:downscale": 1
+            }
+            save_exr(depth_map_gt, os.path.join(chunk.node.depthMapsFolder.value,
+                                                str(view_id) + "_depthMap.exr"), data_type="depth",
+                    custom_header=depth_meta)
+        
+        #Save image masks if any
+        for mask, view_id in zip(masks, views_id) :
+            save_image(os.path.join(chunk.node.maskFolder.value, str(view_id) + ".png"), mask)
 
-            # Exports ------
+        #Save ground truth mesh as obj if any
+        if mesh is not None:
+            mesh_data = trimesh.load(mesh, force='mesh')
+            mesh_data.export(chunk.node.mesh.value)
 
-            # Save the generated SFM data to JSON file
-            with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
-                json.dump(gt_sfm_data, f, indent=4)
+        #Save observation grid if any
+        if observation_mask is not None:
+            raise BaseException("obervationmask not suported yet") #f'{args.dataset_dir}/ObsMask/ObsMask{args.scan}_10.mat'
 
-            #save depth maps if any
-            os.makedirs(chunk.node.depthMapsFolder.value, exist_ok=True)
-            for view_id, depth_map, gt_extrinsic, gt_intrinsic in zip(views_id, depth_maps, extrinsics, intrinsics):
-                if os.path.exists(depth_map):
-                    depth_map_gt = open_depth_map(depth_map)
-                else:
-                    continue
+        #Save plane if any 
+        if ground_plane is not None:
+            raise BaseException("obervationmask not suported yet")
+            # ground_plane = loadmat(f'{args.dataset_dir}/ObsMask/Plane{args.scan}.mat')['P']
+            # data_hom = np.concatenate([data_in_obs, np.ones_like(data_in_obs[:,:1])], -1)
+        chunk.logger.info("*LoadDataset ends")
 
-                camera_center = gt_extrinsic[0:3, 3]
-                inverse_intr_rot = np.linalg.inv(
-                    gt_intrinsic @ np.linalg.inv(gt_extrinsic[0:3, 0:3]))
-                #https://openimageio.readthedocs.io/en/v2.4.6.1/imageoutput.html
-                depth_meta = {
-                    "AliceVision:CArr": camera_center,
-                    "AliceVision:iCamArr": inverse_intr_rot,
-                    "AliceVision:downscale": 1
-                }
-                save_exr(depth_map_gt, os.path.join(chunk.node.depthMapsFolder.value,
-                                                    str(view_id) + "_depthMap.exr"), data_type="depth",
-                        custom_header=depth_meta)
-            
-            #Save image masks if any
-            if masks is not None:
-                for mask, view_id in zip(masks, views_id) :
-                    save_image(os.path.join(chunk.node.maskFolder.value, str(view_id) + ".png"), mask, data_type="image")
-
-            #Save ground truth mesh as obj if any
-            if mesh is not None:
-                mesh_data = trimesh.load(mesh, force='mesh')
-                mesh_data.export(chunk.node.mesh.value)
-
-            #Save observation grid if any
-            if observation_mask is not None:
-                raise BaseException("obervationmask not suported yet") #f'{args.dataset_dir}/ObsMask/ObsMask{args.scan}_10.mat'
-
-            chunk.logger.info("*LoadDataset ends")
-        finally:
-            chunk.logManager.end()

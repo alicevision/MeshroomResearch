@@ -1,3 +1,4 @@
+import numpy as np
 
 def open_txt_calibration_blendedMVG(calib_file):
     '''
