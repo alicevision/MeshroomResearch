@@ -41,6 +41,7 @@ This following workspace folder structure is needed:
 """
 __version__ = "3.0"
 
+from ctypes import sizeof
 import os 
 
 import trimesh
@@ -100,11 +101,12 @@ class LoadDataset(desc.Node):
             advanced=True
         ),
 
-        desc.BoolParam(
+        desc.FloatParam(
             name='initSfmLandmarks',
             label='initSfmLandmarks',
-            description='''Will initalise sfmLandmarks with the vertices ground truth mesh (if any)''',
-            value=False,
+            description='''Will initalise sfmLandmarks with the vertices ground truth mesh (if any). 0 for deactivated, otherwise generate use n*nb_vertices landmarks.''',
+            value=0.0,
+            range=(0.0, 1.0, 0.1),
             uid=[0],
             advanced=True
         ),
@@ -240,6 +242,20 @@ class LoadDataset(desc.Node):
                 extrinsics.append(E)
                 intrinsics.append(I)
             extrinsics = [np.linalg.inv(e) if e is not None else None for e in extrinsics] # R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
+            mesh_list_path = os.path.join(folder, "..", "textured_mesh", 'mesh_list.txt') 
+            if os.path.exists(mesh_list_path):
+                chunk.logger.info("**Importing blendedMVG mesh data")
+                mesh_list = [os.path.basename(p) for p in  open(mesh_list_path, 'r').read().splitlines()]
+                mesh = None
+                submeshes = []
+                for i, mesh_path in enumerate(mesh_list):
+                    chunk.logger.info("**%d/%d"%(i, len(mesh_list)))
+                    submesh_path = os.path.join(folder, "..", "textured_mesh", mesh_path)
+                    submesh = trimesh.load_mesh(submesh_path) 
+                    submeshes.append(submesh)
+                mesh = trimesh.util.concatenate(submeshes)
+
+                #FIXME: need to rotate in CG CS?
 
         elif chunk.node.datasetType.value == "DTU":
             chunk.logger.info("***Importing DTU data")
@@ -265,17 +281,31 @@ class LoadDataset(desc.Node):
         gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, 
                                              images_sizes, sfm_data, sensor_size)
 
-        # Exports ------
-
-        if chunk.node.initSfmLandmarks.value:
+        # Exports
+        if chunk.node.initSfmLandmarks.value != 0:
+            chunk.logger.info("**Exporting SfM landmarks")
             if mesh is None:
                 raise RuntimeError("Cannot initialise landmarks with no mesh")
             mesh_data = trimesh.load(mesh, force='mesh')
             structure = []
-            # for v in mesh_data.vertices:
-            #     structure.append()
+            step = int( 1/chunk.node.initSfmLandmarks.value)
+            for vi, v in enumerate(mesh_data.vertices[::step]):
+                chunk.logger.info("**Exporting SfM landmarks %d/%d"%(vi, mesh_data.vertices.shape[0]))
+                landmark = {}
+                landmark["landmarkId"] = str(vi)
+                landmark["descType"] = "unknown" 
+                landmark["color"] = ["255", "0", "0"]
+                landmark["X"] = [str(x) for x in v]
+                landmark["observations"] = []
+                #create dummy obs in all views FIXME: suboptimal, ideally we would compute the viz  all all view by projection 
+                for oi, i in enumerate(views_id):
+                    obs =  {"observationId": str(i),
+                            "featureId": str(oi),
+                            "x": ["0","0"]}
+                    landmark["observations"].append(obs)
+                structure.append(landmark)
             gt_sfm_data["structure"] = structure
-            raise RuntimeError("WIP")
+
 
         # Save the generated SFM data to JSON file
         with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:

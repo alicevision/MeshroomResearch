@@ -2,14 +2,12 @@
 Module handling the inputs and outputs from and to Meshroom.
 """
 
-import chunk
 import logging
 import re
 from struct import unpack
 
 from PIL import Image
 import numpy as np
-import json
 
 from mrrs.core.utils import format_float_array
 
@@ -20,44 +18,23 @@ def open_exr(exr_path, clip_negative=False):
     '''
     Uses OpenExr to import an EXR file.
     '''
-    try:#try with openexr
-        import OpenEXR, Imath# lazy import
-        if FORCE_IOOI:
-            raise RuntimeError("OpenImageIo overwite")
-    except Exception :#openimage io fallback
-        logging.info("OpenExr bindings for python unavailable, switching to openimageio")
-        #logging.warning("Openimageio does not support custom header for now, this might lead to issues")
-        import OpenImageIO as oiio
-        exr_file = oiio.ImageInput.open(exr_path)
-        # use exra atributes as the header
-        extra_attribs = exr_file.spec().extra_attribs
-        header={}
-        for attrib in extra_attribs:
-            header[attrib.name]=attrib.value
-        if exr_file is None :
-            raise RuntimeError("Could not open exr file "+exr_path)
-        output_array = exr_file.read_image("float32")
-        exr_file.close()
-    else:
-        exr_file = OpenEXR.InputFile(exr_path)
-        header = exr_file.header()#issue: can not parse our custom headers
-        data_window = header['dataWindow']
-        image_size = (data_window.max.y - data_window.min.y + 1,
-                    data_window.max.x - data_window.min.x + 1)
-        output_array = []
-        for channel in header['channels']:
-            exr_data = exr_file.channel(channel, Imath.PixelType(Imath.PixelType.FLOAT))
-            exr_data = np.fromstring(exr_data, dtype=np.float32)
-            exr_data = np.reshape(exr_data, image_size)
-            if clip_negative:
-                exr_data[exr_data<0]=0
-            output_array.append(exr_data)
-        output_array = np.stack(output_array, axis=-1)
+    import OpenImageIO as oiio #lazy import?
+    exr_file = oiio.ImageInput.open(exr_path)
+    # use exra atributes as the header
+    extra_attribs = exr_file.spec().extra_attribs
+    header={}
+    for attrib in extra_attribs:
+        header[attrib.name]=attrib.value
+    if exr_file is None :
+        raise RuntimeError("Could not open exr file "+exr_path)
+    output_array = exr_file.read_image("float32")
+    exr_file.close()
+  
     return output_array, header
 
-def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
-            custom_header = None,#{'AliceVision:CArr':None,'AliceVision:iCamArr':None},
-            channel_names = None):
+def save_exr(input_array, output_file,
+            custom_header = None,
+            channel_names = None):#FIXME: need to put baxk support for channel name
     """
     Saves an exr for meshroom, using different formats.
     """
@@ -66,72 +43,28 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
     elif len(input_array.shape)==2:#gray level case
         input_array = np.expand_dims(input_array, -1)
     input_array_size = input_array.shape
-    try:#try with openexr
-        import OpenEXR, Imath# lazy import
-        if FORCE_IOOI:
-            raise RuntimeError("OpenImageIo overwite")
-    except Exception:#openimage io fallback
-        logging.info("OpenExr bindings for python unavailable, switching to openimageio")
-        import OpenImageIO as oiio
-        out = oiio.ImageOutput.create(output_file)
-        if out is None:
-            raise RuntimeError("Could not open exr file "+output_file)
-        spec = oiio.ImageSpec(input_array_size[1], input_array_size[0], input_array_size[2], 'float32')
-        if custom_header is not None:
-            for key in custom_header.keys():
-                # print("Writting metadata "+key)
-                # print(custom_header[key])
-                if key=="AliceVision:CArr":#FIXME: not working?
-                    spec.attribute(key, "float[3]", list(custom_header[key]))
-                elif key=="AliceVision:iCamArr":
-                    spec.attribute(key, oiio.TypeDesc.TypeMatrix33,  list(custom_header[key].flatten()))
-                elif key=="AliceVision:downscale":
-                    spec.attribute(key, "float", custom_header[key])
-                else:
-                    try:
-                        spec[key]=custom_header[key]
-                    except:
-                        print("WARNING: could not write attribute"+key)
-        out.open(output_file, spec)
-        out.write_image(input_array)
-        out.close()
-    else:
-        channel_data = []
-
-        input_array = input_array.astype(np.float32)#float64 causes issues
-
-        for channel_index in range(input_array.shape[-1]):
-            channel_data.append(input_array[:,:,channel_index].tostring() )
-        import OpenEXR, Imath#lazy importSS
-        # Write the three color channels to the output file
-        header = OpenEXR.Header(input_array_size[1], input_array_size[0])
-        if custom_header is not None:
-            header = {**header, **custom_header}#merges two dicts
-
-        if data_type == 'RGB':
-            out = OpenEXR.OutputFile(output_file, header)
-            out.writePixels({'R' : channel_data[0], 'G' : channel_data[1], 'B' : channel_data[2] })
-        elif data_type == 'depth':
-            float_chan = Imath.Channel(Imath.PixelType(Imath.PixelType.FLOAT))
-            header['channels']={'Y':float_chan}
-            out = OpenEXR.OutputFile(output_file, header)
-            out.writePixels({'Y' : channel_data[0]})
-        elif data_type == 'segmentation':
-            header['channels']={}
-            channel_dict={}
-            for channel in range(input_array.shape[-1]):
-                float_chan = Imath.Channel(Imath.PixelType(Imath.PixelType.FLOAT))
-                if channel_names is None:
-                    header['channels']['channel_%d'%channel]=float_chan
-                    channel_dict['channel_%d'%channel]=channel_data[channel]
-                else:
-                    header['channels'][channel_names[channel]]=float_chan
-                    channel_dict[channel_names[channel]]=channel_data[channel]
-            out = OpenEXR.OutputFile(output_file, header)
-            out.writePixels(channel_dict)
-        else:
-            raise RuntimeError('Data type in save_exr not recognised')
-
+    import OpenImageIO as oiio
+    out = oiio.ImageOutput.create(output_file)
+    if out is None:
+        raise RuntimeError("Could not open exr file "+output_file)
+    spec = oiio.ImageSpec(input_array_size[1], input_array_size[0], input_array_size[2], 'float32')
+    if custom_header is not None:
+        for key in custom_header.keys():
+            if key=="AliceVision:CArr":#FIXME: not working?
+                spec.attribute(key, "float[3]", list(custom_header[key]))
+            elif key=="AliceVision:iCamArr":
+                spec.attribute(key, oiio.TypeDesc.TypeMatrix33,  list(np.asarray(custom_header[key]).flatten()))
+            elif key=="AliceVision:downscale":
+                spec.attribute(key, "float", custom_header[key])
+            else:
+                try:
+                    spec[key]=custom_header[key]
+                except:
+                    print("WARNING: could not write attribute"+key)
+    out.open(output_file, spec)
+    out.write_image(input_array)
+    out.close()
+  
 def open_pfm(path):
     '''
     Parses a pfm file.
