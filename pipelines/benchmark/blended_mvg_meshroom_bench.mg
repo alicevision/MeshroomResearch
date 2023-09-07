@@ -5,23 +5,23 @@
         "fileVersion": "1.1",
         "template": false,
         "nodesVersions": {
-            "PrepareDenseScene": "3.1",
-            "FeatureExtraction": "1.3",
-            "DepthMapTransform": "3.0",
             "SfMAlignment": "2.0",
-            "LoadDataset": "3.0",
-            "ConvertSfMFormat": "2.0",
-            "DepthMapComparison": "3.0",
-            "CameraInit": "9.0",
-            "DepthMapFilter": "3.0",
-            "CalibrationComparison": "3.0",
-            "MeshFiltering": "3.0",
+            "FeatureMatching": "2.0",
             "Meshing": "7.0",
-            "DepthMap": "4.0",
-            "ImageMatching": "2.0",
+            "FeatureExtraction": "1.3",
+            "DepthMapComparison": "3.0",
+            "ConvertSfMFormat": "2.0",
             "StructureFromMotion": "3.1",
+            "CameraInit": "9.0",
+            "PrepareDenseScene": "3.1",
+            "DepthMapFilter": "3.0",
+            "MeshFiltering": "3.0",
+            "CalibrationComparison": "3.0",
+            "DepthMapTransform": "3.0",
+            "LoadDataset": "3.0",
             "Texturing": "6.0",
-            "FeatureMatching": "2.0"
+            "DepthMap": "4.0",
+            "ImageMatching": "2.0"
         }
     },
     "graph": {
@@ -219,44 +219,6 @@
                 "output": "{cache}/{nodeType}/{uid0}/"
             }
         },
-        "LoadDataset_1": {
-            "nodeType": "LoadDataset",
-            "position": [
-                95,
-                137
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 16,
-                "split": 1
-            },
-            "uids": {
-                "0": "c7c28bf25a928c7dceff4f536f27f9b86e29312c"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "sfmData": "{CameraInit_2.output}",
-                "datasetType": "blendedMVG",
-                "permutationMatrix": "[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]",
-                "inverse": false,
-                "initSfmLandmarks": 0.1,
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "outputSfMData": "{cache}/{nodeType}/{uid0}/sfm.sfm",
-                "depthMapsFolder": "{cache}/{nodeType}/{uid0}/depth_maps",
-                "mesh": "{cache}/{nodeType}/{uid0}/mesh.obj",
-                "maskFolder": "{cache}/{nodeType}/{uid0}/masks",
-                "observationMask": "{cache}/{nodeType}/{uid0}/mesh.obj",
-                "depthmaps": "{cache}/{nodeType}/{uid0}/depth_maps/<VIEW_ID>_depthMap.exr"
-            }
-        },
         "SfMAlignment_1": {
             "nodeType": "SfMAlignment",
             "position": [
@@ -269,7 +231,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "4e83db7abf313ccb1bb316c67469e1a54863706e"
+                "0": "f0f20b899d9cf7768563bc38de10262610062294"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -306,7 +268,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "14d98dd22505d7c2496a15cd8a3a44ac754c5750"
+                "0": "c3385cad1025403c72031c1472a4edccbab1558d"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -343,7 +305,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "c0e4402beff91a00dcb88800350b8b979b47ed39"
+                "0": "75e4c348cc9aa764c9dfed1c77c753ec02745c5d"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -382,7 +344,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "d87620f3261d0e692118cc24893eec53a39c835d"
+                "0": "3f6152f15ae68769aff4d2d71671e997128c8293"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -405,8 +367,8 @@
         "DepthMapComparison_1": {
             "nodeType": "DepthMapComparison",
             "position": [
-                1012,
-                252
+                1156,
+                226
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -414,12 +376,12 @@
                 "split": 1
             },
             "uids": {
-                "0": "02b6d6518b54af9654a65eca03f1b5d1573d9aba"
+                "0": "44cc11d73dc51c7c31b488d5d155dfd9c1d8952c"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
-                "inputSfM": "{DepthMapFilter_3.input}",
-                "depthMapsFolder": "{DepthMapFilter_3.output}",
+                "inputSfM": "{DepthMapTransform_2.inputSfM}",
+                "depthMapsFolder": "{DepthMapTransform_2.output}",
                 "depthMapsFolderGT": "{LoadDataset_1.depthMapsFolder}",
                 "metrics": [
                     "RMSE",
@@ -440,6 +402,42 @@
             "outputs": {
                 "output": "{cache}/{nodeType}/{uid0}/",
                 "outputCsv": "{cache}/{nodeType}/{uid0}/depth_map_comparison.csv"
+            }
+        },
+        "LoadDataset_1": {
+            "nodeType": "LoadDataset",
+            "position": [
+                95,
+                137
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 16,
+                "split": 1
+            },
+            "uids": {
+                "0": "8ad3e052d674d5bf5eacc0f8482636bf4feb8951"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "sfmData": "{CameraInit_2.output}",
+                "datasetType": "blendedMVG",
+                "initSfmLandmarks": 0.1,
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "outputSfMData": "{cache}/{nodeType}/{uid0}/sfm.sfm",
+                "depthMapsFolder": "{cache}/{nodeType}/{uid0}/depth_maps",
+                "mesh": "{cache}/{nodeType}/{uid0}/mesh.obj",
+                "maskFolder": "{cache}/{nodeType}/{uid0}/masks",
+                "observationMask": "{cache}/{nodeType}/{uid0}/mesh.obj",
+                "depthmaps": "{cache}/{nodeType}/{uid0}/depth_maps/<VIEW_ID>_depthMap.exr"
             }
         },
         "CameraInit_2": {
@@ -681,7 +679,7 @@
                 "split": 6
             },
             "uids": {
-                "0": "1aa1a3261bd6d45b21c4fbe6b2d693e546eae027"
+                "0": "7164ed17c5190f7a1b51187c9909d464eba2641c"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -781,7 +779,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "b94c2a11215d933f21999fb781a630ea333d76bc"
+                "0": "6f36ec3bb47dc191c3b69d1cec1044944e5e56ea"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -809,8 +807,8 @@
         "ConvertSfMFormat_2": {
             "nodeType": "ConvertSfMFormat",
             "position": [
-                95,
-                46
+                186,
+                -15
             ],
             "parallelization": {
                 "blockSize": 0,
@@ -818,7 +816,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "8f4b89c633ebcb30395e865923d82a7bb90aa356"
+                "0": "567da2e8baba79e6d2c7926bad1f8682193c686b"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -845,6 +843,38 @@
                 "output": "{cache}/{nodeType}/{uid0}/sfm.{fileExtValue}"
             }
         },
+        "DepthMapTransform_2": {
+            "nodeType": "DepthMapTransform",
+            "position": [
+                963,
+                236
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "30ddb34742a5539edce7c07cfc9cea2fca826621"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "inputSfM": "{DepthMapFilter_3.input}",
+                "depthMapsFolder": "{DepthMapFilter_3.output}",
+                "transform": "meshroom2normal",
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/",
+                "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthMap.exr"
+            }
+        },
         "DepthMapFilter_3": {
             "nodeType": "DepthMapFilter",
             "position": [
@@ -857,7 +887,7 @@
                 "split": 2
             },
             "uids": {
-                "0": "62ed182286e94972602f42ed67fda128fe988c25"
+                "0": "d4e15ae47b42db6eb5b84677be5589518825bd29"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -898,7 +928,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "5ddc540e6c7556d9e7a48ca4e73f7337a3d00f7c"
+                "0": "825986b08b28c1d0125abc3dbbcf58feb32fe05a"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -937,7 +967,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "d3be41cd7c53a3c8966e5debd73ccf9e82657bd0"
+                "0": "ab457b4b50a15b60e5305d3762c97ad19aa96106"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1010,7 +1040,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "a1a0aca8504226196f2eac63e4f1525d250f7be5"
+                "0": "c38132f87618218cecc8964702366be5e45e7435"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {

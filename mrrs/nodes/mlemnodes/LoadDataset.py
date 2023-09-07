@@ -41,8 +41,9 @@ This following workspace folder structure is needed:
 """
 __version__ = "3.0"
 
-from ctypes import sizeof
+
 import os 
+import json
 
 import trimesh
 import numpy as np
@@ -54,11 +55,10 @@ from mrrs.core.ios import *
 from mrrs.datasets.blendedMVG import open_txt_calibration_blendedMVG
 from mrrs.datasets.dtu import open_dtu_calibration
 
-#TODO: add option to emulate sfm points (needed in gt sfm)
 class LoadDataset(desc.Node):
     category = 'Meshroom Research'
 
-    documentation = '''Util node to open datasets from the images in the .sfm'''
+    documentation = '''Util node to open datasets with different data from the images in the .sfm'''
 
     size = desc.DynamicNodeSize('sfmData')
 
@@ -80,25 +80,6 @@ class LoadDataset(desc.Node):
             values=['blendedMVG', 'DTU'],
             exclusive=True,
             uid=[0],
-        ),
-
-        #advanced, all of these are used to debug
-        desc.StringParam(
-            name='permutationMatrix',
-            label='Permutation Matrix',
-            description='''Permutation matrix used on the camera intrinsic''',
-            value='[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]',
-            uid=[0],
-            advanced=True,
-        ),
-
-        desc.BoolParam(
-            name='inverse',
-            label='inverse',
-            description='''Will inverse extrinsic''',
-            value=False,
-            uid=[0],
-            advanced=True
         ),
 
         desc.FloatParam(
@@ -138,7 +119,7 @@ class LoadDataset(desc.Node):
             description='Output folder for loaded depth maps',
             value=os.path.join(desc.Node.internalFolder, 'depth_maps'),
             uid=[],
-            enabled=lambda attr: (attr.node.datasetType.value=='blendedMVG'), #FIXME: does not work
+            enabled=lambda attr: (attr.node.datasetType.value=='blendedMVG'), #FIXME: does not work!!
         ),
 
         desc.File(
@@ -147,6 +128,7 @@ class LoadDataset(desc.Node):
             description='Loaded mesh.',
             semantic='mesh',
             value=os.path.join(desc.Node.internalFolder, 'mesh.obj'),
+            enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
             group='',
         ),
@@ -156,6 +138,7 @@ class LoadDataset(desc.Node):
             label='maskFolder',
             description='Image mask folder',
             value=os.path.join(desc.Node.internalFolder,'masks'),
+            enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
             group='',
         ),
@@ -166,6 +149,7 @@ class LoadDataset(desc.Node):
             description='Occupancy map',
             value=os.path.join(desc.Node.internalFolder,
                                'mesh.obj'),
+            enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
             group='',
         ),
@@ -254,7 +238,6 @@ class LoadDataset(desc.Node):
                     submesh = trimesh.load_mesh(submesh_path) 
                     submeshes.append(submesh)
                 mesh = trimesh.util.concatenate(submeshes)
-
                 #FIXME: need to rotate in CG CS?
 
         elif chunk.node.datasetType.value == "DTU":
@@ -267,7 +250,6 @@ class LoadDataset(desc.Node):
             #TODO
             observation_mask = None#f'{args.dataset_dir}/ObsMask/ObsMask{args.scan}_10.mat'
             masks = None
-            mesh = None#os.path.abspath(os.path.join(gtPath,'Points','stl',f'stl{scan:03}_total.ply'))
             ground_plane = None
         elif chunk.node.datasetType.value == "ETH3D":
             RuntimeError("ETH3D support TBA") 
@@ -328,9 +310,8 @@ class LoadDataset(desc.Node):
                 "AliceVision:iCamArr": inverse_intr_rot,
                 "AliceVision:downscale": 1
             }
-            save_exr(depth_map_gt, os.path.join(chunk.node.depthMapsFolder.value,
-                                                str(view_id) + "_depthMap.exr"), data_type="depth",
-                    custom_header=depth_meta)
+            save_exr(depth_map_gt, os.path.join(chunk.node.depthMapsFolder.value, 
+                     str(view_id) + "_depthMap.exr"), custom_header=depth_meta)
         
         #Save image masks if any
         for mask, view_id in zip(masks, views_id) :

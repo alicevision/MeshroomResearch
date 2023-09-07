@@ -75,7 +75,7 @@ def do_transform(depth_maps_path, sfm_data, transform, output_folder):
             depth_map_header["AliceVision:CArr"] = camera_center
             depth_map_header["AliceVision:iCamArr"]= inverse_intr_rot
             
-        save_exr(depth_map_transformed, output_depth_map_path, data_type="depth", custom_header=depth_map_header)
+        save_exr(depth_map_transformed, output_depth_map_path, custom_header=depth_map_header)
         output_depth_map_paths.append(output_depth_map_path)
     return output_depth_map_paths
 
