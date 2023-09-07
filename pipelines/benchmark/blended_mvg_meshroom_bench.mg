@@ -5,23 +5,23 @@
         "fileVersion": "1.1",
         "template": false,
         "nodesVersions": {
-            "SfMAlignment": "2.0",
-            "MeshFiltering": "3.0",
-            "StructureFromMotion": "3.1",
-            "Texturing": "6.0",
-            "Meshing": "7.0",
-            "DepthMapTransform": "3.0",
-            "FeatureMatching": "2.0",
-            "FeatureExtraction": "1.3",
-            "LoadDataset": "3.0",
-            "CalibrationComparison": "3.0",
-            "ConvertSfMFormat": "2.0",
             "PrepareDenseScene": "3.1",
+            "FeatureExtraction": "1.3",
+            "DepthMapTransform": "3.0",
+            "SfMAlignment": "2.0",
+            "LoadDataset": "3.0",
+            "ConvertSfMFormat": "2.0",
+            "DepthMapComparison": "3.0",
             "CameraInit": "9.0",
             "DepthMapFilter": "3.0",
-            "DepthMapComparison": "3.0",
+            "CalibrationComparison": "3.0",
+            "MeshFiltering": "3.0",
+            "Meshing": "7.0",
             "DepthMap": "4.0",
-            "ImageMatching": "2.0"
+            "ImageMatching": "2.0",
+            "StructureFromMotion": "3.1",
+            "Texturing": "6.0",
+            "FeatureMatching": "2.0"
         }
     },
     "graph": {
@@ -400,6 +400,46 @@
             "outputs": {
                 "output": "{cache}/{nodeType}/{uid0}/",
                 "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthMap.exr"
+            }
+        },
+        "DepthMapComparison_1": {
+            "nodeType": "DepthMapComparison",
+            "position": [
+                1012,
+                252
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "02b6d6518b54af9654a65eca03f1b5d1573d9aba"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "inputSfM": "{DepthMapFilter_3.input}",
+                "depthMapsFolder": "{DepthMapFilter_3.output}",
+                "depthMapsFolderGT": "{LoadDataset_1.depthMapsFolder}",
+                "metrics": [
+                    "RMSE",
+                    "MAE",
+                    "validity_ratio"
+                ],
+                "autoRescale": false,
+                "maskValue": "0",
+                "csv_name": "depth_map_comparison.csv",
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/",
+                "outputCsv": "{cache}/{nodeType}/{uid0}/depth_map_comparison.csv"
             }
         },
         "CameraInit_2": {
@@ -1045,47 +1085,6 @@
             "outputs": {
                 "outputMesh": "{cache}/{nodeType}/{uid0}/mesh.{outputMeshFileTypeValue}",
                 "output": "{cache}/{nodeType}/{uid0}/densePointCloud.abc"
-            }
-        },
-        "DepthMapComparison_1": {
-            "nodeType": "DepthMapComparison",
-            "position": [
-                1012,
-                252
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "c25f0b7cdacbb0a02c18ad6b5980c8a95ccb8dbb"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "inputSfM": "{DepthMapFilter_3.input}",
-                "inputSfMGT": "",
-                "depthMapsFolder": "",
-                "depthMapsFolderGT": "",
-                "metrics": [
-                    "RMSE",
-                    "MAE",
-                    "validity_ratio"
-                ],
-                "autoRescale": false,
-                "maskValue": "0",
-                "csv_name": "depth_map_comparison.csv",
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output": "{cache}/{nodeType}/{uid0}/",
-                "outputCsv": "{cache}/{nodeType}/{uid0}/depth_map_comparison.csv"
             }
         }
     }

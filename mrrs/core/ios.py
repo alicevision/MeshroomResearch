@@ -16,17 +16,18 @@ FORCE_IOOI = True#FIXME: probably a good idea to open everything with openimage 
 #%% Images
 def open_exr(exr_path, clip_negative=False):
     '''
-    Uses OpenExr to import an EXR file.
+    Uses oiio to import an EXR file.
     '''
     import OpenImageIO as oiio #lazy import?
     exr_file = oiio.ImageInput.open(exr_path)
+    if exr_file is None :
+        raise RuntimeError("Could not open exr file "+exr_path)
     # use exra atributes as the header
     extra_attribs = exr_file.spec().extra_attribs
     header={}
     for attrib in extra_attribs:
         header[attrib.name]=attrib.value
-    if exr_file is None :
-        raise RuntimeError("Could not open exr file "+exr_path)
+    
     output_array = exr_file.read_image("float32")
     exr_file.close()
   
