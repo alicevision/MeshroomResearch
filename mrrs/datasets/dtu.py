@@ -4,6 +4,7 @@ import cv2
 def open_dtu_calibration(scene_calib_path):
     """Opens camera_sphere.npz file where the ground truth is stored."""
     camera_dict = np.load(scene_calib_path)
+    frame_ids = range(int(len(camera_dict.keys())/6))#the dict contains 6 matrices
     scale_mats = [camera_dict['scale_mat_%d' %
                               idx].astype(np.float32) for idx in frame_ids]
     world_mats = [camera_dict['world_mat_%d' %

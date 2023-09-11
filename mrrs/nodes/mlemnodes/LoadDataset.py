@@ -1,49 +1,8 @@
-"""
-This nodes opens data from various dataset.
-It will overwrite values in an input sfm data.
-
-It uses the camera init node and relative path to find the corresponding data, depending on the dataset.
-It will create its own .sfm and create a ground truth depth map folder and mesh etc. is applicable.
-
-Specific documentation for BlendedMVSDataset:
-TODO
-
-Specific documentation for XMP from reality capture:
-TODO NOTE: sould be in a node?
-
-Specific documentation for DTU dataset
-This following workspace folder structure is needed:
-+---DTU_sphere #https://drive.google.com/drive/folders/1qiG2aaNRxlfJ7GscI4LRFJR6icvEY3Jm
-|   +---scan24
-|       +---images
-|       +---mask
-|       +---cameras_sphere.npz
-|   +---scan...
-|       +---images
-|       +---mask
-|       +---cameras_sphere.npz
-+---SampleSet #https://roboimagedata.compute.dtu.dk/?page_id=36
-|   +---Matlab evaluation code
-|   +---MVS Data
-|       +---ObsMask
-|           +---ObsMask1_10.mat
-|           +---ObsMask..._10.mat
-|           +---ObsMask122_10.mat
-|           +---Plane1.mat
-|           +---Plane....mat
-|           +---Plane122.mat
-|       +---Points
-|           +---stl
-|               +---stl001_total.ply
-|               +---stl..._total.ply
-|               +---stl122_total.ply
-
-"""
 __version__ = "3.0"
-
 
 import os 
 import json
+from mrrs.core.utils import listdir_fullpath
 
 import trimesh
 import numpy as np
@@ -243,16 +202,26 @@ class LoadDataset(desc.Node):
         elif chunk.node.datasetType.value == "DTU":
             chunk.logger.info("***Importing DTU data")
             #FIXME: check order!!! with frame id
-            image_folder = os.path.abspath(os.dirname(sfm_data["views"][0][["path"]]))
+            image_folder = os.path.abspath(os.path.dirname(sfm_data["views"][0]["path"]))
             extrinsics, intrinsics, gt_scale_mat = open_dtu_calibration( os.path.join(image_folder, "..", "cameras_sphere.npz"))
+            #get the id of the scan from the filename
             scan_nb = int(image_folder.split('/')[-2].split('scan')[-1])
-            mesh = os.path.join(image_folder,'Points','stl',f'stl{scan_nb:03}_total.ply'),
-            #TODO
-            observation_mask = None#f'{args.dataset_dir}/ObsMask/ObsMask{args.scan}_10.mat'
-            masks = None
-            ground_plane = None
+            mesh = os.path.join(image_folder,'..',f'stl{scan_nb:03}_total.ply')
+            mesh = trimesh.load(mesh, force='mesh')
+            masks_folder = os.path.join(image_folder, "..", "mask")
+            masks = [open_image(os.path.join(masks_folder, m)) for m in os.listdir(masks_folder) if (m.endswith(".png") and (not m.startswith(".")))]#FIXME: order
+            try:
+                from scipy.io import loadmat
+                observation_mask = loadmat(os.path.join(image_folder, "..", f"ObsMask{scan_nb:03}_10.mat") )
+                ground_plane = loadmat(os.path.join(image_folder, "..", f"Plane{scan_nb:03}.mat"))  #TODO
+            except:
+                chunk.logger.warning("Scipy not installed, will not load observation masks or ground plane")
+                
+
         elif chunk.node.datasetType.value == "ETH3D":
             RuntimeError("ETH3D support TBA") 
+        elif chunk.node.datasetType.value == "RC":
+            RuntimeError("Reality capture support TBA (but will likely require to put the results alongside one of the dataset and run another dataset node for the GT), so is it really a dataset? i dont know") 
         else:
             raise RuntimeError("Dataset type not supported")
 
@@ -294,33 +263,35 @@ class LoadDataset(desc.Node):
             json.dump(gt_sfm_data, f, indent=4)
 
         #save depth maps if any
-        os.makedirs(chunk.node.depthMapsFolder.value, exist_ok=True)
-        for view_id, depth_map, gt_extrinsic, gt_intrinsic in zip(views_id, depth_maps, extrinsics, intrinsics):
-            if os.path.exists(depth_map):
-                depth_map_gt = open_depth_map(depth_map)
-            else:
-                continue
+        if len(depth_maps)>0:
+            os.makedirs(chunk.node.depthMapsFolder.value, exist_ok=True)
+            for view_id, depth_map, gt_extrinsic, gt_intrinsic in zip(views_id, depth_maps, extrinsics, intrinsics):
+                if os.path.exists(depth_map):
+                    depth_map_gt = open_depth_map(depth_map)
+                else:
+                    continue
 
-            camera_center = gt_extrinsic[0:3, 3]
-            inverse_intr_rot = np.linalg.inv(
-                gt_intrinsic @ np.linalg.inv(gt_extrinsic[0:3, 0:3]))
-            #https://openimageio.readthedocs.io/en/v2.4.6.1/imageoutput.html
-            depth_meta = {
-                "AliceVision:CArr": camera_center,
-                "AliceVision:iCamArr": inverse_intr_rot,
-                "AliceVision:downscale": 1
-            }
-            save_exr(depth_map_gt, os.path.join(chunk.node.depthMapsFolder.value, 
-                     str(view_id) + "_depthMap.exr"), custom_header=depth_meta)
-        
+                camera_center = gt_extrinsic[0:3, 3]
+                inverse_intr_rot = np.linalg.inv(
+                    gt_intrinsic @ np.linalg.inv(gt_extrinsic[0:3, 0:3]))
+                #https://openimageio.readthedocs.io/en/v2.4.6.1/imageoutput.html
+                depth_meta = {
+                    "AliceVision:CArr": camera_center,
+                    "AliceVision:iCamArr": inverse_intr_rot,
+                    "AliceVision:downscale": 1
+                }
+                save_exr(depth_map_gt, os.path.join(chunk.node.depthMapsFolder.value, 
+                        str(view_id) + "_depthMap.exr"), custom_header=depth_meta)
+            
         #Save image masks if any
-        for mask, view_id in zip(masks, views_id) :
-            save_image(os.path.join(chunk.node.maskFolder.value, str(view_id) + ".png"), mask)
+        if len(masks)>0:
+            os.makedirs(chunk.node.maskFolder.value, exist_ok=True)
+            for mask, view_id in zip(masks, views_id) :
+                save_image(os.path.join(chunk.node.maskFolder.value, str(view_id) + ".png"), mask)
 
         #Save ground truth mesh as obj if any
         if mesh is not None:
-            mesh_data = trimesh.load(mesh, force='mesh')
-            mesh_data.export(chunk.node.mesh.value)
+            mesh.export(chunk.node.mesh.value)
 
         #Save observation grid if any
         if observation_mask is not None:
@@ -330,6 +301,6 @@ class LoadDataset(desc.Node):
         if ground_plane is not None:
             raise BaseException("obervationmask not suported yet")
             # ground_plane = loadmat(f'{args.dataset_dir}/ObsMask/Plane{args.scan}.mat')['P']
-            # data_hom = np.concatenate([data_in_obs, np.ones_like(data_in_obs[:,:1])], -1)
+            
         chunk.logger.info("*LoadDataset ends")
 

@@ -3,12 +3,11 @@ __version__ = "3.0"
 import logging
 import os
 import json
-from mrrs.core.utils import listdir_fullpath
 import numpy as np
 
 from meshroom.core import desc
 
-from mrrs.core.ios import matrices_from_sfm_data, open_depth_map, open_exr, save_exr
+from mrrs.core.ios import open_depth_map, save_exr
 from mrrs.metrics.metrics import compute_depth_metric
 
 class DepthMapComparison(desc.Node):
