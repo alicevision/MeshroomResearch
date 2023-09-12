@@ -2,7 +2,6 @@ __version__ = "3.0"
 
 import os 
 import json
-from mrrs.core.utils import listdir_fullpath
 
 import trimesh
 import numpy as np
@@ -43,7 +42,7 @@ class LoadDataset(desc.Node):
 
         desc.FloatParam(
             name='initSfmLandmarks',
-            label='initSfmLandmarks',
+            label='Init Landmarks',
             description='''Will initalise sfmLandmarks with the vertices ground truth mesh (if any). 0 for deactivated, otherwise generate use n*nb_vertices landmarks.''',
             value=0.0,
             range=(0.0, 1.0, 0.1),
@@ -66,7 +65,7 @@ class LoadDataset(desc.Node):
     outputs = [
         desc.File(
             name='outputSfMData',
-            label='SfMData',
+            label='SfM Data',
             description='Path to the output sfmdata file',
             value=desc.Node.internalFolder + 'sfm.sfm',
             uid=[],
@@ -94,7 +93,7 @@ class LoadDataset(desc.Node):
 
         desc.File(
             name='maskFolder',
-            label='maskFolder',
+            label='Mask Folder',
             description='Image mask folder',
             value=os.path.join(desc.Node.internalFolder,'masks'),
             enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
@@ -104,13 +103,22 @@ class LoadDataset(desc.Node):
 
         desc.File(
             name='observationMask',
-            label='observationMask',
+            label='Observation Mask',
             description='Occupancy map',
             value=os.path.join(desc.Node.internalFolder,
-                               'mesh.obj'),
+                               'observation_mask.npy'),
             enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
-            group='',
+        ),
+
+        desc.File(
+            name='groundPlane',
+            label='Ground Plane',
+            description='Ground plane',
+            value=os.path.join(desc.Node.internalFolder,
+                               'ground_plane.npy'),
+            enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
+            uid=[],
         ),
 
         desc.File(#for display
@@ -157,7 +165,7 @@ class LoadDataset(desc.Node):
         views_id = [v["viewId"] for v in sfm_data["views"]]
 
         # Initialize lists to store scene images, calibrations, depths and masks
-        images = []
+        images = [view["path"] for view in sfm_data["views"]]
         depth_maps = []
         masks = []
         extrinsics = []
@@ -179,8 +187,6 @@ class LoadDataset(desc.Node):
                 calib = os.path.join(folder, "..", "cams", basename + "_cam.txt")
                 depth_map = os.path.join(folder, "..", "rendered_depth_maps", basename + ".pfm")
                 E, I = open_txt_calibration_blendedMVG(calib)
-                # pixel_size = sensor_size / images_sizes[0][0]
-                images.append(image)
                 depth_maps.append(depth_map)
                 extrinsics.append(E)
                 intrinsics.append(I)
@@ -199,9 +205,10 @@ class LoadDataset(desc.Node):
                 mesh = trimesh.util.concatenate(submeshes)
                 #FIXME: need to rotate in CG CS?
 
-        elif chunk.node.datasetType.value == "DTU":
+        elif chunk.node.datasetType.value == "DTU":#FIXME: everything is in cv?
             chunk.logger.info("***Importing DTU data")
-            #FIXME: check order!!! with frame id
+            #sort sfm data views by frame order (as in dtu)
+            sfm_data["views"]=sorted(sfm_data["views"], key=lambda v:int(v["frameId"]))
             image_folder = os.path.abspath(os.path.dirname(sfm_data["views"][0]["path"]))
             extrinsics, intrinsics, gt_scale_mat = open_dtu_calibration( os.path.join(image_folder, "..", "cameras_sphere.npz"))
             #get the id of the scan from the filename
@@ -212,11 +219,10 @@ class LoadDataset(desc.Node):
             masks = [open_image(os.path.join(masks_folder, m)) for m in os.listdir(masks_folder) if (m.endswith(".png") and (not m.startswith(".")))]#FIXME: order
             try:
                 from scipy.io import loadmat
-                observation_mask = loadmat(os.path.join(image_folder, "..", f"ObsMask{scan_nb:03}_10.mat") )
-                ground_plane = loadmat(os.path.join(image_folder, "..", f"Plane{scan_nb:03}.mat"))  #TODO
             except:
                 chunk.logger.warning("Scipy not installed, will not load observation masks or ground plane")
-                
+            observation_mask = loadmat(os.path.join(image_folder, "..", f"ObsMask{scan_nb}_10.mat") )
+            ground_plane = loadmat(os.path.join(image_folder, "..", f"Plane{scan_nb}.mat"))     
 
         elif chunk.node.datasetType.value == "ETH3D":
             RuntimeError("ETH3D support TBA") 
@@ -295,12 +301,11 @@ class LoadDataset(desc.Node):
 
         #Save observation grid if any
         if observation_mask is not None:
-            raise BaseException("obervationmask not suported yet") #f'{args.dataset_dir}/ObsMask/ObsMask{args.scan}_10.mat'
+            np.savez_compressed(chunk.node.observationMask.value)
 
         #Save plane if any 
         if ground_plane is not None:
-            raise BaseException("obervationmask not suported yet")
-            # ground_plane = loadmat(f'{args.dataset_dir}/ObsMask/Plane{args.scan}.mat')['P']
+            np.savez_compressed(chunk.node.groundPlane.value)
             
         chunk.logger.info("*LoadDataset ends")
 

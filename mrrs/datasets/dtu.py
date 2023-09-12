@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-def open_dtu_calibration(scene_calib_path):
+def open_dtu_calibration(scene_calib_path, rescale = False):
     """Opens camera_sphere.npz file where the ground truth is stored."""
     camera_dict = np.load(scene_calib_path)
     frame_ids = range(int(len(camera_dict.keys())/6))#the dict contains 6 matrices
@@ -17,8 +17,10 @@ def open_dtu_calibration(scene_calib_path):
     for i in range(n_images):
         world_mat = world_mats[i]
         scale_mat = scale_mats[i]
-        P = world_mat @ scale_mat
-        # P = world_mat
+        if rescale:
+            P = world_mat @ scale_mat
+        else:
+            P = world_mat
         P = P[:3, :4]
         intrinsics, pose = load_K_Rt_from_P(None, P)
 
