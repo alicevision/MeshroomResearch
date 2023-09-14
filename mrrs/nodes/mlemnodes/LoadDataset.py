@@ -166,6 +166,7 @@ class LoadDataset(desc.Node):
 
         # Initialize lists to store scene images, calibrations, depths and masks
         images = [view["path"] for view in sfm_data["views"]]
+        images_sizes = [Image.open(image).size for image in images] #FIXME: not working with exr
         depth_maps = []
         masks = []
         extrinsics = []
@@ -234,7 +235,6 @@ class LoadDataset(desc.Node):
         chunk.logger.info("**Exporting data")
         
         # generate SFM data from matrices
-        images_sizes = [Image.open(image).size for image in images] #FIXME: not working with exr
         gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, 
                                              images_sizes, sfm_data, sensor_size)
 
