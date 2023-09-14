@@ -5,11 +5,10 @@ Conda needs to be installed and callable via "conda"
 
 import os
 from meshroom.core import desc
-import psutil, shlex
 
 class CondaNode(desc.CommandLineNode):
-    def __init__(self):
-        super().__init__() #TODO check if conda to path
+    # def __init__(self):
+    #     super().__init__() #TODO check if conda to path
 
     @property
     def env_file(self):
