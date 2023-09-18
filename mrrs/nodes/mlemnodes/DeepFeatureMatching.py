@@ -50,11 +50,27 @@ class DeepFeatureMatching(CondaNode):
     outputs = [#FIXME: output features and output matches?
         desc.File(
             name="outputFolder",
-            label="Matches Folder",
-            description="Path to a folder in which the computed matches are stored.",
+            label="Output Folder",
+            description="Path to a folder in which the computed results are stored.",
             value=desc.Node.internalFolder,
             uid=[],
         ),
+        desc.File(
+            name="featuresFolder",
+            label="Features Folder",
+            description="Path to a folder in which the features matches are stored.",
+            value=os.path.join(desc.Node.internalFolder, "features"),
+            uid=[],
+            group=""
+        ),
+        desc.File(
+            name="machesFolder",
+            label="Matches Folder",
+            description="Path to a folder in which the computed matches are stored.",
+            value=os.path.join(desc.Node.internalFolder, "matches"),
+            uid=[],
+            group=""
+        )
     ]
 
 
