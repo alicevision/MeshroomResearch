@@ -206,18 +206,27 @@ class LoadDataset(desc.Node):
                 mesh = trimesh.util.concatenate(submeshes)
                 #FIXME: need to rotate in CG CS?
 
-        elif chunk.node.datasetType.value == "DTU":#FIXME: everything is in cv?
+        elif chunk.node.datasetType.value == "DTU":#FIXME: issue with alignement not working
             chunk.logger.info("***Importing DTU data")
             #sort sfm data views by frame order (as in dtu)
             sfm_data["views"]=sorted(sfm_data["views"], key=lambda v:int(v["frameId"]))
+            # reload pose IDs, calibration IDs, and view IDs (one per view), in order
+            poses_id = [v["poseId"] for v in sfm_data["views"]]
+            instrinsics_id = [v["intrinsicId"] for v in sfm_data["views"]]
+            views_id = [v["viewId"] for v in sfm_data["views"]]
+
             image_folder = os.path.abspath(os.path.dirname(sfm_data["views"][0]["path"]))
-            extrinsics, intrinsics, gt_scale_mat = open_dtu_calibration( os.path.join(image_folder, "..", "cameras_sphere.npz"))
+            rescale=True
+            extrinsics, intrinsics, gt_scale_mat = open_dtu_calibration( os.path.join(image_folder, "..", "cameras_sphere.npz"), rescale)
             #get the id of the scan from the filename
             scan_nb = int(image_folder.split('/')[-2].split('scan')[-1])
             mesh = os.path.join(image_folder,'..',f'stl{scan_nb:03}_total.ply')
             mesh = trimesh.load(mesh, force='mesh')
+            if rescale:
+                mesh.apply_transform(np.linalg.inv(gt_scale_mat))
             masks_folder = os.path.join(image_folder, "..", "mask")
-            masks = [open_image(os.path.join(masks_folder, m)) for m in os.listdir(masks_folder) if (m.endswith(".png") and (not m.startswith(".")))]#FIXME: order
+            #FIXME: order?
+            masks = [open_image(os.path.join(masks_folder, m)) for m in os.listdir(masks_folder) if (m.endswith(".png") and (not m.startswith(".")))]
             try:
                 from scipy.io import loadmat
             except:
@@ -233,7 +242,6 @@ class LoadDataset(desc.Node):
             raise RuntimeError("Dataset type not supported")
 
         chunk.logger.info("**Exporting data")
-        
         # generate SFM data from matrices
         gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, 
                                              images_sizes, sfm_data, sensor_size)
