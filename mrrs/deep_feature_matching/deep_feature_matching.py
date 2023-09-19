@@ -64,6 +64,8 @@ def run_matching(inputsfmdata, verboselevel, outputfolder): #note: lower caps
             uid_image_0 = sfm_data["views"][view_index_0]["viewId"]
             timage_0 = kornia.color.rgb_to_grayscale(kornia.utils.image_to_tensor(np.array(image_0), False).float() / 255.).to(device)
             for view_index_1  in range(nb_image):
+                if view_index_0 == view_index_1:
+                    continue
                 print("Matches images %d to %d"%(view_index_0, view_index_1))
                 image_1 = Image.open(sfm_data["views"][view_index_1]["path"])
                 uid_image_1 = sfm_data["views"][view_index_1]["viewId"]
@@ -75,12 +77,11 @@ def run_matching(inputsfmdata, verboselevel, outputfolder): #note: lower caps
                 confidences=out["confidence"].to('cpu').numpy()
                 nb_keypoint = keypoints_0.shape[0]
                 print("%d matches found is %fs"%(nb_keypoint, time))
-                #FIXME: confidence threshold?
+                #FIXME: confidence threshold? or order bes matches? 
 
                 #Write features (note: we combine features from several matches)
                 #format is x y scale orientation, we use scale for confidence
-                #TODO: need index
-                extention = ".sift.feat"#".loftr.feat" #FIXME: for now we deize as sift
+                extention = ".sift.feat"#".loftr.feat" #FIXME: for now we write  as sift
                 with open(os.path.join(feature_folder,uid_image_0+extention), "a+") as kpf:
                     for kp,c in zip(keypoints_0, confidences):
                         kpf.write("%f %f %f 0\n"%(kp[0], kp[1], c))
@@ -93,22 +94,28 @@ def run_matching(inputsfmdata, verboselevel, outputfolder): #note: lower caps
                     mf.write("1\n")
                     #kpf.write("loftr %d\n"%(nb_keypoint))
                     mf.write("sift %d\n"%(nb_keypoint))#for now we disuise as sift
-                    for kp_indx in range(nb_keypoint):#save feature index with offset
+                    for kp_indx in range(nb_keypoint):#save feature index with offset for each view
                         mf.write("%d %d\n"%(kp_indx+nb_features[view_index_0], kp_indx+nb_features[view_index_1]))
                     #update offsets
                     nb_features[view_index_0]+=nb_keypoint
                     nb_features[view_index_1]+=nb_keypoint
+                
+                # #display N strongest matches
+                # order = np.argsort(-confidences)
+                # keypoints_0=keypoints_0[order]
+                # keypoints_1=keypoints_1[order]
                 # img_matches_display = np.concatenate([np.array(image_0), np.array(image_1)], axis=1)
+                # n=10
                 # p=1
                 # o=np.array(image_0).shape[1]
-                # for kp in keypoints_0:
+                # for kp in keypoints_0[0:n]:
                 #     img_matches_display[int(kp[1])-p:int(kp[1])+p,
                 #                  int(kp[0])-p:int(kp[0])+p, :]=[255,0,0]
-                # for kp in keypoints_0:
+                # for kp in keypoints_1[0:n]:
                 #     img_matches_display[int(kp[1])-p:int(kp[1])+p,
                 #                         o+int(kp[0])-p:o+int(kp[0])+p, :]=[0,255,0]
-                # for kp0, kp1 in zip(keypoints_0, keypoints_0):
-                #     cv2.line(img_matches_display, kp0, kp1, color = [0,0,255])
+                # for kp0, kp1 in zip(keypoints_0[0:n], keypoints_1[0:n]):
+                #     cv2.line(img_matches_display, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
                 # Image.fromarray(img_matches_display).save(os.path.join(outputfolder, uid_image_0+"_"+uid_image_1)+".png")
                 # print("done")
                 
