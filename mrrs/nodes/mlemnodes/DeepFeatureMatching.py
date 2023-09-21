@@ -47,6 +47,14 @@ class DeepFeatureMatching(CondaNode):
         #     uid=[0],
         # ),
 
+        desc.BoolParam(
+            name="debugImages",
+            label="debugImages",
+            description="Will write image matches",
+            value=False,
+            uid=[0],
+        ),
+
         desc.ChoiceParam(
             name="verboseLevel",
             label="Verbose Level",
