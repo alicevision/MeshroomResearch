@@ -41,8 +41,7 @@ class time_it():
 @click.option('--verboseLevel', help='.')
 @click.option('--outputFolder', help='.')
 @click.option('--keepNmatches', default=0, type=int, help='If specified will keep the n first matches between views')
-@click.option('--mergeFeatures', default=1, type=bool, help='Will merge redonant features from the same view, matches with deifferent views (needed for sfm)')
-def run_matching(inputsfmdata, verboselevel, outputfolder, keepnmatches, mergefeatures): #note: lower caps
+def run_matching(inputsfmdata, verboselevel, outputfolder, keepnmatches): #note: lower caps
     """
     Will runs loftr on the input set of images.
     Writes meshroom feature and maches files.
@@ -108,8 +107,11 @@ def run_matching(inputsfmdata, verboselevel, outputfolder, keepnmatches, mergefe
                 """
                 maps a float x,y feature coord into a linear index 
                 """
-                x,y=X
-                return feature_map_size[1]*(x/8).astype(np.int32)+(y/8).astype(np.int32)
+                x,y=(X/8.0).astype(np.int32)
+                if (x > feature_map_size[1]) or (y > feature_map_size[0]):
+                    raise RuntimeError("Feature outside of feature map (%d %d) vs (%d %d)"%(x,y,feature_map_size[0], feature_map_size[1]))
+                linear_index =  feature_map_size[0]*x+y.astype(np.int32)
+                return linear_index
 
             #for all the other images        
             for view_index_1  in range(nb_image):
@@ -134,12 +136,6 @@ def run_matching(inputsfmdata, verboselevel, outputfolder, keepnmatches, mergefe
                 order = np.argsort(-confidences)
                 keypoints_0=keypoints_0[order]
                 keypoints_1=keypoints_1[order]
-
-                #only keep n best maches
-                if keepnmatches != 0:
-                    keypoints_0 = keypoints_0[:keepnmatches]
-                    keypoints_1 = keypoints_1[:keepnmatches]
-                    confidences = confidences[:keepnmatches]
                 
                 #Write features on img 2 as brand new features
                 with open(os.path.join(feature_folder,uid_image_1+extention), "a+") as kpf:
@@ -147,12 +143,17 @@ def run_matching(inputsfmdata, verboselevel, outputfolder, keepnmatches, mergefe
                         kpf.write("%f %f 0 0\n"%(kp[0], kp[1]))
 
                 #Write matches, note "0." beacause mewhroom suports several matches files for batching
+                #if we dont define a threshold, will write all matches, otherwise will write only the n best matches
+                if keepnmatches == 0:
+                    keepnmatches = nb_keypoint
+                else:
+                    keepnmatches = min(keepnmatches, nb_keypoint)
                 with open(os.path.join(matches_folder,"0.matches.txt"), "a+") as mf:
                     mf.write("%s %s\n"%(uid_image_0, uid_image_1))
                     mf.write("1\n")
                     #kpf.write("loftr %d\n"%(nb_keypoint))
-                    mf.write("sift %d\n"%(nb_keypoint))#for now we disuise as sift
-                    for kp_indx in range(nb_keypoint):#save feature index with offset for each view
+                    mf.write("sift %d\n"%(keepnmatches))#for now we disuise as sift
+                    for kp_indx in range(keepnmatches):#save feature index with offset for each view
                         keypoint_0_index = map_indices(keypoints_0[kp_indx])+nb_features[view_index_0]#kp_indx+nb_features[view_index_0]
                         keypoint_1_index = kp_indx+nb_features[view_index_1]
                         mf.write("%d %d\n"%(keypoint_0_index, keypoint_1_index))
@@ -160,6 +161,7 @@ def run_matching(inputsfmdata, verboselevel, outputfolder, keepnmatches, mergefe
                     nb_features[view_index_1]+=nb_keypoint
             #update offsets for view 0
             nb_features[view_index_0]+=all_keypoints_0_x.shape[0]
+
                 # #display N strongest matches
                 # img_matches_display = np.concatenate([np.array(image_0), np.array(image_1)], axis=1)
                 # n=10
