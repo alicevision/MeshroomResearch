@@ -29,6 +29,16 @@ class DeepFeatureMatching(CondaNode):
             value="",
             uid=[0],
         ),
+
+        desc.IntParam(
+            name="keepNmatches",
+            label="keepNmatches",
+            description="Only keep the n strongest matches per view. 0 to disable",
+            range=(0,1000,1),
+            value=0,
+            uid=[0],
+        ),
+        
         # desc.File(
         #     name="imagePairsList",
         #     label="Image Pairs",

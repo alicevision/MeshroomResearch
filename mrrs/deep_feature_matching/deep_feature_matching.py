@@ -4,10 +4,12 @@ import os
 from PIL import Image
 import click
 import numpy as np
-import cv2
+
 import kornia
 from kornia.feature.loftr.loftr import LoFTR
 import torch
+
+import cv2
 
 #FIXME: call to 
 import time 
@@ -38,38 +40,88 @@ class time_it():
 @click.option('--inputSfMData', help='Input sfm data')
 @click.option('--verboseLevel', help='.')
 @click.option('--outputFolder', help='.')
-
-def run_matching(inputsfmdata, verboselevel, outputfolder): #note: lower caps
+@click.option('--keepNmatches', default=0, type=int, help='If specified will keep the n first matches between views')
+@click.option('--mergeFeatures', default=1, type=bool, help='Will merge redonant features from the same view, matches with deifferent views (needed for sfm)')
+def run_matching(inputsfmdata, verboselevel, outputfolder, keepnmatches, mergefeatures): #note: lower caps
     """
-    image correspondences and confidence scores.
+    Will runs loftr on the input set of images.
+    Writes meshroom feature and maches files.
+    Since loftr matches features in a grid from image 0 to floating features on image 1, i is not bijective.
+    We consider the feature grid on image 0 as common features, wile the matced features are saved independedtly.
     """
+    #To debug
     print("Hello")
+    extention = ".sift.feat"#".loftr.feat" #FIXME: for now we write  as sift
+    model = 'outdoor'#FIXME: var
+
+    #creates output folders
     feature_folder = os.path.join(outputfolder, "features")
     matches_folder = os.path.join(outputfolder, "matches")
     os.makedirs(feature_folder, exist_ok=True)
     os.makedirs(matches_folder, exist_ok=True)
+
     #load sfmdata
     with open(inputsfmdata, "r") as json_file:
         sfm_data = json.load(json_file)
     nb_image = len(sfm_data["views"]) 
+
     #init model
     device = torch.device('cuda:0')
-    loftr_model = LoFTR('outdoor').to(device)#FIXME: var
+    loftr_model = LoFTR(model).to(device)
+
+    #use full functions
+    def open_and_prepare_image(sfm_data, index):
+        """
+        Opens and prepare an image tensor from sfm data
+        """
+        image_0 = Image.open(sfm_data["views"][index]["path"])
+        uid_image_0 = sfm_data["views"][index]["viewId"]
+        timage_0 = kornia.color.rgb_to_grayscale(kornia.utils.image_to_tensor(np.array(image_0), False).float() / 255.).to(device)
+        return timage_0,  uid_image_0
     
+    def get_all_keypoints(feature_map_size):
+        """
+        Get all possibles features in an image
+        """
+        all_keypoints_0_x, all_keypoints_0_y = np.meshgrid(range(feature_map_size[0]), range(feature_map_size[1]))
+        all_keypoints_0_x=8*all_keypoints_0_x.flatten()
+        all_keypoints_0_y=8*all_keypoints_0_y.flatten()
+        return all_keypoints_0_x, all_keypoints_0_y
+
     #loop over pairs of images
-    nb_features = [0 for i in range(nb_image)]#number of features per images
+    #we ned this to keep track of the feature indices
+    nb_features = [0 for _ in range(nb_image)]
     with time_it() as total_time:
-        for view_index_0  in range(nb_image):#FIXME: graph?
-            image_0 = Image.open(sfm_data["views"][view_index_0]["path"])
-            uid_image_0 = sfm_data["views"][view_index_0]["viewId"]
-            timage_0 = kornia.color.rgb_to_grayscale(kornia.utils.image_to_tensor(np.array(image_0), False).float() / 255.).to(device)
+        for view_index_0 in range(nb_image):#FIXME: graph?
+            #open and prepare
+            timage_0, uid_image_0  = open_and_prepare_image(sfm_data,view_index_0)
+            #each feature in image 0 has coords int(X/8)
+            feature_map_size = (np.asarray(timage_0.shape[2:])/8.0).astype(np.int32)
+            #all potential keypoints in image 0
+            all_keypoints_0_x, all_keypoints_0_y = get_all_keypoints(feature_map_size)
+            #write all keypoints 0 
+            with open(os.path.join(feature_folder,uid_image_0+extention), "a+") as kpf:
+                for kp_x, kp_y in zip(all_keypoints_0_x, all_keypoints_0_y):
+                    kpf.write("%f %f 0 0\n"%(kp_x, kp_y))
+            #to retrieve the index later
+            def map_indices(X):
+                """
+                maps a float x,y feature coord into a linear index 
+                """
+                x,y=X
+                return feature_map_size[1]*(x/8).astype(np.int32)+(y/8).astype(np.int32)
+
+            #for all the other images        
             for view_index_1  in range(nb_image):
+                #if same image, skip
                 if view_index_0 == view_index_1:
                     continue
                 print("Matches images %d to %d"%(view_index_0, view_index_1))
-                image_1 = Image.open(sfm_data["views"][view_index_1]["path"])
-                uid_image_1 = sfm_data["views"][view_index_1]["viewId"]
-                timage_1 = kornia.color.rgb_to_grayscale(kornia.utils.image_to_tensor(np.array(image_1), False).float() / 255.).to(device)
+
+                #open and prepare second image
+                timage_1, uid_image_1  = open_and_prepare_image(sfm_data,view_index_1)
+
+                #run loftr and get results
                 with time_it() as time:
                     out = loftr_model({"image0": timage_0, "image1": timage_1})
                 keypoints_0=out["keypoints0"].to('cpu').numpy()
@@ -77,33 +129,38 @@ def run_matching(inputsfmdata, verboselevel, outputfolder): #note: lower caps
                 confidences=out["confidence"].to('cpu').numpy()
                 nb_keypoint = keypoints_0.shape[0]
                 print("%d matches found is %fs"%(nb_keypoint, time))
-                #FIXME: confidence threshold? or order bes matches? 
 
-                #Write features (note: we combine features from several matches)
-                #format is x y scale orientation, we use scale for confidence
-                extention = ".sift.feat"#".loftr.feat" #FIXME: for now we write  as sift
-                with open(os.path.join(feature_folder,uid_image_0+extention), "a+") as kpf:
-                    for kp,c in zip(keypoints_0, confidences):
-                        kpf.write("%f %f %f 0\n"%(kp[0], kp[1], c))
+                #sort by confidence (descending)
+                order = np.argsort(-confidences)
+                keypoints_0=keypoints_0[order]
+                keypoints_1=keypoints_1[order]
+
+                #only keep n best maches
+                if keepnmatches != 0:
+                    keypoints_0 = keypoints_0[:keepnmatches]
+                    keypoints_1 = keypoints_1[:keepnmatches]
+                    confidences = confidences[:keepnmatches]
+                
+                #Write features on img 2 as brand new features
                 with open(os.path.join(feature_folder,uid_image_1+extention), "a+") as kpf:
-                    for kp,c  in zip(keypoints_1, confidences):
-                        kpf.write("%f %f %f 0\n"%(kp[0], kp[1], c))
-                #Write maches, note 0 beacause mewhroom suports several matches files for batching
+                    for kp  in keypoints_1:
+                        kpf.write("%f %f 0 0\n"%(kp[0], kp[1]))
+
+                #Write matches, note "0." beacause mewhroom suports several matches files for batching
                 with open(os.path.join(matches_folder,"0.matches.txt"), "a+") as mf:
                     mf.write("%s %s\n"%(uid_image_0, uid_image_1))
                     mf.write("1\n")
                     #kpf.write("loftr %d\n"%(nb_keypoint))
                     mf.write("sift %d\n"%(nb_keypoint))#for now we disuise as sift
                     for kp_indx in range(nb_keypoint):#save feature index with offset for each view
-                        mf.write("%d %d\n"%(kp_indx+nb_features[view_index_0], kp_indx+nb_features[view_index_1]))
-                    #update offsets
-                    nb_features[view_index_0]+=nb_keypoint
+                        keypoint_0_index = map_indices(keypoints_0[kp_indx])+nb_features[view_index_0]#kp_indx+nb_features[view_index_0]
+                        keypoint_1_index = kp_indx+nb_features[view_index_1]
+                        mf.write("%d %d\n"%(keypoint_0_index, keypoint_1_index))
+                    #update offsets for view 1
                     nb_features[view_index_1]+=nb_keypoint
-                
+            #update offsets for view 0
+            nb_features[view_index_0]+=all_keypoints_0_x.shape[0]
                 # #display N strongest matches
-                # order = np.argsort(-confidences)
-                # keypoints_0=keypoints_0[order]
-                # keypoints_1=keypoints_1[order]
                 # img_matches_display = np.concatenate([np.array(image_0), np.array(image_1)], axis=1)
                 # n=10
                 # p=1
@@ -118,6 +175,6 @@ def run_matching(inputsfmdata, verboselevel, outputfolder): #note: lower caps
                 #     cv2.line(img_matches_display, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
                 # Image.fromarray(img_matches_display).save(os.path.join(outputfolder, uid_image_0+"_"+uid_image_1)+".png")
                 # print("done")
-                
+     
 if __name__ == '__main__':
     run_matching()
