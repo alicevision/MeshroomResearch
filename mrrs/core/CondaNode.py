@@ -5,16 +5,20 @@ Conda needs to be installed and callable via "conda"
 
 import os
 from meshroom.core import desc
-import psutil, shlex
 
 class CondaNode(desc.CommandLineNode):
-    def __init__(self):
-        super().__init__() #TODO check if conda to path
+    # def __init__(self):
+    #     super().__init__() #TODO check if conda to path
 
     @property
     def env_file(self):
         """path to yaml file, needs to be set in inherited class"""
         raise NotImplementedError("You must ovewrite env_file in the inherited CondaNode")
+
+    @property
+    def env_path(self):
+        """path to the conda env, will be initialised if not existing"""
+        return None
 
     def curate_env_command(self):
         """
@@ -33,7 +37,10 @@ class CondaNode(desc.CommandLineNode):
     def buildCommandLine(self, chunk):
         cmdPrefix = ''
         #create the env in the folder above the node
-        env_path=os.path.join(chunk.node.internalFolder, "../conda_env")
+        if self.env_path is None:
+            env_path=os.path.join(chunk.node.internalFolder, "../conda_env")
+        else:
+            env_path=self.env_path
         if not os.path.exists(env_path):
             chunk.logger.info("Creating conda env")
             if not os.path.exists(self.env_file):

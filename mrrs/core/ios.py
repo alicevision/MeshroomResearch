@@ -376,6 +376,17 @@ def gt_depth_from_sfm_data(sfm_data):
     gt_depths = np.asarray(gt_depths)
     return gt_depths
 
+#%% Mesh
+def open_mesh(mesh_path):#FIXME: add suport to uv, texture etc
+    """
+    Opens a mesh and return face and vertices
+    """
+    import trimesh#FIXME: lazy import to avoid dependency ?
+    mesh = trimesh.load(mesh_path)
+    mesh = [mesh.vertices, mesh.faces ]
+    return mesh
+
+
 def open_txt_calibration(calib_file, dataset="blendedMVG"):
     """
     Will open a calibration file in text format.
@@ -391,18 +402,15 @@ def open_txt_calibration(calib_file, dataset="blendedMVG"):
 def open_txt_calibration_blendedMVG(calib_file):
     '''
     Opens a text file containing the calibration for a single camera, in the form :
-
     extrinsic
     E00 E01 E02 E03
     E10 E11 E12 E13
     E20 E21 E22 E23
     E30 E31 E32 E33
-
     intrinsic
     K00 K01 K02
     K10 K11 K12
     K20 K21 K22
-
     see https://github.com/YoYo000/MVSNet.
     '''
     intrinsics = np.zeros((3, 3))
@@ -443,16 +451,6 @@ def open_txt_calibration_blendedMVG(calib_file):
         #     intrinsics[3][3] = 0
 
     return extrinsics, intrinsics
-
-#%% Mesh
-def open_mesh(mesh_path):#FIXME: add suport to uv, texture etc
-    """
-    Opens a mesh and return face and vertices
-    """
-    import trimesh#FIXME: lazy import to avoid dependency ?
-    mesh = trimesh.load(mesh_path)
-    mesh = [mesh.vertices, mesh.faces ]
-    return mesh
 
 def save_obj(file, scene_points, scene_faces=None, points_colors=None):
     """

@@ -8,7 +8,6 @@ import os
 from mrrs.core.ios import open_image, save_image
 import cv2 
 from meshroom.core import desc
-import numpy as np
 import json
 
 class ConvertImages(desc.Node):
@@ -54,7 +53,7 @@ class ConvertImages(desc.Node):
             name='maxWidth',
             label='Maximum Width',
             description='Will resize to the max width (keep the aspect ratio)',
-            value=2024,
+            value=1000000000,
             range=(0, 4096, 1),
             uid=[0],
         ),
@@ -144,18 +143,19 @@ class ConvertImages(desc.Node):
                 if chunk.node.renameSequence.value:
                     new_filename = "frame_%05d"%index+chunk.node.outputFormat.value
                     chunk.logger.info("\tRenaming to to "+new_filename)
-                # if chunk.node.rotateLeft.value:#rename
-                #     chunk.logger.info("\tRotating left")
-                #     input_image = np.rot90(input_image)
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
                 if chunk.node.autoRotate.value:
                     orientation=0
                 save_image(output_file, input_image, orientation=orientation)
                 sfm_data["views"][index]["path"]     = output_file
-                #not used in sfm?
+                #modify the view size
                 sfm_data["views"][index]["width"] = input_image.shape[1]
                 sfm_data["views"][index]["height"] = input_image.shape[0]
-
+                #modify the corresponding intrinsic
+                intrinsicId = sfm_data["views"][index]["intrinsicId"]
+                index_intrinsic = [i for i,intrinsic in enumerate(sfm_data["intrinsics"]) if intrinsic["intrinsicId"]==intrinsicId][0]
+                sfm_data["intrinsics"][index_intrinsic]["width"] = input_image.shape[1]
+                sfm_data["intrinsics"][index_intrinsic]["height"] = input_image.shape[0]
             #update intrisic pixel ratio
             for intrisic in sfm_data["intrinsics"] :
                 old_pixel_ratio = float(intrisic["pixelRatio"])
@@ -165,11 +165,7 @@ class ConvertImages(desc.Node):
                     intrisic["width"] = chunk.node.maxWidth.value
                 else:
                     intrisic["height"] = int(float(intrisic["height"])/chunk.node.resampleX.value)
-                # if chunk.node.rotateLeft.value:
-                #     h=intrisic["height"]
-                #     intrisic["height"] = intrisic["width"]
-                #     intrisic["width"] = h
-
+     
             if chunk.node.mergeInterinsics.value:
                 intrinsic_id = sfm_data["intrinsics"][0]["intrinsicId"]
                 sfm_data["intrinsics"] = [sfm_data["intrinsics"][0]]
