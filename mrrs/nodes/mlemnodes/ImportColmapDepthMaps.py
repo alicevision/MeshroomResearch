@@ -147,16 +147,17 @@ class ImportColmapDepthMaps(desc.Node):
                     size=(int(sfm_data['views'][index]["width"]),int(sfm_data['views'][index]["height"]))
                     depth_map, _ =cv2_resize_with_pad(depth_map, size, padding_color=0)
 
-                    #add metadata as well (used for display)
-                    camera_center = extrinsics[index][0:3, 3]
-                    inverse_intr_rot = np.linalg.inv(
-                        intrinsics[index] @ np.linalg.inv(extrinsics[index][0:3, 0:3]))
-                    depth_meta = {
-                        "AliceVision:CArr": camera_center,
-                        "AliceVision:iCamArr": inverse_intr_rot,
-                        "AliceVision:downscale": 1
-                    }
-                    save_exr(depth_map,os.path.join(chunk.node.depthMapFolder.value, depth_map_name),'depth', custom_header=depth_meta)
+                    # #add metadata as well (used for display)
+                    # # camera_center = extrinsics[index][0:3, 3]
+                    # # inverse_intr_rot = np.linalg.inv(
+                    # #     intrinsics[index] @ np.linalg.inv(extrinsics[index][0:3, 0:3]))
+                    # camera_center = np.linalg.inv(np.concatenate([extrinsics[index], [[0,0,0,1]]]))[0:3, 3]
+                    # depth_meta = {
+                    #     "AliceVision:CArr": camera_center,
+                    #     "AliceVision:iCamArr": extrinsics[index][0:3, 0:3],#inverse_intr_rot,
+                    #     "AliceVision:downscale": 1
+                    # } FIXME: moved to depthmap transform?
+                    save_exr(depth_map,os.path.join(chunk.node.depthMapFolder.value, depth_map_name),'depth')#, custom_header=depth_meta)
 
             chunk.logger.info('Import done.')
         finally:
