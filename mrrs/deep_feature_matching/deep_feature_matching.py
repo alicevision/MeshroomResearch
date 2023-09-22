@@ -83,7 +83,7 @@ def run_matching(inputsfmdata, verboselevel, outputfolder, keepnmatches, debugim
         """
         Get all possibles features in an image
         """
-        all_keypoints_0_x, all_keypoints_0_y = np.meshgrid(range(feature_map_size[0]), range(feature_map_size[1]))
+        all_keypoints_0_x, all_keypoints_0_y = np.meshgrid(range(feature_map_size[1]), range(feature_map_size[0]))
         all_keypoints_0_x=8*all_keypoints_0_x.flatten()
         all_keypoints_0_y=8*all_keypoints_0_y.flatten()
         return all_keypoints_0_x, all_keypoints_0_y
