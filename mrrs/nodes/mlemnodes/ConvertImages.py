@@ -4,11 +4,14 @@ This node converts images.
 __version__ = "3.0"
 
 import os
+import json
+
+import cv2 
+import numpy as np
 
 from mrrs.core.ios import open_image, save_image
-import cv2 
 from meshroom.core import desc
-import json
+
 
 class ConvertImages(desc.Node):
     """
@@ -75,6 +78,14 @@ class ConvertImages(desc.Node):
         ),
 
         desc.BoolParam(
+            name='convertSRGB',
+            label='convertSRGB',
+            description='Will convert to srgb',
+            value=True,
+            uid=[0],
+        ),
+
+        desc.BoolParam(
             name='renameSequence',
             label='Rename Sequence',
             description='Renames the frames by order',
@@ -132,13 +143,17 @@ class ConvertImages(desc.Node):
             for index, (view_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
                 chunk.logger.info('Doing convertion for image %d/%d images'%(index, len(views_ids)))
                 input_image, orientation = open_image(views_original_file, return_orientation=True, 
-                                                      auto_rotate=chunk.node.autoRotate.value)
+                                                      auto_rotate=chunk.node.autoRotate.value, 
+                                                      to_srgb=chunk.node.convertSRGB.value)
+                print(input_image)
                 chunk.logger.info('\tOrientation %d'%orientation)
                 input_image = input_image[::chunk.node.resampleX.value,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
                 if chunk.node.maxWidth.value<input_image.shape[1]:#max sie
                     height = int(input_image.shape[0]*chunk.node.maxWidth.value/input_image.shape[1])
-                    input_image = cv2.resize(input_image, (chunk.node.maxWidth.value, height))
+                    original_dtype = input_image.dtype
+                    input_image = cv2.resize(input_image.astype(np.float32), (chunk.node.maxWidth.value, height))
+                    input_image = input_image.astype(original_dtype)   
                     chunk.logger.info('\tResizing to %d %d'%(chunk.node.maxWidth.value, height))
                 if chunk.node.renameSequence.value:
                     new_filename = "frame_%05d"%index+chunk.node.outputFormat.value

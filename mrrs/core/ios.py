@@ -118,7 +118,7 @@ def open_depth_map(depth_file, raise_exception=True):
             print('Depth file format not recognised for '+depth_file)
     return depth_map
 
-def open_image(image_path, auto_rotate=False, return_orientation=False):
+def open_image(image_path, auto_rotate=False, return_orientation=False, to_srgb=False):
     """
     Opens an image and returns it as a np array.
     """
@@ -131,23 +131,19 @@ def open_image(image_path, auto_rotate=False, return_orientation=False):
     # 6 transverse (right to left, bottom to top)
     # 7 rotated 90 counter-clockwise (left to right, bottom to top)
     orientation=0#oiio standard
-    if image_path.endswith('.exr') or image_path.endswith('.dpx'):
-        image, meta = open_exr(image_path)
-        if image_path.endswith('.dpx'):
-            image = np.flipud(image)
-    else:
-        if FORCE_IOOI:
-            import OpenImageIO as oiio
-            exr_file = oiio.ImageInput.open(image_path)
-            meta = exr_file.spec()
-            orientation = meta.get("Orientation", orientation)
-            image_buff = oiio.ImageBuf(image_path)
-            if auto_rotate and orientation !=0:
-                image_buff = oiio.ImageBufAlgo.reorient(image_buff)#straigten the image
-            image = 255*image_buff.get_pixels()#return float and whole roi by default
-        else:
-            image = np.array(Image.open(image_path))
-            image = image.astype(np.float32)
+
+    import OpenImageIO as oiio
+    exr_file = oiio.ImageInput.open(image_path)
+    meta = exr_file.spec()
+    orientation = meta.get("Orientation", orientation)
+    image_buff = oiio.ImageBuf(image_path)
+    if auto_rotate and orientation !=0:
+        image_buff = oiio.ImageBufAlgo.reorient(image_buff)#straigten the image
+    if to_srgb:
+        image_buff = oiio.ImageBufAlgo.colorconvert(image_buff,meta.get("oiio:ColorSpace"), "sRGB")
+    
+    image = 255*np.clip(image_buff.get_pixels(), 0, 1)#return float and whole roi by default
+
     if len(image.shape)==2:
         image = np.expand_dims(image, -1)
     if return_orientation:
@@ -160,50 +156,43 @@ def save_image(image_path, np_array, orientation=None, auto_rotate=False):
     Save an image in a numpy array.
     Range must be 0-255 and channel 1 or 3.
     """
-    if len(np_array.shape)==2:
-        np_array=np.expand_dims(np_array, axis=-1)
-    if image_path.endswith('.exr'):
-        save_exr(np_array, image_path)
-    else:
-        if FORCE_IOOI:
-            import OpenImageIO as oiio
-            out = oiio.ImageOutput.create(image_path)
-            if out is None:
-                raise RuntimeError("Could not open exr file "+image_path)
-            spec = oiio.ImageSpec(np_array.shape[1], np_array.shape[0], np_array.shape[2], oiio.UINT8)
-            out.open(image_path, spec)
-            out.write_image(np_array.astype(np.uint8))
-            out.close()
+    import OpenImageIO as oiio
+    out = oiio.ImageOutput.create(image_path)
+    if out is None:
+        raise RuntimeError("Could not open file "+image_path)
+    spec = oiio.ImageSpec(np_array.shape[1], np_array.shape[0], np_array.shape[2], oiio.UINT8)
+    out.open(image_path, spec)
+    out.write_image(np_array.astype(np.uint8))
+    out.close()
 
-            if orientation is not None:
-                image_buff = oiio.ImageBuf(image_path)
-                image_buff.orientation=orientation
-                if auto_rotate and orientation != 0:
-                    #reverso rotation
-                    if orientation == 1:
-                        reverse_orientation = 3
-                    elif orientation == 3:
-                        reverse_orientation = 1
-                    elif orientation == 2:
-                        reverse_orientation = 4
-                    elif orientation == 4:
-                        reverse_orientation = 2
-                    elif orientation == 5:
-                        reverse_orientation = 7
-                    elif orientation == 7:
-                        reverse_orientation = 5
-                    elif orientation == 6:
-                        reverse_orientation = 8
-                    elif orientation == 8:
-                        reverse_orientation = 6
-                    #apply inverse
-                    image_buff.orientation=reverse_orientation
-                    image_buff = oiio.ImageBufAlgo.reorient(image_buff)
-                    #but right meta
-                    image_buff.orientation=orientation
-                image_buff.write(image_path)
-        else:
-            Image.fromarray(np_array.astype(np.uint8)).save(image_path)
+    if orientation is not None:
+        image_buff = oiio.ImageBuf(image_path)
+        image_buff.orientation=orientation
+        if auto_rotate and orientation != 0:
+            #reverso rotation
+            if orientation == 1:
+                reverse_orientation = 3
+            elif orientation == 3:
+                reverse_orientation = 1
+            elif orientation == 2:
+                reverse_orientation = 4
+            elif orientation == 4:
+                reverse_orientation = 2
+            elif orientation == 5:
+                reverse_orientation = 7
+            elif orientation == 7:
+                reverse_orientation = 5
+            elif orientation == 6:
+                reverse_orientation = 8
+            elif orientation == 8:
+                reverse_orientation = 6
+            #apply inverse
+            image_buff.orientation=reverse_orientation
+            image_buff = oiio.ImageBufAlgo.reorient(image_buff)
+            #but right meta
+            image_buff.orientation=orientation
+        image_buff.write(image_path)
+ 
 
 # %%
 
