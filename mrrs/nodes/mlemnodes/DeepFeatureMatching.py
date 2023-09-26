@@ -9,8 +9,6 @@ LOFTR_EXEC = "python "+ os.path.join(os.path.dirname(__file__), "../../deep_feat
 
 class DeepFeatureMatching(CondaNode):
 
-    size = desc.DynamicNodeSize('inputSfMData')
-    parallelization = desc.Parallelization(blockSize=20)
     category = 'Sparse Reconstruction'
     documentation = ''' '''
 
@@ -46,6 +44,15 @@ class DeepFeatureMatching(CondaNode):
         #     value="",
         #     uid=[0],
         # ),
+
+
+        desc.StringParam(
+            name='imageMaching',
+            label='imageMaching',
+            description='Method for image matching. Can be "all", an integer defining the windows around the framesId',
+            value="all",
+            uid=[0],
+        ),
 
         desc.BoolParam(
             name="debugImages",

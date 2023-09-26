@@ -163,15 +163,18 @@ class VizFeatures(desc.Node):
             save_image(os.path.join(chunk.node.outputFolder.value, "features_"+image_uid+".png"),image)
 
         if chunk.node.matcheFolder.value != "":
+            chunk.logger.info('Matching found')
             match_file = [os.path.join(chunk.node.matcheFolder.value, mf) for mf in os.listdir(chunk.node.matcheFolder.value) if mf.endswith(".txt")][0]
             matches = open_matches(match_file)
 
             for view_id_0 in matches.keys():
+                chunk.logger.info('Matching for view '+view_id_0)
                 image_file_0 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_0+".png")
                 image_0 = open_image(image_file_0)
                 #for now, only select the best matched view (the one with most matches)
                 view_id_1, matches_0_to_1=get_best_matching_view(matches[view_id_0])
                 image_file_1 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_1+".png")
+                chunk.logger.info('Best matcing for view '+view_id_0+" is "+view_id_1+ "%d matches"%len(matches_0_to_1))
                 image_1 = open_image(image_file_1)
 
                 match_image = np.concatenate([image_0, image_1], axis=1)
