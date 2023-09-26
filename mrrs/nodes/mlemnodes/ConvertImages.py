@@ -4,11 +4,14 @@ This node converts images.
 __version__ = "3.0"
 
 import os
+import json
+
+import cv2 
+import numpy as np
 
 from mrrs.core.ios import open_image, save_image
-import cv2 
 from meshroom.core import desc
-import json
+
 
 class ConvertImages(desc.Node):
     """
@@ -75,6 +78,14 @@ class ConvertImages(desc.Node):
         ),
 
         desc.BoolParam(
+            name='convertSRGB',
+            label='convertSRGB',
+            description='Will convert to srgb',
+            value=True,
+            uid=[0],
+        ),
+
+        desc.BoolParam(
             name='renameSequence',
             label='Rename Sequence',
             description='Renames the frames by order',
@@ -132,14 +143,21 @@ class ConvertImages(desc.Node):
             for index, (view_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
                 chunk.logger.info('Doing convertion for image %d/%d images'%(index, len(views_ids)))
                 input_image, orientation = open_image(views_original_file, return_orientation=True, 
-                                                      auto_rotate=chunk.node.autoRotate.value)
+                                                      auto_rotate=chunk.node.autoRotate.value, 
+                                                      to_srgb=chunk.node.convertSRGB.value)
+                #modify the corresponding intrinsic (! done multiple time becasue sevearl view share one intricic)
+                intrinsicId = sfm_data["views"][index]["intrinsicId"]
                 chunk.logger.info('\tOrientation %d'%orientation)
                 input_image = input_image[::chunk.node.resampleX.value,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
                 if chunk.node.maxWidth.value<input_image.shape[1]:#max sie
                     height = int(input_image.shape[0]*chunk.node.maxWidth.value/input_image.shape[1])
-                    input_image = cv2.resize(input_image, (chunk.node.maxWidth.value, height))
+                    original_dtype = input_image.dtype
+                    input_image = cv2.resize(input_image.astype(np.float32), (chunk.node.maxWidth.value, height))
+                    input_image = input_image.astype(original_dtype)   
                     chunk.logger.info('\tResizing to %d %d'%(chunk.node.maxWidth.value, height))
+                    #updating focal lenght FIXME: if we want to stay up to scale
+                    # sfm_data["intrinsics"]["focalLength"] = sfm_data["intrinsics"]["focalLength"]*(chunk.node.maxWidth.value/input_image.shape[1])
                 if chunk.node.renameSequence.value:
                     new_filename = "frame_%05d"%index+chunk.node.outputFormat.value
                     chunk.logger.info("\tRenaming to to "+new_filename)
@@ -151,11 +169,20 @@ class ConvertImages(desc.Node):
                 #modify the view size
                 sfm_data["views"][index]["width"] = input_image.shape[1]
                 sfm_data["views"][index]["height"] = input_image.shape[0]
-                #modify the corresponding intrinsic
-                intrinsicId = sfm_data["views"][index]["intrinsicId"]
                 index_intrinsic = [i for i,intrinsic in enumerate(sfm_data["intrinsics"]) if intrinsic["intrinsicId"]==intrinsicId][0]
                 sfm_data["intrinsics"][index_intrinsic]["width"] = input_image.shape[1]
                 sfm_data["intrinsics"][index_intrinsic]["height"] = input_image.shape[0]
+                #if has been rotated, swap sensor size (should be done only once per intrisics)
+                largets_dim_image=np.argmax([input_image.shape[0],input_image.shape[1]])
+                largets_dim_sfm=np.argmax([ sfm_data["intrinsics"][index_intrinsic]["sensorHeight"],
+                                            sfm_data["intrinsics"][index_intrinsic]["sensorWidth"]
+                                            ])
+                if  largets_dim_image !=  largets_dim_sfm :
+                    chunk.logger.info("rotation detected for intrinsic %d"%index_intrinsic)
+                    w=sfm_data["intrinsics"][index_intrinsic]["sensorWidth"]
+                    sfm_data["intrinsics"][index_intrinsic]["sensorWidth"] = sfm_data["intrinsics"][index_intrinsic]["sensorHeight"]
+                    sfm_data["intrinsics"][index_intrinsic]["sensorHeight"] = w
+                    
             #update intrisic pixel ratio
             for intrisic in sfm_data["intrinsics"] :
                 old_pixel_ratio = float(intrisic["pixelRatio"])

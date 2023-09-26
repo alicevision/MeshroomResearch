@@ -64,15 +64,18 @@ def do_transform(depth_maps_path, sfm_data, transform, output_folder):
         depth_map_transformed[depth_map<0] = 0#put 0 in places where its invalid
         if "AliceVision:downscale" in depth_map_header:
             depth_map_transformed = cv2.resize(depth_map_transformed, depth_map_size[::-1])
-        #add header for vizualisation
-        # https://openimageio.readthedocs.io/en/v2.4.6.1/imageoutput.html
+        else:
+            depth_map_header["AliceVision:downscale"]=1
+        # add header for vizualisation
         if "AliceVision:CArr" not in depth_map_header: 
             camera_center = extrinsics[index][0:3, 3].tolist()
             inverse_intr_rot = np.linalg.inv(
                     intrinsics[index] @ np.linalg.inv(extrinsics[index][0:3, 0:3]))
+
             depth_map_header["AliceVision:CArr"] = camera_center
             depth_map_header["AliceVision:iCamArr"]= inverse_intr_rot
-        save_exr(depth_map_transformed, output_depth_map_path, data_type="depth", custom_header=depth_map_header)
+            
+        save_exr(depth_map_transformed, output_depth_map_path, custom_header=depth_map_header)
         output_depth_map_paths.append(output_depth_map_path)
     return output_depth_map_paths
 
@@ -110,16 +113,6 @@ class DepthMapTransform(desc.Node):
             joinChar=',',
         ),
 
-        desc.ChoiceParam(
-            name='processDepthMap',
-            label='Depth map to process',
-            description='''Choose the depth maps to process''',
-            value=['folder'],
-            values=['sfm_data', 'folder'],
-            exclusive=False,
-            uid=[0],
-        ),
-
     desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
@@ -155,33 +148,19 @@ class DepthMapTransform(desc.Node):
         """
         Computes the different transforms on the depth maps.
         """
-        try:
-            chunk.logManager.start(chunk.node.verboseLevel.value)
-            if chunk.node.inputSfM.value == '':
-                raise RuntimeError("No inputSfM specified")
+        # try:
+        chunk.logManager.start(chunk.node.verboseLevel.value)
+        if chunk.node.inputSfM.value == '':
+            raise RuntimeError("No inputSfM specified")
 
-            sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
-            transform_function = eval(chunk.node.transform.value)
+        sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
+        transform_function = eval(chunk.node.transform.value)
 
-            if "sfm_data" in chunk.node.processDepthMap.value:
-                if "groudtruthDepth" not in sfm_data["views"][0].keys():
-                    raise RuntimeError("No groudtruthDepth found in .sfm ")
-                depth_files = [view["groudtruthDepth"] for view in sfm_data["views"]]
-                chunk.logger.info('Transforming %d depths maps from sfm'%len(depth_files))
-                output_gt_folder = os.path.join(chunk.node.output.value, "ground_truth_depth_maps")
-                os.makedirs(output_gt_folder)
-                depth_map_path = do_transform(depth_files, sfm_data, transform_function, output_gt_folder)
-                #TODO: change .sfm with depth_map_path
-                raise BaseException("Not supported yet")
+        depth_folder = chunk.node.depthMapsFolder.value
+        depth_files = [os.path.join(depth_folder, str(views["viewId"])+"_depthMap.exr") for views in sfm_data["views"]]#FIXME: hardcoded filename
+        do_transform(depth_files, sfm_data, transform_function, chunk.node.output.value)
 
-            if "folder" in chunk.node.processDepthMap.value :
-                if chunk.node.depthMapsFolder.value == '':
-                    raise RuntimeError("No depthMapsFolder specified")
-                depth_folder = chunk.node.depthMapsFolder.value
-                depth_files = [os.path.join(depth_folder, str(views["viewId"])+"_depthMap.exr") for views in sfm_data["views"]]#FIXME: hardcoded filename
-                do_transform(depth_files, sfm_data, transform_function, chunk.node.output.value)
-
-            chunk.logger.info('Depth map transform end')
-        finally:
-            chunk.logManager.end()
+        chunk.logger.info('Depth map transform end')
+        # finally:
+        #     chunk.logManager.end()
 

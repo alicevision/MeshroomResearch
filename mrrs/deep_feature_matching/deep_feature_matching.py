@@ -11,7 +11,7 @@ import torch
 
 import cv2
 
-#FIXME: call to 
+#FIXME: call to mrr, see with kelian conda node 
 import time 
 class time_it():
     """

@@ -2,14 +2,12 @@
 Module handling the inputs and outputs from and to Meshroom.
 """
 
-import chunk
 import logging
 import re
 from struct import unpack
 
 from PIL import Image
 import numpy as np
-import json
 
 from mrrs.core.utils import format_float_array
 
@@ -18,46 +16,26 @@ FORCE_IOOI = True#FIXME: probably a good idea to open everything with openimage 
 #%% Images
 def open_exr(exr_path, clip_negative=False):
     '''
-    Uses OpenExr to import an EXR file.
+    Uses oiio to import an EXR file.
     '''
-    try:#try with openexr
-        import OpenEXR, Imath# lazy import
-        if FORCE_IOOI:
-            raise RuntimeError("OpenImageIo overwite")
-    except Exception :#openimage io fallback
-        logging.info("OpenExr bindings for python unavailable, switching to openimageio")
-        #logging.warning("Openimageio does not support custom header for now, this might lead to issues")
-        import OpenImageIO as oiio
-        exr_file = oiio.ImageInput.open(exr_path)
-        # use exra atributes as the header
-        extra_attribs = exr_file.spec().extra_attribs
-        header={}
-        for attrib in extra_attribs:
-            header[attrib.name]=attrib.value
-        if exr_file is None :
-            raise RuntimeError("Could not open exr file "+exr_path)
-        output_array = exr_file.read_image("float32")
-        exr_file.close()
-    else:
-        exr_file = OpenEXR.InputFile(exr_path)
-        header = exr_file.header()#issue: can not parse our custom headers
-        data_window = header['dataWindow']
-        image_size = (data_window.max.y - data_window.min.y + 1,
-                    data_window.max.x - data_window.min.x + 1)
-        output_array = []
-        for channel in header['channels']:
-            exr_data = exr_file.channel(channel, Imath.PixelType(Imath.PixelType.FLOAT))
-            exr_data = np.fromstring(exr_data, dtype=np.float32)
-            exr_data = np.reshape(exr_data, image_size)
-            if clip_negative:
-                exr_data[exr_data<0]=0
-            output_array.append(exr_data)
-        output_array = np.stack(output_array, axis=-1)
+    import OpenImageIO as oiio #lazy import?
+    exr_file = oiio.ImageInput.open(exr_path)
+    if exr_file is None :
+        raise RuntimeError("Could not open exr file "+exr_path)
+    # use exra atributes as the header
+    extra_attribs = exr_file.spec().extra_attribs
+    header={}
+    for attrib in extra_attribs:
+        header[attrib.name]=attrib.value
+    
+    output_array = exr_file.read_image("float32")
+    exr_file.close()
+  
     return output_array, header
 
-def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
-            custom_header = None,#{'AliceVision:CArr':None,'AliceVision:iCamArr':None},
-            channel_names = None):
+def save_exr(input_array, output_file,
+            custom_header = None,
+            channel_names = None):#FIXME: need to put baxk support for channel name
     """
     Saves an exr for meshroom, using different formats.
     """
@@ -66,77 +44,28 @@ def save_exr(input_array, output_file, data_type='RGB',#FIXME: ugly
     elif len(input_array.shape)==2:#gray level case
         input_array = np.expand_dims(input_array, -1)
     input_array_size = input_array.shape
-    try:#try with openexr
-        import OpenEXR, Imath# lazy import
-        if FORCE_IOOI:
-            raise RuntimeError("OpenImageIo overwite")
-    except Exception:#openimage io fallback
-        logging.info("OpenExr bindings for python unavailable, switching to openimageio")
-        import OpenImageIO as oiio
-        out = oiio.ImageOutput.create(output_file)
-        if out is None:
-            raise RuntimeError("Could not open exr file "+output_file)
-        spec = oiio.ImageSpec(input_array_size[1], input_array_size[0], input_array_size[2], 'float32')
-        if custom_header is not None:
-            for key in custom_header.keys():
-                # print("Writting metadata "+key)
-                # print(custom_header[key])
-                # if key=="AliceVision:CArr":#FIXME: not working? need to make sure the arrays are list of float32
-                #     spec.attribute(key, "float[3]", np.asarray(custom_header[key], dtype=np.float32).tolist())
-                # elif key=="AliceVision:iCamArr":
-                #     spec.attribute(key, oiio.TypeDesc.TypeMatrix33,  np.asarray(custom_header[key], 
-                #                                                       dtype=np.float64).flatten().tolist())
-                if key=="AliceVision:CArr":#FIXME: not working, but was before...
-                    spec.attribute(key, "float[3]", list(custom_header[key]))
-                elif key=="AliceVision:iCamArr":
-                    spec.attribute(key, oiio.TypeDesc.TypeMatrix33,  list(custom_header[key].flatten()))
-                elif key=="AliceVision:downscale":
-                    spec.attribute(key, "float", custom_header[key])
-                else:
-                    try:
-                        spec[key]=custom_header[key]
-                    except:
-                        print("WARNING: could not write attribute"+key)
-        out.open(output_file, spec)
-        out.write_image(input_array)
-        out.close()
-    else:
-        channel_data = []
-
-        input_array = input_array.astype(np.float32)#float64 causes issues
-
-        for channel_index in range(input_array.shape[-1]):
-            channel_data.append(input_array[:,:,channel_index].tostring() )
-        import OpenEXR, Imath#lazy importSS
-        # Write the three color channels to the output file
-        header = OpenEXR.Header(input_array_size[1], input_array_size[0])
-        if custom_header is not None:
-            header = {**header, **custom_header}#merges two dicts
-
-        if data_type == 'RGB':
-            out = OpenEXR.OutputFile(output_file, header)
-            out.writePixels({'R' : channel_data[0], 'G' : channel_data[1], 'B' : channel_data[2] })
-        elif data_type == 'depth':
-            float_chan = Imath.Channel(Imath.PixelType(Imath.PixelType.FLOAT))
-            header['channels']={'Y':float_chan}
-            out = OpenEXR.OutputFile(output_file, header)
-            out.writePixels({'Y' : channel_data[0]})
-        elif data_type == 'segmentation':
-            header['channels']={}
-            channel_dict={}
-            for channel in range(input_array.shape[-1]):
-                float_chan = Imath.Channel(Imath.PixelType(Imath.PixelType.FLOAT))
-                if channel_names is None:
-                    header['channels']['channel_%d'%channel]=float_chan
-                    channel_dict['channel_%d'%channel]=channel_data[channel]
-                else:
-                    header['channels'][channel_names[channel]]=float_chan
-                    channel_dict[channel_names[channel]]=channel_data[channel]
-            out = OpenEXR.OutputFile(output_file, header)
-            out.writePixels(channel_dict)
-        else:
-            raise RuntimeError('Data type in save_exr not recognised')
-
+    import OpenImageIO as oiio
+    out = oiio.ImageOutput.create(output_file)
+    if out is None:
+        raise RuntimeError("Could not open exr file "+output_file)
+    spec = oiio.ImageSpec(input_array_size[1], input_array_size[0], input_array_size[2], 'float32')
+    if custom_header is not None:
+        for key in custom_header.keys():
+            if key=="AliceVision:CArr":#FIXME: not working?
+                spec.attribute(key, "float[3]", list(custom_header[key]))
+            elif key=="AliceVision:iCamArr":
+                spec.attribute(key, oiio.TypeDesc.TypeMatrix33,  list(np.asarray(custom_header[key]).flatten()))
+            elif key=="AliceVision:downscale":
+                spec.attribute(key, "float", custom_header[key])
+            else:
+                try:
+                    spec[key]=custom_header[key]
+                except:
+                    print("WARNING: could not write attribute"+key)
+    out.open(output_file, spec)
+    out.write_image(input_array)
+    out.close()
+  
 def open_pfm(path):
     '''
     Parses a pfm file.
@@ -189,7 +118,7 @@ def open_depth_map(depth_file, raise_exception=True):
             print('Depth file format not recognised for '+depth_file)
     return depth_map
 
-def open_image(image_path, auto_rotate=False, return_orientation=False):
+def open_image(image_path, auto_rotate=False, return_orientation=False, to_srgb=False):
     """
     Opens an image and returns it as a np array.
     """
@@ -202,23 +131,19 @@ def open_image(image_path, auto_rotate=False, return_orientation=False):
     # 6 transverse (right to left, bottom to top)
     # 7 rotated 90 counter-clockwise (left to right, bottom to top)
     orientation=0#oiio standard
-    if image_path.endswith('.exr') or image_path.endswith('.dpx'):
-        image, meta = open_exr(image_path)
-        if image_path.endswith('.dpx'):
-            image = np.flipud(image)
-    else:
-        if FORCE_IOOI:
-            import OpenImageIO as oiio
-            exr_file = oiio.ImageInput.open(image_path)
-            meta = exr_file.spec()
-            orientation = meta.get("Orientation", orientation)
-            image_buff = oiio.ImageBuf(image_path)
-            if auto_rotate and orientation !=0:
-                image_buff = oiio.ImageBufAlgo.reorient(image_buff)#straigten the image
-            image = 255*image_buff.get_pixels()#return float and whole roi by default
-        else:
-            image = np.array(Image.open(image_path))
-            image = image.astype(np.float32)
+
+    import OpenImageIO as oiio
+    exr_file = oiio.ImageInput.open(image_path)
+    meta = exr_file.spec()
+    orientation = meta.get("Orientation", orientation)
+    image_buff = oiio.ImageBuf(image_path)
+    if auto_rotate and orientation !=0:
+        image_buff = oiio.ImageBufAlgo.reorient(image_buff)#straigten the image
+    if to_srgb:
+        image_buff = oiio.ImageBufAlgo.colorconvert(image_buff,meta.get("oiio:ColorSpace"), "sRGB")
+    
+    image = 255*np.clip(image_buff.get_pixels(), 0, 1)#return float and whole roi by default
+
     if len(image.shape)==2:
         image = np.expand_dims(image, -1)
     if return_orientation:
@@ -231,50 +156,43 @@ def save_image(image_path, np_array, orientation=None, auto_rotate=False):
     Save an image in a numpy array.
     Range must be 0-255 and channel 1 or 3.
     """
-    if len(np_array.shape)==2:
-        np_array=np.expand_dims(np_array, axis=-1)
-    if image_path.endswith('.exr'):
-        save_exr(np_array, image_path)
-    else:
-        if FORCE_IOOI:
-            import OpenImageIO as oiio
-            out = oiio.ImageOutput.create(image_path)
-            if out is None:
-                raise RuntimeError("Could not open exr file "+image_path)
-            spec = oiio.ImageSpec(np_array.shape[1], np_array.shape[0], np_array.shape[2], oiio.UINT8)
-            out.open(image_path, spec)
-            out.write_image(np_array.astype(np.uint8))
-            out.close()
+    import OpenImageIO as oiio
+    out = oiio.ImageOutput.create(image_path)
+    if out is None:
+        raise RuntimeError("Could not open file "+image_path)
+    spec = oiio.ImageSpec(np_array.shape[1], np_array.shape[0], np_array.shape[2], oiio.UINT8)
+    out.open(image_path, spec)
+    out.write_image(np_array.astype(np.uint8))
+    out.close()
 
-            if orientation is not None:
-                image_buff = oiio.ImageBuf(image_path)
-                image_buff.orientation=orientation
-                if auto_rotate and orientation != 0:
-                    #reverso rotation
-                    if orientation == 1:
-                        reverse_orientation = 3
-                    elif orientation == 3:
-                        reverse_orientation = 1
-                    elif orientation == 2:
-                        reverse_orientation = 4
-                    elif orientation == 4:
-                        reverse_orientation = 2
-                    elif orientation == 5:
-                        reverse_orientation = 7
-                    elif orientation == 7:
-                        reverse_orientation = 5
-                    elif orientation == 6:
-                        reverse_orientation = 8
-                    elif orientation == 8:
-                        reverse_orientation = 6
-                    #apply inverse
-                    image_buff.orientation=reverse_orientation
-                    image_buff = oiio.ImageBufAlgo.reorient(image_buff)
-                    #but right meta
-                    image_buff.orientation=orientation
-                image_buff.write(image_path)
-        else:
-            Image.fromarray(np_array.astype(np.uint8)).save(image_path)
+    if orientation is not None:
+        image_buff = oiio.ImageBuf(image_path)
+        image_buff.orientation=orientation
+        if auto_rotate and orientation != 0:
+            #reverso rotation
+            if orientation == 1:
+                reverse_orientation = 3
+            elif orientation == 3:
+                reverse_orientation = 1
+            elif orientation == 2:
+                reverse_orientation = 4
+            elif orientation == 4:
+                reverse_orientation = 2
+            elif orientation == 5:
+                reverse_orientation = 7
+            elif orientation == 7:
+                reverse_orientation = 5
+            elif orientation == 6:
+                reverse_orientation = 8
+            elif orientation == 8:
+                reverse_orientation = 6
+            #apply inverse
+            image_buff.orientation=reverse_orientation
+            image_buff = oiio.ImageBufAlgo.reorient(image_buff)
+            #but right meta
+            image_buff.orientation=orientation
+        image_buff.write(image_path)
+ 
 
 # %%
 
