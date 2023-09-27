@@ -36,16 +36,16 @@ class DeepFeatureMatching(CondaNode):
             value=0,
             uid=[0],
         ),
+
+        desc.FloatParam(
+            name="confidenceThreshold",
+            label="confidenceThreshold",
+            description="Only keep the matches if their confidence hits this threshold.",
+            range=(0.0,1.0,0.01),
+            value=0.5,
+            uid=[0],
+        ),
         
-        # desc.File(
-        #     name="imagePairsList",
-        #     label="Image Pairs",
-        #     description="Path to a file which contains the list of image pairs to match.",
-        #     value="",
-        #     uid=[0],
-        # ),
-
-
         desc.StringParam(
             name='imageMaching',
             label='imageMaching',

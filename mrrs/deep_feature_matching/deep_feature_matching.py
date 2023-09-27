@@ -41,12 +41,14 @@ class time_it():
 @click.option('--outputFolder', help='Output to store the results in')
 @click.option('--imageMaching', default="all", help=("Method to select the views to be matched. 'all' will match all the views."
                                                     +"If a number is passed, will assume sequence and the number is going to be half window around a frame to compute the maches into"
-                                                    ))
+                                                    +"If a file is passed will, open the matches form the files"))
 @click.option('--keepNmatches', default=0, type=int, help='If specified will keep the n first matches between views')
+@click.option('--confidenceThreshold', default=0.0, type=float, help='If specified will only keep the matches with at least this confidence')
 @click.option('--debugImages', default=False, type=bool, help='Will Write match images')
 @click.option('--verboseLevel', help='.')#FIXME: todo
 def run_matching(inputsfmdata, outputfolder, imagemaching, 
-                 keepnmatches, debugimages, verboselevel): #note: lower caps
+                 keepnmatches, confidencethreshold, 
+                 debugimages, verboselevel): #note: lower caps
     """
     Will runs loftr on the input set of images.
     Writes meshroom feature and maches files.
@@ -140,9 +142,14 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
                                     if abs(int(view["frameId"])-frame_id_0)<=int(imagemaching)]
             elif imagemaching == "all":
                 view_indices_1=range(nb_image) 
+            elif os.path.exists(imagemaching):
+                #raise RuntimeError("imagemaching not valid")#FIXME: graph?
+                #opn image matching graph
+                with open(imagemaching, 'r') as matchfile:#FIXME: opened eac time
+                    matches_raw = matchfile.readlines()
+                    view_indices_1 = [rm for rm in matches_raw if rm[0]==view_index_0]
             else:
-                raise RuntimeError("imagemaching not valid")#FIXME: graph?
-            
+                raise RuntimeError("Invalid imagemaching argument")
             #for all the other images
             print("View %d, frame id %d to be matched with:"%(view_index_0, view_index_0))
             print(view_indices_1)
@@ -186,17 +193,20 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
                             cv2.line(img_matches_display, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
                         Image.fromarray(img_matches_display).save(os.path.join(outputfolder, uid_image_0+"_"+uid_image_1)+".png")
                     
-                    #Write features on img 2 as brand new features
+                    #Write features on img 2 as brand new features #FIXME: remove the feature that did not make it
                     with open(os.path.join(feature_folder,uid_image_1+extention), "a+") as kpf:
                         for kp  in keypoints_1:
                             kpf.write("%f %f 0 0\n"%(kp[0], kp[1]))
 
                     #Write matches, note "0." beacause mewhroom suports several matches files for batching
-                    #if we dont define a threshold, will write all matches, otherwise will write only the n best matches
+                    #if we dont define a max nb of match, will write all matches, otherwise will write only the n best matches
                     if keepnmatches == 0:
                         keepnmatches = nb_keypoint
                     else:
                         keepnmatches = min(keepnmatches, nb_keypoint)
+                    #if we passed confidenceThreshold, will find the index dynamically such that the remaining matches keep the trheshold
+                    if  confidencethreshold !=0:
+                        keepnmatches = np.argmax(confidences<confidencethreshold)
                     with open(os.path.join(matches_folder,"0.matches.txt"), "a+") as mf:
                         mf.write("%s %s\n"%(uid_image_0, uid_image_1))
                         mf.write("1\n")
@@ -206,10 +216,11 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
                             keypoint_1_index = kp_indx+nb_features[view_index_1]#index is offsetted by the olready written featuress
                             mf.write("%d %d\n"%(keypoint_0_index, keypoint_1_index))
                     
-                    #update offsets for view 1
+                    #update offsets for view 1, FIXME: make it dynamic in case we remove features
                     nb_features[view_index_1]+=nb_keypoint
             #FIXME: remainng time would be more convenient
-            print("Maches for view %d/%d done (%fs, est. total for view %f, est. total %f)"%(view_index_0, nb_image, t, float(t)*len(view_indices_1), nb_image*float(t)*len(view_indices_1)), end="\r")
+            print("Maches for view %d/%d done (%fs, est. total for view %fs, est. total %fm)"%(view_index_0, 
+            nb_image, t, float(t)*len(view_indices_1), (nb_image*float(t)*len(view_indices_1))/60.0), end="\r")
 
     print("Matching done in %fs"%total_time)
         

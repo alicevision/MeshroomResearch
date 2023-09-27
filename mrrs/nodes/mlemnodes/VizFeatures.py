@@ -32,10 +32,14 @@ def open_matches(match_file):
                 raise RuntimeError("Only supports one descriptor type at the time")
             type_feat, nb_match = parse_line(match_file)
             nb_match = int(nb_match)
-            matches = [match_file.readline() for _ in range(nb_match)]
-            matches = np.loadtxt(matches).astype(np.int32)
+            matches_raw = [match_file.readline() for _ in range(nb_match)]
+            #avoid the squeeze when onlly one match
+            if len(matches_raw)  == 1:
+                matches = np.expand_dims(np.loadtxt(matches_raw).astype(np.int32), axis=0)
+            else:
+                matches = np.loadtxt(matches_raw).astype(np.int32)
             if matches.shape[0] != nb_match:
-                raise RuntimeError("Unexpected number of matches %d vs %d"%(matches.shape[0], nb_match))
+                raise RuntimeError("Unexpected number of matches for view %s %d vs %d"%(view_id_0, matches.shape[0], nb_match))
             #save result
             if not (view_id_0 in match_data.keys()):
                 match_data[view_id_0]={}
@@ -83,13 +87,21 @@ class VizFeatures(desc.Node):
             value="",
             uid=[0],
         ),
-
+        
         desc.IntParam(
             name="keepMatches",
             label="keepMatches",
             description="Only display first n matches",
             range=(1,1000,1),
             value=0,
+            uid=[0],
+        ),
+
+        desc.BoolParam(
+            name="matchOnly",
+            label="matchOnly",
+            description="Only display the matches",
+            value=True,
             uid=[0],
         ),
 
@@ -153,28 +165,36 @@ class VizFeatures(desc.Node):
         
         sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
         feature_files = os.listdir(chunk.node.featureFolder.value)
-        for view in sfm_data["views"]:
-            image_path = view["path"]
-            image_uid = view["viewId"]
-            image = open_image(image_path)
-            keypoint_file = [os.path.join(chunk.node.featureFolder.value, ff) for ff in feature_files if ((image_uid in ff) and ff.endswith(".feat"))][0]
-            keypoints = np.loadtxt(keypoint_file)
-            image = draw_keypoints(image, keypoints, p=chunk.node.markerSize.value)
-            save_image(os.path.join(chunk.node.outputFolder.value, "features_"+image_uid+".png"),image)
+        if not chunk.node.matchOnly.value: 
+            for view in sfm_data["views"]:
+                image_path = view["path"]
+                image_uid = view["viewId"]
+                image = open_image(image_path)
+                keypoint_file = [os.path.join(chunk.node.featureFolder.value, ff) for ff in feature_files if ((image_uid in ff) and ff.endswith(".feat"))][0]
+                keypoints = np.loadtxt(keypoint_file)
+                image = draw_keypoints(image, keypoints, p=chunk.node.markerSize.value)
+                save_image(os.path.join(chunk.node.outputFolder.value, "features_"+image_uid+".png"),image)
 
         if chunk.node.matcheFolder.value != "":
-            chunk.logger.info('Matching found')
+            chunk.logger.info('Displaying Matching')
             match_file = [os.path.join(chunk.node.matcheFolder.value, mf) for mf in os.listdir(chunk.node.matcheFolder.value) if mf.endswith(".txt")][0]
+            chunk.logger.info('Opening matches')
             matches = open_matches(match_file)
-
+            chunk.logger.info('Done open')
             for view_id_0 in matches.keys():
                 chunk.logger.info('Matching for view '+view_id_0)
-                image_file_0 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_0+".png")
-                image_0 = open_image(image_file_0)
                 #for now, only select the best matched view (the one with most matches)
                 view_id_1, matches_0_to_1=get_best_matching_view(matches[view_id_0])
-                image_file_1 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_1+".png")
-                chunk.logger.info('Best matcing for view '+view_id_0+" is "+view_id_1+ "%d matches"%len(matches_0_to_1))
+                chunk.logger.info('Best matcing for view '+view_id_0+" is "+view_id_1+ " (%d matches)"%len(matches_0_to_1))
+                
+                if chunk.node.matchOnly.value: #if match only, will only display line
+                    image_file_0 = [view["path"] for view in sfm_data["views"] if view["viewId"]==view_id_0][0]
+                    image_file_1 = [view["path"] for view in sfm_data["views"] if view["viewId"]==view_id_1][0]
+                else:
+                    image_file_0 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_0+".png")
+                    image_file_1 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_1+".png")
+                
+                image_0 = open_image(image_file_0)
                 image_1 = open_image(image_file_1)
 
                 match_image = np.concatenate([image_0, image_1], axis=1)
