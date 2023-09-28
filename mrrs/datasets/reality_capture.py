@@ -42,3 +42,6 @@ def parse_xmp(xmp_file):
         extrinsics[0:3, 3] = camera_center
         extrinsics[3, 3] = 1
         return extrinsics, intrinsics
+
+def export_xmp(sfm_data):
+    pass
