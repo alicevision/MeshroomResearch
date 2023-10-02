@@ -7,48 +7,10 @@ import json
 import os
 
 from meshroom.core import desc
-from mrrs.core.geometry import *
-from mrrs.core.ios import *
-from mrrs.core.utils import format_float_array
 
-#FIXME: move this into a reality capture folder
-def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size):
-    """
-    Saves the xmp for reality capture.
-    Will convert meshroom sfm extrinsics and intrinsics converted to mrrs, into reality capture format.
-    """
+from mrrs.core.ios import matrices_from_sfm_data
+from mrrs.datasets.reality_capture import export_reality_capture
 
-    focal = intrinsics[0,0]*36 #turn focal from unit sensor  into equivalent 35mm
-    principal_point_u = intrinsics[0,2]/pixel_size
-    principal_point_v = intrinsics[1,2]/pixel_size #convert back into metric principal point
-
-    rotation = np.linalg.inv(extrinsics[0:3,0:3])
-    position = extrinsics[0:3, 3]
-
-    def format_array(array):
-        formated_str = ""
-        for r in array:
-            formated_str+=" "+str(r)
-        return formated_str
-    xmp_string="""
-<x:xmpmeta xmlns:x="adobe:ns:meta/">
-  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <rdf:Description xmlns:xcr="http://www.capturingreality.com/ns/xcr/1.1#" xcr:Version="3"
-       xcr:PosePrior="initial" xcr:Coordinates="absolute" xcr:DistortionModel="brown3"
-       xcr:FocalLength35mm="{0}" xcr:Skew="0" xcr:AspectRatio="1"
-       xcr:PrincipalPointU="{1}" xcr:PrincipalPointV="{2}"
-       xcr:CalibrationPrior="initial" xcr:CalibrationGroup="-1" xcr:DistortionGroup="-1"
-       xcr:InTexturing="1" xcr:InMeshing="1">
-      <xcr:Rotation>{3}</xcr:Rotation>
-      <xcr:Position>{4}</xcr:Position>
-      <xcr:DistortionCoeficients>{5}</xcr:DistortionCoeficients>
-    </rdf:Description>
-  </rdf:RDF>
-</x:xmpmeta>
-""".format(str(focal), principal_point_u, principal_point_v, format_array(rotation.flatten()), format_array(position), '0 0 0')#FIXME: for now we dont support distortion?
-
-    with open(xmp_file, "w") as f:
-       f.write(xmp_string)
 
 class ExportXMP(desc.Node):
 
