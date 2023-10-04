@@ -95,20 +95,22 @@ def import_xmp(sfm_data, xmp_folder):
     intrinsics_ids = []
     images_size = []
     for i, view in enumerate(sfm_data["views"]):
+        print("Loading xmp for view "+view["viewId"])
         scene_image = view["path"]
-        image_size = (view["width"],view["height"])#FIXME: check
+        image_size = (int(view["width"]),int(view["height"]))#FIXME: check
         images_size.append(image_size)
+        poses_ids.append(view["poseId"])
+        intrinsics_ids.append(view["intrinsicId"])
 
         basename = os.path.basename(scene_image)[:-4]#FIXME: not great, use split
         scenes_calib = os.path.join(xmp_folder, basename + ".xmp")#FIXME: actually has several intrisinc
             
         if  not os.path.exists(scenes_calib):#Skip unreconstructed views
-            poses_ids.append(None)
-            intrinsics_ids.append(None)
+            print("No XMP found, skipping")
             extrinsics.append(None)
             intrinsics.append(None)
-            break
-
+            continue
+        
         e, i = parse_xmp(scenes_calib)
         if e is None:
             raise RuntimeError("Invalid XMP "+scenes_calib)
@@ -126,7 +128,5 @@ def import_xmp(sfm_data, xmp_folder):
 
         extrinsics.append(e)
         intrinsics.append(i)
-        poses_ids.append(i)
-        intrinsics_ids.append(i)
     return extrinsics, intrinsics, poses_ids, intrinsics_ids, images_size
                 

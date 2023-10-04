@@ -47,7 +47,7 @@ class ImportXMP(desc.Node):
 
     outputs = [
         desc.File(
-            name='outoutputSfMDataputSfM',
+            name='outputSfMData',
             label='outputSfMData',
             description='Path to the outputSfMData',
             value=os.path.join(desc.Node.internalFolder, "outputSfMData.sfm"),
@@ -62,9 +62,6 @@ class ImportXMP(desc.Node):
         if chunk.node.sfmData.value=='':
             chunk.logger.warning('No sfmData, skipping')
             return False
-        if chunk.node.xmpData.value=='':
-            chunk.logger.warning('No xmpData, skipping')
-            return False
         return True
 
     def processChunk(self, chunk):
@@ -73,7 +70,12 @@ class ImportXMP(desc.Node):
             if not self.check_inputs(chunk):
                 return
             chunk.logger.info("Starts to load data from XMP")
-            extrinsics, intrinsics, poses_ids, intrinsics_ids, images_size  = import_xmp(chunk.node.sfmData.value, chunk.node.xmpData.value)
+            xmp_folder = chunk.node.xmpData.value
+            with open(chunk.node.sfmData.value, "r") as json_file:
+                sfm_data = json.load(json_file)
+            if xmp_folder == "":
+                xmp_folder = os.path.dirname(sfm_data["views"][0]["path"])
+            extrinsics, intrinsics, poses_ids, intrinsics_ids, images_size  = import_xmp(sfm_data, xmp_folder)
             sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, 
                                               poses_ids, intrinsics_ids, images_size,
                                               sfm_data=sfm_data, sensor_width = SENSOR_SIZE

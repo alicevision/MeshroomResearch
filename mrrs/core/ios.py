@@ -214,6 +214,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
     for extrinsic, pose_id in zip(extrinsics, poses_ids):#Note: in, theory we might have a pose shared between views, in practice this never happens
         #if no pose, skipping, meshroom support pose_id in vews with no pose declared.
         if extrinsic is None:
+            print('No extrinsic for view pose '+pose_id)
             continue
         # if extrinsic.shape[0] == 3:#make square for inverse
         #     extrinsic=np.concatenate([extrinsic, [[0,0,0,1]]], axis=0)
