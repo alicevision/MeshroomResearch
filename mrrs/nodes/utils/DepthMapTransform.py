@@ -33,6 +33,9 @@ def normal2meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_size):
     depth_map_converted[depth_map<0]=0
     return  depth_map_converted
 
+def id(ixels, depth_map, extrinsic, intrinsic, pixel_size):
+    return depth_map
+
 def do_transform(depth_maps_path, sfm_data, transform, output_folder):
     """
     Runs the transform on a set of depth maps.
@@ -106,7 +109,7 @@ class DepthMapTransform(desc.Node):
             name='transform',
             label='Tranform',
             description='Transformation to apply to the depth maps',
-            values=['meshroom2normal', 'normal2meshroom'],#TODO: project?
+            values=['meshroom2normal', 'normal2meshroom', 'id'],#TODO: project?
             value='meshroom2normal',
             exclusive=True,
             uid=[0],
