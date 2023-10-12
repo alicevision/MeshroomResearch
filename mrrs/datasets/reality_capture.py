@@ -47,15 +47,23 @@ def parse_xmp(xmp_file):
         extrinsics[3, 3] = 1
         return extrinsics, intrinsics
 
-def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size):
+def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size, image_size):
     """
     Saves the xmp for reality capture.
     Will convert meshroom sfm extrinsics and intrinsics converted to mrrs, into reality capture format.
     """
-
-    focal = intrinsics[0,0]*36 #turn focal from unit sensor  into equivalent 35mm
-    principal_point_u = intrinsics[0,2]/pixel_size
-    principal_point_v = intrinsics[1,2]/pixel_size #convert back into metric principal point
+    #pixel_size = sensor_width/width, so focal 35mm => we get sensor_width = 
+    our_sensor_width = pixel_size*image_size[0]
+    our_sensor_height = pixel_size*image_size[1]
+    our_focal = intrinsics[0,0]
+    #turn focal from unit sensor into equivalent 35mm
+    focal = our_focal*SENSOR_SIZE/our_sensor_width
+    #convert pp in mm into offset from center in mm
+    principal_point_u = intrinsics[0,2]-our_sensor_height/2
+    principal_point_v = intrinsics[1,2]-our_sensor_width/2
+    #pass it into relative 
+    principal_point_u /= our_sensor_height
+    principal_point_v /= our_sensor_width
 
     rotation = np.linalg.inv(extrinsics[0:3,0:3])
     position = extrinsics[0:3, 3]
@@ -65,22 +73,21 @@ def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size):
         for r in array:
             formated_str+=" "+str(r)
         return formated_str
-    xmp_string="""
-<x:xmpmeta xmlns:x="adobe:ns:meta/">
-  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    xmp_string="""<x:xmpmeta xmlns:x="adobe:ns:meta/">
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <rdf:Description xmlns:xcr="http://www.capturingreality.com/ns/xcr/1.1#" xcr:Version="3"
-       xcr:PosePrior="initial" xcr:Coordinates="absolute" xcr:DistortionModel="brown3"
-       xcr:FocalLength35mm="{0}" xcr:Skew="0" xcr:AspectRatio="1"
-       xcr:PrincipalPointU="{1}" xcr:PrincipalPointV="{2}"
-       xcr:CalibrationPrior="initial" xcr:CalibrationGroup="-1" xcr:DistortionGroup="-1"
-       xcr:InTexturing="1" xcr:InMeshing="1">
-      <xcr:Rotation>{3}</xcr:Rotation>
-      <xcr:Position>{4}</xcr:Position>
-      <xcr:DistortionCoeficients>{5}</xcr:DistortionCoeficients>
+    xcr:PosePrior="initial" xcr:Coordinates="absolute" xcr:DistortionModel="brown3"
+    xcr:FocalLength35mm="{0}" xcr:Skew="0" xcr:AspectRatio="1"
+    xcr:PrincipalPointU="{1}" xcr:PrincipalPointV="{2}"
+    xcr:CalibrationPrior="initial" xcr:CalibrationGroup="-1" xcr:DistortionGroup="-1"
+    xcr:InTexturing="1" xcr:InMeshing="1">
+    <xcr:Rotation>{3}</xcr:Rotation>
+    <xcr:Position>{4}</xcr:Position>
+    <xcr:DistortionCoeficients>{5}</xcr:DistortionCoeficients>
     </rdf:Description>
-  </rdf:RDF>
+</rdf:RDF>
 </x:xmpmeta>
-""".format(str(focal), principal_point_u, principal_point_v, format_array(rotation.flatten()), format_array(position), '0 0 0')#FIXME: for now we dont support distortion?
+""".format(str(focal), principal_point_u, principal_point_v, format_array(rotation.flatten()), format_array(position), '0 0 0 0 0 0')#FIXME: for now we dont support distortion
 
     with open(xmp_file, "w") as f:
        f.write(xmp_string)
@@ -117,14 +124,22 @@ def import_xmp(sfm_data, xmp_folder):
            
         #rc to mrrs
         e[0:3, 0:3] = np.linalg.inv(e[0:3, 0:3])
-        # convert principal point in pixels
-        # https://support.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
-        # dimentionless because already /35 => we pass it into pixels
+        #convert focal into px
         pixel_size = SENSOR_SIZE / image_size[0]
         i[0, 0] /= pixel_size
         i[1, 1] /= pixel_size
-        i[0, 2] = image_size[0] / 2 + i[0, 2] * 1000000 * 1 / image_size[0]
-        i[1, 2] = image_size[1] / 2 + i[1, 2] * 1000000 * 1 / image_size[0]
+        # convert principal point in pixels
+        # https://support.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
+        # dimentionless because already /35 => we pass it into pixels, and offset from top image
+
+        #lookign for  "-0.75009676916349455", "-5.1187297220630112"
+        #from array([0.00814665, 0.00596611])
+        #this should pass the principal point in offset relative to actuall pp in pixels
+        # pp_pixels = np.asarray(image_size)/2.0-i[0:2,2]*image_size[0] 
+        # This should turn the pp back in mm
+        image_ratio = image_size[0]/image_size[1]
+        pp_mm = np.asarray((SENSOR_SIZE,image_ratio*SENSOR_SIZE))/2+ i[0:2,2]*SENSOR_SIZE
+        i[0:2, 2] = pp_mm
 
         extrinsics.append(e)
         intrinsics.append(i)

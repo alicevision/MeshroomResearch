@@ -65,7 +65,7 @@ class ImportXMP(desc.Node):
         return True
 
     def processChunk(self, chunk):
-        try:
+        # try:
             chunk.logManager.start(chunk.node.verboseLevel.value)
             if not self.check_inputs(chunk):
                 return
@@ -75,6 +75,7 @@ class ImportXMP(desc.Node):
                 sfm_data = json.load(json_file)
             if xmp_folder == "":
                 xmp_folder = os.path.dirname(sfm_data["views"][0]["path"])
+            #note: focal already in pixels
             extrinsics, intrinsics, poses_ids, intrinsics_ids, images_size  = import_xmp(sfm_data, xmp_folder)
             sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, 
                                               poses_ids, intrinsics_ids, images_size,
@@ -84,8 +85,8 @@ class ImportXMP(desc.Node):
             with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
                 json.dump(sfm_data, f, indent=4)
             chunk.logger.info('XMP import ends')
-        finally:
-            chunk.logManager.end()
+        # finally:
+        #     chunk.logManager.end()
 
 
 

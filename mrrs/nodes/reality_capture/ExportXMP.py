@@ -8,7 +8,7 @@ import os
 
 from meshroom.core import desc
 
-from mrrs.core.ios import matrices_from_sfm_data
+from mrrs.core.ios import get_image_sizes, matrices_from_sfm_data
 from mrrs.datasets.reality_capture import export_reality_capture
 
 
@@ -78,15 +78,17 @@ class ExportXMP(desc.Node):
                 return
             chunk.logger.info("Starts to load data from sfmdata")
             sfm_data = json.load(open(chunk.node.sfmData.value, "r"))
-
+            
             (extrinsics_all_cams, intrinsics_all_cams, views_id,
             poses_id, intrinsics_id, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
+            image_sizes = get_image_sizes(sfm_data)
             chunk.logManager.start("Exporting calibration")
             images_names = [os.path.basename(view["path"])[:-4] for view in sfm_data["views"]]
-            for image_name, extrinsics, intrinsics, pixel_size in zip(images_names, extrinsics_all_cams, intrinsics_all_cams, pixel_sizes_all_cams):
+            for image_name, extrinsics, intrinsics, pixel_size, image_size in zip(images_names, extrinsics_all_cams, 
+                                                                      intrinsics_all_cams, pixel_sizes_all_cams, image_sizes):
                 if extrinsics is not None:
-                    xmp_file = os.path.join(chunk.node.outputFolder.value, image_name+".xmp") #FIXME: image basename+xmp
-                    export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size)
+                    xmp_file = os.path.join(chunk.node.outputFolder.value, image_name+".xmp")
+                    export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size,image_size )
 
             chunk.logger.info('XMP export ends')
         finally:

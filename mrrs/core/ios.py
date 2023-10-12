@@ -6,7 +6,6 @@ import logging
 import re
 from struct import unpack
 
-from PIL import Image
 import numpy as np
 
 from mrrs.core.utils import format_float_array
@@ -14,7 +13,7 @@ from mrrs.core.utils import format_float_array
 FORCE_IOOI = True#FIXME: probably a good idea to open everything with openimage IO, for now not woring on windows
 
 #%% Images
-def open_exr(exr_path, clip_negative=False):
+def open_exr(exr_path):
     '''
     Uses oiio to import an EXR file.
     '''
@@ -197,7 +196,7 @@ def save_image(image_path, np_array, orientation=None, auto_rotate=False):
 # %%
 
 #%% SFM
-#FIXME: unify the sensor/pixel size
+#FIXME: unify the sensor/pixel size, also we open it in mm but expect save from pixels
 def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
                             intrinsics_ids, images_size, sfm_data = {}, sensor_width = 1):
     '''
@@ -240,7 +239,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             already_done_intrisics.append(intrinsic_id)
             #in meshroom, principal point is delta from center of the images, in pixels, in our case its actual pp in pixel
             pixel_size = (sensor_width/image_size[0])
-            principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2
+            principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2#FIXME: our pp is in mm?!
             principal_point = (principal_point).astype(str).tolist()
             intrinsic_sfm = {
                             "intrinsicId": str(intrinsic_id),
@@ -295,6 +294,10 @@ def parse_extrisic_sfm_data(sfm_pose):
     translation = np.asarray(sfm_pose['pose']['transform']['center'], dtype=np.float32)
     extrinsic = np.concatenate([rotation, np.expand_dims(translation, axis=-1)], axis=-1)
     return  extrinsic, pose_id
+
+def get_image_sizes(sfm_data):
+    return [ (int(view["width"]), int(view["height"])) for view in sfm_data["views"] ]
+    
 
 #FIXME: unify the sensor/pixel size
 def matrices_from_sfm_data(sfm_data):
