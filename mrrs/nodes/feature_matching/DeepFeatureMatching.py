@@ -48,9 +48,17 @@ class DeepFeatureMatching(CondaNode):
         
         desc.StringParam(
             name='imageMaching',
-            label='imageMaching',
-            description='Method for image matching. Can be "all", an integer defining the windows around the framesId',
+            label='imageMatching',
+            description='Method for image matching. Can be "all", "file" to use the file in imagePairs, or an integer defining a window around the framesId',
             value="all",
+            uid=[0],
+        ),
+
+        desc.File(
+            name='imagePairs',
+            label='imagePairs',
+            description='Optional file defining the images pairs to be matched',
+            value="",
             uid=[0],
         ),
 
@@ -72,7 +80,7 @@ class DeepFeatureMatching(CondaNode):
             uid=[],
         )
     ]
-    outputs = [#FIXME: output features and output matches?
+    outputs = [
         desc.File(
             name="outputFolder",
             label="Output Folder",
@@ -81,7 +89,7 @@ class DeepFeatureMatching(CondaNode):
             uid=[],
         ),
         desc.File(
-            name="featuresFolder",
+            name="featuresFolders",
             label="Features Folder",
             description="Path to a folder in which the features matches are stored.",
             value=os.path.join(desc.Node.internalFolder, "features"),
@@ -89,7 +97,7 @@ class DeepFeatureMatching(CondaNode):
             group=""
         ),
         desc.File(
-            name="machesFolder",
+            name="matchesFolders",
             label="Matches Folder",
             description="Path to a folder in which the computed matches are stored.",
             value=os.path.join(desc.Node.internalFolder, "matches"),

@@ -7,11 +7,12 @@ import numpy as np
 
 import kornia
 from kornia.feature.loftr.loftr import LoFTR
+from kornia.feature.loftr.loftr import default_cfg#the default config file
 import torch
 
 import cv2
 
-#FIXME: call to mrr, see with kelian conda node 
+#FIXME: call to mrrs, see with kelian conda node 
 import time 
 class time_it():
     """
@@ -35,19 +36,39 @@ class time_it():
     def __repr__(self):
         return str(float(self))
 
+def open_and_prepare_image(sfm_data, index, device):
+    """
+    Opens and prepare an image tensor from sfm data
+    """
+    image_0 = np.asarray(Image.open(sfm_data["views"][index]["path"]))
+    uid_image_0 = sfm_data["views"][index]["viewId"]
+    frame_id = int(sfm_data["views"][index]["frameId"])
+    timage_0 = kornia.color.rgb_to_grayscale(kornia.utils.image_to_tensor(image_0, False).float() / 255.).to(device)
+    return timage_0,  uid_image_0, image_0, frame_id
+
+def get_all_keypoints(feature_map_size):
+    """
+    Get all possibles features in an image
+    """
+    all_keypoints_0_x, all_keypoints_0_y = np.meshgrid(range(feature_map_size[1]), range(feature_map_size[0]))
+    all_keypoints_0_x=8*all_keypoints_0_x.flatten()
+    all_keypoints_0_y=8*all_keypoints_0_y.flatten()
+    return all_keypoints_0_x, all_keypoints_0_y
 
 @click.command()
 @click.option('--inputSfMData', help='Input sfm data')
 @click.option('--outputFolder', help='Output to store the results in')
 @click.option('--imageMaching', default="all", help=("Method to select the views to be matched. 'all' will match all the views."
                                                     +"If a number is passed, will assume sequence and the number is going to be half window around a frame to compute the maches into"
-                                                    +"If a file is passed will, open the matches form the files"))
+                                                    +"If 'file' open the matches from the file in imagePairs"))
+@click.option('--imagePairs', default="", help=("Image pair file to be used for the image matching"))
 @click.option('--keepNmatches', default=0, type=int, help='If specified will keep the n first matches between views')
 @click.option('--confidenceThreshold', default=0.0, type=float, help='If specified will only keep the matches with at least this confidence')
+@click.option('--coarseMatch', default=True, type=bool, help='Will use the coarse patch-level matches to create longer track.')
 @click.option('--debugImages', default=False, type=bool, help='Will Write match images')
 @click.option('--verboseLevel', help='.')#FIXME: todo
-def run_matching(inputsfmdata, outputfolder, imagemaching, 
-                 keepnmatches, confidencethreshold, 
+def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
+                 keepnmatches, confidencethreshold, coarsematch,
                  debugimages, verboselevel): #note: lower caps
     """
     Will runs loftr on the input set of images.
@@ -58,7 +79,29 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
     #To debug
     print("Hello")
     extention = ".sift.feat"#".loftr.feat" #FIXME: for now we write  as sift
-    model = 'outdoor'#FIXME: var
+    loftr_weigts = 'outdoor'#FIXME: var
+    loftr_config = default_cfg
+
+    #load sfmdata
+    print("Loading sfm data")
+    with open(inputsfmdata, "r") as json_file:
+        sfm_data = json.load(json_file)
+    nb_image = len(sfm_data["views"]) 
+    all_view_ids = [v["viewId"] for v in sfm_data["views"]]
+
+    #opening imagematching file if any
+    if imagemaching == "file":
+        print("Opening imagepairs file:")
+        with open(imagepairs, 'r') as matchfile:
+            matches_raw = matchfile.readlines()
+        #one line per image
+        image_pairs = [line.strip().split(" ") for line in matches_raw]
+        if len(image_pairs) !=  nb_image:
+            if len(image_pairs) ==  nb_image-1:#file is not properly written in AV, if last image no match, no \n
+                image_pairs.append("")
+            else:
+                raise RuntimeError("Maformed image match file")
+        print(image_pairs)
 
     #creates output folders
     print("Creating output folders")
@@ -67,46 +110,21 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
     os.makedirs(feature_folder, exist_ok=True)
     os.makedirs(matches_folder, exist_ok=True)
 
-    #load sfmdata
-    print("Loading sfm data")
-    with open(inputsfmdata, "r") as json_file:
-        sfm_data = json.load(json_file)
-    nb_image = len(sfm_data["views"]) 
-
     #init model
     print("Loading model")
     device = torch.device('cuda:0')
-    loftr_model = LoFTR(model).to(device)
-
-    #use full functions
-    def open_and_prepare_image(sfm_data, index):
-        """
-        Opens and prepare an image tensor from sfm data
-        """
-        image_0 = np.asarray(Image.open(sfm_data["views"][index]["path"]))
-        uid_image_0 = sfm_data["views"][index]["viewId"]
-        frame_id = int(sfm_data["views"][index]["frameId"])
-        timage_0 = kornia.color.rgb_to_grayscale(kornia.utils.image_to_tensor(image_0, False).float() / 255.).to(device)
-        return timage_0,  uid_image_0, image_0, frame_id
-    
-    def get_all_keypoints(feature_map_size):
-        """
-        Get all possibles features in an image
-        """
-        all_keypoints_0_x, all_keypoints_0_y = np.meshgrid(range(feature_map_size[1]), range(feature_map_size[0]))
-        all_keypoints_0_x=8*all_keypoints_0_x.flatten()
-        all_keypoints_0_y=8*all_keypoints_0_y.flatten()
-        return all_keypoints_0_x, all_keypoints_0_y
+    default_cfg
+    loftr_model = LoFTR(loftr_weigts, config=loftr_config).to(device)
 
     #loop over pairs of images
-    #we ned this to keep track of the feature indices
+    #we ned this to keep track  the feature indices in case we keep the refined matches
     nb_features = [0 for _ in range(nb_image)]
-    #write all possible features on image 0 (to make sure thay are in the first indices)
+    #write all possible features on image 0 (to make sure thay are the first indices)
     print("Preparing feature files")
     with time_it() as t:
         for view_index_0 in range(nb_image):
             print("writting file for view %d/%d"%(view_index_0, nb_image), end="\r")
-            timage_0, uid_image_0, image_0,_  = open_and_prepare_image(sfm_data,view_index_0)
+            timage_0, uid_image_0, image_0,_  = open_and_prepare_image(sfm_data,view_index_0, device)
             #each feature in image 0 has coords int(X/8)
             feature_map_size = (np.asarray(timage_0.shape[2:])/8.0).astype(np.int32)
             #all potential keypoints in image 0
@@ -115,9 +133,10 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
             with open(os.path.join(feature_folder,uid_image_0+extention), "w") as kpf:
                 for kp_x, kp_y in zip(all_keypoints_0_x, all_keypoints_0_y):
                     kpf.write("%f %f 0 0\n"%(kp_x, kp_y))
-            #update offsets for view 0
-            nb_features[view_index_0]+=all_keypoints_0_x.shape[0]
-    #FIXME: assume constant feaure map size and keep latest
+                #update offsets for view 0
+                nb_features[view_index_0]+=all_keypoints_0_x.shape[0]
+
+    #FIXME: assume constant feature map size and keep latest size
     #to retrieve the index later
     def map_indices(X):
         """
@@ -129,11 +148,12 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
         linear_index =  feature_map_size[1]*y+x.astype(np.int32)
         return linear_index
     print("\nDone in %f seconds"%t)
+
     print("Running matching")
     with time_it() as total_time:
         for view_index_0 in range(nb_image):
             #open and prepare
-            timage_0, uid_image_0, image_0, frame_id_0  = open_and_prepare_image(sfm_data,view_index_0)
+            timage_0, uid_image_0, image_0, frame_id_0  = open_and_prepare_image(sfm_data,view_index_0, device)
 
             #depending of the matching method, we get a list of views to match
             view_indices_1 = []
@@ -142,19 +162,19 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
                                     if abs(int(view["frameId"])-frame_id_0)<=int(imagemaching)]
             elif imagemaching == "all":
                 view_indices_1=range(nb_image) 
-            elif os.path.exists(imagemaching):
-                #raise RuntimeError("imagemaching not valid")#FIXME: graph?
-                #opn image matching graph
-                with open(imagemaching, 'r') as matchfile:#FIXME: opened eac time
-                    matches_raw = matchfile.readlines()
-                    view_indices_1 = [rm for rm in matches_raw if rm[0]==view_index_0]
+            elif imagemaching == "file":
+                #get view from graph
+                # each line corresponds to an image in the same order as in the sfm? #FIXME: to check
+                #FIXME : non bijective matching matrix
+                view_uids_1 = image_pairs[view_index_0]
+                view_indices_1 = [all_view_ids.index(v) for v in view_uids_1 if v != ""]
             else:
                 raise RuntimeError("Invalid imagemaching argument")
             #for all the other images
-            print("View %d, frame id %d to be matched with:"%(view_index_0, view_index_0))
-            print(view_indices_1)
-            print("Frame ids")
-            [print(sfm_data["views"][f]["frameId"]) for f in view_indices_1]
+            # print("View %d, frame id %d to be matched with:"%(view_index_0, sfm_data["views"][view_index_0]["frameId"]))
+            # print(view_indices_1)
+            # print("Frame ids")
+            # [print(sfm_data["views"][f]["frameId"]) for f in view_indices_1]
             with time_it() as t:        
                 for view_index_1  in view_indices_1:
                     #if same image, skip
@@ -163,7 +183,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
                     # print("\nMatches images %d to %d\n"%(view_index_0, view_index_1))
 
                     #open and prepare second image
-                    timage_1, uid_image_1, image_1, _ = open_and_prepare_image(sfm_data,view_index_1)
+                    timage_1, uid_image_1, image_1, _ = open_and_prepare_image(sfm_data,view_index_1, device)
 
                     #run loftr and get results
                     out = loftr_model({"image0": timage_0, "image1": timage_1})
@@ -193,35 +213,41 @@ def run_matching(inputsfmdata, outputfolder, imagemaching,
                             cv2.line(img_matches_display, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
                         Image.fromarray(img_matches_display).save(os.path.join(outputfolder, uid_image_0+"_"+uid_image_1)+".png")
                     
-                    #Write features on img 2 as brand new features #FIXME: remove the feature that did not make it
-                    with open(os.path.join(feature_folder,uid_image_1+extention), "a+") as kpf:
-                        for kp  in keypoints_1:
-                            kpf.write("%f %f 0 0\n"%(kp[0], kp[1]))
-
-                    #Write matches, note "0." beacause mewhroom suports several matches files for batching
+                    #if we keep the original matches
+                    if not coarsematch:
+                        #Write features on img 2 as brand new features #FIXME: remove the feature that did not make it, to avoid clutter
+                        with open(os.path.join(feature_folder,uid_image_1+extention), "a+") as kpf:
+                            for kp  in keypoints_1:
+                                kpf.write("%f %f 0 0\n"%(kp[0], kp[1]))
+                
                     #if we dont define a max nb of match, will write all matches, otherwise will write only the n best matches
                     if keepnmatches == 0:
-                        keepnmatches = nb_keypoint
+                        nb_to_write = nb_keypoint
                     else:
-                        keepnmatches = min(keepnmatches, nb_keypoint)
+                        nb_to_write = min(keepnmatches, nb_keypoint)
                     #if we passed confidenceThreshold, will find the index dynamically such that the remaining matches keep the trheshold
                     if  confidencethreshold !=0:
-                        keepnmatches = np.argmax(confidences<confidencethreshold)
+                        #will return index of first occurence of confidence bellow the threshold=> index when we stop
+                        nb_to_write = np.argmin(confidences>confidencethreshold)
+
+                    #Write matches, note "0." beacause mewhroom suports several matches files for batching
                     with open(os.path.join(matches_folder,"0.matches.txt"), "a+") as mf:
                         mf.write("%s %s\n"%(uid_image_0, uid_image_1))
                         mf.write("1\n")
-                        mf.write("sift %d\n"%(keepnmatches))#for now we disuise as sift
-                        for kp_indx in range(keepnmatches):#save feature index with offset for each view
+                        mf.write("sift %d\n"%(nb_to_write))#for now we disuise as sift
+                        for kp_indx in range(nb_to_write):#save feature index with offset for each view
                             keypoint_0_index = map_indices(keypoints_0[kp_indx])#retrieve index in the pre-written features
-                            keypoint_1_index = kp_indx+nb_features[view_index_1]#index is offsetted by the olready written featuress
+                            if not coarsematch:#if we keep the normal matches
+                                keypoint_1_index = kp_indx+nb_features[view_index_1]#index is offsetted by the allready written features
+                            else:
+                                keypoint_1_index = map_indices(keypoints_1[kp_indx])
                             mf.write("%d %d\n"%(keypoint_0_index, keypoint_1_index))
-                    
-                    #update offsets for view 1, FIXME: make it dynamic in case we remove features
-                    nb_features[view_index_1]+=nb_keypoint
-            #FIXME: remainng time would be more convenient
-            print("Maches for view %d/%d done (%fs, est. total for view %fs, est. total %fm)"%(view_index_0, 
-            nb_image, t, float(t)*len(view_indices_1), (nb_image*float(t)*len(view_indices_1))/60.0), end="\r")
-
+                    if not coarsematch:
+                        nb_features[view_index_1]+=nb_keypoint#nb_to_write #FIXME: remove the feature that did not make it, to avoid clutter
+            
+            print("Matches for view %d/%d done for %d views, in %fs (est. remaining if constant %fm)"%(view_index_0+1, 
+            nb_image, len(view_indices_1), t,  (nb_image-view_index_0)*float(t)/60.0), end="\n")
+    print("\n")
     print("Matching done in %fs"%total_time)
         
 if __name__ == '__main__':
