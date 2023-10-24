@@ -43,17 +43,25 @@ class VizTracks(desc.Node):
             uid=[0],
         ),
 
-
     desc.ChoiceParam(
-            name='verboseLevel',
-            label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
-            value='info',
-            values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
+            name="describerTypes",
+            label="Describer Types",
+            description="Describer types to keep.",
+            value=["dspsift"],
+            values=["sift", "sift_float", "sift_upright", "dspsift", "akaze", "akaze_liop", "akaze_mldb", "cctag3", "cctag4", "sift_ocv", "akaze_ocv", "tag16h5", "unknown"],
             exclusive=True,
-            uid=[0],
+            uid=[0]
         ),
 
+    desc.ChoiceParam(
+            name="verboseLevel",
+            label="Verbose Level",
+            description="Verbosity level (fatal, error, warning, info, debug, trace).",
+            value="info",
+            values=["fatal", "error", "warning", "info", "debug", "trace"],
+            exclusive=True,
+            uid=[],
+        )
     ]
 
     outputs = [
@@ -90,7 +98,7 @@ class VizTracks(desc.Node):
         uids_to_ids = {v:all_view_uids.index(v) for v in all_view_uids if v != ""}
 
         feature_files = [os.path.join(chunk.node.featureFolder.value, 
-                                      uid+".sift.feat") for uid in all_view_uids]#FIXME: harcoded sift"
+                                      uid+"."+chunk.node.describerTypes.value+".feat") for uid in all_view_uids]
         features = [np.loadtxt(ff) for ff in feature_files]
 
         # for each image 
