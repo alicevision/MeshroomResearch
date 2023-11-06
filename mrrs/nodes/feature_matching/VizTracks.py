@@ -48,7 +48,10 @@ class VizTracks(desc.Node):
             label="Describer Types",
             description="Describer types to keep.",
             value=["dspsift"],
-            values=["sift", "sift_float", "sift_upright", "dspsift", "akaze", "akaze_liop", "akaze_mldb", "cctag3", "cctag4", "sift_ocv", "akaze_ocv", "tag16h5", "unknown"],
+            values=["sift", "sift_float", "sift_upright", 
+                    "dspsift", "akaze", "akaze_liop", 
+                    "akaze_mldb", "cctag3", "cctag4", "sift_ocv", 
+                    "akaze_ocv", "tag16h5", "unknown"],
             exclusive=True,
             uid=[0]
         ),

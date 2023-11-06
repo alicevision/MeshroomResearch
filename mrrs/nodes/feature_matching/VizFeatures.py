@@ -165,7 +165,9 @@ class VizFeatures(desc.Node):
         
         sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
         feature_files = os.listdir(chunk.node.featureFolder.value)
+        print("%d feature files detected"%len(feature_files))
         if not chunk.node.matchOnly.value: 
+            print("Writting features")
             for view in sfm_data["views"]:
                 image_path = view["path"]
                 image_uid = view["viewId"]
@@ -176,6 +178,7 @@ class VizFeatures(desc.Node):
                 save_image(os.path.join(chunk.node.outputFolder.value, "features_"+image_uid+".png"),image)
 
         if chunk.node.matcheFolder.value != "":
+            print("Writting matches")
             chunk.logger.info('Displaying Matching')
             match_file = [os.path.join(chunk.node.matcheFolder.value, mf) for mf in os.listdir(chunk.node.matcheFolder.value) if mf.endswith(".txt")][0]
             chunk.logger.info('Opening matches')

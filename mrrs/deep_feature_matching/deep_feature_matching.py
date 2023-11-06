@@ -3,6 +3,7 @@ import os
 
 from PIL import Image
 import click
+from .utils import time_it, open_and_prepare_image
 import numpy as np
 
 import kornia
@@ -11,40 +12,6 @@ from kornia.feature.loftr.loftr import default_cfg#the default config file
 import torch
 
 import cv2
-
-#FIXME: call to mrrs, see with kelian conda node 
-import time 
-class time_it():
-    """
-    Context class to measure elapsed time.
-    Can be cast to float.
-    """
-    def __init__(self):
-        self.start_time = np.nan
-        self.end_time  = np.nan
-    def __enter__(self):
-        self.start_time = time.time()
-        return self
-    def __exit__(self, type, value, traceback):
-        self.end_time= time.time()
-    def __float__(self):
-        return float(self.end_time- self.start_time)
-    def __coerce__(self, other):
-        return (float(self), other)
-    def __str__(self):
-        return str(float(self))
-    def __repr__(self):
-        return str(float(self))
-
-def open_and_prepare_image(sfm_data, index, device):
-    """
-    Opens and prepare an image tensor from sfm data
-    """
-    image_0 = np.asarray(Image.open(sfm_data["views"][index]["path"]))
-    uid_image_0 = sfm_data["views"][index]["viewId"]
-    frame_id = int(sfm_data["views"][index]["frameId"])
-    timage_0 = kornia.color.rgb_to_grayscale(kornia.utils.image_to_tensor(image_0, False).float() / 255.).to(device)
-    return timage_0,  uid_image_0, image_0, frame_id
 
 def get_all_keypoints(feature_map_size):
     """
@@ -100,7 +67,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
             if len(image_pairs) ==  nb_image-1:#file is not properly written in AV, if last image no match, no \n
                 image_pairs.append("")
             else:
-                raise RuntimeError("Maformed image match file")
+                raise RuntimeError("Malformed image match file")
         print(image_pairs)
 
     #creates output folders
