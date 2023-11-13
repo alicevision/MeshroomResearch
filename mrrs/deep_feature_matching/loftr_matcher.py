@@ -1,17 +1,14 @@
 import json
-import os
+import os, sys
 
-from PIL import Image
 import click
-from .utils import time_it, open_and_prepare_image, open_image_grapĥ
 import numpy as np
-
-import kornia
 import torch
-# import cv2
-
 from kornia.feature.loftr.loftr import LoFTR
 from kornia.feature.loftr.loftr import default_cfg#the default config file
+
+sys.path.append(os.path.abspath(__file__))
+from utils import time_it, open_and_prepare_image, open_image_grapĥ
 
 def get_all_keypoints(feature_map_size):
     """
