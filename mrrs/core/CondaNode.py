@@ -45,7 +45,9 @@ class CondaNode(desc.CommandLineNode):
             chunk.logger.info("Creating conda env")
             if not os.path.exists(self.env_file):
                 raise RuntimeError('No yaml file found.')
-            make_env_command = self.curate_env_command()+" conda env create --prefix {env_path} --file {env_file}".format(env_path=env_path, env_file=self.env_file)   
+            make_env_command = self.curate_env_command()+" conda config --set channel_priority strict; "+" conda env create --prefix {env_path} --file {env_file}".format(env_path=env_path, env_file=self.env_file)   
+            print("Building env")
+            print(make_env_command)
             os.system(make_env_command)
         #add the prefix to the command line
         cmdPrefix = self.curate_env_command()+' conda run --no-capture-output -p {env_path} '.format(env_path=env_path)

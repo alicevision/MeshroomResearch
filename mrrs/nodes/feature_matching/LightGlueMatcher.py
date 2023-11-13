@@ -5,14 +5,14 @@ from meshroom.core import desc
 from mrrs.deep_feature_matching import ENV_FILE
 from mrrs.core.CondaNode import CondaNode
 
-LOFTR_EXEC = "python "+ os.path.join(os.path.dirname(__file__), "../../deep_feature_matching/deep_feature_matching.py")
+EXEC = "python "+ os.path.join(os.path.dirname(__file__), "../../deep_feature_matching/light_glue_matcher.py")
 
-class DeepFeatureMatching(CondaNode):
+class LightGlueMatching(CondaNode):
 
     category = 'Sparse Reconstruction'
     documentation = ''' '''
 
-    commandLine = LOFTR_EXEC+" {allParams}"
+    commandLine = EXEC+" {allParams}"
 
     #overides the env path
     @property
@@ -28,6 +28,14 @@ class DeepFeatureMatching(CondaNode):
             uid=[0],
         ),
 
+        desc.File(
+            name="inputFeatureFolder",
+            label="inputFeatureFolder",
+            description="inputFeatureFolder",
+            value="",
+            uid=[0],
+        ),
+
         desc.IntParam(
             name="keepNmatches",
             label="keepNmatches",
@@ -38,11 +46,11 @@ class DeepFeatureMatching(CondaNode):
         ),
 
         desc.FloatParam(
-            name="confidenceThreshold",
-            label="confidenceThreshold",
-            description="Only keep the matches if their confidence hits this threshold.",
+            name="distanceThreshold",
+            label="distanceThreshold",
+            description="distanceThreshold",
             range=(0.0,1.0,0.01),
-            value=0.5,
+            value=0.0,
             uid=[0],
         ),
         
@@ -59,14 +67,6 @@ class DeepFeatureMatching(CondaNode):
             label='imagePairs',
             description='Optional file defining the images pairs to be matched',
             value="",
-            uid=[0],
-        ),
-
-        desc.BoolParam(
-            name="debugImages",
-            label="debugImages",
-            description="Will write image matches",
-            value=False,
             uid=[0],
         ),
 
@@ -87,14 +87,6 @@ class DeepFeatureMatching(CondaNode):
             description="Path to a folder in which the computed results are stored.",
             value=desc.Node.internalFolder,
             uid=[],
-        ),
-        desc.File(
-            name="featuresFolders",
-            label="Features Folder",
-            description="Path to a folder in which the features matches are stored.",
-            value=os.path.join(desc.Node.internalFolder, "features"),
-            uid=[],
-            group=""
         ),
         desc.File(
             name="matchesFolders",

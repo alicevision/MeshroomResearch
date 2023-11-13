@@ -3,15 +3,15 @@ import os
 
 from PIL import Image
 import click
-from .utils import time_it, open_and_prepare_image
+from .utils import time_it, open_and_prepare_image, open_image_grapĥ
 import numpy as np
 
 import kornia
+import torch
+# import cv2
+
 from kornia.feature.loftr.loftr import LoFTR
 from kornia.feature.loftr.loftr import default_cfg#the default config file
-import torch
-
-import cv2
 
 def get_all_keypoints(feature_map_size):
     """
@@ -32,7 +32,7 @@ def get_all_keypoints(feature_map_size):
 @click.option('--keepNmatches', default=0, type=int, help='If specified will keep the n first matches between views')
 @click.option('--confidenceThreshold', default=0.0, type=float, help='If specified will only keep the matches with at least this confidence')
 @click.option('--coarseMatch', default=True, type=bool, help='Will use the coarse patch-level matches to create longer track.')
-@click.option('--debugImages', default=False, type=bool, help='Will Write match images')
+@click.option('--debugImages', default=False, type=bool, help='Will Write match images') #TODO: remove
 @click.option('--verboseLevel', help='.')#FIXME: todo
 def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
                  keepnmatches, confidencethreshold, coarsematch,
@@ -49,7 +49,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
     loftr_weigts = 'outdoor'#FIXME: var
     loftr_config = default_cfg
 
-    #load sfmdata
+    #Load sfmdata
     print("Loading sfm data")
     with open(inputsfmdata, "r") as json_file:
         sfm_data = json.load(json_file)
@@ -59,16 +59,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
     #opening imagematching file if any
     if imagemaching == "file":
         print("Opening imagepairs file:")
-        with open(imagepairs, 'r') as matchfile:
-            matches_raw = matchfile.readlines()
-        #one line per image
-        image_pairs = [line.strip().split(" ") for line in matches_raw]
-        if len(image_pairs) !=  nb_image:
-            if len(image_pairs) ==  nb_image-1:#file is not properly written in AV, if last image no match, no \n
-                image_pairs.append("")
-            else:
-                raise RuntimeError("Malformed image match file")
-        print(image_pairs)
+        image_pairs=open_image_grapĥ(imagepairs, nb_image)
 
     #creates output folders
     print("Creating output folders")
@@ -80,7 +71,6 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
     #init model
     print("Loading model")
     device = torch.device('cuda:0')
-    default_cfg
     loftr_model = LoFTR(loftr_weigts, config=loftr_config).to(device)
 
     #loop over pairs of images
@@ -137,11 +127,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
                 view_indices_1 = [all_view_ids.index(v) for v in view_uids_1 if v != ""]
             else:
                 raise RuntimeError("Invalid imagemaching argument")
-            #for all the other images
-            # print("View %d, frame id %d to be matched with:"%(view_index_0, sfm_data["views"][view_index_0]["frameId"]))
-            # print(view_indices_1)
-            # print("Frame ids")
-            # [print(sfm_data["views"][f]["frameId"]) for f in view_indices_1]
+
             with time_it() as t:        
                 for view_index_1  in view_indices_1:
                     #if same image, skip
@@ -164,21 +150,21 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
                     keypoints_0=keypoints_0[order]
                     keypoints_1=keypoints_1[order]
 
-                    if debugimages:
-                        #display N strongest matches
-                        img_matches_display = np.concatenate([image_0, image_1], axis=1)
-                        n=keepnmatches
-                        p=1
-                        o=image_0.shape[1]
-                        for kp in keypoints_0[0:n]:
-                            img_matches_display[int(kp[1])-p:int(kp[1])+p,
-                                        int(kp[0])-p:int(kp[0])+p, :]=[255,0,0]
-                        for kp in keypoints_1[0:n]:
-                            img_matches_display[int(kp[1])-p:int(kp[1])+p,
-                                                o+int(kp[0])-p:o+int(kp[0])+p, :]=[0,255,0]
-                        for kp0, kp1 in zip(keypoints_0[0:n], keypoints_1[0:n]):
-                            cv2.line(img_matches_display, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
-                        Image.fromarray(img_matches_display).save(os.path.join(outputfolder, uid_image_0+"_"+uid_image_1)+".png")
+                    # if debugimages:
+                    #     #display N strongest matches
+                    #     img_matches_display = np.concatenate([image_0, image_1], axis=1)
+                    #     n=keepnmatches
+                    #     p=1
+                    #     o=image_0.shape[1]
+                    #     for kp in keypoints_0[0:n]:
+                    #         img_matches_display[int(kp[1])-p:int(kp[1])+p,
+                    #                     int(kp[0])-p:int(kp[0])+p, :]=[255,0,0]
+                    #     for kp in keypoints_1[0:n]:
+                    #         img_matches_display[int(kp[1])-p:int(kp[1])+p,
+                    #                             o+int(kp[0])-p:o+int(kp[0])+p, :]=[0,255,0]
+                    #     for kp0, kp1 in zip(keypoints_0[0:n], keypoints_1[0:n]):
+                    #         cv2.line(img_matches_display, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
+                    #     Image.fromarray(img_matches_display).save(os.path.join(outputfolder, uid_image_0+"_"+uid_image_1)+".png")
                     
                     #if we keep the original matches
                     if not coarsematch:
