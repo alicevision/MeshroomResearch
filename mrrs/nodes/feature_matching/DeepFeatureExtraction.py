@@ -11,6 +11,7 @@ class DeepFeatureExtraction(CondaNode):
 
     category = 'Sparse Reconstruction'
     documentation = ''' '''
+    gpu = desc.Level.INTENSIVE
 
     commandLine = EXEC+" {allParams}"
 

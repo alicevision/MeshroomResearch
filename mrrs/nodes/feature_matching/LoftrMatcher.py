@@ -11,6 +11,7 @@ class LoftrMatcher(CondaNode):
 
     category = 'Sparse Reconstruction'
     documentation = ''' '''
+    gpu = desc.Level.INTENSIVE
 
     commandLine = LOFTR_EXEC+" {allParams}"
 

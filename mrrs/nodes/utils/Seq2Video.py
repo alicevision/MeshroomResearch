@@ -5,7 +5,7 @@ from meshroom.core import desc
 
 class Seq2Video(desc.CommandLineNode):
     #FIXme : rez env
-    commandLine = 'rez env ffmpeg -- ffmpeg -y -framerate {framerateValue} -pattern_type glob -i {imagesFolderValue}/{patternValue} {outputVideoValue}'
+    commandLine = 'rez env ffmpeg -- ffmpeg -framerate {framerateValue} -y -pattern_type glob -i {imagesFolderValue}/{patternValue} {outputVideoValue}{videoFormatValue}'
     gpu = desc.Level.NONE
 
     category = 'Meshroom Research'
@@ -19,7 +19,7 @@ class Seq2Video(desc.CommandLineNode):
             value='',
             uid=[0],
             ),
-        desc.File(
+        desc.StringParam(
             name='pattern',
             label='pattern',
             description=''' ''',
@@ -31,9 +31,16 @@ class Seq2Video(desc.CommandLineNode):
             label='Framerate',
             description=''' ''',
             value=25.0,
-            range=(1.0, 120.0, 1.0),
+            range=(1.0, 3000.0, 1.0),
             uid=[0],
-            )
+            ),
+        desc.StringParam(
+            name='videoFormat',
+            label='videoFormat',
+            description=''' ''',
+            value='.mp4',
+            uid=[0],
+            ),
     ]
 
     outputs = [
@@ -41,7 +48,7 @@ class Seq2Video(desc.CommandLineNode):
             name='outputVideo',
             label='Output Video',
             description='''  ''',
-            value=os.path.join(desc.Node.internalFolder, 'video.mp4'),
+            value=os.path.join(desc.Node.internalFolder, 'video'),
             uid=[],
             ),
     ]

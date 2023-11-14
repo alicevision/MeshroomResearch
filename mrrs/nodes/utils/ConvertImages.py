@@ -147,6 +147,7 @@ class ConvertImages(desc.Node):
                                                       to_srgb=chunk.node.convertSRGB.value)
                 #modify the corresponding intrinsic (! done multiple time becasue sevearl view share one intricic)
                 intrinsicId = sfm_data["views"][index]["intrinsicId"]
+                frameId  = int(sfm_data["views"][index]["frameId"])
                 chunk.logger.info('\tOrientation %d'%orientation)
                 input_image = input_image[::chunk.node.resampleX.value,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
@@ -159,7 +160,7 @@ class ConvertImages(desc.Node):
                     #updating focal lenght FIXME: if we want to stay up to scale
                     # sfm_data["intrinsics"]["focalLength"] = sfm_data["intrinsics"]["focalLength"]*(chunk.node.maxWidth.value/input_image.shape[1])
                 if chunk.node.renameSequence.value:
-                    new_filename = "frame_%05d"%index+chunk.node.outputFormat.value
+                    new_filename = "frame_%05d"%frameId+chunk.node.outputFormat.value
                     chunk.logger.info("\tRenaming to to "+new_filename)
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
                 if chunk.node.autoRotate.value:

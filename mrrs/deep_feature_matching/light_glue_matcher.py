@@ -43,7 +43,7 @@ def run_matching(inputsfmdata, outputfolder, inputfeaturefolder,
     print(kornia.__version__)
 
     extention = "unknown"
-    feature_type = "disk"
+    feature_type = "disk"#FIXME: parameter
 
     def open_and_prepare_features(sfm_data, index, device):
         uid_image = sfm_data["views"][index]["viewId"]
@@ -104,7 +104,7 @@ def run_matching(inputsfmdata, outputfolder, inputfeaturefolder,
                     #if same image, skip
                     if view_index_0 == view_index_1:
                         continue
-                    print("\nMatches images %d to %d\n"%(view_index_0, view_index_1))
+                    # print("\nMatches images %d to %d\n"%(view_index_0, view_index_1))
 
                     #open and prepare second image
                     features_1, descritors_1, uid_image_1, _, _ = open_and_prepare_features(sfm_data, view_index_1, device)
@@ -115,6 +115,10 @@ def run_matching(inputsfmdata, outputfolder, inputfeaturefolder,
 
                     hw_0 = torch.Tensor(image_size_0)
                     hw_1 = torch.Tensor(image_size_0)#FIXME: assumes same image size
+                    print(features_0.shape)
+                    print(features_1.shape)
+                    print(descritors_0.shape)
+                    print(descritors_1.shape)
                     input_dict = {
                                     "image0": {
                                         "keypoints": torch.unsqueeze(features_0, dim=0),
@@ -137,7 +141,7 @@ def run_matching(inputsfmdata, outputfolder, inputfeaturefolder,
                     order = np.argsort(distance)
                     matches=matches[order]
 
-                    print(matches.shape)
+                    # print(matches.shape)
 
                     #if we dont define a max nb of match, will write all matches, otherwise will write only the n best matches
                     if keepnmatches == 0:
