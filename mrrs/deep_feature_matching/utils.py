@@ -1,12 +1,14 @@
 from PIL import Image
-import kornia 
+
 import numpy as np
 import struct
 
+#FIXME: imports
 def open_and_prepare_image(sfm_data, index, device, grayscale=True):
     """
     Opens and prepare an image tensor from sfm data
     """
+    import kornia 
     image_0 = np.asarray(Image.open(sfm_data["views"][index]["path"]))#FIXME: replace will call to open_image
     image_0 = image_0[:,:,0:3]
     uid_image_0 = sfm_data["views"][index]["viewId"]
@@ -42,6 +44,7 @@ class time_it():
     def __repr__(self):
         return str(float(self))
 
+#FIXME: all of this should be in core
 def open_image_grapĥ(imagepairs, nb_image):
     with open(imagepairs, 'r') as matchfile:
         matches_raw = matchfile.readlines()
@@ -62,3 +65,13 @@ def open_descriptor_file(descriptor_file):
         descriptors = np.asarray(list(struct.iter_unpack('f', df.read())))
         descriptors=np.reshape(descriptors, (nb_desv_encoded, -1))
     return descriptors
+    
+def write_descriptor_file(descriptors, desk_filename):
+    with open(desk_filename, "wb") as df:
+        #nb of desc, as size_t (should be 1 byte)
+        nb_desv_encoded = struct.pack('N', int(descriptors.shape[0]))
+        df.write(nb_desv_encoded)
+        for descriptor in descriptors:#write descriptor as floats (4 bytes)
+            for d in descriptor:
+                d=struct.pack('f', d)
+                df.write(d)

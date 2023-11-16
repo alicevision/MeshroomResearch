@@ -9,7 +9,7 @@ import torch
 from torch.nn.functional import pad
 
 sys.path.append(os.path.abspath(__file__))
-from utils import time_it, open_and_prepare_image
+from utils import time_it, open_and_prepare_image, write_descriptor_file
 
 FEATURE_SIZE = 128
 
@@ -87,14 +87,7 @@ def run_extraction(inputsfmdata, outputfolder, method, verboselevel):
             desk_filename = os.path.join(outputfolder,uid_image_0+".unknown.desc")
             #TODO: pad descrippr descriptors.shape[0] to FEATURE_SIZE 
             #TODO: put that in fc
-            with open(desk_filename, "wb") as df:
-                #nb of desc, as size_t (should be 1 byte)
-                nb_desv_encoded = struct.pack('N', int(descriptors.shape[0]))
-                df.write(nb_desv_encoded)
-                for descriptor in descriptors:#write descriptor as floats (4 bytes)
-                    for d in descriptor:
-                        d=struct.pack('f', d)
-                        df.write(d)
+            write_descriptor_file(descriptors, desk_filename)
                 
         remaining = (nb_image-view_index_0-1)*float(t)    
         print("Extraction done in %fs (%d desc of size %d est remaining %fs/%fm)"%(t,descriptors.shape[0], descriptors.shape[1],remaining, remaining/60.0))

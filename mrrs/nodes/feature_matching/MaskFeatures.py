@@ -8,6 +8,7 @@ from shutil import copyfile
 from meshroom.core import desc
 
 from mrrs.core.ios import *
+from mrrs.deep_feature_matching.utils import open_descriptor_file, write_descriptor_file
 
 class MaskFeatures(desc.Node):
 
@@ -87,13 +88,16 @@ class MaskFeatures(desc.Node):
             keypoints = np.loadtxt(keypoint_file)
             mask = open_image(mask_file).astype(np.bool)
             keypoints_nn = np.round(keypoints).astype(np.int32)
-            valid_keypoints = keypoints[mask[keypoints_nn[:,1],keypoints_nn[:,0],0],:]
+            valid_mask=mask[keypoints_nn[:,1],keypoints_nn[:,0],0]
+            valid_keypoints = keypoints[valid_mask,:]
             print("Saving %d keypoints"%valid_keypoints.shape[0])
             with open(os.path.join(chunk.node.outputFolder.value, os.path.basename(keypoint_file)), "w") as kpf:
                 for kp_x, kp_y in valid_keypoints[:,0:2]:
                     kpf.write("%f %f 0 0\n"%(kp_x, kp_y))
             #FIXME: need to remove coresp descriptor
-            copyfile(desc_file, os.path.join(chunk.node.outputFolder.value, os.path.basename(desc_file)))
+            descriptors=open_descriptor_file(desc_file)
+            valid_descriptors = descriptors[valid_mask,:]
+            write_descriptor_file(valid_descriptors, os.path.join(chunk.node.outputFolder.value, os.path.basename(desc_file)))
       
         chunk.logManager.end()
 
