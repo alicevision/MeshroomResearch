@@ -133,6 +133,8 @@ def open_image(image_path, auto_rotate=False, return_orientation=False, to_srgb=
 
     import OpenImageIO as oiio
     exr_file = oiio.ImageInput.open(image_path)
+    if exr_file is None:
+        raise RuntimeError("Something went wrong while opening "+image_path)
     meta = exr_file.spec()
     orientation = meta.get("Orientation", orientation)
     image_buff = oiio.ImageBuf(image_path)

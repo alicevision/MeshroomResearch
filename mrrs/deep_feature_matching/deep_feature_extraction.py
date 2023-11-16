@@ -34,7 +34,6 @@ def run_extraction(inputsfmdata, outputfolder, method, verboselevel):
     with open(inputsfmdata, "r") as json_file:
         sfm_data = json.load(json_file)
     nb_image = len(sfm_data["views"]) 
-    all_view_ids = [v["viewId"] for v in sfm_data["views"]]
 
     #init model
     print("Loading model")
@@ -47,6 +46,7 @@ def run_extraction(inputsfmdata, outputfolder, method, verboselevel):
     else:
         raise RuntimeError("Method no valid")
     feature_model=feature_model.to(device)
+
     #loop over images
     for view_index_0 in range(nb_image):
         with time_it() as t:
@@ -77,10 +77,11 @@ def run_extraction(inputsfmdata, outputfolder, method, verboselevel):
                 descriptors=output[2].cpu()
             #write all keypoints
             kp_filename = os.path.join(outputfolder,uid_image_0+".unknown.feat")
+            print("Saving %d keypoints")
             with open(kp_filename, "w") as kpf:
                 for kp_x, kp_y in keypoints:
                     kpf.write("%f %f 0 0\n"%(kp_x, kp_y))
-
+                    
             # write descriptors as in aliceVision
             # https://github.com/alicevision/AliceVision/blob/develop/src/aliceVision/feature/Descriptor.hpp#L255C13-L255C33
             desk_filename = os.path.join(outputfolder,uid_image_0+".unknown.desc")

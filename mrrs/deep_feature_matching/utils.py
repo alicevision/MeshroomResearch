@@ -1,6 +1,7 @@
 from PIL import Image
 import kornia 
 import numpy as np
+import struct
 
 def open_and_prepare_image(sfm_data, index, device, grayscale=True):
     """
@@ -53,3 +54,11 @@ def open_image_grapĥ(imagepairs, nb_image):
             raise RuntimeError("Malformed image match file, %d vs %d images"%(len(image_pairs), nb_image-1))
     return image_pairs
 
+def open_descriptor_file(descriptor_file):
+    with open(descriptor_file, "rb") as df:
+        #read number of desc from first byte
+        nb_desv_encoded = struct.unpack('N', df.read(struct.calcsize('N')))[0]
+        #read rematinign floats
+        descriptors = np.asarray(list(struct.iter_unpack('f', df.read())))
+        descriptors=np.reshape(descriptors, (nb_desv_encoded, -1))
+    return descriptors

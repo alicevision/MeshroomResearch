@@ -1,7 +1,5 @@
-from itertools import count
 import json
 import os
-import struct
 import sys
 
 import click
@@ -11,16 +9,7 @@ import kornia
 import torch
 
 sys.path.append(os.path.abspath(__file__))
-from utils import time_it, open_image_grapĥ
-
-def open_descriptor_file(descriptor_file):
-    with open(descriptor_file, "rb") as df:
-        #read number of desc from first byte
-        nb_desv_encoded = struct.unpack('N', df.read(struct.calcsize('N')))[0]
-        #read rematinign floats
-        descriptors = np.asarray(list(struct.iter_unpack('f', df.read())))
-        descriptors=np.reshape(descriptors, (nb_desv_encoded, -1))
-    return descriptors
+from utils import time_it, open_image_grapĥ, open_descriptor_file
 
 @click.command()
 @click.option('--inputSfMData', help='Input sfm data')
@@ -115,10 +104,10 @@ def run_matching(inputsfmdata, outputfolder, inputfeaturefolder,
 
                     hw_0 = torch.Tensor(image_size_0)
                     hw_1 = torch.Tensor(image_size_0)#FIXME: assumes same image size
-                    print(features_0.shape)
-                    print(features_1.shape)
-                    print(descritors_0.shape)
-                    print(descritors_1.shape)
+                    # print(features_0.shape)
+                    # print(features_1.shape)
+                    # print(descritors_0.shape)
+                    # print(descritors_1.shape)
                     input_dict = {
                                     "image0": {
                                         "keypoints": torch.unsqueeze(features_0, dim=0),
