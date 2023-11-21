@@ -26,12 +26,13 @@ def get_all_keypoints(feature_map_size):
                                                     +"If a number is passed, will assume sequence and the number is going to be half window around a frame to compute the maches into"
                                                     +"If 'file' open the matches from the file in imagePairs"))
 @click.option('--imagePairs', default="", help=("Image pair file to be used for the image matching"))
+@click.option('--maskFolder', default="", help=("Optional mask folder used to discard matches"))
 @click.option('--keepNmatches', default=0, type=int, help='If specified will keep the n first matches between views')
 @click.option('--confidenceThreshold', default=0.0, type=float, help='If specified will only keep the matches with at least this confidence')
 @click.option('--coarseMatch', default=True, type=bool, help='Will use the coarse patch-level matches to create longer track.')
 @click.option('--debugImages', default=False, type=bool, help='Will Write match images') #TODO: remove
 @click.option('--verboseLevel', help='.')#FIXME: todo
-def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
+def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolder,
                  keepnmatches, confidencethreshold, coarsematch,
                  debugimages, verboselevel): #note: lower caps
     """
@@ -57,6 +58,13 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
     if imagemaching == "file":
         print("Opening imagepairs file:")
         image_pairs=open_image_grapĥ(imagepairs, nb_image)
+
+    #opening masks if any 
+    if maskfolder:
+        from PIL import Image
+        masks = {}
+        for view_id in all_view_ids:
+            masks[view_id] = np.array(Image.open(os.path.join(maskfolder, view_id+".png")), dtype=np.bool8)
 
     #creates output folders
     print("Creating output folders")
@@ -167,9 +175,22 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs,
                     if not coarsematch:
                         #Write features on img 2 as brand new features #FIXME: remove the feature that did not make it, to avoid clutter
                         with open(os.path.join(feature_folder,uid_image_1+extention), "a+") as kpf:
-                            for kp  in keypoints_1:
+                            for kp in keypoints_1:
                                 kpf.write("%f %f 0 0\n"%(kp[0], kp[1]))
-                
+
+                    #if masks defined
+                    if len(masks) > 0:
+                        mask_0 = masks[uid_image_0]
+                        mask_1 = masks[uid_image_1]
+                        nn_keypoints_0 = np.round(keypoints_0).astype(np.int32)
+                        nn_keypoints_1 = np.round(keypoints_1).astype(np.int32)
+                        mask_0_kp = mask_0[nn_keypoints_0[:,1],nn_keypoints_0[:,0],0]
+                        mask_1_kp = mask_1[nn_keypoints_1[:,1],nn_keypoints_1[:,0],0]
+                        valid_kp = mask_0_kp&mask_1_kp
+                        keypoints_0 = keypoints_0[valid_kp]
+                        keypoints_1 = keypoints_1[valid_kp]
+                        nb_keypoint = keypoints_0.shape[0]
+
                     #if we dont define a max nb of match, will write all matches, otherwise will write only the n best matches
                     if keepnmatches == 0:
                         nb_to_write = nb_keypoint

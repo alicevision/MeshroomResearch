@@ -4,47 +4,13 @@ import os
 import json
 
 import cv2
+from mrrs.deep_feature_matching.utils import open_matches
 import numpy as np
 
 from meshroom.core import desc
 
 from mrrs.core.ios import *
 from mrrs.core.geometry import *
-
-def parse_line(matches):
-    result = [m.strip() for m in matches.readline().split(" ")]
-    if len(result) == 1:
-        if result[0] == "":
-            return None
-        result = result[0]
-    return result
-
-def open_matches(match_file):
-    with open(match_file, "r") as match_file:
-        match_data = {}
-        while True:
-            view_ids = parse_line(match_file)
-            if view_ids is None:
-                break
-            view_id_0, view_id_1 = view_ids
-            nb_type_feat = parse_line(match_file)
-            if nb_type_feat != "1":
-                raise RuntimeError("Only supports one descriptor type at the time")
-            type_feat, nb_match = parse_line(match_file)
-            nb_match = int(nb_match)
-            matches_raw = [match_file.readline() for _ in range(nb_match)]
-            #avoid the squeeze when onlly one match
-            if len(matches_raw)  == 1:
-                matches = np.expand_dims(np.loadtxt(matches_raw).astype(np.int32), axis=0)
-            else:
-                matches = np.loadtxt(matches_raw).astype(np.int32)
-            if matches.shape[0] != nb_match:
-                raise RuntimeError("Unexpected number of matches for view %s %d vs %d"%(view_id_0, matches.shape[0], nb_match))
-            #save result
-            if not (view_id_0 in match_data.keys()):
-                match_data[view_id_0]={}
-            match_data[view_id_0][view_id_1] = matches
-    return match_data
 
 def draw_keypoints(image, keypoints, downsample=1, p = 2, o = 0):
     for kp in keypoints[::downsample]:

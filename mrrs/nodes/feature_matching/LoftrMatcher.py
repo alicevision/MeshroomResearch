@@ -63,6 +63,14 @@ class LoftrMatcher(CondaNode):
             uid=[0],
         ),
 
+        desc.File(
+            name='maskFolder',
+            label='maskFolder',
+            description='Optional mask folder to remove matches from these zones',
+            value="",
+            uid=[0],
+        ),
+
         desc.BoolParam(
             name="debugImages",
             label="debugImages",
