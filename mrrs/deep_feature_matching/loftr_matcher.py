@@ -184,12 +184,13 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                         mask_1 = masks[uid_image_1]
                         nn_keypoints_0 = np.round(keypoints_0).astype(np.int32)
                         nn_keypoints_1 = np.round(keypoints_1).astype(np.int32)
-                        mask_0_kp = mask_0[nn_keypoints_0[:,1],nn_keypoints_0[:,0],0]
-                        mask_1_kp = mask_1[nn_keypoints_1[:,1],nn_keypoints_1[:,0],0]
+                        mask_0_kp = mask_0[nn_keypoints_0[:,1], nn_keypoints_0[:,0],0]
+                        mask_1_kp = mask_1[nn_keypoints_1[:,1], nn_keypoints_1[:,0],0]
                         valid_kp = mask_0_kp&mask_1_kp
-                        keypoints_0 = keypoints_0[valid_kp]
-                        keypoints_1 = keypoints_1[valid_kp]
+                        keypoints_0 = keypoints_0[valid_kp,:]
+                        keypoints_1 = keypoints_1[valid_kp,:]
                         nb_keypoint = keypoints_0.shape[0]
+                        print(keypoints_0.shape)
 
                     #if we dont define a max nb of match, will write all matches, otherwise will write only the n best matches
                     if keepnmatches == 0:
