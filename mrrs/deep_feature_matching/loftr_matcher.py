@@ -123,7 +123,9 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                 view_indices_1 = [i for i,view in enumerate(sfm_data["views"])
                                     if abs(int(view["frameId"])-frame_id_0)<=int(imagemaching)]
             elif imagemaching == "all":
-                view_indices_1=range(nb_image) 
+                view_indices_1=range(nb_image)
+            elif imagemaching == "uni":
+                view_indices_1=range(view_index_0, nb_image) 
             elif imagemaching == "file":
                 #get view from graph
                 # each line corresponds to an image in the same order as in the sfm? #FIXME: to check
