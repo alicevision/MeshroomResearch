@@ -138,7 +138,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                     #if same image, skip
                     if view_index_0 == view_index_1:
                         continue
-                    # print("\nMatches images %d to %d\n"%(view_index_0, view_index_1))
+                    print("\nMatches images %d to %d\n"%(view_index_0, view_index_1))
 
                     #open and prepare second image
                     timage_1, uid_image_1, image_1, _ = open_and_prepare_image(sfm_data,view_index_1, device)
@@ -190,7 +190,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                         keypoints_0 = keypoints_0[valid_kp,:]
                         keypoints_1 = keypoints_1[valid_kp,:]
                         nb_keypoint = keypoints_0.shape[0]
-                        print(keypoints_0.shape)
+                        # print(keypoints_0.shape)
 
                     #if we dont define a max nb of match, will write all matches, otherwise will write only the n best matches
                     if keepnmatches == 0:
@@ -200,7 +200,8 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                     #if we passed confidenceThreshold, will find the index dynamically such that the remaining matches keep the trheshold
                     if  confidencethreshold !=0:
                         #will return index of first occurence of confidence bellow the threshold=> index when we stop
-                        nb_to_write = np.argmin(confidences>confidencethreshold)
+                        nb_to_write = np.argmax(confidences>confidencethreshold)
+
 
                     #Write matches, note "0." beacause mewhroom suports several matches files for batching
                     with open(os.path.join(matches_folder,"0.matches.txt"), "a+") as mf:
