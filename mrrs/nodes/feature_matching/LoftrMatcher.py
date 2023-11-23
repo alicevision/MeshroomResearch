@@ -33,7 +33,7 @@ class LoftrMatcher(CondaNode):
             name="keepNmatches",
             label="keepNmatches",
             description="Only keep the n strongest matches per view. 0 to disable",
-            range=(0,1000,1),
+            range=(20000,100000,1),
             value=0,
             uid=[0],
         ),

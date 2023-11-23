@@ -201,8 +201,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                     if  confidencethreshold !=0:
                         #will return index of first occurence of confidence bellow the threshold=> index when we stop
                         nb_to_write = np.argmax(confidences>confidencethreshold)
-
-
+                      
                     #Write matches, note "0." beacause mewhroom suports several matches files for batching
                     with open(os.path.join(matches_folder,"0.matches.txt"), "a+") as mf:
                         mf.write("%s %s\n"%(uid_image_0, uid_image_1))
