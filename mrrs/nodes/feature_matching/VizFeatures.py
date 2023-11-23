@@ -179,7 +179,9 @@ class VizFeatures(desc.Node):
                         raise RuntimeError("ERROR FEATURE INDEX IN MATCH OUTSIDE OF LISTED FEATURES FOR %s (%d vs %d)"%(view_id_1, m[1],keypoints_1.shape[0])) 
                     kp0 = keypoints_0[m[0]]
                     kp1 = keypoints_1[m[1]]
-                    
+                    if chunk.node.matchOnly.value:
+                        match_image=draw_keypoints(match_image, np.asarray( [(int(kp0[0]),int(kp0[1])), 
+                                                                            (int(o+kp1[0]),int(kp1[1]))]) )
                     cv2.line(match_image, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
                 save_image(os.path.join(chunk.node.outputFolder.value, "matches_"+view_id_0+".png"),match_image)
   

@@ -16,14 +16,17 @@ FEATURE_SIZE = 128
 #todo add 
 # FEATURE_TYPES = ["DISK", "SIFTFeature", "SIFTFeatureScaleSpace", 
 #                  "GFTTAffNetHardNet", "KeyNetAffNetHardNet", "KeyNetHardNet"]
+#todo add option to sort features 
 
 @click.command()
 @click.option('--inputSfMData', help='Input sfm data')
 @click.option('--outputFolder', help='Output to store the results in')
 @click.option('--method', type=click.Choice(["DISK", "SIFT"]), help="Feature extraction method")
+@click.option('--maxKeypoints', type=click.INT, help='Will set the maximum nb of keyoint to maxKeypoints')
+@click.option('--gridKeypoints', type=click.INT, help='maxKeypoints')
 @click.option('--verboseLevel', help='.')#FIXME: todo
 
-def run_extraction(inputsfmdata, outputfolder, method, verboselevel): 
+def run_extraction(inputsfmdata, outputfolder, method, maxkeypoints, verboselevel): 
     """
     run the feature detection and description
     """
@@ -40,9 +43,9 @@ def run_extraction(inputsfmdata, outputfolder, method, verboselevel):
     device = torch.device('cuda:0')
     feature_model = None
     if method == "DISK":
-        feature_model = kornia.feature.DISK.from_pretrained("depth").to(device)
+        feature_model = kornia.feature.DISK.from_pretrained("depth").to(device)#or epipolar
     elif method == "SIFT":
-        feature_model = kornia.feature.SIFTFeature(num_features=8000,  device=device)
+        feature_model = kornia.feature.SIFTFeature(num_features=maxkeypoints,  device=device)
     else:
         raise RuntimeError("Method no valid")
     feature_model=feature_model.to(device)
@@ -58,13 +61,11 @@ def run_extraction(inputsfmdata, outputfolder, method, verboselevel):
                 padding= new_image_size-image_size
                 if padding[0] !=0 or padding[1] != 0:
                     timage_0 = pad(timage_0, (0,0,padding[0],padding[1]) , value=0)#bad on right/bottom
-            if method == "SIFT":
-                timage_0 = kornia.color.rgb_to_grayscale(timage_0)
-            #get features from image
-            with torch.no_grad():
-                output = feature_model(timage_0)
-
-            if method == "DISK":
+                #get features from image
+                window_size = 5
+                score_threshold = 0
+                with torch.no_grad():
+                    output = feature_model(timage_0, maxkeypoints)
                 keypoints=output[0].keypoints.cpu()
                 descriptors=output[0].descriptors.cpu()
                 #remove keypoints/descriptors in padding
@@ -73,8 +74,12 @@ def run_extraction(inputsfmdata, outputfolder, method, verboselevel):
                 keypoints = keypoints[~outside]
                 descriptors = descriptors[~outside]
             elif method == "SIFT":
+                timage_0 = kornia.color.rgb_to_grayscale(timage_0)
+                with torch.no_grad():
+                    output = feature_model(timage_0, maxkeypoints)
                 keypoints=output[0].cpu()
                 descriptors=output[2].cpu()
+
             #write all keypoints
             kp_filename = os.path.join(outputfolder,uid_image_0+".unknown.feat")
             print("Saving %d keypoints")
@@ -86,7 +91,6 @@ def run_extraction(inputsfmdata, outputfolder, method, verboselevel):
             # https://github.com/alicevision/AliceVision/blob/develop/src/aliceVision/feature/Descriptor.hpp#L255C13-L255C33
             desk_filename = os.path.join(outputfolder,uid_image_0+".unknown.desc")
             #TODO: pad descrippr descriptors.shape[0] to FEATURE_SIZE 
-            #TODO: put that in fc
             write_descriptor_file(descriptors, desk_filename)
                 
         remaining = (nb_image-view_index_0-1)*float(t)    

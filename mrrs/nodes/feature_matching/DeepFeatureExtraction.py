@@ -39,6 +39,15 @@ class DeepFeatureExtraction(CondaNode):
             uid=[],
         ),
 
+        desc.IntParam(
+            name="maxKeypoints",
+            label="maxKeypoints",
+            description="Only keep maxKeypoints features.",
+            range=(0,100000000,1),
+            value=3000,
+            uid=[0],
+        ),
+
         desc.ChoiceParam(
             name="verboseLevel",
             label="Verbose Level",
