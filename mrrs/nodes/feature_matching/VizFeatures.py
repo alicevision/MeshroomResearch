@@ -153,37 +153,39 @@ class VizFeatures(desc.Node):
             for view_id_0 in matches.keys():
                 chunk.logger.info('Matching for view '+view_id_0)
                 #for now, only select the best matched view (the one with most matches)
-                view_id_1, matches_0_to_1=get_best_matching_view(matches[view_id_0])
-                chunk.logger.info('Best matcing for view '+view_id_0+" is "+view_id_1+ " (%d matches)"%len(matches_0_to_1))
-                
-                if chunk.node.matchOnly.value: #if match only, will only display line
-                    image_file_0 = [view["path"] for view in sfm_data["views"] if view["viewId"]==view_id_0][0]
-                    image_file_1 = [view["path"] for view in sfm_data["views"] if view["viewId"]==view_id_1][0]
-                else:
-                    image_file_0 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_0+".png")
-                    image_file_1 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_1+".png")
-                
-                image_0 = open_image(image_file_0)
-                image_1 = open_image(image_file_1)
+                # view_id_1, matches_0_to_1=get_best_matching_view(matches[view_id_0])
+                # chunk.logger.info('Best matcing for view '+view_id_0+" is "+view_id_1+ " (%d matches)"%len(matches_0_to_1))
+                for view_id_1 in matches[view_id_0].keys():
+                    matches_0_to_1 = matches[view_id_0][view_id_1]
+                    if chunk.node.matchOnly.value: #if match only, will only display line
+                        image_file_0 = [view["path"] for view in sfm_data["views"] if view["viewId"]==view_id_0][0]
+                        image_file_1 = [view["path"] for view in sfm_data["views"] if view["viewId"]==view_id_1][0]
+                    else:
+                        image_file_0 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_0+".png")
+                        image_file_1 = os.path.join(chunk.node.outputFolder.value, "features_"+view_id_1+".png")
+                    
+                    image_0 = open_image(image_file_0)
+                    image_1 = open_image(image_file_1)
 
-                match_image = np.concatenate([image_0, image_1], axis=1)
-                keypoint_file_0 = [os.path.join(chunk.node.featureFolder.value, ff) for ff in feature_files if ((view_id_0 in ff) and ff.endswith(".feat"))][0]
-                keypoint_file_1 = [os.path.join(chunk.node.featureFolder.value, ff) for ff in feature_files if ((view_id_1 in ff) and ff.endswith(".feat"))][0]
-                keypoints_0 = np.loadtxt(keypoint_file_0)
-                keypoints_1 = np.loadtxt(keypoint_file_1)
-                o=image_0.shape[1]
-                for m in matches_0_to_1[0:chunk.node.keepMatches.value]:
-                    if m[0]>keypoints_0.shape[0]:
-                        raise RuntimeError("ERROR FEATURE INDEX IN MATCH OUTSIDE OF LISTED FEATURES FOR %s (%d vs %d)"%(view_id_0, m[0],keypoints_0.shape[0]))
-                    if m[1]>keypoints_1.shape[0]:
-                        raise RuntimeError("ERROR FEATURE INDEX IN MATCH OUTSIDE OF LISTED FEATURES FOR %s (%d vs %d)"%(view_id_1, m[1],keypoints_1.shape[0])) 
-                    kp0 = keypoints_0[m[0]]
-                    kp1 = keypoints_1[m[1]]
-                    if chunk.node.matchOnly.value:
-                        match_image=draw_keypoints(match_image, np.asarray( [(int(kp0[0]),int(kp0[1])), 
-                                                                            (int(o+kp1[0]),int(kp1[1]))]) )
-                    cv2.line(match_image, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
-                save_image(os.path.join(chunk.node.outputFolder.value, "matches_"+view_id_0+".png"),match_image)
+                    match_image = np.concatenate([image_0, image_1], axis=1)
+                    keypoint_file_0 = [os.path.join(chunk.node.featureFolder.value, ff) for ff in feature_files if ((view_id_0 in ff) and ff.endswith(".feat"))][0]
+                    keypoint_file_1 = [os.path.join(chunk.node.featureFolder.value, ff) for ff in feature_files if ((view_id_1 in ff) and ff.endswith(".feat"))][0]
+                    keypoints_0 = np.loadtxt(keypoint_file_0)
+                    keypoints_1 = np.loadtxt(keypoint_file_1)
+                    o=image_0.shape[1]
+                    for m in matches_0_to_1[0:chunk.node.keepMatches.value]:
+                        if m[0]>keypoints_0.shape[0]:
+                            raise RuntimeError("ERROR FEATURE INDEX IN MATCH OUTSIDE OF LISTED FEATURES FOR %s (%d vs %d)"%(view_id_0, m[0],keypoints_0.shape[0]))
+                        if m[1]>keypoints_1.shape[0]:
+                            raise RuntimeError("ERROR FEATURE INDEX IN MATCH OUTSIDE OF LISTED FEATURES FOR %s (%d vs %d)"%(view_id_1, m[1],keypoints_1.shape[0])) 
+                        kp0 = keypoints_0[m[0]]
+                        kp1 = keypoints_1[m[1]]
+                        if chunk.node.matchOnly.value:
+                            match_image=draw_keypoints(match_image, np.asarray( [(int(kp0[0]),int(kp0[1])), 
+                                                                                (int(o+kp1[0]),int(kp1[1]))]) )
+                        cv2.line(match_image, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
+                    save_image(os.path.join(chunk.node.outputFolder.value, 
+                                            "matches_"+view_id_0+"_"+view_id_1+".png"), match_image)
   
         chunk.logManager.end()
 
