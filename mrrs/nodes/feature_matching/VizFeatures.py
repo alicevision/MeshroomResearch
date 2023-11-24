@@ -157,6 +157,11 @@ class VizFeatures(desc.Node):
                 # chunk.logger.info('Best matcing for view '+view_id_0+" is "+view_id_1+ " (%d matches)"%len(matches_0_to_1))
                 for view_id_1 in matches[view_id_0].keys():
                     matches_0_to_1 = matches[view_id_0][view_id_1]
+                    if ((     matches_0_to_1[:,0].shape[0] != np.unique(matches_0_to_1[:,0]).shape[0] ) 
+                         or ( matches_0_to_1[:,1].shape[0] != np.unique(matches_0_to_1[:,1]).shape[0] ) ):
+                        # raise RuntimeError("Found duplicated points fo images "+view_id_0+" "+view_id_1+"\n. ")
+                        print("Found duplicated points fo images "+view_id_0+" "+view_id_1+"\n. ")
+
                     if chunk.node.matchOnly.value: #if match only, will only display line
                         image_file_0 = [view["path"] for view in sfm_data["views"] if view["viewId"]==view_id_0][0]
                         image_file_1 = [view["path"] for view in sfm_data["views"] if view["viewId"]==view_id_1][0]

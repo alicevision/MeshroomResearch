@@ -14,10 +14,11 @@ def get_all_keypoints(feature_map_size):
     """
     Get all possibles features in an image
     """
-    all_keypoints_0_x, all_keypoints_0_y = np.meshgrid(range(feature_map_size[1]), range(feature_map_size[0]))
+    all_keypoints_0_y, all_keypoints_0_x = np.meshgrid(range(feature_map_size[0]), 
+                                                       range(feature_map_size[1]), indexing='ij')
     all_keypoints_0_x=8*all_keypoints_0_x.flatten()
     all_keypoints_0_y=8*all_keypoints_0_y.flatten()
-    return all_keypoints_0_x, all_keypoints_0_y
+    return all_keypoints_0_y, all_keypoints_0_x
 
 @click.command()
 @click.option('--inputSfMData', help='Input sfm data')
@@ -46,6 +47,8 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
     extention = ".sift.feat"#".loftr.feat" #FIXME: for now we write  as sift
     loftr_weigts = 'outdoor'#FIXME: var
     loftr_config = default_cfg
+    #we remove matches a posteriori
+    loftr_config["match_coarse"]["thr"]=0#
 
     #Load sfmdata
     print("Loading sfm data")
@@ -88,13 +91,13 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
             print("writting file for view %d/%d"%(view_index_0, nb_image), end="\r")
             timage_0, uid_image_0, image_0,_  = open_and_prepare_image(sfm_data,view_index_0, device)
             #each feature in image 0 has coords int(X/8)
-            feature_map_size = (np.asarray(timage_0.shape[2:])/8.0).astype(np.int32)
+            feature_map_size = (np.asarray(np.flip(timage_0.shape[2:]))/8.0).astype(np.int32)
             #all potential keypoints in image 0
-            all_keypoints_0_x, all_keypoints_0_y = get_all_keypoints(feature_map_size)
+            all_keypoints_0_y, all_keypoints_0_x = get_all_keypoints(feature_map_size)
             #write all keypoints 0 
             with open(os.path.join(feature_folder,uid_image_0+extention), "w") as kpf:
                 for kp_x, kp_y in zip(all_keypoints_0_x, all_keypoints_0_y):
-                    kpf.write("%f %f 0 0\n"%(kp_x, kp_y))
+                    kpf.write("%f %f 0 0\n"%(kp_y, kp_x))
                 #update offsets for view 0
                 nb_features[view_index_0]+=all_keypoints_0_x.shape[0]
 
@@ -104,11 +107,14 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
         """
         maps a float x,y feature coord into a linear index 
         """
-        x,y=(np.asarray(X)/8.0).astype(np.int32)
+        y,x=(np.asarray(X)/8.0).astype(np.int32)
         if (x > feature_map_size[1]) or (y > feature_map_size[0]):
-            raise RuntimeError("Feature outside of feature map (%d %d) vs (%d %d)"%(x,y,feature_map_size[0], feature_map_size[1]))
-        linear_index =  feature_map_size[1]*y+x.astype(np.int32)
+            raise RuntimeError("Feature %f %f outside of feature map (%d %d) vs (%d %d)"%(X[0],X[1],x,y,feature_map_size[0], feature_map_size[1]))
+        linear_index =  feature_map_size[1]*y+x
         return linear_index
+    # for x,y in zip(all_keypoints_0_x, all_keypoints_0_y) :
+    #     print(map_indices((x,y)))
+    # exit(0)
     print("\nDone in %f seconds"%t)
 
     print("Running matching")
@@ -150,32 +156,18 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                     keypoints_0=out["keypoints0"].to('cpu').numpy()
                     keypoints_1=out["keypoints1"].to('cpu').numpy()
                     confidences=out["confidence"].to('cpu').numpy()
+                    
                     nb_keypoint = keypoints_0.shape[0]
-              
+                    print("%d matches"%nb_keypoint) 
+
                     #sort by confidence (descending)
                     order = np.argsort(-confidences)
                     keypoints_0=keypoints_0[order]
                     keypoints_1=keypoints_1[order]
 
-                    # if debugimages:
-                    #     #display N strongest matches
-                    #     img_matches_display = np.concatenate([image_0, image_1], axis=1)
-                    #     n=keepnmatches
-                    #     p=1
-                    #     o=image_0.shape[1]
-                    #     for kp in keypoints_0[0:n]:
-                    #         img_matches_display[int(kp[1])-p:int(kp[1])+p,
-                    #                     int(kp[0])-p:int(kp[0])+p, :]=[255,0,0]
-                    #     for kp in keypoints_1[0:n]:
-                    #         img_matches_display[int(kp[1])-p:int(kp[1])+p,
-                    #                             o+int(kp[0])-p:o+int(kp[0])+p, :]=[0,255,0]
-                    #     for kp0, kp1 in zip(keypoints_0[0:n], keypoints_1[0:n]):
-                    #         cv2.line(img_matches_display, (int(kp0[0]),int(kp0[1])), (int(o+kp1[0]),int(kp1[1])), color = [0,0,255])
-                    #     Image.fromarray(img_matches_display).save(os.path.join(outputfolder, uid_image_0+"_"+uid_image_1)+".png")
-                    
                     #if we keep the original matches
                     if not coarsematch:
-                        #Write features on img 2 as brand new features #FIXME: remove the feature that did not make it, to avoid clutter
+                        #Write features on img 2 as brand new features
                         with open(os.path.join(feature_folder,uid_image_1+extention), "a+") as kpf:
                             for kp in keypoints_1:
                                 kpf.write("%f %f 0 0\n"%(kp[0], kp[1]))
@@ -189,10 +181,11 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                         mask_0_kp = mask_0[nn_keypoints_0[:,1], nn_keypoints_0[:,0],0]
                         mask_1_kp = mask_1[nn_keypoints_1[:,1], nn_keypoints_1[:,0],0]
                         valid_kp = mask_0_kp&mask_1_kp
+                        #remove masked keypoints
                         keypoints_0 = keypoints_0[valid_kp,:]
                         keypoints_1 = keypoints_1[valid_kp,:]
                         nb_keypoint = keypoints_0.shape[0]
-                        # print(keypoints_0.shape)
+                        print("%d matches after masking"%nb_keypoint) 
 
                     #if we dont define a max nb of match, will write all matches, otherwise will write only the n best matches
                     if keepnmatches == 0:
@@ -203,24 +196,45 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                     if  confidencethreshold !=0:
                         #will return index of first occurence of confidence bellow the threshold=> index when we stop
                         nb_to_write = np.argmax(confidences>confidencethreshold)
-                      
+
+                    keypoint_0_indices = [map_indices(k) for k in keypoints_0]
+                    keypoint_1_indices = [map_indices(k) for k in keypoints_1]
+
+                    if coarsematch:
+                        #FIXME: not elegant, better get the index of the match from loftr
+                        #removes the duplicate indices, can happen if the refine move the keypoint outside the initial patch
+                        keypoint_1_index_matched = {}
+                        for kp_indx in range(nb_to_write):
+                            keypoint_1_index=keypoint_1_indices[kp_indx]
+                            if keypoint_1_index in keypoint_1_index_matched.keys():
+                                    print("Keypoint %f %f already matched with %f %f with higher confidence, discarding"%(keypoints_1[kp_indx][0],
+                                                                                                                          keypoints_1[kp_indx][1],
+                                                                                                                          keypoint_1_index[keypoint_1_index][0],
+                                                                                                                          keypoint_1_index[keypoint_1_index][1]
+                                         ))
+                            keypoints_0[kp_indx]
+                            keypoints_1[kp_indx]
+                        nb_to_write=keypoints_1.shape[0]     
+                    
+                    print("Writting %d matches"%nb_to_write) 
                     #Write matches, note "0." beacause mewhroom suports several matches files for batching
                     with open(os.path.join(matches_folder,"0.matches.txt"), "a+") as mf:
                         mf.write("%s %s\n"%(uid_image_0, uid_image_1))
                         mf.write("1\n")
                         mf.write("sift %d\n"%(nb_to_write))#for now we disuise as sift
                         for kp_indx in range(nb_to_write):#save feature index with offset for each view
-                            keypoint_0_index = map_indices(keypoints_0[kp_indx])#retrieve index in the pre-written features
+                            # print("%d/%d"%(kp_indx, nb_to_write))
+                            keypoint_0_index = keypoint_0_indices[kp_indx]#retrieve index in the pre-written features
                             if not coarsematch:#if we keep the normal matches
                                 keypoint_1_index = kp_indx+nb_features[view_index_1]#index is offsetted by the allready written features
                             else:
-                                keypoint_1_index = map_indices(keypoints_1[kp_indx])
+                                keypoint_1_index = keypoint_1_indices[kp_indx]
                             mf.write("%d %d\n"%(keypoint_0_index, keypoint_1_index))
                     if not coarsematch:
-                        nb_features[view_index_1]+=nb_keypoint#nb_to_write #FIXME: remove the feature that did not make it, to avoid clutter
-            
+                        nb_features[view_index_1]+=nb_keypoint#nb_to_write 
+            # exit(0)
             print("Matches for view %d/%d done for %d views, in %fs (est. remaining if constant %fm)"%(view_index_0+1, 
-            nb_image, len(view_indices_1), t,  (nb_image-view_index_0)*float(t)/60.0), end="\n")
+            nb_image, len(view_indices_1)-1, t,  (nb_image-view_index_0)*float(t)/60.0), end="\n")
     print("\n")
     print("Matching done in %fs"%total_time)
         
