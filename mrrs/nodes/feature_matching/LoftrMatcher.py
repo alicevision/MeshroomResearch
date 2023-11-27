@@ -43,7 +43,7 @@ class LoftrMatcher(CondaNode):
             label="confidenceThreshold",
             description="Only keep the matches if their confidence hits this threshold.",
             range=(0.0,1.0,0.01),
-            value=0.5,
+            value=0,
             uid=[0],
         ),
         

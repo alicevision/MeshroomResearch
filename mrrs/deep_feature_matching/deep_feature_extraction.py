@@ -23,10 +23,10 @@ FEATURE_SIZE = 128
 @click.option('--outputFolder', help='Output to store the results in')
 @click.option('--method', type=click.Choice(["DISK", "SIFT"]), help="Feature extraction method")
 @click.option('--maxKeypoints', type=click.INT, help='Will set the maximum nb of keyoint to maxKeypoints')
-@click.option('--gridKeypoints', type=click.INT, help='maxKeypoints')
+@click.option('--gridKeypoints', type=click.INT, help='maxKeypoints')#FIXME: TODO
 @click.option('--verboseLevel', help='.')#FIXME: todo
 
-def run_extraction(inputsfmdata, outputfolder, method, maxkeypoints, verboselevel): 
+def run_extraction(inputsfmdata, outputfolder, method, maxkeypoints, gridkeypoints, verboselevel): 
     """
     run the feature detection and description
     """
@@ -82,7 +82,7 @@ def run_extraction(inputsfmdata, outputfolder, method, maxkeypoints, verboseleve
 
             #write all keypoints
             kp_filename = os.path.join(outputfolder,uid_image_0+".unknown.feat")
-            print("Saving %d keypoints")
+            print("Saving %d keypoints"%keypoints.shape[0])
             with open(kp_filename, "w") as kpf:
                 for kp_x, kp_y in keypoints:
                     kpf.write("%f %f 0 0\n"%(kp_x, kp_y))

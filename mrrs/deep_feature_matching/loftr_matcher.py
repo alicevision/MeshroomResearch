@@ -158,7 +158,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                     confidences=out["confidence"].to('cpu').numpy()
                     
                     nb_keypoint = keypoints_0.shape[0]
-                    print("%d matches"%nb_keypoint) 
+                    print("Found %d matches"%nb_keypoint) 
 
                     #sort by confidence (descending)
                     order = np.argsort(-confidences)
@@ -186,7 +186,33 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                         keypoints_1 = keypoints_1[valid_kp,:]
                         nb_keypoint = keypoints_0.shape[0]
                         print("%d matches after masking"%nb_keypoint) 
-
+                    
+                    if coarsematch:
+                        #FIXME: not elegant, better get the index of the match from loftr
+                        #removes the duplicate indices, can happen if the refine move the keypoint outside the initial patch
+                        # keypoint_0_index_matched = {}
+                        # keypoint_0_indices = [map_indices(k) for k in keypoints_0]
+                        keypoint_1_indices = [map_indices(k) for k in keypoints_1]
+                        keypoint_1_index_matched = {}
+                        to_del = []
+                        print("%d unique match found"%np.unique(keypoint_1_indices).shape[0])
+                        for kp_indx in range(nb_keypoint):
+                            keypoint_1_index=keypoint_1_indices[kp_indx]
+                            # keypoint_0_index=keypoint_0_indices[kp_indx]
+                            if keypoint_1_index in keypoint_1_index_matched.keys():
+                                # print("Keypoint %f %f already matched with %f %f with higher confidence, discarding"%(keypoints_1[kp_indx][0],
+                                #                                                                                     keypoints_1[kp_indx][1],
+                                #                                                                                     keypoint_1_index_matched[keypoint_1_index][0],
+                                #                                                                                     keypoint_1_index_matched[keypoint_1_index][1]
+                                #         ))
+                                to_del.append(kp_indx)
+                            else:
+                                keypoint_1_index_matched[keypoint_1_index]=keypoints_1[kp_indx]
+                        print("Found %d duplicates, removing"%len(to_del))
+                        keypoints_0=np.delete(keypoints_0,to_del, axis=0)
+                        keypoints_1=np.delete(keypoints_1,to_del, axis=0)
+                        nb_keypoint = keypoints_0.shape[0]
+                        
                     #if we dont define a max nb of match, will write all matches, otherwise will write only the n best matches
                     if keepnmatches == 0:
                         nb_to_write = nb_keypoint
@@ -199,22 +225,6 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
 
                     keypoint_0_indices = [map_indices(k) for k in keypoints_0]
                     keypoint_1_indices = [map_indices(k) for k in keypoints_1]
-
-                    if coarsematch:
-                        #FIXME: not elegant, better get the index of the match from loftr
-                        #removes the duplicate indices, can happen if the refine move the keypoint outside the initial patch
-                        keypoint_1_index_matched = {}
-                        for kp_indx in range(nb_to_write):
-                            keypoint_1_index=keypoint_1_indices[kp_indx]
-                            if keypoint_1_index in keypoint_1_index_matched.keys():
-                                    print("Keypoint %f %f already matched with %f %f with higher confidence, discarding"%(keypoints_1[kp_indx][0],
-                                                                                                                          keypoints_1[kp_indx][1],
-                                                                                                                          keypoint_1_index[keypoint_1_index][0],
-                                                                                                                          keypoint_1_index[keypoint_1_index][1]
-                                         ))
-                            keypoints_0[kp_indx]
-                            keypoints_1[kp_indx]
-                        nb_to_write=keypoints_1.shape[0]     
                     
                     print("Writting %d matches"%nb_to_write) 
                     #Write matches, note "0." beacause mewhroom suports several matches files for batching
