@@ -164,6 +164,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                     order = np.argsort(-confidences)
                     keypoints_0=keypoints_0[order]
                     keypoints_1=keypoints_1[order]
+                    confidences=confidences[order]
 
                     #if we keep the original matches
                     if not coarsematch:
@@ -184,6 +185,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                         #remove masked keypoints
                         keypoints_0 = keypoints_0[valid_kp,:]
                         keypoints_1 = keypoints_1[valid_kp,:]
+                        confidences = confidences[valid_kp,:]
                         nb_keypoint = keypoints_0.shape[0]
                         print("%d matches after masking"%nb_keypoint) 
                     
@@ -211,6 +213,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                         print("Found %d duplicates, removing"%len(to_del))
                         keypoints_0=np.delete(keypoints_0,to_del, axis=0)
                         keypoints_1=np.delete(keypoints_1,to_del, axis=0)
+                        confidences=np.delete(confidences,to_del, axis=0)
                         nb_keypoint = keypoints_0.shape[0]
                         
                     #if we dont define a max nb of match, will write all matches, otherwise will write only the n best matches
@@ -219,10 +222,10 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                     else:
                         nb_to_write = min(keepnmatches, nb_keypoint)
                     #if we passed confidenceThreshold, will find the index dynamically such that the remaining matches keep the trheshold
-                    if  confidencethreshold !=0:
+                    if  confidencethreshold != 0:
                         #will return index of first occurence of confidence bellow the threshold=> index when we stop
-                        nb_to_write = np.argmax(confidences>confidencethreshold)
-
+                        nb_to_write = np.argmin(confidences>confidencethreshold)
+   
                     keypoint_0_indices = [map_indices(k) for k in keypoints_0]
                     keypoint_1_indices = [map_indices(k) for k in keypoints_1]
                     

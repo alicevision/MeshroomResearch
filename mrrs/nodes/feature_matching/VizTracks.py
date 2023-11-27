@@ -47,7 +47,7 @@ class VizTracks(desc.Node):
             name="describerTypes",
             label="Describer Types",
             description="Describer types to keep.",
-            value=["dspsift"],
+            value="dspsift",
             values=["sift", "sift_float", "sift_upright", 
                     "dspsift", "akaze", "akaze_liop", 
                     "akaze_mldb", "cctag3", "cctag4", "sift_ocv", 
@@ -120,10 +120,11 @@ class VizTracks(desc.Node):
                 prev_feat=None 
                 for view_uid, feature_id in track[1]["featPerView"]:
                     view_index = uids_to_ids[str(view_uid)]
-                    feat = features[view_index][feature_id]
+                    feat = features[view_index][feature_id["featureId"]]
                     if prev_feat is not None:
                         image=cv2.line( image, (int(prev_feat[0]),int(prev_feat[1])), 
-                                               (int(feat[0]),int(feat[1])), color = feat_color)
+                                               (int(feat[0]),int(feat[1])), color = feat_color, 
+                                               thickness=int(image.shape[0]/640)+1)
                     prev_feat=feat
 
             save_image(os.path.join(chunk.node.outputFolder.value, "tracks_"+image_uid+".png"),image)
