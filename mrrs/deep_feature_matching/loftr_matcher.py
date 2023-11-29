@@ -8,7 +8,7 @@ from kornia.feature.loftr.loftr import LoFTR
 from kornia.feature.loftr.loftr import default_cfg#the default config file
 
 sys.path.append(os.path.abspath(__file__))
-from utils import time_it, open_and_prepare_image, open_image_grapĥ
+from utils import time_it, open_and_prepare_image, open_image_grapĥ, write_descriptor_file
 
 def get_all_keypoints(feature_map_size):
     """
@@ -31,11 +31,11 @@ def get_all_keypoints(feature_map_size):
 @click.option('--keepNmatches', default=0, type=int, help='If specified will keep the n first matches between views')
 @click.option('--confidenceThreshold', default=0.0, type=float, help='If specified will only keep the matches with at least this confidence')
 @click.option('--coarseMatch', default=True, type=bool, help='Will use the coarse patch-level matches to create longer track.')
-@click.option('--debugImages', default=False, type=bool, help='Will Write match images') #TODO: remove
+@click.option('--dummyDescriptor', default=True, type=bool, help='Will create fake descriptors') 
 @click.option('--verboseLevel', help='.')#FIXME: todo
 def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolder,
                  keepnmatches, confidencethreshold, coarsematch,
-                 debugimages, verboselevel): #note: lower caps
+                 dummydescriptor, verboselevel): #note: lower caps
     """
     Will runs loftr on the input set of images.
     Writes meshroom feature and maches files.
@@ -44,7 +44,8 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
     """
     #To debug
     print("Hello")
-    extention = ".sift.feat"#".loftr.feat" #FIXME: for now we write  as sift
+    desc_type = "sift"
+    extention = "."+desc_type+".feat"#".loftr.feat" #FIXME: for now we write  as sift
     loftr_weigts = 'outdoor'#FIXME: var
     loftr_config = default_cfg
     #we remove matches a posteriori
@@ -100,6 +101,9 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                     kpf.write("%f %f 0 0\n"%(kp_y, kp_x))
                 #update offsets for view 0
                 nb_features[view_index_0]+=all_keypoints_0_x.shape[0]
+            if dummydescriptor:
+                write_descriptor_file(np.zeros([all_keypoints_0_y.shape[0], 128]),
+                                      os.path.join(feature_folder,uid_image_0+"."+desc_type+".desc"))
 
     #FIXME: assume constant feature map size and keep latest size
     #to retrieve the index later
