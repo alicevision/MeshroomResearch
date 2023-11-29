@@ -5,6 +5,7 @@ import json
 
 import trimesh
 import numpy as np
+from PIL import Image
 
 from meshroom.core import desc
 from mrrs.core.geometry import *
@@ -35,7 +36,7 @@ class LoadDataset(desc.Node):
             label='Dataset Type',
             description='''Dataset type''',
             value='blendedMVG',
-            values=['blendedMVG', 'DTU'],
+            values=['blendedMVG', 'DTU', 'vital'],
             exclusive=True,
             uid=[0],
         ),
@@ -206,7 +207,7 @@ class LoadDataset(desc.Node):
                 mesh = trimesh.util.concatenate(submeshes)
                 #FIXME: need to rotate in CG CS?
 
-        elif chunk.node.datasetType.value == "DTU":#FIXME: issue with alignement not working
+        elif chunk.node.datasetType.value == "DTU":
             chunk.logger.info("***Importing DTU data")
             #sort sfm data views by frame order (as in dtu)
             sfm_data["views"]=sorted(sfm_data["views"], key=lambda v:int(v["frameId"]))
@@ -233,11 +234,24 @@ class LoadDataset(desc.Node):
                 chunk.logger.warning("Scipy not installed, will not load observation masks or ground plane")
             observation_mask = loadmat(os.path.join(image_folder, "..", f"ObsMask{scan_nb}_10.mat") )
             ground_plane = loadmat(os.path.join(image_folder, "..", f"Plane{scan_nb}.mat"))     
-
+        elif chunk.node.datasetType.value == "vital":
+            image_folder = os.path.dirname(sfm_data["views"][0]["path"])
+            sfm_data_vital_path = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(".sfm")][0]
+            with open(sfm_data_vital_path, "r") as json_file:
+                sfm_data_vital = json.load(json_file)
+            (extrinsics_vital, intrinsics_vital, _, _, _, _) = matrices_from_sfm_data(sfm_data_vital)
+            sensor_size = float(sfm_data_vital["intrinsics"][0]["sensorWidth"])#FIXME: 
+            #match with sfm data using filename
+            extrinsics=[]
+            intrinsics=[]
+            for i,vo in enumerate(sfm_data["views"]):
+                for j,vv in enumerate(sfm_data_vital["views"]):
+                    if os.path.basename(vo["path"])==os.path.basename(vv["path"]):
+                        extrinsics.append(extrinsics_vital[j])
+                        intrinsics.append(intrinsics_vital[j])
+                        break
         elif chunk.node.datasetType.value == "ETH3D":
             RuntimeError("ETH3D support TBA") 
-        elif chunk.node.datasetType.value == "RC":
-            RuntimeError("Reality capture support TBA (but will likely require to put the results alongside one of the dataset and run another dataset node for the GT), so is it really a dataset? i dont know") 
         else:
             raise RuntimeError("Dataset type not supported")
 

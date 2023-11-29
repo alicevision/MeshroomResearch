@@ -85,6 +85,8 @@ def run_matching(inputsfmdata, outputfolder, inputfeaturefolder,
             elif imagemaching == "file":
                 view_uids_1 = image_pairs[view_index_0]
                 view_indices_1 = [all_view_ids.index(v) for v in view_uids_1 if v != ""]
+            elif imagemaching == "uni":
+                view_indices_1=range(view_index_0, nb_image) 
             else:
                 raise RuntimeError("Invalid imagemaching argument")
 
