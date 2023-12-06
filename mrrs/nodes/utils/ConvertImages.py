@@ -73,7 +73,7 @@ class ConvertImages(desc.Node):
             name='autoRotate',
             label='autoRotate',
             description='Rotates the frames using the exif flag',
-            value=False,
+            value=True,
             uid=[0],
         ),
 
@@ -90,6 +90,14 @@ class ConvertImages(desc.Node):
             label='Rename Sequence',
             description='Renames the frames by order',
             value=False,
+            uid=[0],
+        ),
+
+        desc.BoolParam(
+            name='autoPixelRatio',
+            label='autoPixelRatio',
+            description='Will automatically set pixel ratio (will overwrite resample)',
+            value=True,
             uid=[0],
         ),
 
@@ -149,7 +157,10 @@ class ConvertImages(desc.Node):
                 intrinsicId = sfm_data["views"][index]["intrinsicId"]
                 frameId  = int(sfm_data["views"][index]["frameId"])
                 chunk.logger.info('\tOrientation %d'%orientation)
-                input_image = input_image[::chunk.node.resampleX.value,::]#resample
+                resample_x=chunk.node.resampleX.value
+                if chunk.node.autoPixelRatio.value:
+                    resample_x = int(sfm_data["intrinsics"][0]["pixelRatio"])
+                input_image = input_image[::resample_x,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
                 if chunk.node.maxWidth.value<input_image.shape[1]:#max sie
                     height = int(input_image.shape[0]*chunk.node.maxWidth.value/input_image.shape[1])
@@ -187,12 +198,12 @@ class ConvertImages(desc.Node):
             #update intrisic pixel ratio
             for intrisic in sfm_data["intrinsics"] :
                 old_pixel_ratio = float(intrisic["pixelRatio"])
-                intrisic["pixelRatio"] = str(old_pixel_ratio/chunk.node.resampleX.value)
+                intrisic["pixelRatio"] = str(old_pixel_ratio/resample_x)
                 if chunk.node.maxWidth.value<int(intrisic["width"]):#update image size
                     intrisic["height"] = int(int(intrisic["height"])*chunk.node.maxWidth.value/int(intrisic["width"]))
                     intrisic["width"] = chunk.node.maxWidth.value
                 else:
-                    intrisic["height"] = int(float(intrisic["height"])/chunk.node.resampleX.value)
+                    intrisic["height"] = int(float(intrisic["height"])/resample_x)
      
             if chunk.node.mergeInterinsics.value:
                 intrinsic_id = sfm_data["intrinsics"][0]["intrinsicId"]
