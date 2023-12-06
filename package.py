@@ -1,4 +1,4 @@
-S"""
+"""
 Package.py to install MRRS on the grid
 can use rez env meshroom-develop mrrs -- meshroom
 package and repo in /s/apps/users/multiview/mrrs/hogm/mrrs
@@ -21,6 +21,7 @@ def commands():
     """
     env.PATH.append('/s/apps/users/hogm/miniconda/bin')#add conda to path
     source("/s/apps/users/hogm/miniconda/etc/profile.d/conda.sh")
+    env.MESHROOM_CACHE='/s/prods/mvg/_source_global/users/hogm/tmp/'#make cache for conda
     env.PYTHONPATH.append('{root}/MeshroomResearch')
     env.MESHROOM_NODES_PATH.append('{root}/MeshroomResearch/mrrs/nodes')
     for p in ['benchmark', 'colmap']:

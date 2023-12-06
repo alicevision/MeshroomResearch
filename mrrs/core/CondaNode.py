@@ -5,6 +5,7 @@ Conda needs to be installed and callable via "conda"
 
 import os
 from meshroom.core import desc
+from meshroom.core import defaultCacheFolder
 
 class CondaNode(desc.CommandLineNode):
     # def __init__(self):
@@ -38,11 +39,11 @@ class CondaNode(desc.CommandLineNode):
         cmdPrefix = ''
         #create the env in the folder above the node
         if self.env_path is None:
-            env_path=os.path.join(chunk.node.internalFolder, "../conda_env")
+            env_path=os.path.join(defaultCacheFolder, "env_"+self.__class__.__name__)#env name from class
         else:
             env_path=self.env_path
         if not os.path.exists(env_path):
-            chunk.logger.info("Creating conda env")
+            chunk.logger.info("Creating conda env in "+env_path)
             if not os.path.exists(self.env_file):
                 raise RuntimeError('No yaml file found.')
             make_env_command = self.curate_env_command()+" conda config --set channel_priority strict; "+" conda env create --prefix {env_path} --file {env_file}".format(env_path=env_path, env_file=self.env_file)   
