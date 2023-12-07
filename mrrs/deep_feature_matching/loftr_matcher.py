@@ -68,7 +68,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
     if maskfolder:
         from PIL import Image
         for view_id in all_view_ids:
-            masks[view_id] = np.array(Image.open(os.path.join(maskfolder, view_id+".png")), dtype=np.bool8)
+            masks[view_id] = np.array(Image.open(os.path.join(maskfolder, view_id+".png")), dtype=np.bool_)
 
     #creates output folders
     print("Creating output folders")
@@ -189,7 +189,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                         #remove masked keypoints
                         keypoints_0 = keypoints_0[valid_kp,:]
                         keypoints_1 = keypoints_1[valid_kp,:]
-                        confidences = confidences[valid_kp,:]
+                        confidences = confidences[valid_kp]
                         nb_keypoint = keypoints_0.shape[0]
                         print("%d matches after masking"%nb_keypoint) 
                     
