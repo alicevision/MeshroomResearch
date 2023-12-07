@@ -106,8 +106,9 @@ def run(pipeline, output_folder,
 @click.option('--output_folder','-o', default=None, help='Output folder to generate reports into.')
 @click.option('--csv_names','-n', multiple=True, default=["calibration_comparison.csv", "depth_maps_comparison.csv"], help='Csvs to use for reporting.')
 @click.option('--ensure_complete','-c', is_flag=True, help='Will raise an exeption if a result for a sequence is not found.')
+@click.option('--make_plot','-p', is_flag=True, help='Will make plots.')
 @click.argument('computed_outputs_path')#FIXME: inherit from group?
-def report(output_folder, computed_outputs_path, csv_names, ensure_complete):
+def report(output_folder, computed_outputs_path, csv_names, ensure_complete, make_plot):
     """
     Generate a report from a computed benchmark.
     """
@@ -152,66 +153,6 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete):
             results_median.append(med)
         return results_avg, results_median, header, sequences_skipped
 
-    def make_plot(csv_name):
-        """
-        Makes a mustache box from the csv.
-        """
-        from matplotlib import pyplot as plt #FIXME, make option to plot to justify lazy import
-        header = "No valid csv"
-        data_per_metric = None
-        valid_sequences = []
-        for sequence in sequences:
-            csv_file_path = os.path.join(computed_outputs_path, sequence, csv_name)
-            #make sure the computation when trhu
-            if not os.path.exists(csv_file_path):
-                print("Issue with sequence "+sequence+" file "+csv_file_path+" skipping")
-                continue
-            result = np.loadtxt(csv_file_path, dtype=str, delimiter=",")
-            #split average/med from the  rest
-            header = result[0,1:-1]
-            if data_per_metric is None:
-                data_per_metric = [[] for _ in header]
-            data_calib = result[1:-2, 1:-1].astype(np.float32)
-            views = result[1:-2:, 0]
-            for metric, metric_data, data in zip(header, data_per_metric, np.transpose(data_calib)):
-                metric_data.append(data)
-                # fig, ax = plt.subplots(figsize=(10, 10)) #
-                # ax.boxplot([data])#, labels=[views])
-                # ax.set_title(sequence+"_"+metric+'.png')
-                # fig.savefig(os.path.join(RUN_OUTPUT_FOLDER, sequence+"_"+metric+'.png') )
-            valid_sequences.append(sequence)
-        if data_per_metric is None:
-            raise RuntimeError("No valid data was found. Check the computation.")
-        figures = []
-        for metric, metric_data in zip(header, data_per_metric):
-            fig, ax = plt.subplots(figsize=(40, 20))
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            ax.spines['left'].set_visible(False)
-            ax.yaxis.set_ticks_position('none')
-            ax.set_title(metric)
-            plt.xticks(rotation=-90)
-            ax.set_yscale('log')
-
-            nb_missing_views = [np.count_nonzero(np.isnan(data) )for data in metric_data ]
-            valid_metric_data = [data[~np.isnan(data)] for data in metric_data ]
-            max_missing = np.max(nb_missing_views+[0.00001])
-
-            color_barplot = [ [n/max_missing, 1-n/max_missing, 0] for n in nb_missing_views]
-            plotbox = ax.boxplot(valid_metric_data,
-                                 labels=valid_sequences,
-                                 patch_artist=True)#,
-            for patch, color in zip(plotbox['boxes'], color_barplot):
-                patch.set_facecolor(color)
-            fig.savefig(os.path.join(output_folder, metric+'.png') )
-
-            # fig.canvas.draw()
-            # image_from_plot = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-            # image_from_plot = image_from_plot.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-            # figures.append(image_from_plot)
-
-        # return figures, header, sequences_skipped
-
     def save_results(csv_filename, header, results_avg, results_meds):
         with open(os.path.join(output_folder, csv_filename), 'w') as csv_file:
             #header
@@ -237,11 +178,72 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete):
         print("\t"+str(sequences_skipped_calib))
         save_results("all_"+csv_name, header, results_avg, results_med)
 
-    #Make plots
-    print("Making pretty plots for ...")
-    for csv_name in csv_names:
-        print("\t"+csv_name)
-        make_plot(csv_name)
+        if make_plot:
+            def make_plot(csv_name):
+                """
+                Makes a mustache box from the csv.
+                """
+                from matplotlib import pyplot as plt #FIXME, make option to plot to justify lazy import
+                header = "No valid csv"
+                data_per_metric = None
+                valid_sequences = []
+                for sequence in sequences:
+                    csv_file_path = os.path.join(computed_outputs_path, sequence, csv_name)
+                    #make sure the computation when trhu
+                    if not os.path.exists(csv_file_path):
+                        print("Issue with sequence "+sequence+" file "+csv_file_path+" skipping")
+                        continue
+                    result = np.loadtxt(csv_file_path, dtype=str, delimiter=",")
+                    #split average/med from the  rest
+                    header = result[0,1:-1]
+                    if data_per_metric is None:
+                        data_per_metric = [[] for _ in header]
+                    data_calib = result[1:-2, 1:-1].astype(np.float32)
+                    views = result[1:-2:, 0]
+                    for metric, metric_data, data in zip(header, data_per_metric, np.transpose(data_calib)):
+                        metric_data.append(data)
+                        # fig, ax = plt.subplots(figsize=(10, 10)) #
+                        # ax.boxplot([data])#, labels=[views])
+                        # ax.set_title(sequence+"_"+metric+'.png')
+                        # fig.savefig(os.path.join(RUN_OUTPUT_FOLDER, sequence+"_"+metric+'.png') )
+                    valid_sequences.append(sequence)
+                if data_per_metric is None:
+                    raise RuntimeError("No valid data was found. Check the computation.")
+                figures = []
+                for metric, metric_data in zip(header, data_per_metric):
+                    fig, ax = plt.subplots(figsize=(40, 20))
+                    ax.spines['top'].set_visible(False)
+                    ax.spines['right'].set_visible(False)
+                    ax.spines['left'].set_visible(False)
+                    ax.yaxis.set_ticks_position('none')
+                    ax.set_title(metric)
+                    plt.xticks(rotation=-90)
+                    ax.set_yscale('log')
+
+                    nb_missing_views = [np.count_nonzero(np.isnan(data) )for data in metric_data ]
+                    valid_metric_data = [data[~np.isnan(data)] for data in metric_data ]
+                    max_missing = np.max(nb_missing_views+[0.00001])
+
+                    color_barplot = [ [n/max_missing, 1-n/max_missing, 0] for n in nb_missing_views]
+                    plotbox = ax.boxplot(valid_metric_data,
+                                        labels=valid_sequences,
+                                        patch_artist=True)#,
+                    for patch, color in zip(plotbox['boxes'], color_barplot):
+                        patch.set_facecolor(color)
+                    fig.savefig(os.path.join(output_folder, metric+'.png') )
+
+                    # fig.canvas.draw()
+                    # image_from_plot = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+                    # image_from_plot = image_from_plot.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+                    # figures.append(image_from_plot)
+
+                # return figures, header, sequences_skipped
+
+            #Make plots
+            print("Making pretty plots for ...")
+            for csv_name in csv_names:
+                print("\t"+csv_name)
+                make_plot(csv_name)
 
 if __name__ == '__main__':
     cli()
