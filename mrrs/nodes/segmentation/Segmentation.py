@@ -128,55 +128,55 @@ class Segmentation(desc.Node):
         return True
 
     def processChunk(self, chunk):
-        try:
-            chunk.logManager.start(chunk.node.verboseLevel.value)
-            if not self.check_inputs(chunk):
-                return
-            #get views ids and path
-            sfm_data=json.load(open(chunk.node.input.value,"r"))
-            views_ids = [view["viewId"] for view in sfm_data["views"]]
-            views_original_files = [view["path"] for view in sfm_data["views"]]
-            #instantiate segmentor
-            segmentor = eval(chunk.node.segmentationMethod.value+"()")
-            #main loop TODO: batch option?
-            chunk.logger.info('Computing segmentation for %d images'%len(views_ids))
-            for index, (views_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
-                #calling segmentation
-                chunk.logger.info('Computing segmentation for image %d/%d images'%(index, len(views_ids)))
-                input_image, orientation = open_image(views_original_file, auto_rotate=chunk.node.autoRotate.value, return_orientation=True)
-                output_masks, output_classes = segmentor(input_image)#segmentor retrurns 1-hot vectors+corresponding class name
-                chunk.logger.info('%d objects found'%(len(output_masks)))
-                #dumps class names
-                np.savetxt(os.path.join(chunk.node.output.value, views_id+"_classes.txt" ) , output_classes, fmt="%s")
+        # try:
+        chunk.logManager.start(chunk.node.verboseLevel.value)
+        if not self.check_inputs(chunk):
+            return
+        #get views ids and path
+        sfm_data=json.load(open(chunk.node.input.value,"r"))
+        views_ids = [view["viewId"] for view in sfm_data["views"]]
+        views_original_files = [view["path"] for view in sfm_data["views"]]
+        #instantiate segmentor
+        segmentor = eval(chunk.node.segmentationMethod.value+"()")
+        #main loop TODO: batch option?
+        chunk.logger.info('Computing segmentation for %d images'%len(views_ids))
+        for index, (views_id, views_original_file) in enumerate(zip(views_ids, views_original_files)):
+            #calling segmentation
+            chunk.logger.info('Computing segmentation for image %d/%d images'%(index, len(views_ids)))
+            input_image, orientation = open_image(views_original_file, auto_rotate=chunk.node.autoRotate.value, return_orientation=True)
+            output_masks, output_classes = segmentor(input_image)#segmentor retrurns 1-hot vectors+corresponding class name
+            chunk.logger.info('%d objects found'%(len(output_masks)))
+            #dumps class names
+            np.savetxt(os.path.join(chunk.node.output.value, views_id+"_classes.txt" ) , output_classes, fmt="%s")
 
-                #if a class mask is passed will create it for each channel
-                if len(chunk.node.createMask.value)>0:
-                    if len(output_masks)>0:
-                        mask = np.zeros(output_masks[0].shape[0:2], dtype=np.uint8)
-                        selected_masks = [m._value for m in chunk.node.createMask.value]
-                        #creating mask by | the masks of the selected classes
-                        for output_mask, output_class in zip(output_masks, output_classes):
-                            output_class_radical = output_class.split("_")[0]
-                            if output_class_radical in selected_masks:
-                                mask |= output_mask
-                        if chunk.node.inverseClassmask.value:
-                            mask = 255-mask
+            #if a class mask is passed will create it for each channel
+            if len(chunk.node.createMask.value)>0:
+                if len(output_masks)>0:
+                    mask = np.zeros(output_masks[0].shape[0:2], dtype=np.uint8)
+                    selected_masks = [m._value for m in chunk.node.createMask.value]
+                    #creating mask by | the masks of the selected classes
+                    for output_mask, output_class in zip(output_masks, output_classes):
+                        output_class_radical = output_class.split("_")[0]
+                        if output_class_radical in selected_masks:
+                            mask |= output_mask
+                    if chunk.node.inverseClassmask.value:
+                        mask = 255-mask
 
-                        save_image(os.path.join(chunk.node.output.value, views_id+MASK_EXTENTION),
-                                                mask[:,:], orientation=orientation, auto_rotate=True)
+                    save_image(os.path.join(chunk.node.output.value, views_id+MASK_EXTENTION),
+                                            mask[:,:], orientation=orientation, auto_rotate=True)
 
-                    else:
-                        chunk.logger.warn("No objects detected for "+views_id)
-                
-                #save final images: an exr with a one hot per channel, the channel name is the class name
-                if len(output_masks) > 0:
-                    output_masks = np.stack(output_masks, axis=-1)
                 else:
-                    output_masks = np.zeros(input_image.shape[0:2])#empty image if no objects found
-                    output_classes = "unlabeled"
-                save_exr(output_masks, os.path.join(chunk.node.output.value, views_id+"_segmentation.exr"),
-                         data_type="segmentation", channel_names=output_classes)
+                    chunk.logger.warn("No objects detected for "+views_id)
+            
+            #save final images: an exr with a one hot per channel, the channel name is the class name
+            if len(output_masks) > 0:
+                output_masks = np.stack(output_masks, axis=-1)
+            else:
+                output_masks = np.zeros(input_image.shape[0:2])#empty image if no objects found
+                output_classes = "unlabeled"
+            save_exr(output_masks, os.path.join(chunk.node.output.value, views_id+"_segmentation.exr"),
+                    channel_names=output_classes)
 
-            chunk.logger.info('Computing segmentation end')
-        finally:
-            chunk.logManager.end()
+        chunk.logger.info('Computing segmentation end')
+        # finally:
+        #     chunk.logManager.end()
