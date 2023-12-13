@@ -1,7 +1,9 @@
 __version__ = "3.0"
 
+import copy
 import os 
 import json
+from re import S
 
 import trimesh
 import numpy as np
@@ -36,7 +38,7 @@ class LoadDataset(desc.Node):
             label='Dataset Type',
             description='''Dataset type''',
             value='blendedMVG',
-            values=['blendedMVG', 'DTU', 'vital'],
+            values=['blendedMVG', 'DTU', 'vital', 'vital_flipped'],
             exclusive=True,
             uid=[0],
         ),
@@ -87,7 +89,7 @@ class LoadDataset(desc.Node):
             description='Loaded mesh.',
             semantic='mesh',
             value=os.path.join(desc.Node.internalFolder, 'mesh.obj'),
-            enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
+            # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
             group='',
         ),
@@ -234,22 +236,65 @@ class LoadDataset(desc.Node):
                 chunk.logger.warning("Scipy not installed, will not load observation masks or ground plane")
             observation_mask = loadmat(os.path.join(image_folder, "..", f"ObsMask{scan_nb}_10.mat") )
             ground_plane = loadmat(os.path.join(image_folder, "..", f"Plane{scan_nb}.mat"))     
-        elif chunk.node.datasetType.value == "vital":
+        elif chunk.node.datasetType.value.startswith("vital"):
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
             sfm_data_vital_path = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(".sfm")][0]
             with open(sfm_data_vital_path, "r") as json_file:
                 sfm_data_vital = json.load(json_file)
             (extrinsics_vital, intrinsics_vital, _, _, _, _) = matrices_from_sfm_data(sfm_data_vital)
             sensor_size = float(sfm_data_vital["intrinsics"][0]["sensorWidth"])#FIXME: 
+            print("Sensorwidth:", sensor_size)
             #match with sfm data using filename
             extrinsics=[]
             intrinsics=[]
+            sfm_data_out = copy.deepcopy(sfm_data)
+            sfm_data_out["poses"]=[]
             for i,vo in enumerate(sfm_data["views"]):
                 for j,vv in enumerate(sfm_data_vital["views"]):
                     if os.path.basename(vo["path"])==os.path.basename(vv["path"]):
-                        extrinsics.append(extrinsics_vital[j])
-                        intrinsics.append(intrinsics_vital[j])
+                        print(vo["path"]+" matched with "+vv["path"])
+                        #flip cg cv
+                        sfm_data_out["views"][i]["resectionId"]="0"#add resection id
+                        pose=sfm_data_vital["poses"][i]
+                        # #sanity check
+                        # rot_sfm = np.asarray(pose["pose"]["transform"]["rotation"]).reshape([3,3]).astype(np.float32)
+                        # if not is_rotation_mat(rot_sfm):
+                        #     raise RuntimeError("Rotation matrix not valid for "+vo["viewId"])
+
+                        if chunk.node.datasetType.value == "vital_flipped":
+                            transform_mat = np.asarray([[1,0,0],[0,-1,0],[0,0,-1]])
+                            extrinsic_vital = transform_mat@extrinsics_vital[j]
+                        else:
+                            extrinsic_vital = extrinsics_vital[j]
+                        rotation=extrinsic_vital[0:3, 0:3]
+                        if not is_rotation_mat(rotation):
+                            raise RuntimeError("Rotation matrix not valid for "+vo["viewId"])
+                        translation=extrinsic_vital[:, 3]
+                        pose["pose"]["transform"]["rotation"]=np.char.mod("%.20f", rotation.flatten()).tolist()
+                        pose["pose"]["transform"]["center"]=np.char.mod("%.20f", translation).tolist()
+
+                        pose["poseId"] = vo["viewId"] #FIXME: assumes matching id
+                        sfm_data_out["poses"].append(pose)
+
+                        #TODO: open mrrs format
+                        # #intrinsics_vital_pp_pixel=intrinsics_vital[j]
+                        # intrinsics.append(intrinsics_vital[j])#FIXME: principal point need to be converted in pixels from top left
+                        #FIXME: focal need to be converted in pixels for export
                         break
+            sfm_data_out["intrinsics"][0]=sfm_data_vital["intrinsics"][0]#copy gt and keep uid
+            sfm_data_out["intrinsics"][0]["intrinsicId"]=sfm_data["intrinsics"][0]["intrinsicId"]
+            # sfm_data_vital
+            #save
+            with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
+                json.dump(sfm_data_out, f, indent=4)
+            mesh_folder = os.path.join(image_folder, '..', 'mesh')
+            if os.path.exists(mesh_folder):
+                mesh_path = [os.path.join(mesh_folder, f)
+                             for f in os.listdir(mesh_folder) if f.endswith(".obj")][0]
+                print("Laoding "+mesh_path)
+                mesh = trimesh.load(mesh_path, force='mesh')
+                mesh.export(chunk.node.mesh.value)
+            return
         elif chunk.node.datasetType.value == "ETH3D":
             RuntimeError("ETH3D support TBA") 
         else:
@@ -258,7 +303,7 @@ class LoadDataset(desc.Node):
         chunk.logger.info("**Exporting data")
         # generate SFM data from matrices
         gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, 
-                                             images_sizes, sfm_data, sensor_size)
+                                             images_sizes, sfm_data, sensor_width=sensor_size)
 
         # Exports
         if chunk.node.initSfmLandmarks.value != 0:

@@ -109,7 +109,7 @@ class CalibrationComparison(desc.Node):
             if len(views_ids_gt) != len(views_ids):
                 raise RuntimeError("Mismatching number of views (%d vs %d"%(len(views_ids), len(views_ids_gt)))
             #getting calib in matrix form (along with id)
-            extrinsics, intrinsics, _, _, _, _ = matrices_from_sfm_data(sfm_data)
+            extrinsics, intrinsics, poses_id, intrinsics_id, _, _ = matrices_from_sfm_data(sfm_data)
             extrinsics_gt, intrinsics_gt, poses_id_gt, intrinsics_id_gt, _, _ = matrices_from_sfm_data(sfm_data_gt)
 
             chunk.logger.info('Computing metrics for %d calibrations'%len(sfm_data['views']))
@@ -117,17 +117,16 @@ class CalibrationComparison(desc.Node):
             #compute metrics
             computed_metric_values = []
             for index, (view_id, extrinsic, intrinsic) in enumerate(zip(views_ids, extrinsics, intrinsics)):
-                chunk.logger.info('Computing metrics for view %d/%d'%(index, len(views_ids)))
-
                 if (extrinsic is None) or (intrinsic is None):
                     logging.warning("Calibration view "+view_id+" was not computed (likely because the SfM was not able to compute a pose)")
                     computed_metric_values.append([np.nan for _ in metrics])
                     continue
-                #retreive corresponding GT from id
+                #retrieve corresponding GT from id
                 index_gt = np.where(view_id==np.asarray(views_ids_gt))
                 if index_gt[0].size == 0:
                     logging.warning("View "+view_id+" not present in groud truth sfm, skipping")
                     continue
+                # chunk.logger.info('Computing metrics for view %d/%d (%s,%s)'%(index, len(views_ids),view_id,views_ids_gt[index_gt[0][0]]))
                 index_gt = index_gt[0][0]#FIXME: sanity check more than 1
                 extrinsic_gt = extrinsics_gt[index_gt]
                 intrinsic_gt = intrinsics_gt[index_gt]
