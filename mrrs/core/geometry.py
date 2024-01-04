@@ -393,9 +393,8 @@ def transform_cg_cv(vertices):
     vertices=np.transpose(transform_mat@np.transpose(vertices))
     return vertices
 
-def is_rotation_mat(R):
-    SMOL = 0.00001
-    return (np.abs(np.transpose(R) - np.linalg.inv(R))< SMOL ).all() and abs(np.linalg.det(R)-1)<SMOL
+def is_rotation_mat(R, tolerance_threshold= 0.00001):
+    return (np.abs(np.transpose(R) - np.linalg.inv(R))< tolerance_threshold ).all() and abs(np.linalg.det(R)-1)<tolerance_threshold
 
 #%% Other
 def rescale_depth(source_depth_map, target_depth_map, mask):
