@@ -8,6 +8,7 @@ import numpy as np
 import sklearn.neighbors as skln
 from tqdm import tqdm
 from scipy.io import loadmat
+import json
 
 from skimage.morphology import binary_dilation
 from skimage.draw import disk
@@ -36,6 +37,29 @@ def sample_single_tri(input_):
     q = v1 * k[:,:1] + v2 * k[:,1:] + tri_vert
     return q
 
+def sample_pcd(tri_vert):
+    v1 = tri_vert[:,1] - tri_vert[:,0]
+    v2 = tri_vert[:,2] - tri_vert[:,0]
+    l1 = np.linalg.norm(v1, axis=-1, keepdims=True)
+    l2 = np.linalg.norm(v2, axis=-1, keepdims=True)
+    area2 = np.linalg.norm(np.cross(v1, v2), axis=-1, keepdims=True)
+    non_zero_area = np.squeeze((area2 > 0))
+    l1, l2, area2, v1, v2, tri_vert = [
+        arr[non_zero_area] for arr in [l1, l2, area2, v1, v2, tri_vert]
+    ]
+
+    non_zero_area = np.squeeze((area2 > 0)[:,0])
+    thr = thresh * np.sqrt(l1 * l2 / area2)
+    n1 = np.floor(l1 / thr)
+    n2 = np.floor(l2 / thr)
+
+    with mp.Pool() as mp_pool:
+        new_pts = mp_pool.map(sample_single_tri, ((n1[i,0], n2[i,0], v1[i:i+1], v2[i:i+1], tri_vert[i:i+1,0]) for i in range(len(n1))), chunksize=1024)
+
+    new_pts = np.concatenate(new_pts, axis=0)
+    data_pcd = np.concatenate([vertices, new_pts], axis=0)
+    return data_pcd
+
 def write_vis_pcd(file, points, colors):
     # pcd = o3d.geometry.PointCloud()
     # pcd.points = o3d.utility.Vector3dVector(points)
@@ -48,129 +72,129 @@ if __name__ == '__main__':
     mp.freeze_support()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, default='data_in.ply')
-    parser.add_argument('--scan', type=int, default=1)
+    #input
+    parser.add_argument('--data', type=str)#mesh or pouit cloud
+    parser.add_argument('--gt_sfm', type=str)#gt sfm
+    parser.add_argument('--gt_mesh', type=str)#gt mesh
+    #optional input
+    parser.add_argument('--obs_mask', default='', type=str)
+    parser.add_argument('--ground_plane', default='', type=str)
+    parser.add_argument('--mask_folder', default='', type=str)
+    #optional params
+    parser.add_argument('--eval_dir', type=str, default='.')#output dir
     parser.add_argument('--mode', type=str, default='mesh', choices=['mesh', 'pcd'])
-    parser.add_argument('--dataset_dir', type=str, default='.')
-    parser.add_argument('--eval_dir', type=str, default='.')
     parser.add_argument('--suffix', type=str, default='')
     parser.add_argument('--downsample_density', type=float, default=0.2)
     parser.add_argument('--patch_size', type=float, default=60)
     parser.add_argument('--max_dist', type=float, default=20)
     parser.add_argument('--visualize_threshold', type=float, default=10)
-    parser.add_argument('--gt_sfm', type=str, default=None)
-    #args for mask filtering
+    #params for mask filtering
     parser.add_argument("--dilatation_radius", type=int, default=12, help="Radius for mask dilatation (default: 12)")
-    parser.add_argument("--not_main_component", action="store_true", default=False, help="Not to keep the largest main component")
-    
+    parser.add_argument("--not_main_component", type=str, choices=["True", "False"], default=False, help="Not to keep the largest main component")
     args = parser.parse_args()
 
     #parse the arguments from the sfm data
-    if args.gt_sfm is not None:
-        print("Loading sfm")
-        import json
-        sfm_data = json.load(open(args.gt_sfm, "r"))
-        args.dataset_dir=sfm_data["groundTruthDTU"]["gtPath"]
-        print("Dataset dir: "+args.dataset_dir)
-        args.scan=sfm_data["groundTruthDTU"]["scan"]
+    print("Loading sfm")
+    sfm_data = json.load(open(args.gt_sfm, "r"))
 
     thresh = args.downsample_density
     if args.mode == 'mesh':
         print("Mode mesh")
         pbar = tqdm(total=10)
         pbar.set_description('read data mesh')
-        data_mesh = trimesh.load(args.data)#o3d.io.read_triangle_mesh(args.data)
+        data_mesh = trimesh.load(args.data)#o3d.io.read_triangle_mesh(args.data)#switch to trimesh
         data_mesh.remove_unreferenced_vertices()
-
-        ##Added filtering
-        print("\nFiltering")
-
-        # Load masks
-        #opens masks in the same order as the input sfm
-        masks = []
-        for view in sfm_data["views"]:
-            view_number = int(os.path.basename(view["path"]).split(".")[0])
-            masks.append(os.path.join(sfm_data["groundTruthDTU"]["obsMaskFolder"],"%03d.png"%view_number))
-        nb_images = len(masks) 
-
         extrinsics_all_cams, intrinsics_all_cams, _, _, _, pixel_sizes_all_cams = matrices_from_sfm_data(sfm_data)
 
-        dilatation_radius = args.dilatation_radius
-        circle_image = np.zeros((2 * dilatation_radius - 1, 2 * dilatation_radius - 1))
-        circle_image[disk((dilatation_radius - 1, dilatation_radius - 1), dilatation_radius)] = 1
-
-        # Clean mesh using masks and camera poses
-        pbar.update(1)
-        pbar.set_description('project points in dilated masks')
-        if len(intrinsics_all_cams) != nb_images:
-            raise RuntimeError("Nonmatching mask and intrinsic resolution %d vs %d"%(nb_images, len(intrinsics_all_cams)))
+        ##Added filtering from masks
+        masks = []
+        if args.mask_folder != '':
+            print("\nFiltering")
+            # Load masks
+            # opens masks in the same order as the input sfm
+            for view in sfm_data["views"]:
+                view_number = int(os.path.basename(view["path"]).split(".")[0])
+                # masks.append(os.path.join(sfm_data["groundTruthDTU"]["obsMaskFolder"],"%03d.png"%view_number))
+                masks.append(os.path.join(args.mask_folder,"%03d.png"%view_number))
+            nb_images = len(masks) 
         
-        for i in tqdm(range(nb_images)):
-            # Load mask image
-            mask_image_path = masks[i]
-            print("\n")
-            print("Opening "+mask_image_path +" view "+sfm_data["views"][i]["path"])
-            mask_image = np.array(Image.open(mask_image_path))[:, :, 0] > 0  # Assuming mask is stored in the red channel
-       
-            # Dilate mask
-            dilated_mask = binary_dilation(mask_image, circle_image)
+            dilatation_radius = args.dilatation_radius
+            circle_image = np.zeros((2 * dilatation_radius - 1, 2 * dilatation_radius - 1))
+            circle_image[disk((dilatation_radius - 1, dilatation_radius - 1), dilatation_radius)] = 1
 
-            # # Project 3D points onto the mask
-            # points = mesh.vertices
-            # projected_points = trimesh.transformations.transform_points(points, worldMats[i])
-            # projected_points[:, :2] /= projected_points[:, 2, np.newaxis]  # Normalize projected points
-            # projected_points = projected_points[:, :2]
+            # Clean mesh using masks and camera poses
+            pbar.update(1)
+            pbar.set_description('project points in dilated masks')
+            if len(intrinsics_all_cams) != nb_images:
+                raise RuntimeError("Nonmatching mask and intrinsic resolution %d vs %d"%(nb_images, len(intrinsics_all_cams)))
+            
+            for i in tqdm(range(nb_images)):
+                # Load mask image
+                mask_image_path = masks[i]
+                print("\n")
+                print("Opening "+mask_image_path +" view "+sfm_data["views"][i]["path"])
+                mask_image = np.array(Image.open(mask_image_path))[:, :, 0] > 0  # Assuming mask is stored in the red channel
+        
+                # Dilate mask
+                dilated_mask = binary_dilation(mask_image, circle_image)
 
-            vertices = transform_cg_cv(data_mesh.vertices)
-            projected_points, _ = camera_projection(vertices, extrinsics_all_cams[i], 
-                                                    intrinsics_all_cams[i], pixel_sizes_all_cams[i])
-            #FIXME: projection issues?
-            print(data_mesh.vertices)
-            print(projected_points)
-            
-            # Find points inside the image bounds
-            image_height, image_width = dilated_mask.shape
-            valid_points = (
-                (projected_points[:, 0] >= 0) &
-                (projected_points[:, 0] < image_width) &
-                (projected_points[:, 1] >= 0) &
-                (projected_points[:, 1] < image_height)
-            )
-            print("%d valid points"%projected_points[valid_points].shape[0])
-            img=np.array(Image.open(sfm_data["views"][i]["path"]))
-            for p in projected_points[valid_points]:
-                img[p[1],p[0],:]=[255,0,0]
-            Image.fromarray(img).save(f'{args.eval_dir}/%d.png'%i)
-            
-            # Find points inside the mask
-            points_inside_mask = dilated_mask[
-                np.floor(projected_points[valid_points, 1]).astype(int),
-                np.floor(projected_points[valid_points, 0]).astype(int)
-            ]
-            # Ensure both arrays have the same size
-            valid_points_inside_mask = np.ones_like(valid_points, dtype=bool)
-            valid_points_inside_mask[valid_points] = points_inside_mask
-            # Remove points and corresponding faces outside the mask
-            valid_faces = np.any(valid_points_inside_mask[data_mesh.faces], axis=1)
-            data_mesh = data_mesh.submesh([valid_faces])[0]
+                # # Project 3D points onto the mask
+                # points = mesh.vertices
+                # projected_points = trimesh.transformations.transform_points(points, worldMats[i])
+                # projected_points[:, :2] /= projected_points[:, 2, np.newaxis]  # Normalize projected points
+                # projected_points = projected_points[:, :2]
+
+                vertices = transform_cg_cv(data_mesh.vertices)
+                projected_points, _ = camera_projection(vertices, extrinsics_all_cams[i], 
+                                                        intrinsics_all_cams[i], pixel_sizes_all_cams[i])
+                #FIXME: projection issues?
+                # print(data_mesh.vertices)
+                # print(projected_points)
+                
+                # Find points inside the image bounds
+                image_height, image_width = dilated_mask.shape
+                valid_points = (
+                    (projected_points[:, 0] >= 0) &
+                    (projected_points[:, 0] < image_width) &
+                    (projected_points[:, 1] >= 0) &
+                    (projected_points[:, 1] < image_height)
+                )
+                print("%d valid points"%projected_points[valid_points].shape[0])
+                img=np.array(Image.open(sfm_data["views"][i]["path"]))
+                for p in projected_points[valid_points]:
+                    img[p[1],p[0],:]=[255,0,0]
+                Image.fromarray(img).save(f'{args.eval_dir}/%d.png'%i)
+                
+                # Find points inside the mask
+                points_inside_mask = dilated_mask[
+                    np.floor(projected_points[valid_points, 1]).astype(int),
+                    np.floor(projected_points[valid_points, 0]).astype(int)
+                ]
+                # Ensure both arrays have the same size
+                valid_points_inside_mask = np.ones_like(valid_points, dtype=bool)
+                valid_points_inside_mask[valid_points] = points_inside_mask
+                # Remove points and corresponding faces outside the mask
+                valid_faces = np.any(valid_points_inside_mask[data_mesh.faces], axis=1)
+                data_mesh = data_mesh.submesh([valid_faces])[0]
 
         # Ensure only one component of the mesh is kept
         pbar.update(1)
-        pbar.set_description('keep only the largest component mesh')
-        if not args.not_main_component:
+        
+        if args.not_main_component == "False":
+            pbar.set_description('keep only the largest component mesh')
             mesh_components = data_mesh.split(only_watertight=False)
             largest_component = max(mesh_components, key=lambda comp: len(comp.vertices))
+            print("Nb vertices before %d and after %d largest component "%(data_mesh.vertices.shape[0],largest_component.vertices.shape[0] ))
             data_mesh = largest_component
-
         # Save cleaned mesh
         pbar.update(1)
         pbar.set_description('export cleaned mesh')
-        data_mesh.export(f'{args.eval_dir}/cleaned_mesh.ply')
+        
+        data_mesh.export(f'{args.eval_dir}/cleaned_mesh.obj')
 
         pbar.update(1)
         pbar.set_description('done')
         pbar.close()
-        #-----
 
         mp.freeze_support()
 
@@ -180,26 +204,7 @@ if __name__ == '__main__':
 
         pbar.update(1)
         pbar.set_description('sample pcd from mesh')
-        v1 = tri_vert[:,1] - tri_vert[:,0]
-        v2 = tri_vert[:,2] - tri_vert[:,0]
-        l1 = np.linalg.norm(v1, axis=-1, keepdims=True)
-        l2 = np.linalg.norm(v2, axis=-1, keepdims=True)
-        area2 = np.linalg.norm(np.cross(v1, v2), axis=-1, keepdims=True)
-        non_zero_area = np.squeeze((area2 > 0))
-        l1, l2, area2, v1, v2, tri_vert = [
-            arr[non_zero_area] for arr in [l1, l2, area2, v1, v2, tri_vert]
-        ]
-    
-        non_zero_area = np.squeeze((area2 > 0)[:,0])
-        thr = thresh * np.sqrt(l1 * l2 / area2)
-        n1 = np.floor(l1 / thr)
-        n2 = np.floor(l2 / thr)
-
-        with mp.Pool() as mp_pool:
-            new_pts = mp_pool.map(sample_single_tri, ((n1[i,0], n2[i,0], v1[i:i+1], v2[i:i+1], tri_vert[i:i+1,0]) for i in range(len(n1))), chunksize=1024)
-
-        new_pts = np.concatenate(new_pts, axis=0)
-        data_pcd = np.concatenate([vertices, new_pts], axis=0)
+        data_pcd = sample_pcd(tri_vert)
 
     elif args.mode == 'pcd':
         print("Mode point cloud")
@@ -223,11 +228,11 @@ if __name__ == '__main__':
    
     #rnn_idxs = nn_engine.radius_neighbors(data_pcd[0:100], radius=thresh, return_distance=False)
 
-    if os.path.exists(f'{args.eval_dir}/data_down.ply'):
+    if os.path.exists(f'{args.eval_dir}/data_down.ply'):#load the sampling if already computed 
         print("loading tmp file from "+'{args.eval_dir}/data_down.ply')
         data_down = trimesh.load_mesh(f'{args.eval_dir}/data_down.ply').vertices
         print("%d points loaded"%data_down.shape[0])
-    else:
+    else:#compute it onterhwise
         pbar.set_description('Computing neighbors for %d points'%(data_pcd.shape[0]))
         mask = np.ones(data_pcd.shape[0], dtype=np.bool_)
         #for curr, idxs in enumerate(rnn_idxs):
@@ -247,27 +252,31 @@ if __name__ == '__main__':
             
         data_down = data_pcd[mask]
         print("saving tmp file in "+'{args.eval_dir}/data_down.ply')
-        trimesh.PointCloud(data_down).export(f'{args.eval_dir}/data_down.ply', "ply")
+        #trimesh.PointCloud(data_down).export(f'{args.eval_dir}/data_down.ply', "ply")
+        trimesh.PointCloud(data_down).export(f'{args.eval_dir}/data_down.obj', "obj")
 
-    pbar.update(1)
-    pbar.set_description('masking data pcd')
-    obs_mask_file = loadmat(f'{args.dataset_dir}/ObsMask/ObsMask{args.scan}_10.mat')
-    ObsMask, BB, Res = [obs_mask_file[attr] for attr in ['ObsMask', 'BB', 'Res']]
-    BB = BB.astype(np.float32)
-    print("BB")
-    print(BB)
+    #Masking using obesrvation mask
+    data_in_obs = data_down
+    data_in = data_down
+    # inbound = np.one(data_down.shape[0])
+    # grid_inbound =
+    # in_obs = 
+    if args.obs_mask != '':
+        pbar.update(1)
+        pbar.set_description('masking data pcd')
+        obs_mask_file = loadmat(args.obs_mask) #loadmat(f'{args.dataset_dir}/ObsMask/ObsMask{args.scan}_10.mat')
+        ObsMask, BB, Res = [obs_mask_file[attr] for attr in ['ObsMask', 'BB', 'Res']]
+        BB = BB.astype(np.float32)
 
-    patch = args.patch_size
-    inbound = ((data_down >= BB[:1]-patch) & (data_down < BB[1:]+patch*2)).sum(axis=-1) ==3
-    data_in = data_down[inbound]
-    print("data_in")
-    print(data_in.shape)
+        patch = args.patch_size
+        inbound = ((data_down >= BB[:1]-patch) & (data_down < BB[1:]+patch*2)).sum(axis=-1) ==3
+        data_in = data_down[inbound]
 
-    data_grid = np.around((data_in - BB[:1]) / Res).astype(np.int32)
-    grid_inbound = ((data_grid >= 0) & (data_grid < np.expand_dims(ObsMask.shape, 0))).sum(axis=-1) ==3
-    data_grid_in = data_grid[grid_inbound]
-    in_obs = ObsMask[data_grid_in[:,0], data_grid_in[:,1], data_grid_in[:,2]].astype(np.bool_)
-    data_in_obs = data_in[grid_inbound][in_obs]
+        data_grid = np.around((data_in - BB[:1]) / Res).astype(np.int32)
+        grid_inbound = ((data_grid >= 0) & (data_grid < np.expand_dims(ObsMask.shape, 0))).sum(axis=-1) ==3
+        data_grid_in = data_grid[grid_inbound]
+        in_obs = ObsMask[data_grid_in[:,0], data_grid_in[:,1], data_grid_in[:,2]].astype(np.bool_)
+        data_in_obs = data_in[grid_inbound][in_obs]
 
     # added was added by Baptiste
     # ground_plane = loadmat(f'{args.dataset_dir}/ObsMask/Plane{args.scan}.mat')['P']
@@ -279,8 +288,18 @@ if __name__ == '__main__':
     pbar.set_description('read STL pcd')
     # stl_pcd = o3d.io.read_point_cloud(f'{args.dataset_dir}/Points/stl/stl{args.scan:03}_total.ply')
     # stl = np.asarray(stl_pcd.points)
-    stl = trimesh.load(f'{args.dataset_dir}/Points/stl/stl{args.scan:03}_total.ply').vertices
-    
+    print(args.gt_mesh)
+    sample_pcd(tri_vert)
+    gt_mesh = trimesh.load(args.gt_mesh)
+    if len(gt_mesh.faces) == 0:
+        print("GT from point cloud")
+        stl = gt_mesh.vertices
+    else:#if mesh gt, then sample
+        GT_vertices = np.asarray(gt_mesh.vertices)
+        GT_triangles = np.asarray(gt_mesh.faces).astype(np.int32)
+        gt_tri_vert = vertices[triangles]
+        stl = sample_pcd(gt_tri_vert)
+   
     #added by bapiste
     # stl_hom = np.concatenate([stl, np.ones_like(stl[:,:1])], -1)
     # stl_above_bol = (ground_plane.reshape((1,4)) * stl_hom).sum(-1) > 0
@@ -303,12 +322,15 @@ if __name__ == '__main__':
 
     pbar.update(1)
     pbar.set_description('compute stl2data')
-    #removed by baptiste
-    ground_plane = loadmat(f'{args.dataset_dir}/ObsMask/Plane{args.scan}.mat')['P']
-    stl_hom = np.concatenate([stl, np.ones_like(stl[:,:1])], -1)
-    above = (ground_plane.reshape((1,4)) * stl_hom).sum(-1) > 0
-    stl_above = stl[above]
-    #
+
+    ##FILTER ground plane
+    stl_above=stl
+    if args.ground_plane != '':
+        #removed by baptiste
+        ground_plane = loadmat(args.ground_plane)#loadmat(f'{args.dataset_dir}/ObsMask/Plane{args.scan}.mat')['P']
+        stl_hom = np.concatenate([stl, np.ones_like(stl[:,:1])], -1)
+        above = (ground_plane.reshape((1,4)) * stl_hom).sum(-1) > 0
+        stl_above = stl[above]
     
     nn_engine.fit(data_in)
     dist_s2d, idx_s2d = nn_engine.kneighbors(stl_above, n_neighbors=1, return_distance=True)
@@ -327,9 +349,13 @@ if __name__ == '__main__':
     # data_color[ np.where(inbound)[0][grid_inbound][in_obs][data_above_bol] ] = R * data_alpha + W * (1-data_alpha)
     # data_color[ np.where(inbound)[0][grid_inbound][in_obs][data_above_bol][dist_d2s[:,0] >= max_dist] ] = G
     # write_vis_pcd(f'{args.eval_dir}/vis_{args.scan:03}_d2s{args.suffix}.ply', data_down, data_color)
-    data_color[ np.where(inbound)[0][grid_inbound][in_obs] ] = R * data_alpha + W * (1-data_alpha)
-    data_color[ np.where(inbound)[0][grid_inbound][in_obs][dist_d2s[:,0] >= max_dist] ] = G
-    write_vis_pcd(f'{args.eval_dir}/vis_{args.scan:03}_d2s.ply', data_down, data_color)
+    if args.obs_mask != '':
+        data_color[ np.where(inbound)[0][grid_inbound][in_obs] ] = R * data_alpha + W * (1-data_alpha)
+        data_color[ np.where(inbound)[0][grid_inbound][in_obs][dist_d2s[:,0] >= max_dist] ] = G
+    else:
+        data_color = R * data_alpha + W * (1-data_alpha)
+        data_color[dist_d2s[:,0] >= max_dist] = G
+    write_vis_pcd(f'{args.eval_dir}/vis_d2s.ply', data_down, data_color)
 
     
     stl_color = np.tile(B, (stl.shape[0], 1))
@@ -338,9 +364,14 @@ if __name__ == '__main__':
     # stl_color[ np.where(stl_above_bol)[0] ] = R * stl_alpha + W * (1-stl_alpha)
     # stl_color[ np.where(stl_above_bol)[0][dist_s2d[:,0] >= max_dist] ] = G
     # write_vis_pcd(f'{args.eval_dir}/vis_{args.scan:03}_s2d{args.suffix}.ply', stl, stl_color)
-    stl_color[ np.where(above)[0] ] = R * stl_alpha + W * (1-stl_alpha)
-    stl_color[ np.where(above)[0][dist_s2d[:,0] >= max_dist] ] = G
-    write_vis_pcd(f'{args.eval_dir}/vis_{args.scan:03}_s2d.ply', stl, stl_color)
+    if args.ground_plane != '':
+        stl_color[ np.where(above)[0] ] = R * stl_alpha + W * (1-stl_alpha)
+        stl_color[ np.where(above)[0][dist_s2d[:,0] >= max_dist] ] = G
+    else:
+        stl_color= R * stl_alpha + W * (1-stl_alpha)
+        stl_color[dist_s2d[:,0] >= max_dist] = G
+
+    write_vis_pcd(f'{args.eval_dir}/vis_s2d.ply', stl, stl_color)
 
     #added by baptiste
     pbar.update(1)
@@ -378,7 +409,7 @@ if __name__ == '__main__':
         os.makedirs(args.eval_dir)
 
     # Write the data to a CSV file
-    with open(f'{args.eval_dir}/result_{args.scan:03}{args.suffix}.csv', 'w', newline='') as file:
+    with open(f'{args.eval_dir}/result_{args.suffix}.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['data2stl','stl2data'])
         writer.writerow([mean_d2s, mean_s2d])

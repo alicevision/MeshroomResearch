@@ -207,8 +207,6 @@ class LoadDataset(desc.Node):
                     submesh = trimesh.load_mesh(submesh_path) 
                     submeshes.append(submesh)
                 mesh = trimesh.util.concatenate(submeshes)
-                #FIXME: need to rotate in CG CS?
-
         elif chunk.node.datasetType.value == "DTU":
             chunk.logger.info("***Importing DTU data")
             #sort sfm data views by frame order (as in dtu)
@@ -253,14 +251,8 @@ class LoadDataset(desc.Node):
                 for j,vv in enumerate(sfm_data_vital["views"]):
                     if os.path.basename(vo["path"])==os.path.basename(vv["path"]):
                         print(vo["path"]+" matched with "+vv["path"])
-                        #flip cg cv
                         sfm_data_out["views"][i]["resectionId"]="0"#add resection id
                         pose=sfm_data_vital["poses"][i]
-                        # #sanity check
-                        # rot_sfm = np.asarray(pose["pose"]["transform"]["rotation"]).reshape([3,3]).astype(np.float32)
-                        # if not is_rotation_mat(rot_sfm):
-                        #     raise RuntimeError("Rotation matrix not valid for "+vo["viewId"])
-
                         if chunk.node.datasetType.value == "vital_flipped":
                             transform_mat = np.asarray([[1,0,0],[0,-1,0],[0,0,-1]])
                             extrinsic_vital = transform_mat@extrinsics_vital[j]
@@ -275,15 +267,9 @@ class LoadDataset(desc.Node):
 
                         pose["poseId"] = vo["viewId"] #FIXME: assumes matching id
                         sfm_data_out["poses"].append(pose)
-
-                        #TODO: open mrrs format
-                        # #intrinsics_vital_pp_pixel=intrinsics_vital[j]
-                        # intrinsics.append(intrinsics_vital[j])#FIXME: principal point need to be converted in pixels from top left
-                        #FIXME: focal need to be converted in pixels for export
                         break
             sfm_data_out["intrinsics"][0]=sfm_data_vital["intrinsics"][0]#copy gt and keep uid
             sfm_data_out["intrinsics"][0]["intrinsicId"]=sfm_data["intrinsics"][0]["intrinsicId"]
-            # sfm_data_vital
             #save
             with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
                 json.dump(sfm_data_out, f, indent=4)
@@ -291,10 +277,10 @@ class LoadDataset(desc.Node):
             if os.path.exists(mesh_folder):
                 mesh_path = [os.path.join(mesh_folder, f)
                              for f in os.listdir(mesh_folder) if f.endswith(".obj")][0]
-                print("Laoding "+mesh_path)
+                print("Loading "+mesh_path)
                 mesh = trimesh.load(mesh_path, force='mesh')
                 mesh.export(chunk.node.mesh.value)
-            return
+            return #unlike the other datasets we leave early here
         elif chunk.node.datasetType.value == "ETH3D":
             RuntimeError("ETH3D support TBA") 
         else:

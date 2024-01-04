@@ -34,6 +34,22 @@ class MeshcomparisonDTU(CondaNode):
             uid=[0],
             ),
 
+        desc.File(
+            name='gt_mesh',
+            label='GroundTruthMesh',
+            description='''''',
+            value='',
+            uid=[0],
+            ),
+
+        desc.BoolParam(
+            name='not_main_component',
+            label='notMainComponent',
+            description='''''',
+            value=False,
+            uid=[0],
+            ),
+
         # desc.File(
         #     name='dataset_dir',
         #     label='DataseDir',
