@@ -7,21 +7,22 @@ name='mrrs'
 version='0.0'
 
 requires=[
-    'python-3.7',
+    'python',
     'Pillow-8.4.0',
     'pyopencv-4.7.0',
     'pyoiio-2.4.13',
     'trimesh',
-    'click', #needed for clis otherwise optional
+    'click', 
+    'matplotlib'
     ]
 
 def commands():
     """
     Setups mrrs path and meshroom node path env variable
     """
-    env.PATH.append('/s/apps/users/hogm/miniconda/bin')#add conda to path
+    env.PATH.append('/s/apps/users/hogm/miniconda/bin')#add conda to path FIXME: harcoded with hogm
     source("/s/apps/users/hogm/miniconda/etc/profile.d/conda.sh")
-    env.MESHROOM_CACHE='/s/prods/mvg/_source_global/users/hogm/tmp/'#make cache for conda
+    #env.MESHROOM_CACHE='/s/prods/mvg/_source_global/users/hogm/tmp/'#make cache for conda FIXME: harcoded with hogm
     env.PYTHONPATH.append('{root}/MeshroomResearch')
     env.MESHROOM_NODES_PATH.append('{root}/MeshroomResearch/mrrs/nodes')
     for p in ['benchmark', 'colmap']:
