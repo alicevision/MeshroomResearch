@@ -236,7 +236,11 @@ class LoadDataset(desc.Node):
             ground_plane = loadmat(os.path.join(image_folder, "..", f"Plane{scan_nb}.mat"))     
         elif chunk.node.datasetType.value.startswith("vital"):
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
-            sfm_data_vital_path = [os.path.join(image_folder, f) for f in os.listdir(image_folder) if f.endswith(".sfm")][0]
+            sfm_folder=os.path.join(image_folder, "..", '..', 'sfm')
+            sfm_data_vital_path = [os.path.join(sfm_folder, f) for f in os.listdir(sfm_folder) if f.endswith(".sfm")]
+            if len(sfm_data_vital_path) == 0:
+                raise RuntimeError("No sfm found in "+sfm_folder)
+            sfm_data_vital_path=sfm_data_vital_path[0]
             with open(sfm_data_vital_path, "r") as json_file:
                 sfm_data_vital = json.load(json_file)
             (extrinsics_vital, intrinsics_vital, _, _, _, _) = matrices_from_sfm_data(sfm_data_vital)
@@ -264,7 +268,6 @@ class LoadDataset(desc.Node):
                         translation=extrinsic_vital[:, 3]
                         pose["pose"]["transform"]["rotation"]=np.char.mod("%.20f", rotation.flatten()).tolist()
                         pose["pose"]["transform"]["center"]=np.char.mod("%.20f", translation).tolist()
-
                         pose["poseId"] = vo["viewId"] #FIXME: assumes matching id
                         sfm_data_out["poses"].append(pose)
                         break

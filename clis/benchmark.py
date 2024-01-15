@@ -16,7 +16,7 @@ if MESHROOM_ROOT is not None:
     print("MESHROOM_INSTALL_DIR set, will use it")
     meshroom_batch_cl = "python "+MESHROOM_ROOT+"/bin/meshroom_batch"
 else:
-    print("Will call meshroom_batch directly")
+    print("Will call meshroom_batch directly from terminal")
 
 #Auto detect and set paths
 this_file_path = os.path.abspath(__file__)
@@ -66,6 +66,7 @@ def run(pipeline, output_folder,
             input_folder = os.path.join(dataset_path, scene_folder, "images")
         else:
             raise RuntimeError("Unknown dataset type")
+
         #folder handling
         scene_output_folder = os.path.abspath(os.path.join(output_folder, scene_folder))
         if os.path.exists(scene_output_folder):
@@ -104,11 +105,12 @@ def run(pipeline, output_folder,
 #aggregate results and make report
 @cli.command()
 @click.option('--output_folder','-o', default=None, help='Output folder to generate reports into.')
-@click.option('--csv_names','-n', multiple=True, default=["calibration_comparison.csv", "depth_maps_comparison.csv"], help='Csvs to use for reporting.')
+@click.option('--csv_names','-n', multiple=True, default=["calibration_comparison.csv"], help='Csvs names to use for reporting.')
 @click.option('--ensure_complete','-c', is_flag=True, help='Will raise an exeption if a result for a sequence is not found.')
-@click.option('--make_plot','-p', is_flag=True, help='Will make plots.')
+@click.option('--rename_csv','-r', default=None, help='If passed, will rename the output csv.')
+@click.option('--make_mustahce_plot','-p', is_flag=True, help='Will make plots.')
 @click.argument('computed_outputs_path')#FIXME: inherit from group?
-def report(output_folder, computed_outputs_path, csv_names, ensure_complete, make_plot):
+def report(output_folder, computed_outputs_path, csv_names, ensure_complete, rename_csv, make_mustahce_plot):
     """
     Generate a report from a computed benchmark.
     """
@@ -131,24 +133,25 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete, mak
         sequences_skipped = []
         for sequence in sequences:
             csv_file_path = os.path.join(computed_outputs_path, sequence, csv_name)
-            #make sure the computation when trhu
+            #make sure the computation when thru
             if not os.path.exists(csv_file_path):
-                results_avg.append("")
-                results_median.append("")
+                results_avg.append(None)
+                results_median.append(None)#empty line
                 sequences_skipped.append(sequence)
                 if ensure_complete:
                     raise RuntimeError("Issue with sequence "+sequence+" file "+csv_file_path+" skipping")
                 print("Issue with sequence "+sequence+" file "+csv_file_path+" skipping")
                 continue
             result = np.loadtxt(csv_file_path, dtype=str, delimiter=",")
-            #split average/med from the  rest
+            #split header from data
             header = result[0,:-1]
             data_calib = result[1:-2, 1:-1].astype(np.float32)
+            #compture avg and med
             avg = np.nanmean(data_calib, axis =0)
             med =  np.nanmedian(data_calib, axis =0)
-            if np.all(np.isnan(avg)) or np.all(np.isnan(med)):
+            if np.any(np.isnan(avg)) or np.any(np.isnan(med)):
                 raise BaseException("Nan")
-            #save only average
+            #save only average and med for all views
             results_avg.append(avg)
             results_median.append(med)
         return results_avg, results_median, header, sequences_skipped
@@ -158,15 +161,18 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete, mak
             #header
             for metric in header:
                 csv_file.write("avg "+metric+",")
-            for metric in header[1:]:
-                csv_file.write("med "+metric+",")
+            # for metric in header[1:]:
+            #     csv_file.write("med "+metric+",")
             csv_file.write('\n')
             for sequence, avgs, meds in zip(sequences, results_avg, results_meds):
                 csv_file.write(sequence+",")
+                if avgs is None or meds is None:
+                    avgs=[np.nan]*(len(header)-1)
+                    meds=[np.nan]*(len(header)-1)
                 for avg in avgs:
                     csv_file.write(str(avg)+",")
-                for med in meds:
-                    csv_file.write(str(med)+",")
+                # for med in meds:
+                #     csv_file.write(str(med)+",")
                 csv_file.write("\n")
 
     #Save csvs
@@ -176,10 +182,13 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete, mak
         results_avg, results_med, header, sequences_skipped_calib = agregate_results(csv_name)
         print("\t%d sequences skiped:"%len(sequences_skipped_calib))
         print("\t"+str(sequences_skipped_calib))
-        save_results("all_"+csv_name, header, results_avg, results_med)
+        output_csv_name = "all_"+csv_name
+        if rename_csv is not None:
+            output_csv_name=rename_csv
+        save_results(output_csv_name, header, results_avg, results_med)
 
-        if make_plot:
-            def make_plot(csv_name):
+        if make_mustahce_plot:
+            def make_mustahce_plot(csv_name):
                 """
                 Makes a mustache box from the csv.
                 """
@@ -243,7 +252,54 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete, mak
             print("Making pretty plots for ...")
             for csv_name in csv_names:
                 print("\t"+csv_name)
-                make_plot(csv_name)
+                make_mustahce_plot(csv_name)
+
+@cli.command()
+@click.option('--output_folder','-o', default="./", help='Output folder to generate reports into.')
+@click.argument('csv_paths', nargs=-1) #note: this is supposed to be the ouptut of the aggregated results for a bench ((1 metric per )
+#TODO: name
+def timeline(csv_paths, output_folder):
+    """
+    Takes csv with same average/median metrics and plot then along time.
+    """
+    #fixme 
+    from matplotlib import pyplot as plt
+    if len(csv_paths) == 0:
+        print("No csv_paths passed")
+        exit(0)
+
+    # metric_colors = ["r", "g", "b", "c", "m", "y", "k"]
+    
+    header=None
+    data = []
+    for csv_path in csv_paths:
+        #issue: incomplete sequence?
+        result = np.loadtxt(csv_path, dtype=str, delimiter=",")
+        #split average/med from the  rest
+        if header is None:
+            header = result[0,:-1]
+        else:
+            assert ((result[0,:-1]==header).all())
+        #result without header and scene names (also removing the last ',')
+        data.append(result[1:, 1:-1].astype(np.float32))
+    data=np.stack(data, axis=-1)#array of scenexmetrics
+    data = np.nanmean(data, axis=0)
+    for m, metric in enumerate(header[1:]):
+        fig, ax = plt.subplots(figsize=(10, 10))
+        d=data[m]
+        x_ticks_labls = [os.path.splitext(os.path.basename(c))[0] for c in csv_paths]
+        ax.set_xticks(range(len(x_ticks_labls)))
+        ax.set_xticklabels(x_ticks_labls)
+        plt.plot(d)
+        print(x_ticks_labls)
+        plt.title(metric+ "over versions" )
+        print("Saving "+os.path.join(output_folder, metric+'_over_v.png'))
+        fig.savefig(os.path.join(output_folder, metric+'_over_v.png') )
+
+    
+
+
+from matplotlib import pyplot as plt
 
 if __name__ == '__main__':
     cli()

@@ -119,7 +119,7 @@ class CalibrationComparison(desc.Node):
             for index, (view_id, extrinsic, intrinsic) in enumerate(zip(views_ids, extrinsics, intrinsics)):
                 if (extrinsic is None) or (intrinsic is None):
                     logging.warning("Calibration view "+view_id+" was not computed (likely because the SfM was not able to compute a pose)")
-                    computed_metric_values.append([np.nan for _ in metrics])
+                    computed_metric_values.append([0 if m=="validCams" else np.nan for m in metrics])
                     continue
                 #retrieve corresponding GT from id
                 index_gt = np.where(view_id==np.asarray(views_ids_gt))
