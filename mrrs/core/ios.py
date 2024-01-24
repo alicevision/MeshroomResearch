@@ -217,8 +217,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
         if extrinsic is None:
             print('No extrinsic for view pose '+pose_id)
             continue
-        # if extrinsic.shape[0] == 3:#make square for inverse
-        #     extrinsic=np.concatenate([extrinsic, [[0,0,0,1]]], axis=0)
+
         translation = format_float_array(extrinsic[0:3,3])
         rotation = format_float_array(extrinsic[0:3,0:3])
         pose = {

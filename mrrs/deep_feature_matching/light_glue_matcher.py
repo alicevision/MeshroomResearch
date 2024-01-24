@@ -29,8 +29,7 @@ def run_matching(inputsfmdata, outputfolder, inputfeaturefolder,
     """
     """
     print("Hello")
-    print(kornia.__version__)
-
+    
     extention = "unknown"
     feature_type = "disk"#FIXME: parameter
 

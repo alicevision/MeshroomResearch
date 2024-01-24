@@ -114,7 +114,7 @@ class MeshcomparisonDTU(CondaNode):
 
         desc.FloatParam(
             name='visualize_threshold',
-            label='maxDist',
+            label='visualize_threshold',
             description='''''',
             value=20.0,
             range=(0.0, 100.0, 1.0),

@@ -7,6 +7,7 @@ import os
 from meshroom.core import desc
 from meshroom.core import defaultCacheFolder
 
+#TODO: add mode to not run as CLI to be able to debug
 class CondaNode(desc.CommandLineNode):
     # def __init__(self):
     #     super().__init__() #TODO check if conda to path

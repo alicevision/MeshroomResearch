@@ -2,9 +2,7 @@
 Module that contains 2D and 3D geometrical operations
 """
 import numpy as np
-import math
 import logging
-from mrrs.core.utils import cross_with_broacsat, time_it, vectorised_dot
 
 #what is condidered a small float
 EPSILON = 0.0000001
@@ -94,7 +92,6 @@ def camera_deprojection_meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_
     return scene_points
 
 #%% Triangle operations
-
 def compute_triangle_area(triangle):
     """
     A utility function to calculate compute_triangle_area

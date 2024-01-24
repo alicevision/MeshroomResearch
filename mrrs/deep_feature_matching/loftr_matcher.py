@@ -125,7 +125,8 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
     with time_it() as total_time:
         for view_index_0 in range(nb_image):
             #open and prepare
-            timage_0, uid_image_0, image_0, frame_id_0  = open_and_prepare_image(sfm_data,view_index_0, device)
+            (timage_0, uid_image_0, 
+            image_0, frame_id_0)  = open_and_prepare_image(sfm_data,view_index_0, device)
 
             #depending of the matching method, we get a list of views to match
             view_indices_1 = []
@@ -136,7 +137,7 @@ def run_matching(inputsfmdata, outputfolder, imagemaching, imagepairs, maskfolde
                 view_indices_1=range(nb_image)
             elif imagemaching == "uni":
                 view_indices_1=range(view_index_0, nb_image) 
-            elif imagemaching == "file":
+            elif imagemaching == "file": #FIXME: first index in list is the id of the view!!!
                 #get view from graph
                 # each line corresponds to an image in the same order as in the sfm? #FIXME: to check
                 #FIXME : non bijective matching matrix

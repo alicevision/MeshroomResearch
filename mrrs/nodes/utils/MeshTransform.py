@@ -73,7 +73,7 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             name='outputMesh',
             label='Output mesh',
             description='Output Mesh.',
-            value=desc.Node.internalFolder + 'mesh.obj',#pb: not extention!!!
+            value=desc.Node.internalFolder + 'mesh.ply',#pb: not extention!!! variable output
             uid=[],
         ),
     ]
