@@ -3,7 +3,6 @@ __version__ = "3.0"
 import copy
 import os 
 import json
-from re import S
 
 import trimesh
 import numpy as np
@@ -15,6 +14,8 @@ from mrrs.core.ios import *
 
 from mrrs.datasets.blendedMVG import open_txt_calibration_blendedMVG
 from mrrs.datasets.dtu import open_dtu_calibration
+from mrrs.datasets.eth3d import open_dataset
+#FIXME: this node si becoming to big, split into abstract datasetLoader, overwrite for each dataset type
 
 class LoadDataset(desc.Node):
     category = 'Meshroom Research'
@@ -38,7 +39,7 @@ class LoadDataset(desc.Node):
             label='Dataset Type',
             description='''Dataset type''',
             value='blendedMVG',
-            values=['blendedMVG', 'DTU', 'vital', 'vital_flipped'],
+            values=['blendedMVG', 'DTU', 'vital', 'ETH3D', 'minimal'],
             exclusive=True,
             uid=[0],
         ),
@@ -162,6 +163,7 @@ class LoadDataset(desc.Node):
 
         # Load SFM data from JSON file
         sfm_data = json.load(open(chunk.node.sfmData.value, "r"))
+        
         # pose IDs, calibration IDs, and view IDs (one per view)
         poses_id = [v["poseId"] for v in sfm_data["views"]]
         instrinsics_id = [v["intrinsicId"] for v in sfm_data["views"]]
@@ -257,11 +259,7 @@ class LoadDataset(desc.Node):
                         print(vo["path"]+" matched with "+vv["path"])
                         sfm_data_out["views"][i]["resectionId"]="0"#add resection id
                         pose=sfm_data_vital["poses"][i]
-                        if chunk.node.datasetType.value == "vital_flipped":
-                            transform_mat = np.asarray([[1,0,0],[0,-1,0],[0,0,-1]])
-                            extrinsic_vital = transform_mat@extrinsics_vital[j]
-                        else:
-                            extrinsic_vital = extrinsics_vital[j]
+                        extrinsic_vital = extrinsics_vital[j]
                         rotation=extrinsic_vital[0:3, 0:3]
                         if not is_rotation_mat(rotation):
                             raise RuntimeError("Rotation matrix not valid for "+vo["viewId"])
@@ -276,23 +274,44 @@ class LoadDataset(desc.Node):
             #save
             with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
                 json.dump(sfm_data_out, f, indent=4)
-            mesh_folder = os.path.join(image_folder, '..', 'mesh')
+            mesh_folder = os.path.join(image_folder, '..', '..', 'obj')
             if os.path.exists(mesh_folder):
                 mesh_path = [os.path.join(mesh_folder, f)
                              for f in os.listdir(mesh_folder) if f.endswith(".obj")][0]
                 print("Loading "+mesh_path)
                 mesh = trimesh.load(mesh_path, force='mesh')
                 mesh.export(chunk.node.mesh.value)
+            else:
+                print("GT mesh not found in "+mesh_folder)
             return #unlike the other datasets we leave early here
         elif chunk.node.datasetType.value == "ETH3D":
-            RuntimeError("ETH3D support TBA") 
+            # RuntimeError("ETH3D support TBA") 
+            image_folder = os.path.dirname(sfm_data["views"][0]["path"])
+            data = open_dataset(image_folder)
+            image_names = data["image_names"]
+            # point_cloud = data["point_cloud"]
+            # point_cloud.export(chunk.node.mesh.value)#save mesh as we load it from file #FIXME: not ideal
+            extrinsics = data["extrinsics"]
+            intrinsics = data["intrinsics"]
+            #FIXME: isplay not working
+            # intrinsics = sfm_data["intrinsics"] #dummy test
+            #re-order the camera parameters using filename
+            raise NotImplementedError("Need to implement reordering")
+        elif chunk.node.datasetType.value == "minimal":
+
+            raise NotImplemented("Dataset not supported yet")
         else:
             raise RuntimeError("Dataset type not supported")
 
         chunk.logger.info("**Exporting data")
+
         # generate SFM data from matrices
         gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, 
                                              images_sizes, sfm_data, sensor_width=sensor_size)
+
+        #add dummy resection id for display 
+        for i, v in enumerate(gt_sfm_data["views"]):
+            gt_sfm_data["views"][i]["resectionId"]="0"
 
         # Exports
         if chunk.node.initSfmLandmarks.value != 0:
