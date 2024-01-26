@@ -99,11 +99,12 @@ def open_poses(poses_file):
                 continue
             image_id, qw, qx, qy, qz, tx, ty, tz, camera_id, name = lines[i].split(' ')
             points_2D = np.asarray(lines[i+1].split(' ')).reshape([-1, 3])
+            #FIXME: issue with rotation
             rotation = quartenion2matrix(float(qw), float(qx), float(qy), float(qz))
+            #dummy test
+            rotation = np.identity(3)
             if not is_rotation_mat(rotation):
                 raise ValueError("Not a rotation matrix for "+name+":", rotation)
-            #dummy test
-            rotation = np.zeros([3,3])
             pose = np.concatenate([rotation, np.array([[float(tx)], [float(ty)], [float(tz)]]) ], axis=1)
             pose = np.concatenate([pose, np.array([[0,0,0,1]])] )
             poses.append(pose)
@@ -126,7 +127,7 @@ def open_intrinsics(intrinsic_file):
             camera_id, model, width, height, *params = lines[i].split(' ')
             camera = {"camera_id":int(camera_id), "model":model,
                       "width":int(width), "height":int(height), "params":[float(p) for p in params] }
-            #first 4 params are always fx, fy, cx, cy
+            #first 4 params are always fx, fy, cx, cy, in pixels
             intrinsic = np.asarray([camera["params"][0], 0,                   camera["params"][2], \
                                     0,                   camera["params"][1], camera["params"][3], \
                                     0,                   0,                   1 ]).reshape([3,3])

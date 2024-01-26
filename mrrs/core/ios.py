@@ -205,7 +205,8 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
     Converts calibration matrices into sfm data used in meshroom.
     The camera is assumed pinhole.
     You may pass an existing sfm_data to overwrite the parameters, otherwise you need to handle views yourself.
-    The focal and sensor width is assumed in m while the principal point is assumed in pixels, as a delta from the theoreticla center.
+    the principal point is assumed in pixels, as a delta from the theoreticla center
+    focal in pixels
     '''
     sfm_data = sfm_data.copy()
     sfm_data['poses']=[]

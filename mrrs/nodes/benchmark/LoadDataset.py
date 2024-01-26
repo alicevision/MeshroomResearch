@@ -14,7 +14,8 @@ from mrrs.core.ios import *
 
 from mrrs.datasets.blendedMVG import open_txt_calibration_blendedMVG
 from mrrs.datasets.dtu import open_dtu_calibration
-from mrrs.datasets.eth3d import open_dataset
+from mrrs.datasets.eth3d import open_dataset as open_dataset_eth3d
+from mrrs.datasets.baptiste import open_dataset as open_dataset_baptiste
 #FIXME: this node si becoming to big, split into abstract datasetLoader, overwrite for each dataset type
 
 class LoadDataset(desc.Node):
@@ -39,7 +40,7 @@ class LoadDataset(desc.Node):
             label='Dataset Type',
             description='''Dataset type''',
             value='blendedMVG',
-            values=['blendedMVG', 'DTU', 'vital', 'ETH3D', 'minimal'],
+            values=['blendedMVG', 'DTU', 'ETH3D', 'minimal', 'vital'],
             exclusive=True,
             uid=[0],
         ),
@@ -47,7 +48,8 @@ class LoadDataset(desc.Node):
         desc.FloatParam(
             name='initSfmLandmarks',
             label='Init Landmarks',
-            description='''Will initalise sfmLandmarks with the vertices ground truth mesh (if any). 0 for deactivated, otherwise generate use n*nb_vertices landmarks.''',
+            description='''Will initalise sfmLandmarks with the vertices ground truth mesh (if any). \\
+                           0 for deactivated, otherwise generate use n*nb_vertices landmarks.''',
             value=0.0,
             range=(0.0, 1.0, 0.1),
             uid=[0],
@@ -81,7 +83,7 @@ class LoadDataset(desc.Node):
             description='Output folder for loaded depth maps',
             value=os.path.join(desc.Node.internalFolder, 'depth_maps'),
             uid=[],
-            enabled=lambda attr: (attr.node.datasetType.value=='blendedMVG'), #FIXME: does not work!!
+            # enabled=lambda attr: (attr.node.datasetType.value=='blendedMVG'), #FIXME: does not work!! doesnt actually hides in the node
         ),
 
         desc.File(
@@ -98,27 +100,28 @@ class LoadDataset(desc.Node):
         desc.File(
             name='maskFolder',
             label='Mask Folder',
-            description='Image mask folder',
+            description='Image mask folder. The mask describes the visibility of the object to be observed, on each view.',
             value=os.path.join(desc.Node.internalFolder,'masks'),
             enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
+            # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             group='',
         ),
 
         desc.File(
             name='observationMask',
             label='Observation Mask',
-            description='Occupancy map',
+            description='Occupancy map (for DTU)',
             value=os.path.join(desc.Node.internalFolder,
                                'observation_mask.npy'),
-            enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
+            # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
         ),
 
         desc.File(
             name='groundPlane',
             label='Ground Plane',
-            description='Ground plane',
+            description='Ground plane (for DTU)',
             value=os.path.join(desc.Node.internalFolder,
                                'ground_plane.npy'),
             enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
@@ -285,21 +288,33 @@ class LoadDataset(desc.Node):
                 print("GT mesh not found in "+mesh_folder)
             return #unlike the other datasets we leave early here
         elif chunk.node.datasetType.value == "ETH3D":
-            # RuntimeError("ETH3D support TBA") 
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
-            data = open_dataset(image_folder)
-            image_names = data["image_names"]
-            # point_cloud = data["point_cloud"]
-            # point_cloud.export(chunk.node.mesh.value)#save mesh as we load it from file #FIXME: not ideal
+            #load data from relative path
+            data = open_dataset_eth3d(image_folder)
+            #arbitrary sensor size since the focal is in px
+            sensor_size = 35 
+            # re-order the camera parameters using filename
+            image_names = data["image_names"] 
+            extrinsics=[]
+            intrinsics=[]
+            image_sizes=[]
+            for v in sfm_data["views"]:
+                for i, image_name in enumerate(image_names):
+                    if image_name == os.path.basename(sfm_data["views"][i]["path"]):
+                        extrinsics.append(data["extrinsics"][i])
+                        intrinsics.append(data["intrinsics"][i])
+                        image_sizes.append(data["image_sizes"][i])
+            #save mesh as we load it from file #FIXME: not ideal
+            point_cloud = data["point_cloud"]
+            point_cloud.export(chunk.node.mesh.value)
+           
+        elif chunk.node.datasetType.value == "minimal":
+            image_folder = os.path.dirname(sfm_data["views"][0]["path"])
+            data = open_dataset_baptiste(image_folder)
+            depth_maps = data["depth_maps"]
+            masks = data["masks"]
             extrinsics = data["extrinsics"]
             intrinsics = data["intrinsics"]
-            #FIXME: isplay not working
-            # intrinsics = sfm_data["intrinsics"] #dummy test
-            #re-order the camera parameters using filename
-            raise NotImplementedError("Need to implement reordering")
-        elif chunk.node.datasetType.value == "minimal":
-
-            raise NotImplemented("Dataset not supported yet")
         else:
             raise RuntimeError("Dataset type not supported")
 
@@ -311,7 +326,7 @@ class LoadDataset(desc.Node):
 
         #add dummy resection id for display 
         for i, v in enumerate(gt_sfm_data["views"]):
-            gt_sfm_data["views"][i]["resectionId"]="0"
+            gt_sfm_data["views"][i]["resectionId"]=str(i)
 
         # Exports
         if chunk.node.initSfmLandmarks.value != 0:
@@ -338,12 +353,11 @@ class LoadDataset(desc.Node):
                 structure.append(landmark)
             gt_sfm_data["structure"] = structure
 
-
         # Save the generated SFM data to JSON file
         with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
             json.dump(gt_sfm_data, f, indent=4)
 
-        #save depth maps if any
+        # Save depth maps if any
         if len(depth_maps)>0:
             os.makedirs(chunk.node.depthMapsFolder.value, exist_ok=True)
             for view_id, depth_map, gt_extrinsic, gt_intrinsic in zip(views_id, depth_maps, extrinsics, intrinsics):
@@ -351,7 +365,7 @@ class LoadDataset(desc.Node):
                     depth_map_gt = open_depth_map(depth_map)
                 else:
                     continue
-
+                #add flags to the depth map
                 camera_center = gt_extrinsic[0:3, 3]
                 inverse_intr_rot = np.linalg.inv(
                     gt_intrinsic @ np.linalg.inv(gt_extrinsic[0:3, 0:3]))
@@ -368,6 +382,8 @@ class LoadDataset(desc.Node):
         if len(masks)>0:
             os.makedirs(chunk.node.maskFolder.value, exist_ok=True)
             for mask, view_id in zip(masks, views_id) :
+                if isinstance(mask, str):
+                    mask=open_image(mask)
                 save_image(os.path.join(chunk.node.maskFolder.value, str(view_id) + ".png"), mask)
 
         #Save ground truth mesh as obj if any
