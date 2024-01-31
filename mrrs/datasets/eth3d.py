@@ -54,10 +54,10 @@ def open_meshlab_project(project_file_path)->List[MeshLabProjectMeshInfo]:
             mlmatrix44_text = xml_mlmatrix44.text
             M = new_mesh.global_T_mesh
             values = list(map(float, mlmatrix44_text.split()))
-            M[0:4, 0] = values[0:4]
-            M[0:4, 1] = values[4:8]
-            M[0:4, 2] = values[8:12]
-            M[0:4, 3] = values[12:16]
+            M[0,0:4] = values[0:4]
+            M[1,0:4] = values[4:8]
+            M[2,0:4] = values[8:12]
+            M[3,0:4] = values[12:16]
         else:
             raise ValueError(f"Error: Encountered a mesh without pose in file: {project_file_path}")
 
@@ -150,6 +150,7 @@ def open_dataset(image_path):
     for mesh_info in meshes_info: 
         # print(f"Label: {mesh_info.label}, Filename: {mesh_info.file_path}, Pose Matrix: {mesh_info.global_T_mesh}") 
         points = trimesh.load(mesh_info.file_path, force="mesh")
+        points.apply_transform(mesh_info.global_T_mesh)
         all_points = np.concatenate([all_points, points.vertices], axis=0)
 
     #load poses from corresponding filename

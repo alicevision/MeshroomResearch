@@ -12,11 +12,11 @@ from meshroom.core import desc
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
 
-from mrrs.datasets.blendedMVG import open_txt_calibration_blendedMVG
-from mrrs.datasets.dtu import open_dtu_calibration
 from mrrs.datasets.eth3d import open_dataset as open_dataset_eth3d
 from mrrs.datasets.baptiste import open_dataset as open_dataset_baptiste
-#FIXME: this node si becoming to big, split into abstract datasetLoader, overwrite for each dataset type
+#FIXME: this node is becoming to big, split into abstract datasetLoader, overwrite for each dataset type
+from mrrs.datasets.blendedMVG import open_txt_calibration_blendedMVG
+from mrrs.datasets.dtu import open_dtu_calibration
 
 class LoadDataset(desc.Node):
     category = 'Meshroom Research'
@@ -40,7 +40,7 @@ class LoadDataset(desc.Node):
             label='Dataset Type',
             description='''Dataset type''',
             value='blendedMVG',
-            values=['blendedMVG', 'DTU', 'ETH3D', 'minimal', 'vital'],
+            values=['blendedMVG', 'DTU', 'ETH3D', 'baptiste', 'vital'],
             exclusive=True,
             uid=[0],
         ),
@@ -108,27 +108,8 @@ class LoadDataset(desc.Node):
             group='',
         ),
 
+        #used for display
         desc.File(
-            name='observationMask',
-            label='Observation Mask',
-            description='Occupancy map (for DTU)',
-            value=os.path.join(desc.Node.internalFolder,
-                               'observation_mask.npy'),
-            # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
-            uid=[],
-        ),
-
-        desc.File(
-            name='groundPlane',
-            label='Ground Plane',
-            description='Ground plane (for DTU)',
-            value=os.path.join(desc.Node.internalFolder,
-                               'ground_plane.npy'),
-            enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
-            uid=[],
-        ),
-
-        desc.File(#for display
             name='depthmaps',
             label='Depth maps',
             description='Generated depth maps.',
@@ -183,8 +164,6 @@ class LoadDataset(desc.Node):
 
         # Initialise geometry (one per scene)
         mesh = None
-        observation_mask = None
-        ground_plane = None
 
         # Load data
         if chunk.node.datasetType.value == "blendedMVG":
@@ -233,13 +212,48 @@ class LoadDataset(desc.Node):
             masks_folder = os.path.join(image_folder, "..", "mask")
             #FIXME: order?
             masks = [open_image(os.path.join(masks_folder, m)) for m in os.listdir(masks_folder) if (m.endswith(".png") and (not m.startswith(".")))]
-            try:
-                from scipy.io import loadmat
-            except:
-                chunk.logger.warning("Scipy not installed, will not load observation masks or ground plane")
-            observation_mask = loadmat(os.path.join(image_folder, "..", f"ObsMask{scan_nb}_10.mat") )
-            ground_plane = loadmat(os.path.join(image_folder, "..", f"Plane{scan_nb}.mat"))     
-        elif chunk.node.datasetType.value.startswith("vital"):
+        elif chunk.node.datasetType.value == "ETH3D":
+            chunk.logger.info("**Importing ETH3D data")
+            image_folder = os.path.dirname(sfm_data["views"][0]["path"])
+            #load data from relative path
+            data = open_dataset_eth3d(image_folder)
+            #arbitrary sensor size since the focal is in px
+            sensor_size = 35 
+            # re-order the camera parameters using filename
+            image_names = data["image_names"] 
+            if len(image_names) != len(sfm_data["views"]):
+                raise RuntimeError("Different number of images in the sfm and the GT")
+            extrinsics=[]
+            intrinsics=[]
+            image_sizes=[]
+            for v in sfm_data["views"]:
+                for i, image_name in enumerate(image_names):
+                    if image_name == os.path.basename(v["path"]):
+                        # print(i, os.path.basename(v["path"])+" vs "+image_name)
+                        extrinsics.append(data["extrinsics"][i])
+                        intrinsics.append(data["intrinsics"][i])
+                        image_sizes.append(data["image_sizes"][i])
+                        break
+                ##raise RuntimeError("Image "+v["path"]+" not found in ground truth")
+            #save mesh as we load it from file #FIXME: not ideal
+            mesh = data["point_cloud"]
+            # mesh.export(chunk.node.mesh.value)
+        elif chunk.node.datasetType.value == "baptiste":
+            #renders from https://github.com/bbrument/lambertianRendering_v1
+            image_folder = os.path.dirname(sfm_data["views"][0]["path"])
+            data = open_dataset_baptiste(image_folder)
+            depth_maps = data["depth_maps"]
+            masks = data["masks"]
+            extrinsics = data["extrinsics"]
+            intrinsics = data["intrinsics"]
+            sensor_size = data["sensor_size"]
+            image_sizes = data["image_sizes"]
+            pixel_size = sensor_size/image_sizes[0][0]
+            #turn focal into pixels
+            for i in range(len(intrinsics)):
+                intrinsics[i][0,0]/=pixel_size 
+                intrinsics[i][1,1]/=pixel_size
+        elif chunk.node.datasetType.value.startswith("vital"):#FIXME: open the same way as the rest
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
             sfm_folder=os.path.join(image_folder, "..", '..', 'sfm')
             sfm_data_vital_path = [os.path.join(sfm_folder, f) for f in os.listdir(sfm_folder) if f.endswith(".sfm")]
@@ -274,7 +288,7 @@ class LoadDataset(desc.Node):
                         break
             sfm_data_out["intrinsics"][0]=sfm_data_vital["intrinsics"][0]#copy gt and keep uid
             sfm_data_out["intrinsics"][0]["intrinsicId"]=sfm_data["intrinsics"][0]["intrinsicId"]
-            #save
+            #save FIXME: move that
             with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
                 json.dump(sfm_data_out, f, indent=4)
             mesh_folder = os.path.join(image_folder, '..', '..', 'obj')
@@ -286,49 +300,7 @@ class LoadDataset(desc.Node):
                 mesh.export(chunk.node.mesh.value)
             else:
                 print("GT mesh not found in "+mesh_folder)
-            return #unlike the other datasets we leave early here
-        elif chunk.node.datasetType.value == "ETH3D":
-            chunk.logger.info("**Importing ETH3D data")
-            image_folder = os.path.dirname(sfm_data["views"][0]["path"])
-            #load data from relative path
-            data = open_dataset_eth3d(image_folder)
-            #arbitrary sensor size since the focal is in px
-            sensor_size = 35 
-            # re-order the camera parameters using filename
-            image_names = data["image_names"] 
-            if len(image_names) != len(sfm_data["views"]):
-                raise RuntimeError("Different number of images in the sfm and the GT")
-            extrinsics=[]
-            intrinsics=[]
-            image_sizes=[]
-            for v in sfm_data["views"]:
-                for i, image_name in enumerate(image_names):
-                    if image_name == os.path.basename(v["path"]):
-                        print(i, os.path.basename(v["path"])+" vs "+image_name)
-                        extrinsics.append(data["extrinsics"][i])
-                        intrinsics.append(data["intrinsics"][i])
-                        image_sizes.append(data["image_sizes"][i])
-                        break
-                ##raise RuntimeError("Image "+v["path"]+" not found in ground truth")
-            #save mesh as we load it from file #FIXME: not ideal
-            # point_cloud = data["point_cloud"]
-            # point_cloud.export(chunk.node.mesh.value)
-        elif chunk.node.datasetType.value == "minimal":
-            #renders from https://github.com/bbrument/lambertianRendering_v1
-            image_folder = os.path.dirname(sfm_data["views"][0]["path"])
-            data = open_dataset_baptiste(image_folder)
-            depth_maps = data["depth_maps"]
-            masks = data["masks"]
-            extrinsics = data["extrinsics"]
-            intrinsics = data["intrinsics"]
-            sensor_size = data["sensor_size"]
-            image_sizes = data["image_sizes"]
-            pixel_size = sensor_size/image_sizes[0][0]
-            #turn focal into pixels
-            for i in range(len(intrinsics)):
-                intrinsics[i][0,0]/=pixel_size 
-                intrinsics[i][1,1]/=pixel_size
-
+            return #FIXME: unlike the other datasets we leave early here
         else:
             raise RuntimeError("Dataset type not supported")
 
@@ -350,8 +322,9 @@ class LoadDataset(desc.Node):
             mesh_data = trimesh.load(mesh, force='mesh')
             structure = []
             step = int( 1/chunk.node.initSfmLandmarks.value)
-            for vi, v in enumerate(mesh_data.vertices[::step]):
-                chunk.logger.info("**Exporting SfM landmarks %d/%d"%(vi, mesh_data.vertices.shape[0]))
+            chunk.logger.info("**Exporting %d SfM landmarks %d"%(int(mesh_data.vertices.shape[0]/step)))
+            for vi, v in enumerate(mesh_data.vertices[::step]):#FIXME: slow
+                # chunk.logger.info("**Exporting SfM landmarks %d/%d"%(vi, int(mesh_data.vertices.shape[0]/step)))
                 landmark = {}
                 landmark["landmarkId"] = str(vi)
                 landmark["descType"] = "unknown" 
@@ -379,7 +352,7 @@ class LoadDataset(desc.Node):
                     depth_map_gt = open_depth_map(depth_map)
                 else:
                     continue
-                #add flags to the depth map
+                #add flags to the depth map for display
                 camera_center = gt_extrinsic[0:3, 3]
                 inverse_intr_rot = np.linalg.inv(
                     gt_intrinsic @ np.linalg.inv(gt_extrinsic[0:3, 0:3]))
@@ -403,14 +376,6 @@ class LoadDataset(desc.Node):
         #Save ground truth mesh as obj if any
         if mesh is not None:
             mesh.export(chunk.node.mesh.value)
-
-        #Save observation grid if any
-        if observation_mask is not None:
-            np.savez_compressed(chunk.node.observationMask.value)
-
-        #Save plane if any 
-        if ground_plane is not None:
-            np.savez_compressed(chunk.node.groundPlane.value)
             
         chunk.logger.info("*LoadDataset ends")
 

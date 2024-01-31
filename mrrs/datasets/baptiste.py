@@ -54,5 +54,6 @@ def open_dataset(image_path):
             "masks":        masks,
             "extrinsics" :  ordered_extrinsics,
             "intrinsics" :  ordered_intrinsics,
-            "image_sizes":  images_sizes
+            "image_sizes":  images_sizes,
+            "sensor_size": sensor_size
            }
