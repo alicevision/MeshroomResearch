@@ -101,14 +101,14 @@ def open_poses(poses_file):
             points_2D = np.asarray(lines[i+1].split(' ')).reshape([-1, 3])
             #FIXME: issue with rotation
             rotation = quartenion2matrix(float(qw), float(qx), float(qy), float(qz))
-            #dummy test
-            rotation = np.identity(3)
+            # #dummy test
+            # rotation = np.identity(3)
             if not is_rotation_mat(rotation):
                 raise ValueError("Not a rotation matrix for "+name+":", rotation)
             pose = np.concatenate([rotation, np.array([[float(tx)], [float(ty)], [float(tz)]]) ], axis=1)
             pose = np.concatenate([pose, np.array([[0,0,0,1]])] )
             poses.append(pose)
-            image_names.append(name)
+            image_names.append(os.path.basename(name).strip("\n"))
             camera_ids.append(int(camera_id))
     return poses, image_names, camera_ids
     
@@ -165,7 +165,8 @@ def open_dataset(image_path):
     intrinsics = np.asarray(intrinsics)[np.asarray(camera_ids)]
 
     #extract image sizes
-    image_sizes = [ [c["width"], c["height"] ] for c in cameras ]
+    camera_image_sizes = [ [c["width"], c["height"] ] for c in cameras ]
+    image_sizes = np.asarray(camera_image_sizes)[np.asarray(camera_ids)]
 
     return {
             "image_names": image_names,

@@ -288,6 +288,7 @@ class LoadDataset(desc.Node):
                 print("GT mesh not found in "+mesh_folder)
             return #unlike the other datasets we leave early here
         elif chunk.node.datasetType.value == "ETH3D":
+            chunk.logger.info("**Importing ETH3D data")
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
             #load data from relative path
             data = open_dataset_eth3d(image_folder)
@@ -295,26 +296,39 @@ class LoadDataset(desc.Node):
             sensor_size = 35 
             # re-order the camera parameters using filename
             image_names = data["image_names"] 
+            if len(image_names) != len(sfm_data["views"]):
+                raise RuntimeError("Different number of images in the sfm and the GT")
             extrinsics=[]
             intrinsics=[]
             image_sizes=[]
             for v in sfm_data["views"]:
                 for i, image_name in enumerate(image_names):
-                    if image_name == os.path.basename(sfm_data["views"][i]["path"]):
+                    if image_name == os.path.basename(v["path"]):
+                        print(i, os.path.basename(v["path"])+" vs "+image_name)
                         extrinsics.append(data["extrinsics"][i])
                         intrinsics.append(data["intrinsics"][i])
                         image_sizes.append(data["image_sizes"][i])
+                        break
+                ##raise RuntimeError("Image "+v["path"]+" not found in ground truth")
             #save mesh as we load it from file #FIXME: not ideal
-            point_cloud = data["point_cloud"]
-            point_cloud.export(chunk.node.mesh.value)
-           
+            # point_cloud = data["point_cloud"]
+            # point_cloud.export(chunk.node.mesh.value)
         elif chunk.node.datasetType.value == "minimal":
+            #renders from https://github.com/bbrument/lambertianRendering_v1
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
             data = open_dataset_baptiste(image_folder)
             depth_maps = data["depth_maps"]
             masks = data["masks"]
             extrinsics = data["extrinsics"]
             intrinsics = data["intrinsics"]
+            sensor_size = data["sensor_size"]
+            image_sizes = data["image_sizes"]
+            pixel_size = sensor_size/image_sizes[0][0]
+            #turn focal into pixels
+            for i in range(len(intrinsics)):
+                intrinsics[i][0,0]/=pixel_size 
+                intrinsics[i][1,1]/=pixel_size
+
         else:
             raise RuntimeError("Dataset type not supported")
 
@@ -324,7 +338,7 @@ class LoadDataset(desc.Node):
         gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, 
                                              images_sizes, sfm_data, sensor_width=sensor_size)
 
-        #add dummy resection id for display 
+        #Add dummy resection id for display 
         for i, v in enumerate(gt_sfm_data["views"]):
             gt_sfm_data["views"][i]["resectionId"]=str(i)
 
