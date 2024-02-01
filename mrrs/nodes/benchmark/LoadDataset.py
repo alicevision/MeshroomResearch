@@ -91,7 +91,7 @@ class LoadDataset(desc.Node):
             label='Mesh',
             description='Loaded mesh.',
             semantic='mesh',
-            value=os.path.join(desc.Node.internalFolder, 'mesh.obj'),
+            value=os.path.join(desc.Node.internalFolder, 'mesh.ply'),
             # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
             group='',
@@ -322,7 +322,7 @@ class LoadDataset(desc.Node):
             mesh_data = trimesh.load(mesh, force='mesh')
             structure = []
             step = int( 1/chunk.node.initSfmLandmarks.value)
-            chunk.logger.info("**Exporting %d SfM landmarks %d"%(int(mesh_data.vertices.shape[0]/step)))
+            chunk.logger.info("**Exporting %d SfM landmarks"%(int(mesh_data.vertices.shape[0]/step)))
             for vi, v in enumerate(mesh_data.vertices[::step]):#FIXME: slow
                 # chunk.logger.info("**Exporting SfM landmarks %d/%d"%(vi, int(mesh_data.vertices.shape[0]/step)))
                 landmark = {}
@@ -331,7 +331,8 @@ class LoadDataset(desc.Node):
                 landmark["color"] = ["255", "0", "0"]
                 landmark["X"] = [str(x) for x in v]
                 landmark["observations"] = []
-                #create dummy obs in all views FIXME: suboptimal, ideally we would compute the viz  all all view by projection 
+                #create dummy obs in all views 
+                #FIXME: suboptimal, ideally we would compute the viz  all all view by projection 
                 for oi, i in enumerate(views_id):
                     obs =  {"observationId": str(i),
                             "featureId": str(oi),
@@ -341,11 +342,13 @@ class LoadDataset(desc.Node):
             gt_sfm_data["structure"] = structure
 
         # Save the generated SFM data to JSON file
+        chunk.logger.info("**Writting sfm")
         with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
             json.dump(gt_sfm_data, f, indent=4)
 
         # Save depth maps if any
         if len(depth_maps)>0:
+            chunk.logger.info("**Writting depth maps")
             os.makedirs(chunk.node.depthMapsFolder.value, exist_ok=True)
             for view_id, depth_map, gt_extrinsic, gt_intrinsic in zip(views_id, depth_maps, extrinsics, intrinsics):
                 if os.path.exists(depth_map):
@@ -367,6 +370,7 @@ class LoadDataset(desc.Node):
             
         #Save image masks if any
         if len(masks)>0:
+            chunk.logger.info("**Writting masks")
             os.makedirs(chunk.node.maskFolder.value, exist_ok=True)
             for mask, view_id in zip(masks, views_id) :
                 if isinstance(mask, str):
@@ -375,6 +379,7 @@ class LoadDataset(desc.Node):
 
         #Save ground truth mesh as obj if any
         if mesh is not None:
+            chunk.logger.info("**Writting mesh")
             mesh.export(chunk.node.mesh.value)
             
         chunk.logger.info("*LoadDataset ends")

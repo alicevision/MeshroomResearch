@@ -1,0 +1,23 @@
+name: dtubench
+channels:
+  - conda-forge
+  - open3d-admin
+  - defaults
+dependencies:
+- python #=3.9
+- numpy
+- scikit-learn
+- scikit-image 
+- scipy
+- open3d
+- trimesh
+- igl
+- matplotlib
+# - pip
+# - pip:
+#   - pyoctree
+  # - libigl
+
+
+
+

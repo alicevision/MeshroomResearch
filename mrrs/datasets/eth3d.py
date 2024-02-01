@@ -5,7 +5,9 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import trimesh 
 
-from mrrs.core.geometry import is_rotation_mat
+from mrrs.core.geometry import is_rotation_mat, make_homogeneous, unmake_homogeneous
+
+cg2cv_mat = np.asarray([[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]])
 
 class MeshLabProjectMeshInfo:
     """
@@ -70,16 +72,16 @@ def quartenion2matrix(qw, qx, qy, qz):
     Build the intrinsic matrix from the quaternions
     """
     #norm quaternion
-    n = 1/np.sqrt(qx*qx+qy*qy+qz*qz+qw*qw)
+    n = 1/np.sqrt(qx**2+qy**2+qz**2+qw**2)
     qx*= n
     qy*= n
     qz*= n
     qw*= n
-    #create  matrix:
+    #create  matrix (note: transpose because we are collumn major)
     mat= np.asarray([1-2*qy*qy - 2*qz*qz, 2*qx*qy - 2*qz*qw      , 2*qx*qz + 2*qy*qw,
                     2*qx*qy + 2*qz*qw   , 1 - 2*qx*qx - 2*qz*qz  , 2*qy*qz - 2*qx*qw, 
                     2*qx*qz - 2*qy*qw   , 2*qy*qz + 2*qx*qw      , 1 - 2*qx*qx - 2*qy*qy, 
-                    ]).reshape([3,3])
+                    ]).reshape([3,3]).transpose()
     return mat
 
 def open_poses(poses_file):
@@ -99,10 +101,7 @@ def open_poses(poses_file):
                 continue
             image_id, qw, qx, qy, qz, tx, ty, tz, camera_id, name = lines[i].split(' ')
             points_2D = np.asarray(lines[i+1].split(' ')).reshape([-1, 3])
-            #FIXME: issue with rotation
             rotation = quartenion2matrix(float(qw), float(qx), float(qy), float(qz))
-            # #dummy test
-            # rotation = np.identity(3)
             if not is_rotation_mat(rotation):
                 raise ValueError("Not a rotation matrix for "+name+":", rotation)
             pose = np.concatenate([rotation, np.array([[float(tx)], [float(ty)], [float(tz)]]) ], axis=1)
@@ -150,12 +149,14 @@ def open_dataset(image_path):
     for mesh_info in meshes_info: 
         # print(f"Label: {mesh_info.label}, Filename: {mesh_info.file_path}, Pose Matrix: {mesh_info.global_T_mesh}") 
         points = trimesh.load(mesh_info.file_path, force="mesh")
-        points.apply_transform(mesh_info.global_T_mesh)
+        points.apply_transform(mesh_info.global_T_mesh)#FIXME test inv?
         all_points = np.concatenate([all_points, points.vertices], axis=0)
+    #FIXME test rot
+    # all_points = unmake_homogeneous((cg2cv_mat@make_homogeneous(all_points).transpose()).transpose())
 
     #load poses from corresponding filename
     poses_folder_path = os.path.join(dataset_root_path, "dslr_calibration_jpg")
-    intrics_file = os.path.join(poses_folder_path, "cameras.txt")
+    intrics_file = os.path.join(poses_folder_path, "cameras.txt") 
     poses_file = os.path.join(poses_folder_path, "images.txt")
     poses, image_names, camera_ids = open_poses(poses_file)
 
