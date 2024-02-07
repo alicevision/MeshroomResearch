@@ -51,9 +51,9 @@ def save_exr(input_array, output_file,
     if custom_header is not None:
         for key in custom_header.keys():
             if key=="AliceVision:CArr":#FIXME: not working?
-                spec.attribute(key, "float[3]", list(custom_header[key]))
+                spec.attribute(key, "float[3]", np.asarray(custom_header[key]).tolist())
             elif key=="AliceVision:iCamArr":
-                spec.attribute(key, oiio.TypeDesc.TypeMatrix33,  list(np.asarray(custom_header[key]).flatten()))
+                spec.attribute(key, oiio.TypeDesc.TypeMatrix33,  np.asarray(custom_header[key]).flatten().tolist())
             elif key=="AliceVision:downscale":
                 spec.attribute(key, "float", custom_header[key])
             else:
@@ -205,8 +205,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
     Converts calibration matrices into sfm data used in meshroom.
     The camera is assumed pinhole.
     You may pass an existing sfm_data to overwrite the parameters, otherwise you need to handle views yourself.
-    the principal point is assumed in pixels, as a delta from the theoreticla center
-    focal in pixels
+    Focal and principal point is in pixels is in pixels.
     '''
     sfm_data = sfm_data.copy()
     sfm_data['poses']=[]
@@ -270,7 +269,7 @@ def parse_intrisics_sfm_data(sfm_intrinsic):
     The intrinsics are given in metrics.
     """
     intrinsic_id = sfm_intrinsic['intrinsicId']
-    width=int(sfm_intrinsic["width"] )
+    width=int(sfm_intrinsic["width"])
     sensor_width = abs(float(sfm_intrinsic["sensorWidth"] ))
     sensor_height = abs(float(sfm_intrinsic["sensorHeight"] )) #FIXME: not axtually used, sensor_heightis pixelratio*sensor_widtha
     pixel_size = sensor_width/width
@@ -282,7 +281,7 @@ def parse_intrisics_sfm_data(sfm_intrinsic):
                             [focal_length, 0, principal_point[0]],
                             [0, focal_length, principal_point[1]],
                             [0, 0, 1],
-                            ], np.float32)#TODO: see if we cant use projection matrices instead
+                            ], np.float32)
     return intrinsic, intrinsic_id, pixel_size
 
 def parse_extrisic_sfm_data(sfm_pose):
@@ -302,7 +301,8 @@ def get_image_sizes(sfm_data):
     
 
 #FIXME: unify the sensor/pixel size
-def matrices_from_sfm_data(sfm_data):
+#FIXME: return disctionnary?
+def matrices_from_sfm_data(sfm_data, return_image_sizes=False):
     '''
     Returns extrinsics and intrinsics matrices from the sfm data.
     The poses and extrinsic ids are also passed for convenience.
@@ -333,6 +333,7 @@ def matrices_from_sfm_data(sfm_data):
     intrinsics_all_cams = []
     extrinsics_all_cams = []
     pixel_sizes_all_cams = []
+    image_sizes = []
     for view in sfm_data["views"]:
         view_id = view["viewId"]
         views_id.append(view_id)
@@ -347,11 +348,14 @@ def matrices_from_sfm_data(sfm_data):
             continue
         intrinsic_index = np.where(intrinsics_id==intrinsic_id)[0]
         #fetch the correspoding poses and intrinsics
-        intrinsics_all_cams.append(intrinsics[intrinsic_index[0]])
-        extrinsics_all_cams.append(extrinsics[pose_index[0]])
+        intrinsics_all_cams.append(intrinsics[intrinsic_index[0]].copy())
+        extrinsics_all_cams.append(extrinsics[pose_index[0]].copy())
         pixel_sizes_all_cams.append(pixel_sizes[intrinsic_index[0]])
-
-    return extrinsics_all_cams, intrinsics_all_cams, views_id, poses_id, intrinsics_id, pixel_sizes_all_cams
+        image_sizes.append([int(view["width"]), int(view["height"])])
+    if return_image_sizes:
+        return extrinsics_all_cams, intrinsics_all_cams, views_id, poses_id, intrinsics_id, pixel_sizes_all_cams, image_sizes
+    else:
+        return extrinsics_all_cams, intrinsics_all_cams, views_id, poses_id, intrinsics_id, pixel_sizes_all_cams
 
 #%% Mesh
 def open_mesh(mesh_path):#FIXME: add suport to uv, texture etc

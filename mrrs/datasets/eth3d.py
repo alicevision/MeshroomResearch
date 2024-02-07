@@ -7,8 +7,6 @@ import trimesh
 
 from mrrs.core.geometry import is_rotation_mat, make_homogeneous, unmake_homogeneous
 
-cg2cv_mat = np.asarray([[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]])
-
 class MeshLabProjectMeshInfo:
     """
     Small util struct to contain the mesh info
@@ -81,7 +79,7 @@ def quartenion2matrix(qw, qx, qy, qz):
     mat= np.asarray([1-2*qy*qy - 2*qz*qz, 2*qx*qy - 2*qz*qw      , 2*qx*qz + 2*qy*qw,
                     2*qx*qy + 2*qz*qw   , 1 - 2*qx*qx - 2*qz*qz  , 2*qy*qz - 2*qx*qw, 
                     2*qx*qz - 2*qy*qw   , 2*qy*qz + 2*qx*qw      , 1 - 2*qx*qx - 2*qy*qy, 
-                    ]).reshape([3,3]).transpose()
+                    ]).reshape([3,3])
     return mat
 
 def open_poses(poses_file):
@@ -106,6 +104,7 @@ def open_poses(poses_file):
                 raise ValueError("Not a rotation matrix for "+name+":", rotation)
             pose = np.concatenate([rotation, np.array([[float(tx)], [float(ty)], [float(tz)]]) ], axis=1)
             pose = np.concatenate([pose, np.array([[0,0,0,1]])] )
+            pose=np.linalg.inv(pose)
             poses.append(pose)
             image_names.append(os.path.basename(name).strip("\n"))
             camera_ids.append(int(camera_id))
@@ -151,9 +150,7 @@ def open_dataset(image_path):
         points = trimesh.load(mesh_info.file_path, force="mesh")
         points.apply_transform(mesh_info.global_T_mesh)#FIXME test inv?
         all_points = np.concatenate([all_points, points.vertices], axis=0)
-    #FIXME test rot
-    # all_points = unmake_homogeneous((cg2cv_mat@make_homogeneous(all_points).transpose()).transpose())
-
+ 
     #load poses from corresponding filename
     poses_folder_path = os.path.join(dataset_root_path, "dslr_calibration_jpg")
     intrics_file = os.path.join(poses_folder_path, "cameras.txt") 

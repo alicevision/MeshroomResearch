@@ -3,6 +3,7 @@ __version__ = "3.0"
 import copy
 import os 
 import json
+from mrrs.core.utils import listdir_fullpath
 
 import trimesh
 import numpy as np
@@ -160,13 +161,13 @@ class LoadDataset(desc.Node):
         masks = []
         extrinsics = []
         intrinsics = []
-        sensor_size = 1 #note, by default the sensor size is set to a virtual sensor size of 1
+        sensor_size = 35 #note, by default the sensor size is set to 35mm
 
         # Initialise geometry (one per scene)
         mesh = None
 
         # Load data
-        if chunk.node.datasetType.value == "blendedMVG":
+        if chunk.node.datasetType.value == "blendedMVG":#FIXME: sort as in dtu?
             chunk.logger.info("**Importing blendedMVG data")
             for view in sfm_data["views"]:
                 image = view["path"]
@@ -179,7 +180,9 @@ class LoadDataset(desc.Node):
                 extrinsics.append(E)
                 intrinsics.append(I)
             extrinsics = [np.linalg.inv(e) if e is not None else None for e in extrinsics] # R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
+            #try loading from mesh list if any
             mesh_list_path = os.path.join(folder, "..", "textured_mesh", 'mesh_list.txt') 
+            all_meshes = [f for f in listdir_fullpath(os.path.join(folder, "..", "textured_mesh")) if f.endswith(".ply")]
             if os.path.exists(mesh_list_path):
                 chunk.logger.info("**Importing blendedMVG mesh data")
                 mesh_list = [os.path.basename(p) for p in  open(mesh_list_path, 'r').read().splitlines()]
@@ -191,10 +194,16 @@ class LoadDataset(desc.Node):
                     submesh = trimesh.load_mesh(submesh_path) 
                     submeshes.append(submesh)
                 mesh = trimesh.util.concatenate(submeshes)
+            #else try loading the first mesh it finds
+            elif len(all_meshes)>=1:
+                chunk.logger.info("**Importing blendedMVG mesh data")
+                mesh = trimesh.load_mesh(all_meshes[0]) 
+            else:
+                chunk.logger.info("**No mesh found")
         elif chunk.node.datasetType.value == "DTU":
             chunk.logger.info("***Importing DTU data")
             #sort sfm data views by frame order (as in dtu)
-            sfm_data["views"]=sorted(sfm_data["views"], key=lambda v:int(v["frameId"]))
+            sfm_data["views"]=sorted(sfm_data["views"], key=lambda v:int(v["frameId"])) 
             # reload pose IDs, calibration IDs, and view IDs (one per view), in order
             poses_id = [v["poseId"] for v in sfm_data["views"]]
             instrinsics_id = [v["intrinsicId"] for v in sfm_data["views"]]
@@ -212,7 +221,7 @@ class LoadDataset(desc.Node):
             masks_folder = os.path.join(image_folder, "..", "mask")
             #FIXME: order?
             masks = [open_image(os.path.join(masks_folder, m)) for m in os.listdir(masks_folder) if (m.endswith(".png") and (not m.startswith(".")))]
-        elif chunk.node.datasetType.value == "ETH3D":
+        elif chunk.node.datasetType.value == "ETH3D":#FIXME: sort as in dtu?
             chunk.logger.info("**Importing ETH3D data")
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
             #load data from relative path
@@ -239,9 +248,16 @@ class LoadDataset(desc.Node):
             mesh = data["point_cloud"]
             # mesh.export(chunk.node.mesh.value)
         elif chunk.node.datasetType.value == "baptiste":
+            #sort sfm data views by filenames as in baptist's dataset 
+            sfm_data["views"]=sorted(sfm_data["views"], key=lambda v:os.path.basename(v["path"]))
+            # reload pose IDs, calibration IDs, and view IDs (one per view), in order
+            poses_id = [v["poseId"] for v in sfm_data["views"]]
+            instrinsics_id = [v["intrinsicId"] for v in sfm_data["views"]]
+            views_id = [v["viewId"] for v in sfm_data["views"]]
             #renders from https://github.com/bbrument/lambertianRendering_v1
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
             data = open_dataset_baptiste(image_folder)
+            # data["image_names"]
             depth_maps = data["depth_maps"]
             masks = data["masks"]
             extrinsics = data["extrinsics"]
@@ -249,10 +265,10 @@ class LoadDataset(desc.Node):
             sensor_size = data["sensor_size"]
             image_sizes = data["image_sizes"]
             pixel_size = sensor_size/image_sizes[0][0]
-            #turn focal into pixels
+            #turn focal and pp into pixels for export
             for i in range(len(intrinsics)):
-                intrinsics[i][0,0]/=pixel_size 
-                intrinsics[i][1,1]/=pixel_size
+                intrinsics[i]/=pixel_size 
+                intrinsics[i][2,2]=1
         elif chunk.node.datasetType.value.startswith("vital"):#FIXME: open the same way as the rest
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
             sfm_folder=os.path.join(image_folder, "..", '..', 'sfm')
@@ -307,6 +323,9 @@ class LoadDataset(desc.Node):
         chunk.logger.info("**Exporting data")
 
         # generate SFM data from matrices
+        if not (len(extrinsics) == len(intrinsics) == len(images_sizes) ):
+            raise RuntimeError("Mismatching number of parameters for the sfmData ")
+
         gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, 
                                              images_sizes, sfm_data, sensor_width=sensor_size)
 
