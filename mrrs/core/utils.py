@@ -9,8 +9,8 @@ import os
 import sys
 
 #%%Folder scan
-def listdir_fullpath(d):
-    return [os.path.join(d, f) for f in os.listdir(d)]
+def listdir_fullpath(d, filter=lambda x:True):
+    return [os.path.join(d, f) for f in os.listdir(d) if filter(f)]
 
 #%% usefull array operations
 def format_float_array(np_array):
