@@ -15,8 +15,7 @@ from mrrs.core.ios import *
 
 from mrrs.datasets.eth3d import open_dataset as open_dataset_eth3d
 from mrrs.datasets.baptiste import open_dataset as open_dataset_baptiste
-#FIXME: this node is becoming to big, split into abstract datasetLoader, overwrite for each dataset type
-from mrrs.datasets.blendedMVG import open_txt_calibration_blendedMVG
+from mrrs.datasets.blendedMVG import open_dataset as open_dataset_blended
 from mrrs.datasets.dtu import open_dtu_calibration
 
 class LoadDataset(desc.Node):
@@ -169,37 +168,13 @@ class LoadDataset(desc.Node):
         # Load data
         if chunk.node.datasetType.value == "blendedMVG":#FIXME: sort as in dtu?
             chunk.logger.info("**Importing blendedMVG data")
-            for view in sfm_data["views"]:
-                image = view["path"]
-                folder = os.path.dirname(image)
-                basename = os.path.basename(image)[:-4]#FIXME: not great, use split
-                calib = os.path.join(folder, "..", "cams", basename + "_cam.txt")
-                depth_map = os.path.join(folder, "..", "rendered_depth_maps", basename + ".pfm")
-                E, I = open_txt_calibration_blendedMVG(calib)
-                depth_maps.append(depth_map)
-                extrinsics.append(E)
-                intrinsics.append(I)
-            extrinsics = [np.linalg.inv(e) if e is not None else None for e in extrinsics] # R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
-            #try loading from mesh list if any
-            mesh_list_path = os.path.join(folder, "..", "textured_mesh", 'mesh_list.txt') 
-            all_meshes = [f for f in listdir_fullpath(os.path.join(folder, "..", "textured_mesh")) if f.endswith(".ply")]
-            if os.path.exists(mesh_list_path):
-                chunk.logger.info("**Importing blendedMVG mesh data")
-                mesh_list = [os.path.basename(p) for p in  open(mesh_list_path, 'r').read().splitlines()]
-                mesh = None
-                submeshes = []
-                for i, mesh_path in enumerate(mesh_list):
-                    chunk.logger.info("**%d/%d"%(i, len(mesh_list)))
-                    submesh_path = os.path.join(folder, "..", "textured_mesh", mesh_path)
-                    submesh = trimesh.load_mesh(submesh_path) 
-                    submeshes.append(submesh)
-                mesh = trimesh.util.concatenate(submeshes)
-            #else try loading the first mesh it finds
-            elif len(all_meshes)>=1:
-                chunk.logger.info("**Importing blendedMVG mesh data")
-                mesh = trimesh.load_mesh(all_meshes[0]) 
-            else:
-                chunk.logger.info("**No mesh found")
+            data = open_dataset_blended(sfm_data)
+            image_names = data["depth_maps"]
+            extrinsics = data["extrinsics"]
+            intrinsics = data["intrinsics"] 
+            depth_maps = data["depth_maps"] 
+            image_sizes = data["image_sizes"]
+            mesh=data["mesh"]
         elif chunk.node.datasetType.value == "DTU":
             chunk.logger.info("***Importing DTU data")
             #sort sfm data views by frame order (as in dtu)
@@ -226,8 +201,6 @@ class LoadDataset(desc.Node):
             image_folder = os.path.dirname(sfm_data["views"][0]["path"])
             #load data from relative path
             data = open_dataset_eth3d(image_folder)
-            #arbitrary sensor size since the focal is in px
-            sensor_size = 35 
             # re-order the camera parameters using filename
             image_names = data["image_names"] 
             if len(image_names) != len(sfm_data["views"]):
@@ -244,9 +217,7 @@ class LoadDataset(desc.Node):
                         image_sizes.append(data["image_sizes"][i])
                         break
                 ##raise RuntimeError("Image "+v["path"]+" not found in ground truth")
-            #save mesh as we load it from file #FIXME: not ideal
             mesh = data["point_cloud"]
-            # mesh.export(chunk.node.mesh.value)
         elif chunk.node.datasetType.value == "baptiste":
             #sort sfm data views by filenames as in baptist's dataset 
             sfm_data["views"]=sorted(sfm_data["views"], key=lambda v:os.path.basename(v["path"]))
@@ -322,10 +293,9 @@ class LoadDataset(desc.Node):
 
         chunk.logger.info("**Exporting data")
 
-        # generate SFM data from matrices
+        #Generate SFM data from matrices
         if not (len(extrinsics) == len(intrinsics) == len(images_sizes) ):
             raise RuntimeError("Mismatching number of parameters for the sfmData ")
-
         gt_sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, poses_id, instrinsics_id, 
                                              images_sizes, sfm_data, sensor_width=sensor_size)
 
@@ -333,7 +303,7 @@ class LoadDataset(desc.Node):
         for i, v in enumerate(gt_sfm_data["views"]):
             gt_sfm_data["views"][i]["resectionId"]=str(i)
 
-        # Exports
+        #Exports
         if chunk.node.initSfmLandmarks.value != 0:
             chunk.logger.info("**Exporting SfM landmarks")
             if mesh is None:
@@ -343,7 +313,6 @@ class LoadDataset(desc.Node):
             step = int( 1/chunk.node.initSfmLandmarks.value)
             chunk.logger.info("**Exporting %d SfM landmarks"%(int(mesh_data.vertices.shape[0]/step)))
             for vi, v in enumerate(mesh_data.vertices[::step]):#FIXME: slow
-                # chunk.logger.info("**Exporting SfM landmarks %d/%d"%(vi, int(mesh_data.vertices.shape[0]/step)))
                 landmark = {}
                 landmark["landmarkId"] = str(vi)
                 landmark["descType"] = "unknown" 
