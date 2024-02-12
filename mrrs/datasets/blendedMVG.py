@@ -1,5 +1,6 @@
 import os
 from PIL import Image
+from mrrs.core.geometry import transform_cg_cv
 import numpy as np
 
 from mrrs.core.utils import listdir_fullpath
@@ -70,6 +71,7 @@ def open_dataset(sfm_data):
     intrinsics=[]
     image_names=[]
     images_sizes = []
+    print("***Importing image list and depth maps")
     for view in sfm_data["views"]:
         image = view["path"]
         folder = os.path.dirname(image)
@@ -89,22 +91,26 @@ def open_dataset(sfm_data):
     mesh_list_path = os.path.join(folder, "..", "textured_mesh", 'mesh_list.txt') 
     all_meshes = [f for f in listdir_fullpath(os.path.join(folder, "..", "textured_mesh")) if f.endswith(".ply")]
     if os.path.exists(mesh_list_path):
-        print("**Importing blendedMVG mesh data")
+        print("***Importing mesh data from list")
         mesh_list = [os.path.basename(p) for p in  open(mesh_list_path, 'r').read().splitlines()]
         mesh = None
         submeshes = []
         for i, mesh_path in enumerate(mesh_list):
-            print("**%d/%d"%(i, len(mesh_list)))
+            print("****%d/%d"%(i, len(mesh_list)))
             submesh_path = os.path.join(folder, "..", "textured_mesh", mesh_path)
             submesh = trimesh.load_mesh(submesh_path) 
             submeshes.append(submesh)
         mesh = trimesh.util.concatenate(submeshes)
     #else try loading the first mesh it finds
     elif len(all_meshes)>=1:
-        print("**Importing blendedMVG mesh data")
+        print("***Importing blendedMVG mesh data")
         mesh = trimesh.load_mesh(all_meshes[0]) 
     else:
-        print("**No mesh found")
+        print("***No mesh found")
+    
+    #flip cg=>cv
+    if mesh is not None:
+        mesh.vertices = transform_cg_cv(mesh.vertices)
 
     return {
         "image_names":  image_names,

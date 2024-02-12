@@ -1,5 +1,9 @@
+import os
+from mrrs.core.ios import open_image
 import numpy as np
 import cv2
+import trimesh
+from PIL import Image
 
 def open_dtu_calibration(scene_calib_path, rescale = False):
     """Opens camera_sphere.npz file where the ground truth is stored."""
@@ -52,3 +56,34 @@ def load_K_Rt_from_P(filename, P=None):
     pose[:3, 3] = (t[:3] / t[3])[:, 0]
 
     return intrinsics, pose
+
+def open_dataset(sfm_data):
+    """
+    Import dtu data, ! assumes the sfm_data is sorted!
+    """
+
+    print("***Importing DTU data")
+    image_names = [os.path.basename(v["path"]) for v in sfm_data["views"]]
+    image_sizes = [Image.open(v["path"]).size for v in sfm_data["views"]]
+    image_folder = os.path.abspath(os.path.dirname(sfm_data["views"][0]["path"]))
+    rescale=True
+    extrinsics, intrinsics, gt_scale_mat = open_dtu_calibration( os.path.join(image_folder, "..", "cameras_sphere.npz"), rescale)
+    #get the id of the scan from the filename
+    scan_nb = int(image_folder.split('/')[-2].split('scan')[-1])
+    mesh = os.path.join(image_folder,'..',f'stl{scan_nb:03}_total.ply')
+    mesh = trimesh.load(mesh, force='mesh')
+    if rescale:
+        mesh.apply_transform(np.linalg.inv(gt_scale_mat))
+    masks_folder = os.path.join(image_folder, "..", "mask")
+    #FIXME: check order?
+    masks = [open_image(os.path.join(masks_folder, m)) for m in os.listdir(masks_folder) if (m.endswith(".png") and (not m.startswith(".")))]
+
+
+    return {
+            "image_names":  image_names,
+            "masks":        masks,  
+            "extrinsics" :  extrinsics,
+            "intrinsics" :  intrinsics,
+            "image_sizes":  image_sizes,
+            "mesh":mesh
+            }

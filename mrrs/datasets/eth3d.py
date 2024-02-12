@@ -133,11 +133,12 @@ def open_intrinsics(intrinsic_file):
             cameras.append(camera)
     return cameras, intrinsics
 
-def open_dataset(image_path):
+def open_dataset(sfm_data):
     """
     Opens an eth3d dataset from a given image path.
     """
     #get the root of the dataset
+    image_path = os.path.dirname(sfm_data["views"][0]["path"])
     dataset_root_path = os.path.abspath(os.path.join(image_path, "..", ".."))
 
     #load and merge meshes
@@ -167,10 +168,27 @@ def open_dataset(image_path):
     camera_image_sizes = [ [c["width"], c["height"] ] for c in cameras ]
     image_sizes = np.asarray(camera_image_sizes)[np.asarray(camera_ids)]
 
-    return {
+    data ={
             "image_names": image_names,
             "point_cloud": trimesh.PointCloud(vertices=all_points),
             "extrinsics" : poses,
             "intrinsics" : intrinsics,
             "image_sizes": image_sizes
            }
+
+    # re-order the camera parameters using filename
+    if len(image_names) != len(sfm_data["views"]):
+        raise RuntimeError("Different number of images in the sfm and the GT")
+    extrinsics=[]
+    intrinsics=[]
+    image_sizes=[]
+    for v in sfm_data["views"]:
+        for i, image_name in enumerate(image_names):
+            if image_name == os.path.basename(v["path"]):
+                # print(i, os.path.basename(v["path"])+" vs "+image_name)
+                extrinsics.append(data["extrinsics"][i])
+                intrinsics.append(data["intrinsics"][i])
+                image_sizes.append(data["image_sizes"][i])
+                break
+
+    return data
