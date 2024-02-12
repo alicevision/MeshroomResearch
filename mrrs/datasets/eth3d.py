@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import trimesh 
 
-from mrrs.core.geometry import is_rotation_mat, make_homogeneous, unmake_homogeneous
+from mrrs.core.geometry import is_rotation_mat, make_homogeneous, transform_cg_cv, unmake_homogeneous
 
 class MeshLabProjectMeshInfo:
     """
@@ -151,7 +151,10 @@ def open_dataset(sfm_data):
         points = trimesh.load(mesh_info.file_path, force="mesh")
         points.apply_transform(mesh_info.global_T_mesh)#FIXME test inv?
         all_points = np.concatenate([all_points, points.vertices], axis=0)
- 
+    
+    #put in cg FIXME?
+    all_points=transform_cg_cv(all_points)
+
     #load poses from corresponding filename
     poses_folder_path = os.path.join(dataset_root_path, "dslr_calibration_jpg")
     intrics_file = os.path.join(poses_folder_path, "cameras.txt") 
@@ -170,7 +173,7 @@ def open_dataset(sfm_data):
 
     data ={
             "image_names": image_names,
-            "point_cloud": trimesh.PointCloud(vertices=all_points),
+            "mesh": trimesh.PointCloud(vertices=all_points),
             "extrinsics" : poses,
             "intrinsics" : intrinsics,
             "image_sizes": image_sizes

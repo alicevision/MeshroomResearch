@@ -1,4 +1,5 @@
 import os
+from mrrs.core.geometry import transform_cg_cv
 from mrrs.core.ios import open_image
 import numpy as np
 import cv2
@@ -74,6 +75,8 @@ def open_dataset(sfm_data):
     mesh = trimesh.load(mesh, force='mesh')
     if rescale:
         mesh.apply_transform(np.linalg.inv(gt_scale_mat))
+    #cg to cv for meshroom
+    mesh.vertices=transform_cg_cv(mesh.vertices)
     masks_folder = os.path.join(image_folder, "..", "mask")
     #FIXME: check order?
     masks = [open_image(os.path.join(masks_folder, m)) for m in os.listdir(masks_folder) if (m.endswith(".png") and (not m.startswith(".")))]
