@@ -7,7 +7,7 @@ RENDER_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__f
 
 class RenderMesh(desc.CommandLineNode):
     commandLine = 'blender -b -P {scriptValue} -- \
-                    {cameras} {model} {output}'
+                    {cameras} {model} {renderMode} {output}'
     category = 'Evaluation'
     documentation = 'This nodes creates 3D objects in a Blender scene and render them on top of the corresponding views'
     inputs = [

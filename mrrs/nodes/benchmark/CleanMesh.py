@@ -32,7 +32,7 @@ class CleanMesh(desc.CommandLineNode):
             name="output_mesh",
             label="Ouput Mesh",
             description="",
-            value=os.path.join(desc.Node.internalFolder, "cleaned_mesh.obj"),
+            value=os.path.join(desc.Node.internalFolder, "cleaned_mesh.ply"),
             uid=[],
             ),
     ]

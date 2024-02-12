@@ -35,7 +35,7 @@ def create_parser():
         help="Render an image to the specified path",
     )
     parser.add_argument(
-        "--renderMode", type=str, required=False, default="FACES", choices=["MESH", "FACES"],
+        "--renderMode", type=str, required=False, default="FACES", choices=["MESH", "FACES", "DEPTH"],
         help="Choose the rendering mode, MESH: mesh with no light, FACES: face index",
     )
     parser.add_argument(
@@ -206,13 +206,15 @@ def main():
         rangeStart = 0
         rangeSize = len(views)
 
-    
+    print(args.renderMode)
     if args.renderMode=="FACES":
         print("Setup render faces idx")
         setup_face_index_shader(scene_mesh, scene_obj)
     elif args.renderMode=="DEPTH":
         print("Setup render depth maps")
         raise BaseException('depth map mode tba')
+    else:
+        print("Render mesh")
 
     print("Render viewpoints")
     for view in views[rangeStart:rangeStart+rangeSize]:
