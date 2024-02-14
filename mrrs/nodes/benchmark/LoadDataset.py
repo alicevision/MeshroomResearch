@@ -37,7 +37,7 @@ class LoadDataset(desc.Node):
             label='Dataset Type',
             description='''Dataset type''',
             value='blendedMVG',
-            values=['blendedMVG', 'DTU', 'ETH3D', 'baptiste', 'vital'],
+            values=['blendedMVG', 'DTU', 'ETH3D', 'baptiste', 'vital', 'ptut'],
             exclusive=True,
             uid=[0],
         ),
@@ -87,7 +87,7 @@ class LoadDataset(desc.Node):
             name='mesh',
             label='Mesh',
             description='Loaded mesh.',
-            semantic='mesh',
+            semantic='3D',
             value=os.path.join(desc.Node.internalFolder, 'mesh.ply'),
             # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
@@ -98,6 +98,7 @@ class LoadDataset(desc.Node):
             name='maskFolder',
             label='Mask Folder',
             description='Image mask folder. The mask describes the visibility of the object to be observed, on each view.',
+            semantic='image',
             value=os.path.join(desc.Node.internalFolder,'masks'),
             enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
@@ -204,6 +205,7 @@ class LoadDataset(desc.Node):
                     depth_map_gt = open_depth_map(depth_map)
                 else:
                     continue
+                #FIXME: move to IO?
                 #add flags to the depth map for display
                 camera_center = gt_extrinsic[0:3, 3]
                 inverse_intr_rot = np.linalg.inv(

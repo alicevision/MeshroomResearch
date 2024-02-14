@@ -31,9 +31,9 @@ def open_dataset(sfm_data):
 
     #transforms in mr format
     # extrinsics = [np.linalg.inv(np.concatenate( [e,[[0,0,0,1]]] )) for e in extrinsics]
-    pixel_size = sensor_size/images_sizes[0][0]
 
     #turn focal and pp into pixels for export
+    pixel_size = sensor_size/images_sizes[0][0]
     for i in range(len(intrinsics)):
         intrinsics[i]/=pixel_size 
         intrinsics[i][2,2]=1
