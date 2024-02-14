@@ -53,4 +53,24 @@ class MeshcomparisonBaptiste(CondaNode):
             value=desc.Node.internalFolder,
             uid=[],
             ),
+
+            desc.File(
+            name='vizMeshtoGT',
+            label='Distance Mesh to GT',
+            description='''''',
+            value=os.path.join(desc.Node.internalFolder, "vis_data2gt.ply"),
+            uid=[],
+            semantic="3D",
+            group='',
+            ),
+
+            desc.File(
+            name='vizGTtoMesh',
+            label='Distance GT to Mesg',
+            description='''''',
+            value=os.path.join(desc.Node.internalFolder, "vis_gt2data.ply"),
+            uid=[],
+            semantic="3D",
+            group='',
+            ),
     ]
