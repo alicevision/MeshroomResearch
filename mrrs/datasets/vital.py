@@ -2,17 +2,24 @@
 import json
 import os
 import trimesh 
+from PIL import Image
 
 from mrrs.core.ios import matrices_from_sfm_data
 
-def open_dataset(sfm_data):
-    image_folder = os.path.dirname(sfm_data["views"][0]["path"])
-    sfm_folder= os.path.abspath(os.path.join(image_folder, "..", '..', 'sfm'))
-    #get gt .sfm
+def find_sfm(sfm_folder):
     sfm_data_vital_path = [os.path.join(sfm_folder, f) for f in os.listdir(sfm_folder) if f.endswith(".sfm")]
     if len(sfm_data_vital_path) == 0:
-        raise RuntimeError("No sfm found in "+sfm_folder)
-    sfm_data_vital_path=sfm_data_vital_path[0]
+        return None
+    return sfm_data_vital_path[0]
+
+def open_dataset(sfm_data):
+    image_folder = os.path.dirname(sfm_data["views"][0]["path"])
+    #get gt .sfm first from current folder (vital), or from .. .. sfm (ptut)
+    sfm_data_vital_path = find_sfm(image_folder)
+    if sfm_data_vital_path is None:
+        sfm_data_vital_path = find_sfm(os.path.abspath(os.path.join(image_folder, "..", '..', 'sfm')))
+    if sfm_data_vital_path is None:
+        raise FileNotFoundError("Could not find sfmData") 
     with open(sfm_data_vital_path, "r") as json_file:
         sfm_data_vital = json.load(json_file)
     #sort by filename to match the .sfm 
@@ -21,9 +28,16 @@ def open_dataset(sfm_data):
     assert(len(sfm_data["views"]) == len(sfm_data_vital["views"]) )
     image_names = [os.path.basename(v["path"]) for v in sfm_data["views"]]
     #load gt mats
-    (extrinsics, intrinsics, _, _, _, _, image_sizes) = matrices_from_sfm_data(sfm_data_vital,return_image_sizes=True )
-    sensor_size = float(sfm_data_vital["intrinsics"][0]["sensorWidth"])
+    (extrinsics, intrinsics, views_id_vital, _, _, _, image_sizes) = matrices_from_sfm_data(sfm_data_vital, return_image_sizes=True )
+    # image_sizes = [Image.open(v["path"]).size for v in sfm_data["views"] ]
+    sensor_w = float(sfm_data_vital["intrinsics"][0]["sensorWidth"])
+    sensor_h = float(sfm_data_vital["intrinsics"][0]["sensorHeight"])
+    if(sensor_w/sensor_h != image_sizes[0][0]/image_sizes[0][1]):
+        print("!!!Image size incoherent with sensor size, will modify sensor_height and reload")
+        sfm_data_vital["intrinsics"][0]["sensorHeight"] =  sensor_w*image_sizes[0][1]/image_sizes[0][0]
+        (extrinsics, intrinsics, _, _, _, _, image_sizes) = matrices_from_sfm_data(sfm_data_vital, return_image_sizes=True )
 
+    sensor_size = sensor_w
     #turn focal and pp into pixels for export
     pixel_size = sensor_size/image_sizes[0][0]
     for i in range(len(intrinsics)):
@@ -33,21 +47,23 @@ def open_dataset(sfm_data):
     
     #TODO: depth maps and masks
 
+ 
+    data = {
+        "image_names":  image_names,
+        "extrinsics" :  extrinsics,
+        "intrinsics" :  intrinsics,
+        "image_sizes":  image_sizes,
+        "sensor_size": sensor_size
+        }
+
     #load mesh if any
     mesh_folder = os.path.join(image_folder, '..', '..', 'obj')
     if os.path.exists(mesh_folder):
         mesh_path = [os.path.join(mesh_folder, f)
                         for f in os.listdir(mesh_folder) if f.endswith(".obj")][0]
         print("Loading "+mesh_path)
-        mesh = trimesh.load(mesh_path, force='mesh')
+        data["mesh"] = trimesh.load(mesh_path, force='mesh')
     else:
         print("GT mesh not found in "+mesh_folder)
-    
-    return {
-        "image_names":  image_names,
-        "mesh":         mesh,
-        "extrinsics" :  extrinsics,
-        "intrinsics" :  intrinsics,
-        "image_sizes":  image_sizes,
-        "sensor_size": sensor_size
-        }
+
+    return data

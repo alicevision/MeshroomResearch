@@ -1,18 +1,13 @@
 __version__ = "3.0"
 
-import copy
 import os 
 import json
-from mrrs.core.utils import listdir_fullpath
-
-import trimesh
 import numpy as np
-from PIL import Image
 
 from meshroom.core import desc
+
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
-
 from mrrs.datasets import load_dataset
 
 class LoadDataset(desc.Node):
@@ -37,7 +32,7 @@ class LoadDataset(desc.Node):
             label='Dataset Type',
             description='''Dataset type''',
             value='blendedMVG',
-            values=['blendedMVG', 'DTU', 'ETH3D', 'baptiste', 'vital', 'ptut'],
+            values=['blendedMVG', 'DTU', 'ETH3D', 'baptiste', 'vital', 'NERF'],
             exclusive=True,
             uid=[0],
         ),
@@ -152,7 +147,7 @@ class LoadDataset(desc.Node):
 
         print("**Exporting data")
         #Generate SFM data from matrices
-        if not (len(gt_data["image_names"]) == len(gt_data["intrinsics"]) == len(gt_data["extrinsics"]) ==  len(gt_data["image_sizes"])):
+        if not (len(gt_data["intrinsics"]) == len(gt_data["extrinsics"]) ==  len(gt_data["image_sizes"])):
             raise RuntimeError("Mismatching number of parameters for the sfmData ")
         gt_sfm_data = sfm_data_from_matrices(gt_data["extrinsics"], gt_data["intrinsics"], extrinsics_id, instrinsics_id, 
                                               gt_data["image_sizes"], sfm_data, sensor_width=gt_data["sensor_size"])
@@ -229,7 +224,7 @@ class LoadDataset(desc.Node):
                 save_image(os.path.join(chunk.node.maskFolder.value, str(view_id) + ".png"), mask)
 
         #Save ground truth mesh as obj if any
-        if "mesh" in gt_data:
+        if "mesh" in gt_data :
             print("**Writting mesh")
             gt_data["mesh"].export(chunk.node.mesh.value)
             
