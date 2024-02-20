@@ -205,7 +205,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
     Converts calibration matrices into sfm data used in meshroom.
     The camera is assumed pinhole.
     You may pass an existing sfm_data to overwrite the parameters, otherwise you need to handle views yourself.
-    Focal and principal point is in pixels is in pixels.
+    Focal and principal point is in pixels
     '''
     sfm_data = sfm_data.copy()
     sfm_data['poses']=[]
@@ -232,6 +232,8 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
                 }
         sfm_data['poses'].append(pose)
 
+    #FIXME: our pp and focal are in mms in matrices from sfm
+
     already_done_intrisics = []
     for intrinsic, intrinsic_id, image_size in zip(intrinsics, intrinsics_ids, images_size):
         if intrinsic is not None:
@@ -240,7 +242,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             already_done_intrisics.append(intrinsic_id)
             #in meshroom, principal point is delta from center of the images, in pixels, in our case its actual pp in pixel
             pixel_size = (sensor_width/image_size[0])
-            principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2#FIXME: our pp is in mm?!
+            principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2
             principal_point = (principal_point).astype(str).tolist()
             intrinsic_sfm = {
                             "intrinsicId": str(intrinsic_id),
@@ -273,7 +275,7 @@ def parse_intrisics_sfm_data(sfm_intrinsic):
     sensor_width = abs(float(sfm_intrinsic["sensorWidth"] ))
     sensor_height = abs(float(sfm_intrinsic["sensorHeight"] )) #FIXME: not axtually used, sensor_heightis pixelratio*sensor_widtha
     pixel_size = sensor_width/width
-    #principal point is given in pixel, we pass it into metric for consistency with focal
+    #principal point is given in pixel, we pass it into mm for consistency with focal
     principal_point = np.asarray([sensor_width, sensor_height])/2\
                       +pixel_size*np.asarray(sfm_intrinsic['principalPoint'], np.float32)
     focal_length = abs(float(sfm_intrinsic['focalLength']))
@@ -352,6 +354,8 @@ def matrices_from_sfm_data(sfm_data, return_image_sizes=False):
         extrinsics_all_cams.append(extrinsics[pose_index[0]].copy())
         pixel_sizes_all_cams.append(pixel_sizes[intrinsic_index[0]])
         image_sizes.append([int(view["width"]), int(view["height"])])
+    pixel_sizes_all_cams=np.asarray(pixel_sizes_all_cams)
+    image_sizes=np.asarray(image_sizes)
     if return_image_sizes:
         return extrinsics_all_cams, intrinsics_all_cams, views_id, poses_id, intrinsics_id, pixel_sizes_all_cams, image_sizes
     else:
