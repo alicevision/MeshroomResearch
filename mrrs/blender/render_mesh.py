@@ -129,6 +129,8 @@ def load_model(filename):
         root = bpy.data.objects['mvgRoot']
         root.rotation_euler.rotate_axis('X', math.radians(-90.0))
         return bpy.data.objects['mvgPointCloud'], bpy.data.meshes['particleShape1']
+    else:
+        raise RuntimeError("Not a valid mesh object")
 
 def setup_face_index_shader(scene_mesh, scene_obj):
 
