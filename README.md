@@ -1,7 +1,7 @@
 # Meshroom Research ![](./assets/logo-inline.png)
 
 Meshroom Research is a library and a plugin for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use nodal GIU.\
-Meshroom Research focuses on making, integrating, testing and benchmarking various methods easily into Meshroom.\
+Meshroom Research focuses on making, integrating, testing and benchmarking various methods easily into Meshroom's GUI.\
 Dependencies are kept to a bare minimum, [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) is used extensivelly instead.  
 It is implemented in Python and will likely remain so.
 
@@ -9,26 +9,34 @@ It is implemented in Python and will likely remain so.
 
 ### State-of-the-art datasets integration
 
-This plugin support opening the ground truth data of the following datasets:
+This plugin support opening and viewing the ground truth data of the following datasets:
 
-MH  Nerf synthetic
 - [ETH3D](https://www.eth3d.net/overview)
 - [DTU](https://www.eth3d.net/overview)
 - [BlendedMVG](https://www.eth3d.net/overview)
 - [Nerf synthetic](https://www.eth3d.net/overview)
+- Tank and temples TBA
+- Skoltech3D TBA
+- Our own synthetic dataset(s) TBA
 
-To do so, drag and drop the images from the dataset in meshroom, as you would do for a normal format, add the node LoadDataset on the camera init'output, select the dataset type.
+To do so, drag and drop the images from the dataset in meshroom, as you would do for a normal dataset. 
+Add the node LoadDataset on the camera init's output and select the dataset type.\
+
 You may now use meshroom's visualisation and nodes on the ouptuts. 
 
 todo: gif load demo
 
-### SfM, Depth maps, Meshing benchmarking
-
-TODO
-
 ### 3rd party imports and exports
 
-Meshroom reasearch can also import and export data from the follwoing software 
+Meshroom reasearch can also import and export data from the follwoing softwares:
+
+- [COLMAP](https://colmap.github.io/)
+- [REALITY](https://www.capturingreality.com/)
+- Metashape (TBA)
+
+TODO explanation and GIF
+
+### SfM, Depth maps, Meshing benchmarking
 
 TODO
 
