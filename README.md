@@ -1,16 +1,36 @@
 # Meshroom Research ![](./assets/logo-inline.png)
 
-Meshroom Research is a library and a plugin for Meshroom.\
-It focuses on making, integrating, testing and benchmarking various methods easily into Meshroom.\
-Dependencies are kept to a bare minimum. To re-train/export model(s), you may have to do more complex install (cf each module).\
+Meshroom Research is a library and a plugin for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use nodal GIU.\
+Meshroom Research focuses on making, integrating, testing and benchmarking various methods easily into Meshroom.\
+Dependencies are kept to a bare minimum, [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) is used extensivelly instead.  
 It is implemented in Python and will likely remain so.
 
-The organisation is the following:
-- mrrs/core contains all the basic IOs, utils and common geometrical functions used through the library
-- mrrs/pipeline contains Meshrom pipeline files
-- mrrs/scripts contains all the scripts, including those used to run the benchmark
-- mrrs/nodes contains the interface nodes for integration in Meshroom
-- mrrs/< feature > contains code realated to the target feature. If several methods are solving the feature task, all methods inside MUST have the same IOs. An interface/abstract class should describe this. Each feature folder should be ideally associated to a Meshroom node.
+## Features 
+
+### State-of-the-art datasets integration
+
+This plugin support opening the ground truth data of the following datasets:
+
+MH  Nerf synthetic
+- [ETH3D](https://www.eth3d.net/overview)
+- [DTU](https://www.eth3d.net/overview)
+- [BlendedMVG](https://www.eth3d.net/overview)
+- [Nerf synthetic](https://www.eth3d.net/overview)
+
+To do so, drag and drop the images from the dataset in meshroom, as you would do for a normal format, add the node LoadDataset on the camera init'output, select the dataset type.
+You may now use meshroom's visualisation and nodes on the ouptuts. 
+
+todo: gif load demo
+
+### SfM, Depth maps, Meshing benchmarking
+
+TODO
+
+### 3rd party imports and exports
+
+Meshroom reasearch can also import and export data from the follwoing software 
+
+TODO
 
 ## Install
 
@@ -80,7 +100,13 @@ Options:
 ```
 
 ## Meshroom Dev quickstart
-
+The organisation is the following:
+- mrrs/core contains all the basic IOs, utils and common geometrical functions used through the library
+- mrrs/pipeline contains Meshrom pipeline files
+- mrrs/scripts contains all the scripts, including those used to run the benchmark
+- mrrs/nodes contains the interface nodes for integration in Meshroom
+- mrrs/< feature > contains code realated to the target feature.
+  
 Meshroom was designed to interact with a nodal GUI; this organically defines the code's structure as independent modules with distinct inputs and outputs. All the intermetiates results of each node of the graph (the pipeline) are dumped into a cache folder eponypm to the node.\
 These files can be opened easily because they are in a standard format (exr, obj, abc, json, etc.).
 
