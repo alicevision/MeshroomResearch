@@ -87,7 +87,7 @@ def open_dataset(sfm_data):
     # R-1 and R-1.-T, needed to reuse sfm_data_from_matrices
     extrinsics = [np.linalg.inv(e) if e is not None else None for e in extrinsics] 
     
-    #try loading from mesh list if any
+    #try loading from mesh list if any (original blended)
     mesh_list_path = os.path.join(folder, "..", "textured_mesh", 'mesh_list.txt') 
     all_meshes = [f for f in listdir_fullpath(os.path.join(folder, "..", "textured_mesh")) if f.endswith(".ply")]
     if os.path.exists(mesh_list_path):
@@ -101,10 +101,13 @@ def open_dataset(sfm_data):
             submesh = trimesh.load_mesh(submesh_path) 
             submeshes.append(submesh)
         mesh = trimesh.util.concatenate(submeshes)
-    #else try loading the first mesh it finds
+    #else try loading the first mesh it finds (tank and temples blended)
     elif len(all_meshes)>=1:
-        print("***Importing blendedMVG mesh data")
+        print("***Importing blendedMVG mesh data (T&T)")
         mesh = trimesh.load_mesh(all_meshes[0]) 
+        tranform_file =  [f for f in listdir_fullpath(os.path.join(folder, "..", "textured_mesh")) if f.endswith(".txt")][0]
+        mesh_tranform = np.linalg.inv(np.loadtxt(tranform_file))
+        mesh.apply_transform(mesh_tranform)#Fixme: unsure
     else:
         print("***No mesh found")
     

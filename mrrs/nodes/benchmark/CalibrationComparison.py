@@ -140,9 +140,8 @@ class CalibrationComparison(desc.Node):
                 computed_metric_values.append(metric_values)
             #stack up and compute average on dataset
             computed_metric_values = np.asarray(computed_metric_values)
-            #TODO: remove avg and median?
-            average_metric_values = np.mean(computed_metric_values, axis=0)
-            median_metric_values = np.median(computed_metric_values, axis=0)
+            average_metric_values = np.nanmean(computed_metric_values, axis=0)
+            median_metric_values = np.nanmedian(computed_metric_values, axis=0)
             #write output file
             os.makedirs(chunk.node.outputFolder.value, exist_ok=True)
 

@@ -113,6 +113,7 @@ def run(pipeline, output_folder,
 def report(output_folder, computed_outputs_path, csv_names, ensure_complete, rename_csv, make_mustahce_plot):
     """
     Generate a report from a computed benchmark.
+    Note, publish must be used to set the output to the meshtoom cache folder
     """
     print("Making report from benchmark")
     sequences = [directory for directory in os.listdir(computed_outputs_path)
@@ -145,12 +146,11 @@ def report(output_folder, computed_outputs_path, csv_names, ensure_complete, ren
             result = np.loadtxt(csv_file_path, dtype=str, delimiter=",")
             #split header from data
             header = result[0,:-1]
-            data_calib = result[1:-2, 1:-1].astype(np.float32)
-            #compture avg and med
-            avg = np.nanmean(data_calib, axis =0)
-            med =  np.nanmedian(data_calib, axis =0)
-            if np.any(np.isnan(avg)) or np.any(np.isnan(med)):
-                raise BaseException("Nan")
+            # data_calib = result[1:-2, 1:-1].astype(np.float32)#removes pre computed avg and median, first and last cols
+            
+            #get avg and median from   the two last lines, rtemove first (name) and last cols ''
+            avg = result[-2,1:-1]
+            med =  result[-1,1:-1]
             #save only average and med for all views
             results_avg.append(avg)
             results_median.append(med)
