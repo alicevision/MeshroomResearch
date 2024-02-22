@@ -12,9 +12,9 @@ It is implemented in Python and will likely remain so.
 This plugin support opening and viewing the ground truth data of the following datasets:
 
 - [ETH3D](https://www.eth3d.net/overview)
-- [DTU](https://www.eth3d.net/overview)
-- [BlendedMVG](https://www.eth3d.net/overview)
-- [Nerf synthetic](https://www.eth3d.net/overview)
+- [DTU](https://roboimagedata.compute.dtu.dk/?page_id=36)
+- [BlendedMVG](https://github.com/YoYo000/BlendedMVS)
+- [Nerf synthetic](https://www.matthewtancik.com/nerf)
 - Tank and temples TBA
 - Skoltech3D TBA
 - Our own synthetic dataset(s) TBA
@@ -26,7 +26,6 @@ You may now use meshroom's visualisation and nodes on the ouptuts.
 
 :warning: TODO: add gif load demo
 
-
 ### 3rd party imports and exports
 
 Meshroom reasearch can also import and export data from the follwoing softwares:
@@ -37,11 +36,27 @@ Meshroom reasearch can also import and export data from the follwoing softwares:
 
 :warning: TODO:  explanation and GIF
 
+### 3D Reconstruciotn methods nodes
+
+
+:warning: TODO:  explanation and GIF
+
+Classical:
+  - Meshroom
+  - COLMAP
+  - ACMP
+
+Deep learning based depth map estimation:
+  - VIZ-mvsnet
+
+Implicit representations (NERF):
+  - Instant-ngp
+  - NeuS
+  - NeuS2
+  - NeuralAngelo
+
 ### SfM, Depth maps, Meshing benchmarking
 
-
-### Run the benchmark
-Download the benchmark data for [blendedMVS](https://github.com/YoYo000/BlendedMVS).
 Run the benchmark with the command line interface
 
 ```
@@ -107,6 +122,9 @@ rez env meshroom mrrs
 ```
 
 ## Meshroom Dev quickstart
+
+You are very welcome to add your own method or dataset to meshroom-research!
+
 The organisation is the following:
 - mrrs/core contains all the basic IOs, utils and common geometrical functions used through the library
 - mrrs/pipeline contains Meshrom pipeline files
@@ -131,4 +149,9 @@ Don't forget to add the `__init__.py` in the node folder.
 
 tips:
 plugin QT_DEBUG_PLUGINS=1 to debug
+
+### Conda Nodes
+
+
+
 
