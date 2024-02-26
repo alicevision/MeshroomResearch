@@ -1,5 +1,6 @@
 __version__ = "3.0"
 
+from ast import Break
 import os 
 import json
 import numpy as np
@@ -10,6 +11,7 @@ from mrrs.core.geometry import *
 from mrrs.core.ios import *
 from mrrs.datasets import load_dataset
 
+#FIXME:move this into  a command line node
 class LoadDataset(desc.Node):
     category = 'Meshroom Research'
 
@@ -44,6 +46,15 @@ class LoadDataset(desc.Node):
                            0 for deactivated, otherwise generate use n*nb_vertices landmarks.''',
             value=0.0,
             range=(0.0, 1.0, 0.1),
+            uid=[0],
+            advanced=True
+        ),
+
+        desc.BoolParam(
+            name='initMasks',
+            label='Init Masks',
+            description='''If no masks in dataset, will initialise the masks using the values from the depth map (<=0) or the images (alpha<=0)''',
+            value=True,
             uid=[0],
             advanced=True
         ),
@@ -86,19 +97,15 @@ class LoadDataset(desc.Node):
             value=os.path.join(desc.Node.internalFolder, 'mesh.ply'),
             # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
-            group='',
         ),
 
         desc.File(
             name='maskFolder',
             label='Mask Folder',
             description='Image mask folder. The mask describes the visibility of the object to be observed, on each view.',
-            semantic='image',
             value=os.path.join(desc.Node.internalFolder,'masks'),
-            enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
             # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
-            group='',
         ),
 
         #used for display
@@ -110,7 +117,17 @@ class LoadDataset(desc.Node):
             value=os.path.join(desc.Node.internalFolder,
                                'depth_maps', '<VIEW_ID>_depthMap.exr'),
             uid=[],
-            group='',
+            advanced=True
+        ),
+
+        desc.File(
+            name='masks',
+            label='Masks',
+            description='Generated masks',
+            semantic='image',
+            value=os.path.join(desc.Node.internalFolder,
+                               'masks', '<VIEW_ID>.png'),
+            uid=[],
             advanced=True
         ),
     ]
@@ -158,7 +175,7 @@ class LoadDataset(desc.Node):
 
         #Exports
         if chunk.node.initSfmLandmarks.value != 0: 
-            print("**Exporting SfM landmarks")
+            print("**Initialising SfM landmarks from mesh")
             if gt_data["mesh"] is None:
                 raise RuntimeError("Cannot initialise landmarks with no mesh")
 
@@ -213,12 +230,39 @@ class LoadDataset(desc.Node):
                 }
                 save_exr(depth_map_gt, os.path.join(chunk.node.depthMapsFolder.value, 
                         str(view_id) + "_depthMap.exr"), custom_header=depth_meta)
-            
+
+        if "masks" not in gt_data and chunk.node.initMasks.value :
+            from concurrent.futures import ThreadPoolExecutor
+            from threading import Thread
+            #try to see if image has alpha
+            image = open_image(gt_sfm_data["views"][0]["path"])
+            if image.shape[-1] == 4:
+                print("**Init masks from images")
+                #note: process is io bound
+                def open_mask(view):
+                    return 255*(open_image(view["path"])[:,:,3]>0)
+                #FIXME: this blocks main thread
+                with ThreadPoolExecutor() as threadpool:#auto max worker
+                    gt_data["masks"]=[r for r in threadpool.map(open_mask, gt_sfm_data["views"])]
+      
+                print("**Done init masks from images")    
+            #else try to see if image has depth maps
+            elif "depth_maps" in gt_data:
+                print("**Init masks from depth maps")
+                def open_mask(view):
+                    return 255*(open_depth_map(depth_map)>0)
+                #FIXME: this blocks main thread
+                with ThreadPoolExecutor() as threadpool:#auto max worker
+                    gt_data["masks"]=[r for r in threadpool.map(open_mask, gt_sfm_data["views"])]
+            else:
+                raise RuntimeError("Could not initialise masks from image or depth maps")
+
         #Save image masks if any
         if "masks" in gt_data:
             print("**Writting masks")
             os.makedirs(chunk.node.maskFolder.value, exist_ok=True)
             for mask, view_id in zip(gt_data["masks"], views_id) :
+                #if we have a list of image, open them
                 if isinstance(mask, str):
                     mask=open_image(mask)
                 save_image(os.path.join(chunk.node.maskFolder.value, str(view_id) + ".png"), mask)

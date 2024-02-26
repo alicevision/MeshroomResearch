@@ -5,6 +5,7 @@ Module handling the inputs and outputs from and to Meshroom.
 import logging
 import re
 from struct import unpack
+import OpenImageIO as oiio
 
 import numpy as np
 
@@ -17,7 +18,6 @@ def open_exr(exr_path):
     '''
     Uses oiio to import an EXR file.
     '''
-    import OpenImageIO as oiio #lazy import?
     exr_file = oiio.ImageInput.open(exr_path)
     if exr_file is None :
         raise RuntimeError("Could not open exr file "+exr_path)
@@ -43,7 +43,6 @@ def save_exr(input_array, output_file,
     elif len(input_array.shape)==2:#gray level case
         input_array = np.expand_dims(input_array, -1)
     input_array_size = input_array.shape
-    import OpenImageIO as oiio
     out = oiio.ImageOutput.create(output_file)
     if out is None:
         raise RuntimeError("Could not open exr file "+output_file)
@@ -148,16 +147,17 @@ def open_image(image_path, auto_rotate=False, return_orientation=False, to_srgb=
     if len(image.shape)==2:
         image = np.expand_dims(image, -1)
     if return_orientation:
-        return image[:,:, 0:3], orientation
+        return image, orientation
     else:
-        return image[:,:, 0:3]
+        return image
 
 def save_image(image_path, np_array, orientation=None, auto_rotate=False):
     """
     Save an image in a numpy array.
     Range must be 0-255 and channel 1 or 3.
     """
-    import OpenImageIO as oiio
+    if len(np_array.shape)==2:
+        np_array=np.expand_dims(np_array, axis = -1)
     out = oiio.ImageOutput.create(image_path)
     if out is None:
         raise RuntimeError("Could not open file "+image_path)
