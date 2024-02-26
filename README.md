@@ -1,50 +1,62 @@
 # Meshroom Research ![](./assets/logo-inline.png)
 
-Meshroom Research is a library and a plugin for Meshroom.\
-It focuses on making, integrating, testing and benchmarking various methods easily into Meshroom.\
-Dependencies are kept to a bare minimum. To re-train/export model(s), you may have to do more complex install (cf each module).\
+Meshroom Research is a library and a plugin for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use nodal GIU.
+Meshroom Research focuses on making, integrating, testing and benchmarking various methods easily into Meshroom's GUI.
+Dependencies are kept to a bare minimum, [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) is used extensivelly instead.  
 It is implemented in Python and will likely remain so.
 
-The organisation is the following:
-- mrrs/core contains all the basic IOs, utils and common geometrical functions used through the library
-- mrrs/pipeline contains Meshrom pipeline files
-- mrrs/scripts contains all the scripts, including those used to run the benchmark
-- mrrs/nodes contains the interface nodes for integration in Meshroom
-- mrrs/< feature > contains code realated to the target feature. If several methods are solving the feature task, all methods inside MUST have the same IOs. An interface/abstract class should describe this. Each feature folder should be ideally associated to a Meshroom node.
+## Features 
 
-## Install
+### State-of-the-art datasets integration
 
-Install Meshroom: https://alicevision.org/#meshroom (or build it by yourself).
+This plugin support opening and viewing the ground truth data of the following datasets:
 
-Clone this repo :
-```
-git clone https://github.com/alicevision/MeshroomResearch
-```
-Then install Meshroom Research with pip :
-```
-cd MRRS
-pip install -e . [< optional features >]
-```
-< optional features > may need other packages.
+- [ETH3D](https://www.eth3d.net/overview)
+- [DTU](https://roboimagedata.compute.dtu.dk/?page_id=36)
+- [BlendedMVG](https://github.com/YoYo000/BlendedMVS)
+- [Nerf synthetic](https://www.matthewtancik.com/nerf)
+- Tank and temples TBA
+- Skoltech3D TBA
+- Our own synthetic dataset(s) TBA
 
-On Mikros machines:
-```
-rez env meshroom mrrs
-```
-## New nodes
+To do so, drag and drop the images from the dataset in meshroom, as you would do for a normal dataset. 
+Add the node LoadDataset on the camera init's output and select the dataset type.
 
-The list of added nodes can be found in [nodes](mrrs/nodes/README.md).
-For now it mainly adds nodes for:
-- Benchmarking and dataset imports
-- Experimental features sur as segmentation, deep depth refinement and deep MVS
-- Support to run COLMAP
+You may now use meshroom's visualisation and nodes on the ouptuts. 
 
-## Tools&Pipeline
+:warning: TODO: add gif load demo
 
-You may find the following command line tools useful.
+### 3rd party imports and exports
 
-### Run the benchmark
-Download the benchmark data for [blendedMVS](https://github.com/YoYo000/BlendedMVS).
+Meshroom reasearch can also import and export data from the follwoing softwares:
+
+- [COLMAP](https://colmap.github.io/)
+- [REALITY](https://www.capturingreality.com/)
+- Metashape (TBA)
+
+:warning: TODO:  explanation and GIF
+
+### 3D Reconstruciotn methods nodes
+
+
+:warning: TODO:  explanation and GIF
+
+Classical:
+  - Meshroom
+  - COLMAP
+  - ACMP
+
+Deep learning based depth map estimation:
+  - VIZ-mvsnet
+
+Implicit representations (NERF):
+  - Instant-ngp
+  - NeuS
+  - NeuS2
+  - NeuralAngelo
+
+### SfM, Depth maps, Meshing benchmarking
+
 Run the benchmark with the command line interface
 
 ```
@@ -79,8 +91,47 @@ Options:
   --help                    Show this message and exit.
 ```
 
+:warning: TODO: explain benchmarking and cli, pipeline system etc..
+
+### New nodes
+
+Meshroom research adds a few new nodes to make it easy to play with 3D reconstruction data.
+The list of added nodes can be found in [nodes](mrrs/nodes/README.md).
+
+## Install
+
+:warning: TODO: make proper install method
+
+Install Meshroom: https://alicevision.org/#meshroom (or build it by yourself).
+
+Clone this repo :
+```
+git clone https://github.com/alicevision/MeshroomResearch
+```
+Then install Meshroom Research with pip :
+```
+cd MRRS
+pip install -e . [< optional features >]
+```
+< optional features > may need other packages.
+
+:warning: TODO: this prbaly needs to go
+On Mikros machines:
+```
+rez env meshroom mrrs
+```
+
 ## Meshroom Dev quickstart
 
+You are very welcome to add your own method or dataset to meshroom-research!
+
+The organisation is the following:
+- mrrs/core contains all the basic IOs, utils and common geometrical functions used through the library
+- mrrs/pipeline contains Meshrom pipeline files
+- mrrs/scripts contains all the scripts, including those used to run the benchmark
+- mrrs/nodes contains the interface nodes for integration in Meshroom
+- mrrs/< feature > contains code realated to the target feature.
+  
 Meshroom was designed to interact with a nodal GUI; this organically defines the code's structure as independent modules with distinct inputs and outputs. All the intermetiates results of each node of the graph (the pipeline) are dumped into a cache folder eponypm to the node.\
 These files can be opened easily because they are in a standard format (exr, obj, abc, json, etc.).
 
@@ -98,4 +149,9 @@ Don't forget to add the `__init__.py` in the node folder.
 
 tips:
 plugin QT_DEBUG_PLUGINS=1 to debug
+
+### Conda Nodes
+
+
+
 
