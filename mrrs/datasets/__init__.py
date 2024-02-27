@@ -1,5 +1,4 @@
 
-from multiprocessing.sharedctypes import Value
 from mrrs.core.geometry import is_rotation_mat
 from mrrs.datasets.eth3d import open_dataset as open_dataset_eth3d
 from mrrs.datasets.baptiste import open_dataset as open_dataset_baptiste

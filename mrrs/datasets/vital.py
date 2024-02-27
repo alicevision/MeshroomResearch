@@ -53,7 +53,7 @@ def open_dataset(sfm_data):
         "extrinsics" :  extrinsics,
         "intrinsics" :  intrinsics,
         "image_sizes":  image_sizes,
-        "sensor_size": sensor_size
+        "sensor_size":  sensor_size
         }
 
     #load mesh if any
