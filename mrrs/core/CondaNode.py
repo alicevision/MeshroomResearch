@@ -12,16 +12,12 @@ class CondaNode(desc.CommandLineNode):
     # def __init__(self):
     #     super().__init__() #TODO check if conda to path
 
-    @property
-    def env_file(self):
-        """path to yaml file, needs to be set in inherited class"""
-        raise NotImplementedError("You must ovewrite env_file in the inherited CondaNode")
-
-    @property
-    def env_path(self):
-        """path to the conda env, will be initialised if not existing"""
-        return None
-
+    """path to yaml file, needs to be set in inherited class"""
+    env_file = None
+        
+    """path to the conda env, will be initialised if not existing"""
+    env_path = None
+        
     def curate_env_command(self):
         """
         Used to unset all rez defined env that messes up with conda.
