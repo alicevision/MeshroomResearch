@@ -154,9 +154,11 @@ class LoadDataset(desc.Node):
         print("*LoadDataset Starting")
 
         print("**Importing data")
-        # Load SFM data from JSON file (may update sfm_data!)
+        # Load SFM data from JSON file 
         sfm_data = json.load(open(chunk.node.sfmData.value, "r"))
+        #load datset data (may update sfm_data!)
         gt_data, sfm_data = load_dataset(sfm_data, chunk.node.datasetType.value)
+        
         # Load meshroom ids
         extrinsics_id = [v["poseId"] for v in sfm_data["views"]]
         instrinsics_id = [v["intrinsicId"] for v in sfm_data["views"]]
