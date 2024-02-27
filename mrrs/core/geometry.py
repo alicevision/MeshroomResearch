@@ -1,12 +1,11 @@
 """
 Module that contains 2D and 3D geometrical operations
 """
-import sys
 import numpy as np
 import logging
 
 #what is condidered a small float
-EPSILON = sys.float_info.min
+EPSILON = 1e-6
 
 GG_CV_MAT33 = np.asarray([[1,0,0],[0,-1,0],[0,0,-1]])
 GG_CV_MAT44 = np.asarray([[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]])
