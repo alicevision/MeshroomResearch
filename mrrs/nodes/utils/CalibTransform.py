@@ -133,15 +133,20 @@ class CalibTransform(desc.Node):
         #load .sfm data
         sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
         extrinsics, intrinsics, views_id, poses_ids, intrinsics_ids, pixel_sizes_all_cams, images_size = matrices_from_sfm_data(sfm_data, True)
-        sensor_width = pixel_sizes_all_cams*images_size[:,0]
+        sensor_width = pixel_sizes_all_cams[0]*images_size[0,0]
         #apply transfrom
         extrinsics, intrinsics = transform_function(extrinsics, intrinsics, matrix)
         #intrinsics in piXels for export
-        intrinsics/=np.expand_dims(pixel_sizes_all_cams, axis=[1,2])
-        intrinsics[:,2,2]=1
+        # intrinsics/=np.expand_dims(pixel_sizes_all_cams, axis=[1,2])
+        # intrinsics[:,2,2]=1
+        #intrinsics in pixels for export
+        for i in range(len(intrinsics)):
+            if intrinsics[i] is not None:
+                intrinsics[i]/= pixel_sizes_all_cams[i]
+                intrinsics[i][2,2]=1
         #write result
         sfm_data_out = sfm_data_from_matrices(extrinsics, intrinsics, poses_ids, intrinsics_ids, images_size, 
-                                              sfm_data = sfm_data, sensor_width = sensor_width[0])
+                                              sfm_data = sfm_data, sensor_width = sensor_width)
         with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
             json.dump(sfm_data_out, f, indent=4)
         chunk.logManager.end()
