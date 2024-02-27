@@ -1,13 +1,13 @@
 """
 Module that contains 2D and 3D geometrical operations
 """
+import sys
 import numpy as np
 import logging
 
 #what is condidered a small float
-EPSILON = 0.0000001
+EPSILON = sys.float_info.min
 
-#
 GG_CV_MAT33 = np.asarray([[1,0,0],[0,-1,0],[0,0,-1]])
 GG_CV_MAT44 = np.asarray([[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]])
 
@@ -394,7 +394,7 @@ def transform_cg_cv(vertices):
     vertices=np.transpose(transform_mat@np.transpose(vertices))
     return vertices
 
-def is_rotation_mat(R, tolerance_threshold= 0.00001):
+def is_rotation_mat(R, tolerance_threshold= EPSILON):
     return (np.abs(np.transpose(R) - np.linalg.inv(R))< tolerance_threshold ).all() and abs(np.linalg.det(R)-1)<tolerance_threshold
 
 #%% Other
