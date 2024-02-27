@@ -20,6 +20,7 @@ for k in keys:
 mat_convert = mathutils.Matrix.Identity(4)
 mat_convert[1][1] = -1
 mat_convert[2][2] = -1
+
 counter = frame_start-1
  
 for camera in cameras:
