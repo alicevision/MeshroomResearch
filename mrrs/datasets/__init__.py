@@ -1,4 +1,6 @@
 
+from multiprocessing.sharedctypes import Value
+from mrrs.core.geometry import is_rotation_mat
 from mrrs.datasets.eth3d import open_dataset as open_dataset_eth3d
 from mrrs.datasets.baptiste import open_dataset as open_dataset_baptiste
 from mrrs.datasets.blendedMVG import open_dataset as open_dataset_blended
@@ -47,8 +49,10 @@ def load_dataset(sfm_data, dataset_type):
     else:
         raise RuntimeError("Dataset type not supported")
     
-    #sanity check rotation matrix FIXME: todo
-    # is_rotation_mat
+    #sanity check rotation matrix, as its a common error
+    for e in data["extrinsics"]:
+        if not is_rotation_mat(e[0:3,0:3]):
+            raise ValueError("Issue with rotation matrix")
 
     #if sensor size, not specified, assumes 35mm
     if "sensor_size" not in data :
