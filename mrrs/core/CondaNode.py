@@ -56,20 +56,13 @@ class CondaNode(desc.CommandLineNode):
 
     def processChunk(self, chunk):
         try:
+            chunk.logManager.start(chunk.node.verboseLevel.value)
             with open(chunk.logFile, 'w') as logF:
                 cmd = self.buildCommandLine(chunk)
                 chunk.status.commandLine = cmd
                 chunk.saveStatusFile()
                 print(' - commandLine: {}'.format(cmd))
                 print(' - logFile: {}'.format(chunk.logFile))
-                # chunk.subprocess = psutil.Popen(shlex.split(cmd), stdout=logF, stderr=logF, cwd=chunk.node.internalFolder)
-
-                # chunk.statThread.proc = chunk.subprocess
-                # stdout, stderr = chunk.subprocess.communicate()
-                # chunk.subprocess.wait()
-
-                # chunk.status.returnCode = chunk.subprocess.returncode
-
                 #unset doesnt work with subprocess, and removing the variables from the env dict does not work either
                 chunk.status.returnCode = os.system(cmd)
                 logContent=""
@@ -79,6 +72,6 @@ class CondaNode(desc.CommandLineNode):
                     logContent = ''.join(logF.readlines())
                 raise RuntimeError('Error on node "{}":\nLog:\n{}'.format(chunk.name, logContent))
         except:
+            chunk.logManager.end()
             raise
-        finally:
-            chunk.subprocess = None
+        chunk.logManager.end()
