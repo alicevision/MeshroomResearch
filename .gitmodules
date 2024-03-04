@@ -4,3 +4,6 @@
 [submodule "mrrs/implicit_mesh/instant_ngp/instant-ngp"]
 	path = mrrs/implicit_mesh/instant_ngp/instant-ngp
 	url = https://github.com/NVlabs/instant-ngp.git
+[submodule "mrrs/depth_maps/vismvsnet/Vis-MVSNet"]
+	path = mrrs/depth_maps/vismvsnet/Vis-MVSNet
+	url = https://github.com/jzhangbs/Vis-MVSNet
