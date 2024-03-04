@@ -26,8 +26,19 @@ class ExecuteCmdConda(CondaNode):
             value='',
             uid=[0],
             group=''
-            )
+            ),
+        desc.ChoiceParam(
+            name='verboseLevel',
+            label='Verbose Level',
+            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            value='info',
+            values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
+            exclusive=True,
+            uid=[0],
+        ),
     ]
+
+    outputs = [    ]
 
     def processChunk(self, chunk):
         self.env_path = chunk.node.condaEnv.value
@@ -36,5 +47,4 @@ class ExecuteCmdConda(CondaNode):
         else:
             super().processChunk(chunk)
 
-    outputs = [
-    ]
+    
