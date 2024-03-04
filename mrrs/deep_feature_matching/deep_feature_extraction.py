@@ -30,8 +30,6 @@ def run_extraction(inputsfmdata, outputfolder, method, maxkeypoints, gridkeypoin
     """
     run the feature detection and description
     """
-    print("Hello")
-
     #load sfmdata
     print("Loading sfm data")
     with open(inputsfmdata, "r") as json_file:
