@@ -9,11 +9,14 @@ from meshroom.core import desc
 
 from mrrs.core.ios import *
 from mrrs.core.geometry import *
+from mrrs.core.utils import listdir_fullpath
 
 def meshroom2normal(pixels, depth_map, extrinsic, intrinsic, pixel_size):
     """
     Convert meshroom depth maps to conventional depth maps.
     """
+    if extrinsic is None:
+        raise ValueError("Must pass an sfm for this transform")
     #deproject using meshoom deprojection
     scene_points = camera_deprojection_meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_size)
     #reprojection used to get depth map
@@ -25,6 +28,8 @@ def normal2meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_size):
     """
     Convert conventional depth maps to meshroom depth maps.
     """
+    if extrinsic is None:
+        raise ValueError("Must pass an sfm for this transform")
     #deproject using regular equation
     scene_points = camera_deprojection(pixels, depth_map, extrinsic, intrinsic, pixel_size)
     #Z is distance from camera center
@@ -33,53 +38,69 @@ def normal2meshroom(pixels, depth_map, extrinsic, intrinsic, pixel_size):
     depth_map_converted[depth_map<0]=0
     return  depth_map_converted
 
-def id(ixels, depth_map, extrinsic, intrinsic, pixel_size):
+def id(pixels, depth_map, extrinsic, intrinsic, pixel_size):
     return depth_map
 
 def do_transform(depth_maps_path, sfm_data, transform, output_folder):
     """
     Runs the transform on a set of depth maps.
     """
-    extrinsics, intrinsics, _, _, _, pixel_sizes = matrices_from_sfm_data(sfm_data)
     output_depth_map_paths = []
-    pixels = None
-    for index, view in enumerate(sfm_data["views"]):
-        logging.info("Converting view %d/%d"%(index, len(pixel_sizes)))
-        view_id = view["viewId"]
-        if not os.path.exists(depth_maps_path[index]):
-            logging.warning(depth_maps_path[index]+" cannot be found, skipping")
-            continue
-        depth_map, depth_map_header = open_exr(depth_maps_path[index])
-        depth_map=depth_map.astype(np.float32)
-        scale = 1
-        depth_map_size = np.asarray(depth_map.shape[0:2])
-        if "AliceVision:downscale" in depth_map_header:#FIXME: resizing is not ideal
+    if sfm_data is not None:
+        extrinsics, intrinsics, _, _, _, pixel_sizes = matrices_from_sfm_data(sfm_data)
+        pixels = None
+        for index, view in enumerate(sfm_data["views"]):
+            logging.info("Converting view %d/%d"%(index, len(pixel_sizes)))
+            view_id = view["viewId"]
+            if not os.path.exists(depth_maps_path[index]):
+                logging.warning(depth_maps_path[index]+" cannot be found, skipping")
+                continue
+            depth_map, depth_map_header = open_exr(depth_maps_path[index])
+            depth_map=depth_map.astype(np.float32)
+         
+            depth_map_size = np.asarray(depth_map.shape[0:2])
+            #add downscale if not present
+            if "AliceVision:downscale" not in depth_map_header:
+                depth_map_header["AliceVision:downscale"]=float(view["width"])/float(depth_map_size[1])
+            
+            #FIXME: resizing is not ideal, but convenient to use our calib directly
             scale = float(depth_map_header["AliceVision:downscale"])
             depth_map = cv2.resize(depth_map, (scale*depth_map_size[::-1]).astype(np.int32))
             logging.info("Rescaling depth map with %f"%scale)
 
-        ys, xs = np.meshgrid(range(0, depth_map.shape[0]), \
-                            range(0, depth_map.shape[1]), \
-                            indexing="ij")
-        pixels = [xs, ys]
-        depth_map_transformed = transform(pixels, depth_map, extrinsics[index], intrinsics[index], pixel_sizes[index])
-        output_depth_map_path = os.path.join(output_folder, view_id+"_depthMap.exr")
-        depth_map_transformed[depth_map<0] = 0#put 0 in places where its invalid
-        if "AliceVision:downscale" in depth_map_header:
-            depth_map_transformed = cv2.resize(depth_map_transformed, depth_map_size[::-1])
-        else:
-            depth_map_header["AliceVision:downscale"]=1
-        # add header for vizualisation
-        if "AliceVision:CArr" not in depth_map_header: 
-            camera_center = extrinsics[index][0:3, 3].tolist()
-            inverse_intr_rot = np.linalg.inv(
-                    intrinsics[index] @ np.linalg.inv(extrinsics[index][0:3, 0:3]))
-
-            depth_map_header["AliceVision:CArr"] = camera_center
-            depth_map_header["AliceVision:iCamArr"]= inverse_intr_rot
+            ys, xs = np.meshgrid(range(0, depth_map.shape[0]), \
+                                range(0, depth_map.shape[1]), \
+                                indexing="ij")
+            pixels = [xs, ys]
+            depth_map_transformed = transform(pixels, depth_map, extrinsics[index], intrinsics[index], pixel_sizes[index])
+            output_depth_map_path = os.path.join(output_folder, view_id+"_depthMap.exr")
+            depth_map_transformed[depth_map<0] = 0#put 0 in places where its invalid
             
-        save_exr(depth_map_transformed, output_depth_map_path, custom_header=depth_map_header)
-        output_depth_map_paths.append(output_depth_map_path)
+            #resie to orginnal size
+            depth_map_transformed = cv2.resize(depth_map_transformed, depth_map_size[::-1])
+                
+            # add header for vizualisation
+            if "AliceVision:CArr" not in depth_map_header: 
+                # edit intrinsics pp with scale
+                intrinsics_dm = intrinsics[index]
+                # ?
+                # intrinsics_dm[0,2]/=depth_map_header["AliceVision:downscale"]
+                # intrinsics_dm[1,2]/=depth_map_header["AliceVision:downscale"]
+                camera_center = extrinsics[index][0:3, 3].tolist()
+                inverse_intr_rot = np.linalg.inv(intrinsics_dm @ np.linalg.inv(extrinsics[index][0:3, 0:3]))
+
+                depth_map_header["AliceVision:CArr"] = camera_center
+                depth_map_header["AliceVision:iCamArr"]= inverse_intr_rot
+                
+            save_exr(depth_map_transformed, output_depth_map_path, custom_header=depth_map_header)
+            output_depth_map_paths.append(output_depth_map_path)
+    else:
+        for depth_map_file in depth_maps_path:
+            depth_map = open_depth_map(depth_map_file)
+            depth_map_transformed = transform(None, depth_map, None, None, None)
+            output_depth_map_path = os.path.join(output_folder, os.path.basename(depth_map_file)+"_depthMap.exr")
+            save_exr(depth_map_transformed, output_depth_map_path)
+            output_depth_map_paths.append(output_depth_map_path)
     return output_depth_map_paths
 
 class DepthMapTransform(desc.Node):
@@ -116,15 +137,15 @@ class DepthMapTransform(desc.Node):
             joinChar=',',
         ),
 
-    desc.ChoiceParam(
-            name='verboseLevel',
-            label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
-            value='info',
-            values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
-            exclusive=True,
-            uid=[0],
-        ),
+        desc.ChoiceParam(
+                name='verboseLevel',
+                label='Verbose Level',
+                description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+                value='info',
+                values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
+                exclusive=True,
+                uid=[0],
+            ),
 
     ]
 
@@ -151,19 +172,15 @@ class DepthMapTransform(desc.Node):
         """
         Computes the different transforms on the depth maps.
         """
-        # try:
         chunk.logManager.start(chunk.node.verboseLevel.value)
-        if chunk.node.inputSfM.value == '':
-            raise RuntimeError("No inputSfM specified")
-
-        sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
-        transform_function = eval(chunk.node.transform.value)
-
         depth_folder = chunk.node.depthMapsFolder.value
-        depth_files = [os.path.join(depth_folder, str(views["viewId"])+"_depthMap.exr") for views in sfm_data["views"]]#FIXME: hardcoded filename
+        transform_function = eval(chunk.node.transform.value)
+        sfm_data=None
+        if chunk.node.inputSfM.value != '':#get the depth from the sfm if passed
+            sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
+            depth_files = [os.path.join(depth_folder, str(views["viewId"])+"_depthMap.exr") for views in sfm_data["views"]]#FIXME: hardcoded filename
+        else:
+            depth_files = [f for f in listdir_fullpath(depth_folder) if (f.endswith('.npy') or f.endswith('.pfm') or f.endswith('.exr')) ]
         do_transform(depth_files, sfm_data, transform_function, chunk.node.output.value)
 
         chunk.logger.info('Depth map transform end')
-        # finally:
-        #     chunk.logManager.end()
-
