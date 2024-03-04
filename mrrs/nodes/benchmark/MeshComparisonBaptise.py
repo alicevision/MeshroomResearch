@@ -43,6 +43,17 @@ class MeshcomparisonBaptiste(CondaNode):
             exclusive=True,
             uid=[0],
         ),
+
+        desc.ChoiceParam(
+            name='verboseLevel',
+            label='Verbose Level',
+            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            value='info',
+            values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
+            exclusive=True,
+            uid=[0],
+            group=""
+        ),
     ]
 
     outputs = [
