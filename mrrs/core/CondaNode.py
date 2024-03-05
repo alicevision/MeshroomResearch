@@ -12,7 +12,7 @@ class CondaNode(desc.CommandLineNode):
     # def __init__(self):
     #     super().__init__() #TODO check if conda to path
 
-    """path to yaml file, needs to be set in inherited class"""
+    """path to yaml file"""
     env_file = None
         
     """path to the conda env, will be initialised if not existing"""

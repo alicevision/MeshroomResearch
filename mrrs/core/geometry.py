@@ -5,7 +5,7 @@ import numpy as np
 import logging
 
 #what is condidered a small float
-EPSILON = 1e-5
+EPSILON = 1e-4
 
 GG_CV_MAT33 = np.asarray([[1,0,0],[0,-1,0],[0,0,-1]])
 GG_CV_MAT44 = np.asarray([[1,0,0,0],[0,-1,0,0],[0,0,-1,0],[0,0,0,1]])

@@ -249,17 +249,17 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
                             'width':str(image_size[0]), 'height':str(image_size[1]),
                             "sensorWidth": str(sensor_width),
                             "sensorHeight": str(sensor_width*image_size[1]/image_size[0]),
-                            "serialNumber": "0",
-                            "type": "pinhole",
-                            "initializationMode": "unknown",
-                            "initialFocalLength": "0.00048828125",
+                            "serialNumber": "0", #FIXME: not matching the sfm
+                            "type": "pinhole",#FIXME: not matching the sfm
+                            "initializationMode": "unknown", #FIXME: not matching the sfm
+                            "initialFocalLength": "0", #FIXME: not matching the sfm
                             #pass focal into "mm"
                             "focalLength": str(intrinsic[0,0]*pixel_size),
-                            "pixelRatio": "1",
-                            "pixelRatioLocked": "false",
+                            "pixelRatio": "1", #FIXME: not matching the sfm
+                            "pixelRatioLocked": "false", #FIXME: not matching the sfm
                             "principalPoint": principal_point,
-                            "distortionParams": "",
-                            "locked": "true"
+                            "distortionParams": "", #FIXME: not matching the sfm
+                            "locked": "true" #FIXME: not matching the sfm
                             }
             sfm_data['intrinsics'].append(intrinsic_sfm)
 

@@ -1,0 +1,657 @@
+{
+    "version": [
+        "1",
+        "2",
+        "6"
+    ],
+    "featuresFolders": [
+        "..\/..\/FeatureExtraction\/ba3924934ba554e24bd600fa594abe2ecb26fed3"
+    ],
+    "matchesFolders": [
+        "..\/..\/FeatureMatching\/48ac44be030879006d348df7f56aa5c5cad595b2"
+    ],
+    "views": [
+        {
+            "viewId": "7554437",
+            "poseId": "7554437",
+            "frameId": "4",
+            "intrinsicId": "404732531",
+            "resectionId": "3",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000004.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "77937651",
+            "poseId": "77937651",
+            "frameId": "13",
+            "intrinsicId": "404732531",
+            "resectionId": "0",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000013.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "246686527",
+            "poseId": "246686527",
+            "frameId": "3",
+            "intrinsicId": "404732531",
+            "resectionId": "9",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000003.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "328990241",
+            "poseId": "328990241",
+            "frameId": "0",
+            "intrinsicId": "404732531",
+            "resectionId": "5",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000000.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "335902456",
+            "poseId": "335902456",
+            "frameId": "1",
+            "intrinsicId": "404732531",
+            "resectionId": "14",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000001.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "435457966",
+            "poseId": "435457966",
+            "frameId": "5",
+            "intrinsicId": "404732531",
+            "resectionId": "4",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000005.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "475560383",
+            "poseId": "475560383",
+            "frameId": "8",
+            "intrinsicId": "404732531",
+            "resectionId": "13",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000008.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "538779264",
+            "poseId": "538779264",
+            "frameId": "14",
+            "intrinsicId": "404732531",
+            "resectionId": "7",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000014.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "623335754",
+            "poseId": "623335754",
+            "frameId": "2",
+            "intrinsicId": "404732531",
+            "resectionId": "2",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000002.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "1102296173",
+            "poseId": "1102296173",
+            "frameId": "7",
+            "intrinsicId": "404732531",
+            "resectionId": "0",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000007.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "1398374336",
+            "poseId": "1398374336",
+            "frameId": "12",
+            "intrinsicId": "404732531",
+            "resectionId": "12",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000012.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "1416335166",
+            "poseId": "1416335166",
+            "frameId": "9",
+            "intrinsicId": "404732531",
+            "resectionId": "8",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000009.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "1566310525",
+            "poseId": "1566310525",
+            "frameId": "10",
+            "intrinsicId": "404732531",
+            "resectionId": "6",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000010.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "1655582873",
+            "poseId": "1655582873",
+            "frameId": "11",
+            "intrinsicId": "404732531",
+            "resectionId": "10",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000011.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "2030917626",
+            "poseId": "2030917626",
+            "frameId": "6",
+            "intrinsicId": "404732531",
+            "resectionId": "1",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000006.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        },
+        {
+            "viewId": "2054207917",
+            "poseId": "2054207917",
+            "frameId": "15",
+            "intrinsicId": "404732531",
+            "resectionId": "11",
+            "path": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images\/00000015.jpg",
+            "width": "768",
+            "height": "576",
+            "metadata": {
+                "jpeg:subsampling": "4:2:0",
+                "oiio:ColorSpace": "sRGB"
+            }
+        }
+    ],
+    "intrinsics": [
+        {
+            "intrinsicId": "404732531",
+            "width": "768",
+            "height": "576",
+            "sensorWidth": "36",
+            "sensorHeight": "27",
+            "serialNumber": "\/s\/prods\/mvg\/_source_global\/users\/hogm\/datasets\/blendedMVSNEt\/debug_set\/5aa0f9d7a9efce63548c69a1\/blended_images",
+            "type": "radial3",
+            "initializationMode": "unknown",
+            "initialFocalLength": "-1",
+            "focalLength": "29.50483776882794",
+            "pixelRatio": "1",
+            "pixelRatioLocked": "true",
+            "principalPoint": [
+                "-0.90724500216585136",
+                "-4.932245462847213"
+            ],
+            "distortionInitializationMode": "none",
+            "distortionParams": [
+                "-0.001561009357615906",
+                "0.012987056387324326",
+                "-0.023280723319779425"
+            ],
+            "undistortionOffset": [
+                "0",
+                "0"
+            ],
+            "undistortionParams": "",
+            "locked": "false"
+        }
+    ],
+    "poses": [
+        {
+            "poseId": "7554437",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.87651420652785161",
+                        "0.28087412632964692",
+                        "-0.39093806531650049",
+                        "-0.10083988597823025",
+                        "0.90124276565767381",
+                        "0.4214176013713769",
+                        "0.47069540379182412",
+                        "-0.32995636455183702",
+                        "0.81827540250271913"
+                    ],
+                    "center": [
+                        "-0.32597260902271596",
+                        "-1.7581200750448065",
+                        "-0.15930158708194408"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "77937651",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.98760327069048448",
+                        "0.10534626213994",
+                        "-0.11636986196864056",
+                        "-0.096032009329661633",
+                        "0.99191574817644823",
+                        "0.08295180349856586",
+                        "0.12416776113615481",
+                        "-0.070748240774594101",
+                        "0.98973585037712708"
+                    ],
+                    "center": [
+                        "-1.0279255550893445",
+                        "-1.047247567106558",
+                        "-0.48885207895130961"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "246686527",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.29438869468664297",
+                        "0.18702263469161046",
+                        "-0.93720746398740473",
+                        "-0.096558217910176547",
+                        "0.98146731699602996",
+                        "0.16552466952881956",
+                        "0.95079535495010981",
+                        "0.041766491133712662",
+                        "0.30699145464275091"
+                    ],
+                    "center": [
+                        "0.85325293906287236",
+                        "-1.2786529051546964",
+                        "0.84466324611599364"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "328990241",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.5434936178101859",
+                        "0.20156936693759564",
+                        "-0.81485242695347737",
+                        "-0.1000413686988125",
+                        "0.97937579655573492",
+                        "0.17554137309958495",
+                        "0.83343050816997544",
+                        "-0.013886663861286057",
+                        "0.55244977022199937"
+                    ],
+                    "center": [
+                        "0.5163388205863213",
+                        "-1.3647830099953611",
+                        "0.4281053465754231"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "335902456",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.50500445053056164",
+                        "0.17755318934945336",
+                        "-0.84465695397371976",
+                        "-0.10489319242355497",
+                        "0.98398413859714007",
+                        "0.14412714238629315",
+                        "0.85671927906842427",
+                        "0.015813916057729215",
+                        "0.51554049009888503"
+                    ],
+                    "center": [
+                        "1.2997575695899357",
+                        "-1.4986147262998468",
+                        "0.095794754976298413"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "435457966",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.97775048992953018",
+                        "0.16180562378651905",
+                        "-0.13350250766790567",
+                        "-0.095632893464430505",
+                        "0.91026051773254735",
+                        "0.40284009177947472",
+                        "0.18670385408497772",
+                        "-0.38110986600759927",
+                        "0.90548160715802783"
+                    ],
+                    "center": [
+                        "-0.95681417062195639",
+                        "-1.682712948999292",
+                        "-0.45410364315727758"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "475560383",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.99327539965334555",
+                        "0.10921120843264177",
+                        "0.038430357741876614",
+                        "-0.11344106484339149",
+                        "0.98438733932818112",
+                        "0.13458339785271431",
+                        "-0.023132342092490165",
+                        "-0.13803795899341098",
+                        "0.99015676366232497"
+                    ],
+                    "center": [
+                        "-1.4362811688014985",
+                        "-1.3732864530569078",
+                        "-0.65269422969621826"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "538779264",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.5249369753062374",
+                        "0.039555536025152604",
+                        "-0.85022146028320256",
+                        "-0.10087525029455696",
+                        "0.99477040009813966",
+                        "-0.016001092668862307",
+                        "0.84514221042044113",
+                        "0.094165867799059166",
+                        "0.52618193954876569"
+                    ],
+                    "center": [
+                        "0.57437598969650849",
+                        "-0.95599512676368048",
+                        "0.44236025399198886"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "623335754",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.98587048287266998",
+                        "0.099538947718932638",
+                        "-0.13472709039913261",
+                        "-0.068000041392416416",
+                        "0.97286050878477415",
+                        "0.22117509990426201",
+                        "0.15308620241889245",
+                        "-0.20888855481820501",
+                        "0.96588311212844169"
+                    ],
+                    "center": [
+                        "-0.98183833006525811",
+                        "-1.3057609284307798",
+                        "-0.44789097748066442"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "1102296173",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.85659937442933165",
+                        "0.17549636892234383",
+                        "-0.48522009049744641",
+                        "-0.081868249916846839",
+                        "0.97469598969730054",
+                        "0.20800316661905083",
+                        "0.509445876794415",
+                        "-0.13845126277167899",
+                        "0.84929155562391945"
+                    ],
+                    "center": [
+                        "-0.24149622439357718",
+                        "-1.2343746450859114",
+                        "-0.18445474261428832"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "1398374336",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.82708228270537942",
+                        "0.16411460155629304",
+                        "-0.53758840686056275",
+                        "-0.10767963452456818",
+                        "0.98497358662131151",
+                        "0.1350264047029503",
+                        "0.55167018583888894",
+                        "-0.053790623851826279",
+                        "0.83232600274298596"
+                    ],
+                    "center": [
+                        "0.34238013972247838",
+                        "-1.4515690005916002",
+                        "-0.55890550908380154"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "1416335166",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.32298369454512521",
+                        "0.39561297980236038",
+                        "-0.85975107052557842",
+                        "-0.088227300700451983",
+                        "0.91706959383822184",
+                        "0.38884354626058892",
+                        "0.9422831190619374",
+                        "-0.049736608944477616",
+                        "0.33110239090289101"
+                    ],
+                    "center": [
+                        "0.69907573426250624",
+                        "-1.6764519072738897",
+                        "0.84977073573584105"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "1566310525",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.55263528678798024",
+                        "0.31672726001259199",
+                        "-0.77089433942770813",
+                        "-0.097765748021451715",
+                        "0.94322377304608884",
+                        "0.31744412496454566",
+                        "0.82766907536199064",
+                        "-0.10006376329928834",
+                        "0.552223817816482"
+                    ],
+                    "center": [
+                        "0.46816181856978756",
+                        "-1.5473627160625503",
+                        "0.42976482408358641"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "1655582873",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.27935590514640007",
+                        "0.067241904987413656",
+                        "-0.9578302586959232",
+                        "-0.0818516557928958",
+                        "0.99558148562013915",
+                        "0.046019690724277945",
+                        "0.95669252359564139",
+                        "0.065544120285960988",
+                        "0.28362542832429999"
+                    ],
+                    "center": [
+                        "0.8972868408197866",
+                        "-0.97434994202195069",
+                        "0.84669813662958315"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "2030917626",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.84591595886742377",
+                        "0.084739474745995025",
+                        "-0.52654098791374238",
+                        "-0.083439730776719484",
+                        "0.99616653155663815",
+                        "0.026268854834690873",
+                        "0.52674851861330896",
+                        "0.021713194748593907",
+                        "0.84974380569233576"
+                    ],
+                    "center": [
+                        "-0.20682267750678435",
+                        "-0.93547007591892695",
+                        "-0.17146345082973111"
+                    ]
+                },
+                "locked": "0"
+            }
+        },
+        {
+            "poseId": "2054207917",
+            "pose": {
+                "transform": {
+                    "rotation": [
+                        "0.95581958435314651",
+                        "0.14639559592524815",
+                        "-0.25490635861168653",
+                        "-0.093293835106079637",
+                        "0.97340875831969287",
+                        "0.20921675257424616",
+                        "0.27875649319464807",
+                        "-0.17619227769742118",
+                        "0.9440609613693477"
+                    ],
+                    "center": [
+                        "-0.47347911680906263",
+                        "-1.4888151012629329",
+                        "-0.81949107921347963"
+                    ]
+                },
+                "locked": "0"
+            }
+        }
+    ]
+}
