@@ -129,6 +129,10 @@ def load_model(filename):
         root = bpy.data.objects['mvgRoot']
         root.rotation_euler.rotate_axis('X', math.radians(-90.0))
         return bpy.data.objects['mvgPointCloud'], bpy.data.meshes['particleShape1']
+    elif filename.lower().endswith('.ply'):
+        bpy.ops.import_mesh.ply(filepath=filename)
+        meshName = os.path.splitext(os.path.basename(filename))[0]
+        return bpy.data.objects[meshName], bpy.data.meshes[meshName]
     else:
         raise RuntimeError("Not a valid mesh object")
 
@@ -147,18 +151,22 @@ def setup_face_index_shader(scene_mesh, scene_obj):
     mesh.uv_layers['PolyIndex'].data.foreach_set('uv', uvs)
 
     #setup shaders
+    #make sure there is at least one material slot
+    bpy.ops.object.material_slot_add()
     #remove all mats exept from slot 0
     for _ in range(1, len(scene_obj.material_slots)):
         with bpy.context.temp_override(object=scene_obj):
             bpy.ops.object.material_slot_remove()
-
+    # create new material
+    scene_obj.material_slots[0].material = bpy.data.materials.new("face_idx_material")
     #select and activate material 0
     material = scene_obj.material_slots[0].material
     scene_obj.active_material_index = 0
     material.use_nodes = True
-    #clear all nodes in mat tree
+    #clear all nodes in mat tree (just in case)
     material.node_tree.links.clear()
     material.node_tree.nodes.clear()
+
 
     #create new uv, separate xyz and output material
     input_uv_map_shader_node = material.node_tree.nodes.new('ShaderNodeUVMap')
