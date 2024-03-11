@@ -1,10 +1,14 @@
 __version__ = "1.0"
 import os
-import numpy as np
 from meshroom.core import desc
-# from mrrs.metrics.baptiste
+from mrrs.core.CondaNode import CondaNode
+from mrrs.metrics.baptiste import ENV_FILE
 
-class CleanMesh(desc.CommandLineNode):
+class CleanMesh(CondaNode):
+
+    #overides the env path
+    env_file = ENV_FILE
+
     category = 'Meshroom Research'
     commandLine = 'python "'+os.path.join(os.path.dirname(__file__),"..", "..", "metrics", "baptiste", "remove_invisible_faces.py")+'" {allParams}'
     gpu = desc.Level.NONE
@@ -20,11 +24,21 @@ class CleanMesh(desc.CommandLineNode):
             ),
         desc.File(
             name="face_index_images_folder",
-            label='FAces Index Images',
+            label='Faces Index Images',
             description='',
             value='',
             uid=[0],
-            )
+            ),
+        desc.ChoiceParam(
+            name='verboseLevel',
+            label='Verbose Level',
+            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            value='info',
+            values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
+            exclusive=True,
+            uid=[0],
+            group=""
+        ),
     ]
 
     outputs = [
