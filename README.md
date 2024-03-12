@@ -44,20 +44,25 @@ Meshroom reasearch can also import and export data from the follwoing softwares:
 Classical:
   - Meshroom
   - COLMAP
-  - ACMP
+  - ACMP TBA
 
 Deep learning based depth map estimation:
   - VIZ-mvsnet
 
 Implicit representations (NERF):
-  - Instant-ngp
-  - NeuS
-  - NeuS2
-  - NeuralAngelo
+  - Instant-ngp TBA
+  - NeuS TBA
+  - NeuS2 TBA
+  - NeuralAngelo TBA
+
+Gaussian Splatting
+  - Original paper TBA
+  - SUGAR TBA
 
 ### SfM, Depth maps, Meshing benchmarking
 
-Run the benchmark with the command line interface
+Meshroom research provides a way to evalutate the different steps of the photograpmetry pipeline (sfm, depth map estimation and meshing).
+You may use the provided meshroom project and run the benchmark with the command line interface.
 
 ```
 Usage: python -m benchmark run [OPTIONS] DATASET_PATH
@@ -92,6 +97,8 @@ Options:
 ```
 
 :warning: TODO: explain benchmarking and cli, pipeline system etc..
+
+You may also create you own evaluation pipeline with the evaluation nodes.
 
 ### New nodes
 
