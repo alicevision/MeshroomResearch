@@ -33,12 +33,12 @@ You also have option to generate ground truth image masks and depth mapth TBA.
 Meshroom research can also import and export data from the following softwares:
 
 - [COLMAP](https://colmap.github.io/)
-  - Import SfM calibration (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Colmap2MeshroomSfmConvertions.py)
-  - Import Computed depth maps (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/ImportColmapDepthMaps.py)
-  - Export SfM Calibration (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Meshroom2ColmapSfmConvertions.py)
+  - Import SfM calibration (node [Colmap2MeshroomSfmConvertions](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Colmap2MeshroomSfmConvertions.py) )
+  - Import computed depth (node [ImportColmapDepthMaps] (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/ImportColmapDepthMaps.py) )
+  - Export SfM Calibration (node [Meshroom2ColmapSfmConvertions] (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Meshroom2ColmapSfmConvertions.py) )
 - [Capturing reality](https://www.capturingreality.com/)
-  - Import SfM calibration (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ImportXMP.py)
-  - Export SfM Calibration (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ExportXMP.py)
+  - Import SfM calibration (node [ImportXMP](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ImportXMP.py))
+  - Export SfM Calibration (node [ExportXMP](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ExportXMP.py))
 - Metashape (TBA)
 
 :warning: TODO:  explanation and GIF
@@ -70,7 +70,7 @@ Gaussian Splatting :
 ### SfM, Depth maps, Meshing benchmarking
 
 Meshroom research provides a way to evalutate the different steps of the photograpmetry pipeline (sfm, depth map estimation and meshing).
-the nodes CalibrationComparison (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/CalibrationComparison.py), DepthMapComparison (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/DepthMapComparison.py) and MeshComparison (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/MeshComparisonBaptise.py)
+the nodes [CalibrationComparison](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/CalibrationComparison.py), [DepthMapComparison](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/DepthMapComparison.py) and [MeshComparison](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/MeshComparisonBaptise.py)
 
 You may use the provided meshroom project and run the benchmark with the command line interface.
 
