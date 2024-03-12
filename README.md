@@ -1,7 +1,7 @@
 # Meshroom Research ![](./assets/logo-inline.png)
 
-Meshroom Research is a library and a plugin for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use nodal GIU.
-Meshroom Research focuses on making, integrating, testing and benchmarking various methods easily into Meshroom's GUI.
+Meshroom Research is a library and a plugin for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use [nodal](https://en.wikipedia.org/wiki/Node_graph_architecture) IU and architecture.
+Meshroom Research focuses on making, integrating, testing and benchmarking various methods easily into Meshroom's UI.
 Dependencies are kept to a bare minimum, [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) is used extensivelly instead.  
 It is implemented in Python and will likely remain so.
 
@@ -24,44 +24,54 @@ Add the node LoadDataset on the camera init's output and select the dataset type
 
 You may now use meshroom's visualisation and nodes on the ouptuts. 
 
+You also have option to generate ground truth image masks and depth mapth TBA.
+
 :warning: TODO: add gif load demo
 
 ### 3rd party imports and exports
 
-Meshroom reasearch can also import and export data from the follwoing softwares:
+Meshroom research can also import and export data from the following softwares:
 
 - [COLMAP](https://colmap.github.io/)
-- [REALITY](https://www.capturingreality.com/)
+  - Import SfM calibration (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Colmap2MeshroomSfmConvertions.py)
+  - Import Computed depth maps (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/ImportColmapDepthMaps.py)
+  - Export SfM Calibration (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Meshroom2ColmapSfmConvertions.py)
+- [Capturing reality](https://www.capturingreality.com/)
+  - Import SfM calibration (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ImportXMP.py)
+  - Export SfM Calibration (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ExportXMP.py)
 - Metashape (TBA)
 
 :warning: TODO:  explanation and GIF
 
 ### 3D Reconstruciotn methods nodes
 
+We integrated the following 3D reconstruction methods into their own node pipelines.
 
-:warning: TODO:  explanation and GIF
-
-Classical:
+Classical photogrametry:
   - Meshroom
   - COLMAP
   - ACMP TBA
 
-Deep learning based depth map estimation:
+Deep-learning-based depth map estimation:
   - VIZ-mvsnet
 
-Implicit representations (NERF):
+Implicit representations (NERFs):
   - Instant-ngp TBA
   - NeuS TBA
   - NeuS2 TBA
   - NeuralAngelo TBA
 
-Gaussian Splatting
+Gaussian Splatting :
   - Original paper TBA
   - SUGAR TBA
+
+:warning: TODO:  explanation and GIF
 
 ### SfM, Depth maps, Meshing benchmarking
 
 Meshroom research provides a way to evalutate the different steps of the photograpmetry pipeline (sfm, depth map estimation and meshing).
+the nodes CalibrationComparison (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/CalibrationComparison.py), DepthMapComparison (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/DepthMapComparison.py) and MeshComparison (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/MeshComparisonBaptise.py)
+
 You may use the provided meshroom project and run the benchmark with the command line interface.
 
 ```
@@ -102,7 +112,7 @@ You may also create you own evaluation pipeline with the evaluation nodes.
 
 ### New nodes
 
-Meshroom research adds a few new nodes to make it easy to play with 3D reconstruction data.
+Meshroom research also adds a few new nodes to make it easy to play with 3D reconstruction data.
 The list of added nodes can be found in [nodes](mrrs/nodes/README.md).
 
 ## Install
