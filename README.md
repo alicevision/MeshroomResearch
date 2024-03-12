@@ -34,8 +34,8 @@ Meshroom research can also import and export data from the following softwares:
 
 - [COLMAP](https://colmap.github.io/)
   - Import SfM calibration (node [Colmap2MeshroomSfmConvertions](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Colmap2MeshroomSfmConvertions.py) )
-  - Import computed depth (node [ImportColmapDepthMaps] (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/ImportColmapDepthMaps.py) )
-  - Export SfM Calibration (node [Meshroom2ColmapSfmConvertions] (https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Meshroom2ColmapSfmConvertions.py) )
+  - Import computed depth (node [ImportColmapDepthMaps](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/ImportColmapDepthMaps.py) )
+  - Export SfM Calibration (node [Meshroom2ColmapSfmConvertions](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Meshroom2ColmapSfmConvertions.py) )
 - [Capturing reality](https://www.capturingreality.com/)
   - Import SfM calibration (node [ImportXMP](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ImportXMP.py))
   - Export SfM Calibration (node [ExportXMP](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ExportXMP.py))
