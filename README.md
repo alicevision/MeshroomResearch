@@ -119,7 +119,8 @@ The list of added nodes can be found in [nodes](mrrs/nodes/README.md).
 
 :warning: TODO: make proper install method
 
-Install Meshroom: https://alicevision.org/#meshroom (or build it by yourself).
+Install Meshroom: https://alicevision.org/#meshroom.
+Clone the repo and copy and paste the prebuild 
 
 Clone this repo :
 ```
@@ -131,6 +132,8 @@ cd MRRS
 pip install -e . [< optional features >]
 ```
 < optional features > may need other packages.
+
+TODO: env var
 
 :warning: TODO: this prbaly needs to go
 On Mikros machines:
