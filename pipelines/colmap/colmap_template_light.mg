@@ -1,21 +1,17 @@
 {
     "header": {
         "pipelineVersion": "2.2",
-        "releaseVersion": "2023.3.0-develop",
+        "releaseVersion": "2024.1.0-develop",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "ColmapFeatureMatching": "2.0",
-            "StereoFusion": "2.0",
             "ColmapImageUndistorder": "1.1",
-            "ColmapMapper": "2.0",
-            "ConvertSfMFormat": "2.0",
-            "CameraInit": "9.0",
-            "PatchMatchStereo": "2.0",
-            "DepthMapTransform": "3.0",
             "PoissonMesher": "2.0",
-            "Colmap2MeshroomSfmConvertion": "2.0",
+            "CameraInit": "9.0",
+            "StereoFusion": "2.0",
+            "ColmapMapper": "2.0",
             "ColmapFeatureExtraction": "1.1",
-            "ImportColmapDepthMaps": "1.0"
+            "PatchMatchStereo": "2.0",
+            "ColmapFeatureMatching": "2.0"
         },
         "template": false
     },
@@ -247,76 +243,6 @@
                 "output": "{cache}/{nodeType}/{uid0}/cameraInit.sfm"
             }
         },
-        "Colmap2MeshroomSfmConvertion_1": {
-            "nodeType": "Colmap2MeshroomSfmConvertion",
-            "position": [
-                737,
-                -126
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "28cdf52d4e6a59bde669088bad4c62e16669b9ec"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input": "{ColmapMapper_2.output_path0}",
-                "inputSfm": "{CameraInit_1.output}",
-                "imageFolder": "{ColmapMapper_2.image_path}",
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "outputSfm": "{cache}/{nodeType}/{uid0}/sfmdata.sfm"
-            }
-        },
-        "ConvertSfMFormat_1": {
-            "nodeType": "ConvertSfMFormat",
-            "position": [
-                926,
-                -142
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "def3a5307d78d404d5ec64b93aa93a0638e9b1a9"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input": "{Colmap2MeshroomSfmConvertion_1.outputSfm}",
-                "fileExt": "abc",
-                "describerTypes": [
-                    "dspsift"
-                ],
-                "imageWhiteList": [],
-                "views": true,
-                "intrinsics": true,
-                "extrinsics": true,
-                "structure": true,
-                "observations": true,
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output": "{cache}/{nodeType}/{uid0}/sfm.{fileExtValue}"
-            }
-        },
         "ColmapFeatureExtraction_2": {
             "nodeType": "ColmapFeatureExtraction",
             "position": [
@@ -523,69 +449,6 @@
             "outputs": {
                 "output_path": "{cache}/{nodeType}/{uid0}/workspace/fused.ply",
                 "workspace_path": "{cache}/{nodeType}/{uid0}/workspace"
-            }
-        },
-        "ImportColmapDepthMaps_1": {
-            "nodeType": "ImportColmapDepthMaps",
-            "position": [
-                1154,
-                -138
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "08af7ecae8dab415452293036b895515bdedf2bd"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input": "{PatchMatchStereo_2.workspace_path}",
-                "inputSfm": "{CameraInit_1.output}",
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "depthMapFolder": "{cache}/{nodeType}/{uid0}/",
-                "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthMap.exr"
-            }
-        },
-        "DepthMapTransform_1": {
-            "nodeType": "DepthMapTransform",
-            "position": [
-                1356,
-                -139
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "cd59b931234e152b8f73b0daef8cccc12d7597a8"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "inputSfM": "{ImportColmapDepthMaps_1.inputSfm}",
-                "depthMapsFolder": "{ImportColmapDepthMaps_1.depthMapFolder}",
-                "transform": "meshroom2normal",
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output": "{cache}/{nodeType}/{uid0}/",
-                "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthMap.exr"
             }
         }
     }
