@@ -1,6 +1,5 @@
 __version__ = "3.0"
 
-from ast import Break
 import os 
 import json
 import numpy as np
@@ -11,7 +10,7 @@ from mrrs.core.geometry import *
 from mrrs.core.ios import *
 from mrrs.datasets import load_dataset
 
-#FIXME:move this into  a command line node
+#FIXME:move this into  a command line node?
 class LoadDataset(desc.Node):
     category = 'Meshroom Research'
 
@@ -110,23 +109,35 @@ class LoadDataset(desc.Node):
 
         #used for display
         desc.File(
-            name='depthmaps',
-            label='Depth maps',
+            name='depthmapsDisplay',
+            label='DepthMapsDisplay',
             description='Generated depth maps.',
             semantic='image',
             value=os.path.join(desc.Node.internalFolder,
                                'depth_maps', '<VIEW_ID>_depthMap.exr'),
             uid=[],
-            advanced=True
+            advanced=True,
+            # enabled=False #FIXME: disaply the node altogether
         ),
 
         desc.File(
-            name='masks',
-            label='Masks',
+            name='masksDisplay',
+            label='MasksDisplay',
             description='Generated masks',
             semantic='image',
             value=os.path.join(desc.Node.internalFolder,
                                'masks', '<VIEW_ID>.png'),
+            uid=[],
+            advanced=True
+        ),
+
+        desc.File(
+            name='meshDisplay',
+            label='MeshDisplay',
+            description='MeshDisplay',
+            semantic='3D',
+            value=os.path.join(desc.Node.internalFolder,
+                               'mesh_gt.abc'),
             uid=[],
             advanced=True
         ),
@@ -269,10 +280,18 @@ class LoadDataset(desc.Node):
                     mask=open_image(mask)
                 save_image(os.path.join(chunk.node.maskFolder.value, str(view_id) + ".png"), mask)
 
+
         #Save ground truth mesh as obj if any
         if "mesh" in gt_data :
             print("**Writting mesh")
             gt_data["mesh"].export(chunk.node.mesh.value)
+
+            #FIXME: for now we export diplsay mesh as .abc to support point cloud...
+            script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../blender/alembic_convert.py"))
+            command_line = "blender -b -P "+script_path+" -- "+chunk.node.mesh.value+" "+\
+                            chunk.node.meshDisplay.value+ " mesh2abc"
+            os.system(command_line)
+     
             
         print("*LoadDataset ends")
 
