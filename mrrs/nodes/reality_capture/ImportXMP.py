@@ -5,6 +5,7 @@ __version__ = "3.0"
 
 import json
 import os
+import shutil
 from meshroom.core import desc
 from mrrs.core.ios import sfm_data_from_matrices
 from mrrs.datasets.reality_capture import import_xmp, SENSOR_SIZE
@@ -30,6 +31,14 @@ class ImportXMP(desc.Node):
             name="xmpData",
             label="xmpData",
             description="Input xmpData",
+            value="",
+            uid=[0],
+        ),
+
+        desc.File(
+            name="meshData",
+            label="meshData",
+            description="Input mesh",
             value="",
             uid=[0],
         ),
@@ -85,6 +94,7 @@ class ImportXMP(desc.Node):
             with open(os.path.join(chunk.node.outputSfMData.value), 'w') as f:
                 json.dump(sfm_data, f, indent=4)
             chunk.logger.info('XMP import ends')
+
         # finally:
         #     chunk.logManager.end()
 
