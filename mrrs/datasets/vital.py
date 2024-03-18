@@ -2,7 +2,7 @@
 import json
 import os
 import trimesh 
-from PIL import Image
+# from PIL import Image
 
 from mrrs.core.ios import matrices_from_sfm_data
 
@@ -60,7 +60,7 @@ def open_dataset(sfm_data):
     mesh_folder = os.path.join(image_folder, '..', '..', 'obj')
     if os.path.exists(mesh_folder):
         mesh_path = [os.path.join(mesh_folder, f)
-                        for f in os.listdir(mesh_folder) if f.endswith(".obj")][0]
+                        for f in os.listdir(mesh_folder) if (f.endswith(".obj") or f.endswith(".ply")) ][0]
         print("Loading "+mesh_path)
         data["mesh"] = trimesh.load(mesh_path, force='mesh')
     else:
