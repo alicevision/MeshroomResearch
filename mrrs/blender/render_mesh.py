@@ -118,6 +118,12 @@ def init_scene():
     bpy.context.scene.render.filter_size = 0
     # print(bpy.context.scene.render.engine)#EEVEE
 
+    # # Setup rendering engine
+    # bpy.context.scene.render.engine = 'CYCLES'
+    # bpy.context.scene.cycles.samples = 1
+    # bpy.context.scene.cycles.use_adaptative_sampling = False
+    # bpy.context.scene.cycles.use_denoising = False
+
 def load_model(filename):
     '''Load model in Alembic of OBJ format. Make sure orientation matches camera orientation.'''
     if filename.lower().endswith('.obj'):
