@@ -2,6 +2,7 @@
 
 For several 3D scene reconstruction tasks, it is difficult to obtain per-pixel-accurate ground truth from real images, along with a mesh wich topology is close to production-level assets. 
 We propose this photorealistic synthetic dataset created from the [Animal Logic ALab](https://dpel.aswf.io/alab/) project and rendered using blender.
+[SED creator](https://github.com/Alex-665/SEDcreator_new) was used to generate the scenes
 
 # Content
 
