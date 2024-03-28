@@ -25,7 +25,7 @@ setup(
     description='Meshroom Research plugin and library.',
     long_description=open('README.md').read(),
     install_requires=["numpy", "pillow",
-                      "opencv-python",
+                      "opencv-python-headless",
                       "trimesh", "click"],
                      # "openexr-python"],#note add mode meshroom? with oiio
     scripts=['clis/benchmark.py'],

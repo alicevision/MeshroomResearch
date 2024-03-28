@@ -1,28 +1,30 @@
 {
     "header": {
         "pipelineVersion": "2.2",
-        "releaseVersion": "2024.1.0-develop",
+        "releaseVersion": "2023.3.0",
         "fileVersion": "1.1",
         "nodesVersions": {
-            "DepthMap": "5.0",
-            "ColmapMapper": "2.0",
-            "DepthMapTransform": "3.0",
-            "CameraInit": "9.0",
-            "PoissonMesher": "2.0",
-            "StereoFusion": "2.0",
-            "DepthMapFilter": "4.0",
-            "Meshing": "7.0",
+            "NeRFStudio": "0.0",
+            "ExportXMP": "3.0",
             "MeshFiltering": "3.0",
+            "ColmapFeatureExtraction": "1.1",
+            "CameraInit": "9.0",
+            "DepthMap": "5.0",
+            "NeRFStudioExport": "0.0",
+            "PoissonMesher": "2.0",
+            "ColmapFeatureMatching": "2.0",
+            "StereoFusion": "2.0",
+            "ColmapMapper": "2.0",
+            "ColmapImageUndistorder": "1.1",
             "ImportXMP": "3.0",
             "Meshroom2ColmapSfmConvertions": "2.0",
-            "VizMVSNet": "0.0",
-            "LoadDataset": "3.0",
-            "ColmapFeatureExtraction": "1.1",
-            "ColmapFeatureMatching": "2.0",
-            "ExportXMP": "3.0",
-            "ColmapImageUndistorder": "1.1",
             "PatchMatchStereo": "2.0",
-            "PrepareDenseScene": "3.1"
+            "DepthMapTransform": "3.0",
+            "VizMVSNet": "0.0",
+            "DepthMapFilter": "4.0",
+            "Meshing": "7.0",
+            "PrepareDenseScene": "3.1",
+            "LoadDataset": "3.0"
         },
         "template": false
     },
@@ -39,7 +41,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "04c01ea56683c211b55df891e84d52e468103bc2"
+                "0": "d838cb345ce0d27ba1d57c51b4709b85c8953d48"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -129,7 +131,7 @@
                 "split": 3
             },
             "uids": {
-                "0": "980dfb94e2251f853546b2c17557e42ab10428c4"
+                "0": "0778d88e29c9565b53963fe9dedc41b88228fc6a"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -170,7 +172,7 @@
                 "split": 2
             },
             "uids": {
-                "0": "f118e65840a6e480ac06ba0b766fece0597cef7b"
+                "0": "eabc7a50d11ab947cdb01b964f77cb512c4740e8"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -209,7 +211,7 @@
                 "split": 5
             },
             "uids": {
-                "0": "96a7ec2f99cb5d308da1a3ea4eb10f1a17b7aee8"
+                "0": "bc84f7165ca551a0796d1d1c2544761e6894f6e8"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -309,7 +311,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "1c841430b118e1384a63d2ce1e6fe7be26ddb25d"
+                "0": "b8dddc8ec66fd9143866943732cc1bc952501cb3"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -336,43 +338,6 @@
                 "outputMesh": "{cache}/{nodeType}/{uid0}/mesh.{outputMeshFileTypeValue}"
             }
         },
-        "LoadDataset_1": {
-            "nodeType": "LoadDataset",
-            "position": [
-                -596,
-                2
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 49,
-                "split": 1
-            },
-            "uids": {
-                "0": "9d6ac66a0544122f60e7fbf6401a75808800fc8f"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "sfmData": "{CameraInit_2.output}",
-                "datasetType": "DTU",
-                "initSfmLandmarks": 0.0001,
-                "initMasks": true,
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "outputSfMData": "{cache}/{nodeType}/{uid0}/sfm.sfm",
-                "depthMapsFolder": "{cache}/{nodeType}/{uid0}/depth_maps",
-                "mesh": "{cache}/{nodeType}/{uid0}/mesh.ply",
-                "maskFolder": "{cache}/{nodeType}/{uid0}/masks",
-                "depthmaps": "{cache}/{nodeType}/{uid0}/depth_maps/<VIEW_ID>_depthMap.exr",
-                "masks": "{cache}/{nodeType}/{uid0}/masks/<VIEW_ID>.png"
-            }
-        },
         "VizMVSNet_1": {
             "nodeType": "VizMVSNet",
             "position": [
@@ -385,7 +350,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "17d4f4f629817373383101b698759a555ded89cd"
+                "0": "39b60c0fd3d6f5052fb6fb68b2bcdb510b60f644"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -420,7 +385,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "f205560b39444111278686ffe53a793d1a10585d"
+                "0": "5d541feee74a122d6d2eac6bf96f1440550dc06e"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -452,7 +417,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "0310317e9e3145995325df8ef13f5dc46269af9f"
+                "0": "1980188d7ffbad5761019932c877d2d37f468680"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -480,7 +445,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "4a1216629c0ad69894953d299eb179f00b15fc87"
+                "0": "2ae28643d31059b4c9181883c7a25d7845c8eb57"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -509,7 +474,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "2906f634efce93f7aa64dcd30c67ea33d8f1ade4"
+                "0": "f3bb87deef845dd57c3beb2592f8bff05263df78"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -526,36 +491,6 @@
                 "workspace_path": "{cache}/{nodeType}/{uid0}/workspace"
             }
         },
-        "ImportXMP_1": {
-            "nodeType": "ImportXMP",
-            "position": [
-                624,
-                186
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "9e0c7818e6af8046a49b3878677a24219a485c9b"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "sfmData": "",
-                "xmpData": "",
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "ImportRealityCapture",
-                "color": "#00aaff"
-            },
-            "outputs": {
-                "outputSfMData": "{cache}/{nodeType}/{uid0}/outputSfMData.sfm"
-            }
-        },
         "ExportXMP_1": {
             "nodeType": "ExportXMP",
             "position": [
@@ -568,7 +503,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "4e3d165ff040ca06056bfe936847f7f435bd09a7"
+                "0": "09379c6b85cd8b411015592c7cbb08f19f01b5f8"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -598,7 +533,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "36ca3c535338bb38f4f405900b2a22d93c54f7cc"
+                "0": "f06b4f3789526b7a20ccdd4841b2032cdfb20969"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -628,7 +563,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "af8158dab714fab1c193bea9f6075efdcf33c21a"
+                "0": "ec9eca47a4c6e46a2889d548544dba1ec4b4b497"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -647,6 +582,144 @@
                 "sparseDirectory": "{cache}/{nodeType}/{uid0}/sparse"
             }
         },
+        "LoadDataset_1": {
+            "nodeType": "LoadDataset",
+            "position": [
+                -596,
+                2
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 49,
+                "split": 1
+            },
+            "uids": {
+                "0": "5b0c8cbd766f2305eb2f9d9afc0301a623c29bd8"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "sfmData": "{CameraInit_2.output}",
+                "datasetType": "DTU",
+                "initSfmLandmarks": 0.0001,
+                "initMasks": true,
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "outputSfMData": "{cache}/{nodeType}/{uid0}/sfm.sfm",
+                "depthMapsFolder": "{cache}/{nodeType}/{uid0}/depth_maps",
+                "mesh": "{cache}/{nodeType}/{uid0}/mesh.ply",
+                "maskFolder": "{cache}/{nodeType}/{uid0}/masks",
+                "depthmapsDisplay": "{cache}/{nodeType}/{uid0}/depth_maps/<VIEW_ID>_depthMap.exr",
+                "masksDisplay": "{cache}/{nodeType}/{uid0}/masks/<VIEW_ID>.png",
+                "meshDisplay": "{cache}/{nodeType}/{uid0}/mesh_gt.abc"
+            }
+        },
+        "ImportXMP_1": {
+            "nodeType": "ImportXMP",
+            "position": [
+                624,
+                186
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "c4f64366461803d0bbcbd05a468a977469538525"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "sfmData": "",
+                "xmpData": "",
+                "meshData": "",
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "ImportRealityCapture",
+                "color": "#00aaff"
+            },
+            "outputs": {
+                "outputSfMData": "{cache}/{nodeType}/{uid0}/outputSfMData.sfm"
+            }
+        },
+        "NeRFStudio_1": {
+            "nodeType": "NeRFStudio",
+            "position": [
+                -165,
+                498
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "44ad0b0d6f440616215c85c7f2836f583877b2a9"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "inputSfMData": "{LoadDataset_1.outputSfMData}",
+                "method": "nerfacto",
+                "max-num-iterations": 100,
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output": "{cache}/{nodeType}/{uid0}/"
+            }
+        },
+        "NeRFStudioExport_1": {
+            "nodeType": "NeRFStudioExport",
+            "position": [
+                89,
+                513
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "e819da3cd1cdcff87935d54acf41c7de5b4576f6"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input": "{NeRFStudio_1.output}",
+                "method": "poisson",
+                "numPoints": 1000000,
+                "removeOutliers": true,
+                "reorientNormals": true,
+                "normalMethod": "open3d",
+                "downscaleFactor": 1,
+                "resolution": 256,
+                "isosurface-threshold": 0.0,
+                "simplify-mesh": false,
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output-dir": "{cache}/{nodeType}/{uid0}/"
+            }
+        },
         "CameraInit_2": {
             "nodeType": "CameraInit",
             "position": [
@@ -659,456 +732,456 @@
                 "split": 1
             },
             "uids": {
-                "0": "1816cdbed69b125521d53cf9b624cab54448f1a5"
+                "0": "fd71a48635ec6834f96496febf3203773e9a0a95"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "viewpoints": [
                     {
-                        "viewId": 40268677,
-                        "poseId": 40268677,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000039.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:08:47\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 82861068,
-                        "poseId": 82861068,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000043.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:09:58\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 106202883,
-                        "poseId": 106202883,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000008.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:51\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 133279082,
-                        "poseId": 133279082,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000020.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:03:42\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 167469321,
-                        "poseId": 167469321,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000013.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:02:40\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 202760876,
-                        "poseId": 202760876,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000004.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:03:15\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 237919392,
-                        "poseId": 237919392,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000036.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:09:05\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 240372485,
-                        "poseId": 240372485,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000041.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:03\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 326406810,
-                        "poseId": 326406810,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000032.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:53\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 406813559,
-                        "poseId": 406813559,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000031.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:08:45\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 460287128,
-                        "poseId": 460287128,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000040.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:55\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 510688733,
-                        "poseId": 510688733,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000011.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:20\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 535724082,
-                        "poseId": 535724082,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000009.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:00\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 568565927,
-                        "poseId": 568565927,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000021.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 45085819,
+                        "poseId": 45085819,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000021.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"DateTime\": \"2014:05:13 23:02:50\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 725250703,
-                        "poseId": 725250703,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000005.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:02:25\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 753748880,
-                        "poseId": 753748880,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000006.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:36\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 797932829,
-                        "poseId": 797932829,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000045.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:09:52\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 799896409,
-                        "poseId": 799896409,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000030.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:00:20\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 821661429,
-                        "poseId": 821661429,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000046.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:10:12\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 840397534,
-                        "poseId": 840397534,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000027.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:02:56\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 868839994,
-                        "poseId": 868839994,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000038.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:21\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 942825739,
-                        "poseId": 942825739,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000025.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:38\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 961825639,
-                        "poseId": 961825639,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000012.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:03:31\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 974163012,
-                        "poseId": 974163012,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000023.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:06\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1021561672,
-                        "poseId": 1021561672,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000044.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 70326946,
+                        "poseId": 70326946,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000044.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"DateTime\": \"2014:05:13 23:09:05\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1030018405,
-                        "poseId": 1030018405,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000033.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:02\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1105533006,
-                        "poseId": 1105533006,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000003.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:05\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1178362468,
-                        "poseId": 1178362468,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000048.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:10:11\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1216057868,
-                        "poseId": 1216057868,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000019.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:33\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1342695163,
-                        "poseId": 1342695163,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000026.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:03:47\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1379361672,
-                        "poseId": 1379361672,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000024.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:00:13\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1399342047,
-                        "poseId": 1399342047,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000029.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:13\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1411519242,
-                        "poseId": 1411519242,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000028.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:02:04\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1495908591,
-                        "poseId": 1495908591,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000007.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:00:45\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1502746159,
-                        "poseId": 1502746159,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000047.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:10:48\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1504154005,
-                        "poseId": 1504154005,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000016.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:00:07\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1615829873,
-                        "poseId": 1615829873,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000017.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:16\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1626246017,
-                        "poseId": 1626246017,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000018.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 150999255,
+                        "poseId": 150999255,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000018.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"DateTime\": \"2014:05:13 23:05:26\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1704264264,
-                        "poseId": 1704264264,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000002.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 151152014,
+                        "poseId": 151152014,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000036.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:56\", \"oiio:ColorSpace\": \"sRGB\"}"
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:09:05\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1722464903,
-                        "poseId": 1722464903,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000014.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 179666763,
+                        "poseId": 179666763,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000047.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:50\", \"oiio:ColorSpace\": \"sRGB\"}"
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:10:48\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1728608483,
-                        "poseId": 1728608483,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000000.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 183938442,
+                        "poseId": 183938442,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000031.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:36\", \"oiio:ColorSpace\": \"sRGB\"}"
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:08:45\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1730979906,
-                        "poseId": 1730979906,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000034.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:09\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1735254857,
-                        "poseId": 1735254857,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000035.png",
-                        "intrinsicId": 3277137958,
-                        "rigId": -1,
-                        "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:09:58\", \"oiio:ColorSpace\": \"sRGB\"}"
-                    },
-                    {
-                        "viewId": 1886537543,
-                        "poseId": 1886537543,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000042.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 248805568,
+                        "poseId": 248805568,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000042.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"DateTime\": \"2014:05:13 23:07:53\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1959411163,
-                        "poseId": 1959411163,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000037.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 257334569,
+                        "poseId": 257334569,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000023.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:08:14\", \"oiio:ColorSpace\": \"sRGB\"}"
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:06\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 1994742676,
-                        "poseId": 1994742676,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000010.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 300491415,
+                        "poseId": 300491415,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000034.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:05:10\", \"oiio:ColorSpace\": \"sRGB\"}"
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:09\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 2014009122,
-                        "poseId": 2014009122,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000022.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 330431205,
+                        "poseId": 330431205,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000025.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
-                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:57\", \"oiio:ColorSpace\": \"sRGB\"}"
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:38\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 2098197410,
-                        "poseId": 2098197410,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000015.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 359262726,
+                        "poseId": 359262726,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000033.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:02\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 476304856,
+                        "poseId": 476304856,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000043.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:09:58\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 515107190,
+                        "poseId": 515107190,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000006.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:36\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 554309828,
+                        "poseId": 554309828,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000045.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:09:52\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 694746052,
+                        "poseId": 694746052,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000000.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:36\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 750765413,
+                        "poseId": 750765413,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000032.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:53\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 781436137,
+                        "poseId": 781436137,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000048.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:10:11\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 801786271,
+                        "poseId": 801786271,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000012.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:03:31\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 856832600,
+                        "poseId": 856832600,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000026.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:03:47\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 880452698,
+                        "poseId": 880452698,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000009.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:00\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 938859404,
+                        "poseId": 938859404,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000019.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:33\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 954966145,
+                        "poseId": 954966145,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000024.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:00:13\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1037647549,
+                        "poseId": 1037647549,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000027.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:02:56\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1057517035,
+                        "poseId": 1057517035,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000002.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:56\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1101558153,
+                        "poseId": 1101558153,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000040.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:55\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1130795884,
+                        "poseId": 1130795884,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000016.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:00:07\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1230640010,
+                        "poseId": 1230640010,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000015.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"DateTime\": \"2014:05:13 23:00:59\", \"oiio:ColorSpace\": \"sRGB\"}"
                     },
                     {
-                        "viewId": 2144867824,
-                        "poseId": 2144867824,
-                        "path": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image/000001.png",
-                        "intrinsicId": 3277137958,
+                        "viewId": 1241484141,
+                        "poseId": 1241484141,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000005.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:02:25\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1247128944,
+                        "poseId": 1247128944,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000001.png",
+                        "intrinsicId": 2627282641,
                         "rigId": -1,
                         "subPoseId": -1,
                         "metadata": "{\"DateTime\": \"2014:05:13 23:05:46\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1275354233,
+                        "poseId": 1275354233,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000010.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:05:10\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1299758411,
+                        "poseId": 1299758411,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000041.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:03\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1387973256,
+                        "poseId": 1387973256,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000037.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:08:14\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1423509114,
+                        "poseId": 1423509114,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000022.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:57\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1471149744,
+                        "poseId": 1471149744,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000030.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:00:20\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1542061841,
+                        "poseId": 1542061841,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000014.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:50\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1582488192,
+                        "poseId": 1582488192,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000020.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:03:42\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1632949724,
+                        "poseId": 1632949724,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000013.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:02:40\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1642935163,
+                        "poseId": 1642935163,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000028.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:02:04\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1666575656,
+                        "poseId": 1666575656,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000017.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:16\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1677434882,
+                        "poseId": 1677434882,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000004.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:03:15\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1692011131,
+                        "poseId": 1692011131,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000011.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:20\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1705752229,
+                        "poseId": 1705752229,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000039.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:08:47\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1920461391,
+                        "poseId": 1920461391,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000003.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:04:05\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 1920896094,
+                        "poseId": 1920896094,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000046.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:10:12\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 2001397352,
+                        "poseId": 2001397352,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000008.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:06:51\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 2027709952,
+                        "poseId": 2027709952,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000007.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:00:45\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 2062994802,
+                        "poseId": 2062994802,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000038.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:07:21\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 2072347487,
+                        "poseId": 2072347487,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000035.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:09:58\", \"oiio:ColorSpace\": \"sRGB\"}"
+                    },
+                    {
+                        "viewId": 2073549621,
+                        "poseId": 2073549621,
+                        "path": "/home/bbrument/Datasets/DTU_main/scan24/image/000029.png",
+                        "intrinsicId": 2627282641,
+                        "rigId": -1,
+                        "subPoseId": -1,
+                        "metadata": "{\"DateTime\": \"2014:05:13 23:01:13\", \"oiio:ColorSpace\": \"sRGB\"}"
                     }
                 ],
                 "intrinsics": [
                     {
-                        "intrinsicId": 3277137958,
+                        "intrinsicId": 2627282641,
                         "initialFocalLength": -1.0,
                         "focalLength": 43.45584412271571,
                         "pixelRatio": 1.0,
@@ -1118,7 +1191,7 @@
                         "height": 1200,
                         "sensorWidth": 36.0,
                         "sensorHeight": 24.0,
-                        "serialNumber": "/s/prods/mvg/_source_global/users/hogm/datasets/dtu/scan24/image",
+                        "serialNumber": "/home/bbrument/Datasets/DTU_main/scan24/image",
                         "principalPoint": {
                             "x": 0.0,
                             "y": 0.0
@@ -1183,7 +1256,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "e9e8f99bde9a3d65e133291d429ce2466cf8f6d8"
+                "0": "2d8447f572f1cea773eb0a15bf941d654b67206e"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1273,7 +1346,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "7d2e7a37e7cd1427b5d1ac61de92e0f601137950"
+                "0": "97e238d47078ec6d206cc4357020ba80233ae23c"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1305,7 +1378,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "e1fcb5340158fc31991e309bceab1f389ef02c98"
+                "0": "d85b53d1d84f1511db4275bcebf9df115147e9e2"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1334,7 +1407,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "23afaffecbc031ddc27a95f1231b784b87f67b4a"
+                "0": "eb8560e041ed33a55d954f054b4a966818ea18b1"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1364,7 +1437,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "c6961002604c99925c6f1004e6e8b14ad0f4d647"
+                "0": "09c247644009d4baf6440842845c5f7c9f1ac9e1"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1395,7 +1468,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "5be91ec8bc4b400307b0012930729a8756aa7774"
+                "0": "71937f5bf3f136b25d7b7c55fdeca149b4a46d78"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1423,7 +1496,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "4a7ddea5d36fb50be700bdc5b8747953482541bd"
+                "0": "e12481ad3989ceefdf95849c794573d04d80cb83"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1452,7 +1525,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "208273cd0e0f9540fa8c44c9aae118c9af46dbaa"
+                "0": "f6f5acb2193d779f86ce7017a15bdba1f7c3f3df"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -1481,7 +1554,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "2bf54993bb03ab465f32bde4e99925a2c925b75f"
+                "0": "2c5e1199e59b904bad78be282538f72eb863f666"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
