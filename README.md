@@ -15,9 +15,10 @@ This plugin support opening and viewing the ground truth data of the following d
 - [DTU](https://roboimagedata.compute.dtu.dk/?page_id=36)
 - [BlendedMVG](https://github.com/YoYo000/BlendedMVS)
 - [Nerf synthetic](https://www.matthewtancik.com/nerf)
+- [Our own synthetic dataset](https://github.com/alicevision/MeshroomResearch/tree/main/alab_dataset)
 - Tank and temples TBA
 - Skoltech3D TBA
-- Our own synthetic dataset(s) TBA
+
 
 To do so, drag and drop the images from the dataset in meshroom, as you would do for a normal dataset. 
 Add the node LoadDataset on the camera init's output and select the dataset type.
