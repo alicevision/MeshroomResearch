@@ -1,4 +1,4 @@
-# ALab 3D Reconstruction Dataset
+# ALab-R 3D Reconstruction Dataset
 
 For several 3D scene reconstruction tasks, it is difficult to obtain per-pixel-accurate ground truth from real images, along with a mesh wich topology is close to production-level assets. 
 We propose this photorealistic synthetic dataset created from the [Animal Logic ALab](https://dpel.aswf.io/alab/) project and rendered using blender.
@@ -31,12 +31,11 @@ This dataset is the result from a student project with students from [IMACS](htt
 If you use this dadaset to publish, we kindly ask you to cite it:
 xxx
 
-# Licence for the renders
- <p xmlns:cc="http://creativecommons.org/ns#" >This work is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></p> 
+# Licence for the ALab-R 3D Reconstruction Dataset
+ <p xmlns:cc="http://creativecommons.org/ns#" >ALab-R assets (renders and json files) are licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1"></a></p> 
 
-# Licence for the 3D assets
-
-ASWF Digital Assets License v1.1
+# Licence for the ALab 3D models
+All 3D models and materials belong to [Animal Logic ALab](https://dpel.aswf.io/alab/) and are under the ASWF Digital Assets License v1.1 .
 
 License for Animal Logic ALab (the "Asset Name").
 
