@@ -22,11 +22,11 @@ The full dataset can be dowloaded [here](TODO)
 
 # Credits
 
-This dataset is the result from a student project with students from [IMAC](https://www.ingenieur-imac.fr/):
-  - Sara	Lafleur
-  - Alexandre	Miralles
-  - Léa	Touchard
-  - Maxime	Verna
+This dataset is the result from a student project with students from [IMAC](https://www.ingenieur-imac.fr/) engineering school:
+  - Sara Lafleur
+  - Alexandre Miralles
+  - Léa Touchard
+  - Maxime Verna
 
 If you use this dadaset to publish, we kindly ask you to cite it:
 xxx
