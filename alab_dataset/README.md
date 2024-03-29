@@ -22,7 +22,7 @@ The full dataset can be dowloaded [here](TODO)
 
 # Credits
 
-This dataset is the result from a student project with students from [IMACS](https://www.ingenieur-imac.fr/):
+This dataset is the result from a student project with students from [IMAC](https://www.ingenieur-imac.fr/):
   - Sara	Lafleur
   - Alexandre	Miralles
   - Léa	Touchard
