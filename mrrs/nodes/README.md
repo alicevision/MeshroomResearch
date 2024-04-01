@@ -6,7 +6,8 @@ The following new nodes are added to Meshroom, you may find them by right click 
 ## Benchmark and data nodes
 
 ### LoadDataset
-TODO
+Util node to open datasets with different data from the images in the .sfm.\
+Supports blendedMVG, DTU, ETH3D, baptiste, vital and NERF datasets as input.
 
 ### InjectSFMData
 Meshroom relies internally on feature points from the SfM to initialise the depth estimation. Use this node with te option 'structure' to copy them into a ground truth .sfm.\
@@ -46,9 +47,11 @@ TBA list nodes
 
 ## Reality Capture Nodes
 
-TODO
+Import and export Reality Capture XMP camera calibration files.
 
 ## Render
+
+Nodes to render Meshroom results in Blender
 
 ##
 
