@@ -15,7 +15,7 @@ Meshroom Research supports opening and viewing the ground truth data of the foll
 - [DTU](https://roboimagedata.compute.dtu.dk/?page_id=36)
 - [BlendedMVG](https://github.com/YoYo000/BlendedMVS)
 - [Nerf synthetic](https://www.matthewtancik.com/nerf)
-- [AliceVision synthetic dataset](https://github.com/alicevision/MeshroomResearch/tree/main/alab_dataset)
+- [ALab synthetic dataset](https://github.com/alicevision/MeshroomResearch/tree/main/alab_dataset)
 - [Tanks and Temples](https://www.tanksandtemples.org/) TBA
 - [Skoltech3D](https://github.com/Skoltech-3D/sk3d_data) TBA
 
