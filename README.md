@@ -1,8 +1,8 @@
 # Meshroom Research ![](./assets/logo-inline.png)
 
-Meshroom Research is a library and a plugin for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use [nodal](https://en.wikipedia.org/wiki/Node_graph_architecture) IU and architecture.
+Meshroom Research is a library and a plugin for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use [nodal](https://en.wikipedia.org/wiki/Node_graph_architecture) UI and architecture.
 Meshroom Research focuses on making, integrating, testing and benchmarking various methods easily into Meshroom's UI.
-Dependencies are kept to a bare minimum, [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) is used extensivelly instead.  
+Dependencies are kept to a bare minimum, [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) is used extensivelly instead.  
 It is implemented in Python and will likely remain so.
 
 ## Features 
@@ -15,11 +15,12 @@ This plugin support opening and viewing the ground truth data of the following d
 - [DTU](https://roboimagedata.compute.dtu.dk/?page_id=36)
 - [BlendedMVG](https://github.com/YoYo000/BlendedMVS)
 - [Nerf synthetic](https://www.matthewtancik.com/nerf)
+- [Our own synthetic dataset](https://github.com/alicevision/MeshroomResearch/tree/main/alab_dataset)
 - Tank and temples TBA
 - Skoltech3D TBA
-- Our own synthetic dataset(s) TBA
 
-To do so, drag and drop the images from the dataset in meshroom, as you would do for a normal dataset. 
+
+To do so, drag and drop the images from the dataset in Meshroom, as you would do for a normal dataset. 
 Add the node LoadDataset on the camera init's output and select the dataset type.
 
 You may now use meshroom's visualisation and nodes on the ouptuts. 
@@ -30,7 +31,7 @@ You also have option to generate ground truth image masks and depth mapth TBA.
 
 ### 3rd party imports and exports
 
-Meshroom research can also import and export data from the following softwares:
+Meshroom Research can also import and export data from the following softwares:
 
 - [COLMAP](https://colmap.github.io/)
   - Import SfM calibration (node [Colmap2MeshroomSfmConvertions](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Colmap2MeshroomSfmConvertions.py) )
@@ -69,7 +70,7 @@ Gaussian Splatting :
 
 ### SfM, Depth maps, Meshing benchmarking
 
-Meshroom research provides a way to evalutate the different steps of the photograpmetry pipeline (sfm, depth map estimation and meshing).
+Meshroom Research provides a way to evalutate the different steps of the photograpmetry pipeline (SfM, depth map estimation and meshing).
 the nodes [CalibrationComparison](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/CalibrationComparison.py), [DepthMapComparison](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/DepthMapComparison.py) and [MeshComparison](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/MeshComparisonBaptise.py)
 
 You may use the provided meshroom project and run the benchmark with the command line interface.
@@ -143,7 +144,7 @@ rez env meshroom mrrs
 
 ## Meshroom Dev quickstart
 
-You are very welcome to add your own method or dataset to meshroom-research!
+You are very welcome to add your own method or dataset to Meshroom Research!
 
 The organisation is the following:
 - mrrs/core contains all the basic IOs, utils and common geometrical functions used through the library
