@@ -238,28 +238,7 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             pixel_size = (sensor_width/image_size[0])
             principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2
             principal_point = (principal_point).astype(str).tolist()
-            #
-
-
-    #         "focalLength": "43.45584412271571",
-    #         "pixelRatio": "1",
-    #         "pixelRatioLocked": "true",
-    #         "principalPoint": [
-    #             "0",
-    #             "0"
-    #         ],
-    #         "distortionInitializationMode": "none",
-    #         "distortionParams": "",
-    #         "undistortionOffset": [
-    #             "0",
-    #             "0"
-    #         ],
-    #         "undistortionParams": "",
-    #         "distortionType": "none",
-    #         "undistortionType": "none",
-    #         "locked": "false"
-    #     }
-            #
+            
             intrinsic_sfm = {
                             "intrinsicId": str(intrinsic_id),
                             'width':str(image_size[0]), 'height':str(image_size[1]),
