@@ -29,7 +29,7 @@ class Transforms():
 
     def custom(extrinsics, intrinsics, param):
         """
-        Will use the passed matrix to transform the poses
+        Will use the passed param_array to transform the poses
         """
         extrinsics=param@extrinsics
         return extrinsics, intrinsics
@@ -60,6 +60,15 @@ class Transforms():
         center = np.mean(extrinsics[:,0:3,3], axis=0 )
         for i in range(len(extrinsics)):
             extrinsics[i][0:3,3] -= center
+        return extrinsics, intrinsics
+
+    def set_focal(extrinsics, intrinsics, param):
+        """
+        Set focal 
+        """
+        intrinsics=np.asarray(intrinsics)
+        intrinsics[:,0,0] = param
+        intrinsics[:,1,1] = param
         return extrinsics, intrinsics
 
 transforms_names = [f for f in Transforms.__dict__.keys() if not f.startswith("__")]
@@ -129,13 +138,15 @@ class CalibTransform(desc.Node):
             raise RuntimeError("No inputSfM specified")
         #get transform function
         transform_function = eval("Transforms."+chunk.node.transform.value)
-        matrix = np.asarray(eval(chunk.node.parameter.value), dtype=np.float32)
-        #load .sfm data
+        param_array = np.asarray(eval(chunk.node.parameter.value), dtype=np.float32)
+        #load .sfm data 
         sfm_data=json.load(open(chunk.node.inputSfM.value,"r"))
+        #sfm_data["views"]=sorted(sfm_data["views"], key=lambda v:int(v["frameId"])) 
+
         extrinsics, intrinsics, views_id, poses_ids, intrinsics_ids, pixel_sizes_all_cams, images_size = matrices_from_sfm_data(sfm_data, True)
         sensor_width = pixel_sizes_all_cams[0]*images_size[0,0]
         #apply transfrom
-        extrinsics, intrinsics = transform_function(extrinsics, intrinsics, matrix)
+        extrinsics, intrinsics = transform_function(extrinsics, intrinsics, param_array)
         #intrinsics in piXels for export
         # intrinsics/=np.expand_dims(pixel_sizes_all_cams, axis=[1,2])
         # intrinsics[:,2,2]=1

@@ -5,6 +5,7 @@ import json
 import numpy as np
 
 from meshroom.core import desc
+import trimesh
 
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
@@ -33,27 +34,36 @@ class LoadDataset(desc.Node):
             label='Dataset Type',
             description='''Dataset type''',
             value='blendedMVG',
-            values=['blendedMVG', 'DTU', 'ETH3D', 'baptiste', 'vital', 'NERF'],
+            values=['blendedMVG', 'DTU', 'ETH3D', 'baptiste', 'alab', 'NERF'],
             exclusive=True,
             uid=[0],
         ),
 
-        desc.FloatParam(
-            name='initSfmLandmarks',
-            label='Init Landmarks',
-            description='''Will initalise sfmLandmarks with the vertices ground truth mesh (if any). \\
-                           0 for deactivated, otherwise generate use n*nb_vertices landmarks.''',
-            value=0.0,
-            range=(0.0, 1.0, 0.1),
+        desc.IntParam(
+            name='initSfmLandmarksVertices',
+            label='Init Landmarks Vertices',
+            description='''Will initalise sfmLandmarks by sampling points on mesh. 0 to deactivate''',
+            value=1,
+            range=(0, 1000000000, 1),
             uid=[0],
             advanced=True
         ),
+        
 
         desc.BoolParam(
             name='initMasks',
             label='Init Masks',
             description='''If no masks in dataset, will initialise the masks using the values from the depth map (<=0) or the images (alpha<=0)''',
             value=True,
+            uid=[0],
+            advanced=True
+        ),
+
+        desc.BoolParam(
+            name='landMarksProj',
+            label='Landmarks Projections',
+            description='''Will display point cloud or landmarks projection''',
+            value=False,
             uid=[0],
             advanced=True
         ),
@@ -92,7 +102,6 @@ class LoadDataset(desc.Node):
             name='mesh',
             label='Mesh',
             description='Loaded mesh.',
-            semantic='3D',
             value=os.path.join(desc.Node.internalFolder, 'mesh.ply'),
             # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
             uid=[],
@@ -117,7 +126,6 @@ class LoadDataset(desc.Node):
                                'depth_maps', '<VIEW_ID>_depthMap.exr'),
             uid=[],
             advanced=True,
-            # enabled=False #FIXME: disaply the node altogether
         ),
 
         desc.File(
@@ -132,12 +140,24 @@ class LoadDataset(desc.Node):
         ),
 
         desc.File(
+            name='landMarksProjDisplay',
+            label='landMarksProjDisplay',
+            description='Generated images for landmarl projection',
+            semantic='image',
+            value=os.path.join(desc.Node.internalFolder,
+                               'lm_projs', '<VIEW_ID>.png'),
+            uid=[],
+            advanced=True,
+            enabled=lambda attr: attr.node.landMarksProj.value,
+        ),
+
+        desc.File(
             name='meshDisplay',
             label='MeshDisplay',
             description='MeshDisplay',
             semantic='3D',
             value=os.path.join(desc.Node.internalFolder,
-                               'mesh_gt.abc'),
+                               'mesh_display.ply'),
             uid=[],
             advanced=True
         ),
@@ -179,6 +199,7 @@ class LoadDataset(desc.Node):
         #Generate SFM data from matrices
         if not (len(gt_data["intrinsics"]) == len(gt_data["extrinsics"]) ==  len(gt_data["image_sizes"])):
             raise RuntimeError("Mismatching number of parameters for the sfmData ")
+        #note: will copy sfm_data
         gt_sfm_data = sfm_data_from_matrices(gt_data["extrinsics"], gt_data["intrinsics"], extrinsics_id, instrinsics_id, 
                                               gt_data["image_sizes"], sfm_data, sensor_width=gt_data["sensor_size"])
 
@@ -187,18 +208,45 @@ class LoadDataset(desc.Node):
             gt_sfm_data["views"][i]["resectionId"]=str(i)
 
         #Exports
-        if chunk.node.initSfmLandmarks.value != 0: 
-            print("**Initialising SfM landmarks from mesh")
+        if  chunk.node.initSfmLandmarksVertices.value != 0: 
+            print("**Initialising random SfM landmarks from geometry")
+            if "landmarks" in gt_sfm_data:
+                raise RuntimeError("Landmarks already in sfmData")
             if gt_data["mesh"] is None:
-                raise RuntimeError("Cannot initialise landmarks with no mesh")
+                raise RuntimeError("Cannot initialise landmarks with no geometry")
+            
+            vertices = gt_data["mesh"].vertices.copy()
+            #meshes in meshroom are in the CG cs, landmarks are CV
+            vertices=transform_cg_cv(vertices)
 
-            #FIXME: move to common 
+            #sampling from mesh or or point cloud
+            if isinstance(gt_data["mesh"], trimesh.PointCloud) :
+                vertices_indxs = np.random.choice(list(range(vertices.shape[0])), chunk.node.initSfmLandmarksVertices.value)
+                vertices = vertices[vertices_indxs]
+            else:
+                vertices =  random_sample_points_mesh_2([vertices, gt_data["mesh"].faces],
+                                                        chunk.node.initSfmLandmarksVertices.value)
+            #compute projections
+            vertices_projections = [camera_projection(vertices, gt_data["extrinsics"][oi], gt_data["intrinsics"][oi]) for oi in range(len(views_id))]
+
+            if chunk.node.landMarksProj.value:
+                print("**Exporting %d SfM landmarks projections"%(vertices.shape[0]))
+                os.makedirs(os.path.dirname(chunk.node.landMarksProjDisplay.value), exist_ok=True)
+                size_lm=int(np.ceil(gt_data["image_sizes"][0][0]/400))
+                for projs, view in zip(vertices_projections, gt_sfm_data["views"]):
+                    prj_img = open_image(view["path"], to_srgb=True)
+                    for (x,y) in projs[0]:
+                        x=int(x)
+                        y=int(y)
+                        if x-size_lm<0 or y-size_lm<0 or x+size_lm >= gt_data["image_sizes"][0][0] or y+size_lm >= gt_data["image_sizes"][0][1]:
+                            continue
+                        prj_img[y-size_lm:y+size_lm,x-size_lm:x+size_lm,1] = 255
+                    output_image = os.path.join(os.path.dirname(chunk.node.landMarksProjDisplay.value), view["viewId"]+".png")
+                    save_image(output_image, prj_img)
+
+            print("**Exporting %d SfM landmarks"%(vertices.shape[0]))
             structure = []
-            step = int( 1/chunk.node.initSfmLandmarks.value)
-            #meshes in meshroom ar in the CG cs, landmarks are CV
-            vertices = transform_cg_cv(gt_data["mesh"].vertices)
-            print("**Exporting %d SfM landmarks"%(int(vertices.shape[0]/step)))
-            for vi, v in enumerate(vertices[::step]):#FIXME: slow
+            for vi, v in enumerate(vertices):#FIXME: slow  
                 landmark = {}
                 landmark["landmarkId"] = str(vi)
                 landmark["descType"] = "unknown" 
@@ -206,11 +254,14 @@ class LoadDataset(desc.Node):
                 landmark["X"] = [str(x) for x in v]
                 landmark["observations"] = []
                 #create dummy obs in all views 
-                #FIXME: suboptimal, ideally we would compute the viz  all all view by projection 
                 for oi, i in enumerate(views_id):
+                    #sanity check, the landmark is visible in the view
+                    x,y=vertices_projections[oi][0][vi]
+                    if x<0 or y<0 or x>gt_data["image_sizes"][0][0] or y > gt_data["image_sizes"][0][1]:
+                        continue
                     obs =  {"observationId": str(i),
                             "featureId": str(oi),
-                            "x": ["0","0"]}
+                            "x": [str(x),str(y)]}
                     landmark["observations"].append(obs)
                 structure.append(landmark)
             gt_sfm_data["structure"] = structure
@@ -284,13 +335,46 @@ class LoadDataset(desc.Node):
         #Save ground truth mesh as obj if any
         if "mesh" in gt_data :
             print("**Writting mesh")
-            gt_data["mesh"].export(chunk.node.mesh.value)
+            gt_data["mesh"].export(chunk.node.mesh.value)    
+            
+            #create ply if the mesh is a point cloud (poitn cloud display not supported...)
+            if isinstance(gt_data["mesh"], trimesh.PointCloud) or len(gt_data["mesh"].faces) == 0:
+                print("***Writting point cloud preview")
 
-            #FIXME: for now we export diplsay mesh as .abc to support point cloud...
-            script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../blender/alembic_convert.py"))
-            command_line = "blender -b -P "+script_path+" -- "+chunk.node.mesh.value+" "+\
-                            chunk.node.meshDisplay.value+ " mesh2abc"
-            os.system(command_line)
+                #We have a special viewer for point cloud in ply
+                new_display_filename = chunk.node.meshDisplay.value.split(".")[0]+".pc.ply"
+                gt_data["mesh"].export(new_display_filename)
+                chunk.node.meshDisplay.value=new_display_filename
+
+                #Fit spheres
+                # SAMPLES = 10000
+
+                # print("Kmeans")
+                # from scipy.cluster.vq import  kmeans2
+                # # centroids, labels = trimesh.points.k_means(gt_data["mesh"].vertices, SAMPLES, iter=1)
+                # centroids, labels = kmeans2(gt_data["mesh"].vertices, SAMPLES, iter=1)
+
+                # print("Creating spheres")
+                # spheres = []   
+                # for label in range(SAMPLES):    
+                #     print("%d/%d"%(label,SAMPLES))
+                #     vertices = gt_data["mesh"].vertices[labels==label] 
+                #     if vertices.shape[0]>3:
+                #         # center, radius, error =trimesh.nsphere.fit_nsphere(vertices)
+                #         center = np.mean(vertices, axis=0)
+                #         #radius is s
+                #         radius = np.amin(np.amax(vertices, axis=0) - np.amin(vertices, axis=0))/2
+                #         sphere = trimesh.creation.uv_sphere(radius)
+                #         sphere.apply_translation(center)
+                #         spheres.append(sphere)
+                # display_mesh=trimesh.util.concatenate(spheres)
+                # display_mesh.export(chunk.node.meshDisplay.value)
+
+      
+            else:
+                gt_data["mesh"].export(chunk.node.meshDisplay.value)
+
+
      
             
         print("*LoadDataset ends")

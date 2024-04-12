@@ -16,12 +16,13 @@ mode="abc2obj"
 if len(argv)>=3:
     mode = argv[2]
 
+bpy.ops.wm.read_homefile(use_empty=True)
+
+print("Alembic convert mode: "+mode)
+
 #import the abc into the scene
 if mode == "abc2obj":
     bpy.ops.wm.alembic_import(filepath=filename, as_background_job=False)
-
-    #saves project (for depbug)
-    bpy.ops.wm.save_as_mainfile(filepath=os.path.dirname(output_mesh)+"/project.blend")
 
     # #export point cloud into ply https://docs.blender.org/api/current/bpy.ops.export_mesh.html
     #not working because no faces?
@@ -35,14 +36,46 @@ if mode == "abc2obj":
         for vertex in obj.vertices:
             obj_file.write("v "+ " ".join(map(str,vertex.co))+"\n")
 elif mode == "mesh2abc":
+    print("Creating hierarchy")
+
+    #create .abc hierarchy for qtalicevision
+    def create_empty(name, parent=None):
+        obj=bpy.data.objects.new(name, None)
+        scene = bpy.context.scene
+        scene.collection.objects.link(obj)
+        if parent is not None:
+            obj.parent = parent
+        return obj
+
+    mvgRoot=create_empty("mvgRoot")
+    mvgCloud=create_empty("mvgCloud", mvgRoot)
+    mvgAncestors=create_empty("mvgAncestors", mvgRoot)
+    mvgCameras=create_empty("mvgCameras", mvgRoot)
+    mvgCamerasUndefined=create_empty("mvgCamerasUndefined", mvgRoot)
+
+    #import mesh
+    print("Importing")
     if filename.lower().endswith('.obj'):
-        print("obj")
         bpy.ops.import_scene.obj(filepath=filename, axis_forward='Y', axis_up='Z')
     elif filename.lower().endswith('.ply'):
         bpy.ops.import_mesh.ply(filepath=filename)
     else:
         raise ValueError('Model file not supported')
-    print("ec")
+    print("Done")
+    meshName = os.path.splitext(os.path.basename(filename))[0]
+    obj=bpy.data.objects[meshName]
+    mesh=bpy.data.meshes[meshName]
+    #rename and move mesh in hierachy
+    obj.name="mvgPointCloud"
+    mesh.name="particleShape1"
+    obj.parent=mvgCloud
+
+    print("Saving abc to "+output_mesh)
     bpy.ops.wm.alembic_export(filepath=output_mesh)
 else:
     raise ValueError('Wrong mode')
+print("Convert done")
+#saves project (for depbug)
+print("Saving to "+os.path.dirname(output_mesh)+"/project.blend")
+bpy.ops.wm.save_as_mainfile(filepath=os.path.dirname(output_mesh)+"/project.blend")
+print("Bye")

@@ -1,6 +1,8 @@
 """
 Module that contains 2D and 3D geometrical operations
 """
+import random
+from mrrs.core.utils import time_it
 import numpy as np
 import logging
 
@@ -35,24 +37,26 @@ def make_unit(input_array):
     return input_array
 
 #%% Camera projections
-def camera_projection(vertices, extrinsic, intrinsic, pixel_size):
+def camera_projection(vertices, extrinsic, intrinsic, pixel_size=0):
     """
-    Compute the projection of 3d points according to the pinhole camera projection model
+    Compute the pixels projection of 3d points according to the pinhole camera projection model.
+    Iput units are in m by default. If pixel_size = 0 will assume input where in pixels.
     """
     vertices_homo = vertices
     if vertices.shape[-1] != 4:#if not homo make homo
         vertices_homo = make_homogeneous(vertices)
     # project vertices into the camera
-    extrinsic = np.linalg.inv(np.concatenate([extrinsic, [[0, 0, 0, 1]]], axis=0))[0:3, 0:4]
+    extrinsic = np.linalg.inv(np.concatenate([extrinsic[0:3, 0:4], [[0, 0, 0, 1]]], axis=0))[0:3, 0:4]
     # vertices in camera CS
     vertices_camera_cs = extrinsic @ np.transpose(vertices_homo)
     vertices_distances_from_cam = vertices_camera_cs[2, :].copy()  # save this for visibility approx
     # projection onto the camera plane
-    vertices_projected = np.transpose(intrinsic @ vertices_camera_cs)
+    vertices_projected = np.transpose(intrinsic[0:3,0:3] @ vertices_camera_cs)
     #normalises and reduce dim
     vertices_projected = unmake_homogeneous(vertices_projected)
     # convert into pixel coordinates
-    vertices_projected = vertices_projected / pixel_size
+    if pixel_size != 0:
+        vertices_projected = vertices_projected / pixel_size
     vertices_projected = np.round(vertices_projected).astype(np.int32)  # FIXME: this should be optional
     return vertices_projected[:, 0:2], vertices_distances_from_cam
 
@@ -318,7 +322,23 @@ def nearest_neighbors(array_0, array_1, nb_neighbors=1, distance=lambda x, y: np
 
     return all_nn_indices, all_distances
 
+
 #%% Meshes
+def sample_face(selection):
+    """
+    Samples points from a given face
+    """
+    triangle, nb_sample = selection
+    if nb_sample == 0:
+        return []
+    # random barycentric coordinates for each face
+    random_baryentric_coordinates = np.random.random([nb_sample, 3])
+    norm = np.sum(random_baryentric_coordinates, axis=1)
+    random_baryentric_coordinates = random_baryentric_coordinates / np.stack([norm, norm, norm], axis=1)  # N*3
+    # pass into euclidian coordinates
+    samples = barycentric_to_cartesian(triangle, random_baryentric_coordinates)
+    return samples
+
 def random_sample_points_mesh(mesh, target_nb_samples):
     """
     Randomly samples points on the surface of a mesh.
@@ -332,32 +352,68 @@ def random_sample_points_mesh(mesh, target_nb_samples):
     # normalise
     faces_areas /= np.sum(faces_areas)
     # get nb_sample per face
-    # FIXME: round makes that we might no reach target nb of vertices, might underrepresent small faces
-    # ceil+random discard=> might overrepresent small faces,
-    # solution: use remainer to propagate
-    nb_sample_per_face = (np.round(target_nb_samples * faces_areas)).astype(np.int32)
-    all_samples = []
-    # loop because i dont know how to write it in a one liner FIXME: parallelize that
-    for index, (triangle, nb_sample) in enumerate(zip(triangles, nb_sample_per_face)):
-        print("Sampling face %d/%d" % (index, triangles.shape[0]), end="\r")
-        if nb_sample == 0:
-            continue
-        # random barycentric coordinates for each face
-        random_baryentric_coordinates = np.random.random([nb_sample, 3])
-        norm = np.sum(random_baryentric_coordinates, axis=1)
-        random_baryentric_coordinates = random_baryentric_coordinates / np.stack([norm, norm, norm], axis=1)  # N*3
-        # pass into euclidian coordinates
-        # # loop version for reference
-        # samples = []
-        # for barycentric_coordinates in random_baryentric_coordinates:
-        #     sample = barycentric_to_cartesian(triangle, barycentric_coordinates)
-        #     samples.append(sample)
-        # broadcast version
-        samples = barycentric_to_cartesian(triangle, random_baryentric_coordinates)
-        # saveit
-        all_samples.append(samples)
+    nb_sample_per_face = (target_nb_samples * faces_areas).astype(np.int32)
+    #because the nb of samples are potentially very small (lower than 1 on small faces), we draw at least one sample from N first radom faces until the quota is met
+    small_faces_indices = np.where(nb_sample_per_face<1)[0]
+    random.shuffle(small_faces_indices)
+    sample_count = 0
+    to_sample = target_nb_samples-np.sum(np.round(nb_sample_per_face))
+    for face_idx in small_faces_indices:
+        if (nb_sample_per_face[face_idx]<1) and (sample_count<to_sample):
+            nb_sample_per_face[face_idx]=1
+            sample_count+=1
+    #round up
+    nb_sample_per_face = np.round(nb_sample_per_face)
+
+    from mrrs.core.utils import time_it
+
+    with time_it() as t:
+        #   loop because i dont know how to write it in a one liner FIXME: parallelize that
+        all_samples = []
+        for index, (triangle, nb_sample) in enumerate(zip(triangles, nb_sample_per_face)):
+            print("Sampling face %d/%d" % (index, triangles.shape[0]), end="\r")
+            face_samples = sample_face((triangle, nb_sample))
+            # save it
+            all_samples.append(face_samples)
     all_samples = np.concatenate(all_samples, axis=0)
+    print(t)
+
+    #FIXME: slow?!
+    from multiprocessing import Pool
+    with time_it() as t:
+        with Pool() as pool:#FIXME: chunk size according to max cpu
+            all_samples =  pool.imap_unordered(sample_face, zip(triangles, nb_sample_per_face), chunksize=triangles.shape[0]/24)
+    all_samples = np.concatenate(all_samples, axis=0)
+    print(t)
+   
     return all_samples
+
+def random_sample_points_mesh_2(mesh, target_nb_samples):
+    """
+    Randomly samples points on the surface of a mesh.
+    Returns an array of size nb_samplesx3
+    """
+    vertices, faces = mesh
+    triangles = vertices[faces]
+    # compute triangle area
+    faces_areas = compute_triangle_area(np.transpose(triangles, [1, 2, 0]))
+    # normalise
+    faces_areas /= np.sum(faces_areas)
+
+    #get a list of random faces to draw from, big faces are more likely to be drawn
+    #formaly: sampling faces from a discrete probability distribution proportioanl to its area
+    faces_to_samples = np.random.choice(list(range(triangles.shape[0])), target_nb_samples, p=faces_areas)
+    #draw random barycentric coordinates
+    random_baryentric_coordinates = np.random.random([target_nb_samples, 3])
+    norm = np.sum(random_baryentric_coordinates, axis=1)
+    random_baryentric_coordinates = random_baryentric_coordinates / np.stack([norm, norm, norm], axis=1)  # N*3
+    # pass into euclidian coordinates for each of the selected face
+    samples = []
+    for sample_nb, (triangle_index, bary_coordinates) in enumerate(zip(faces_to_samples, random_baryentric_coordinates)):
+        print("Sample %d/%d"%(sample_nb,target_nb_samples))
+        sample = barycentric_to_cartesian(triangles[triangle_index], bary_coordinates)
+        samples.append(sample)
+    return np.stack(samples, axis=0)
 
 def mesh_transform(mesh,T):
     """

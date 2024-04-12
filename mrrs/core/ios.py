@@ -11,8 +11,6 @@ import numpy as np
 
 from mrrs.core.utils import format_float_array
 
-FORCE_IOOI = True#FIXME: probably a good idea to open everything with openimage IO, for now not woring on windows
-
 #%% Images
 def open_exr(exr_path):
     '''
@@ -301,7 +299,6 @@ def parse_extrisic_sfm_data(sfm_pose):
 def get_image_sizes(sfm_data):
     return [ (int(view["width"]), int(view["height"])) for view in sfm_data["views"] ]
     
-
 #FIXME: unify the sensor/pixel size
 #FIXME: return disctionnary?
 def matrices_from_sfm_data(sfm_data, return_image_sizes=False):
@@ -361,6 +358,20 @@ def matrices_from_sfm_data(sfm_data, return_image_sizes=False):
     else:
         return extrinsics_all_cams, intrinsics_all_cams, views_id, poses_id, intrinsics_id, pixel_sizes_all_cams
 
+def get_landmarks(sfm_data):
+    """
+    Returns the landmarks in the .sfm (if any)
+    """
+    landmarks=[]
+    featuresFolders=None
+    matchesFolders=None
+    if "structure" in sfm_data.keys():
+        landmarks = sfm_data["structure"]
+    if "featuresFolders" in sfm_data.keys():
+        featuresFolders = sfm_data["featuresFolders"]
+    if "matchesFolders" in sfm_data.keys():
+        matchesFolders = sfm_data["matchesFolders"]
+    return landmarks, featuresFolders, matchesFolders
 #%% Mesh
 def open_mesh(mesh_path):#FIXME: add suport to uv, texture etc
     """

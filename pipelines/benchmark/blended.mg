@@ -5,16 +5,16 @@
         "fileVersion": "1.1",
         "template": false,
         "nodesVersions": {
-            "MeshcomparisonBaptiste": "1.0",
             "LoadDataset": "3.0",
-            "MeshTransform": "3.0",
-            "Meshing": "7.0",
             "CleanMesh": "1.0",
-            "Texturing": "6.0",
-            "PrepareDenseScene": "3.1",
             "RenderMesh": "1.1",
+            "Texturing": "6.0",
+            "CameraInit": "9.0",
             "DepthMapTransform": "3.0",
-            "CameraInit": "9.0"
+            "Meshing": "7.0",
+            "MeshcomparisonBaptiste": "1.0",
+            "MeshTransform": "3.0",
+            "PrepareDenseScene": "3.1"
         }
     },
     "graph": {
@@ -30,7 +30,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "3f6152f15ae68769aff4d2d71671e997128c8293"
+                "0": "258c015b1917219b07a3fd6d7d37eb0eabece7f6"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -50,41 +50,6 @@
                 "depth": "{cache}/{nodeType}/{uid0}/<VIEW_ID>_depthMap.exr"
             }
         },
-        "LoadDataset_1": {
-            "nodeType": "LoadDataset",
-            "position": [
-                -205,
-                100
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 16,
-                "split": 1
-            },
-            "uids": {
-                "0": "8ad3e052d674d5bf5eacc0f8482636bf4feb8951"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "sfmData": "{CameraInit_2.output}",
-                "datasetType": "blendedMVG",
-                "initSfmLandmarks": 0.1,
-                "verboseLevel": "info"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "outputSfMData": "{cache}/{nodeType}/{uid0}/sfm.sfm",
-                "depthMapsFolder": "{cache}/{nodeType}/{uid0}/depth_maps",
-                "mesh": "{cache}/{nodeType}/{uid0}/mesh.ply",
-                "maskFolder": "{cache}/{nodeType}/{uid0}/masks",
-                "depthmaps": "{cache}/{nodeType}/{uid0}/depth_maps/<VIEW_ID>_depthMap.exr"
-            }
-        },
         "Texturing_1": {
             "nodeType": "Texturing",
             "position": [
@@ -97,7 +62,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "dce0922d56f3bd6e813b226fa99ac33a80390f3e"
+                "0": "f10d12e350222c0f30c6db60a19093395a3c2b5e"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -170,7 +135,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "6f36ec3bb47dc191c3b69d1cec1044944e5e56ea"
+                "0": "1a3f1d185218331ff39d317076814521a74401bf"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -195,35 +160,6 @@
                 "undistorted": "{cache}/{nodeType}/{uid0}/<VIEW_ID>.{outputFileTypeValue}"
             }
         },
-        "CleanMesh_1": {
-            "nodeType": "CleanMesh",
-            "position": [
-                837,
-                104
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "a0b7f4824ef27413d9b9cc9f9aae2533fc6cd0ba"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input_mesh": "{Texturing_1.outputMesh}",
-                "face_index_images_folder": "{RenderMesh_1.output}"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output_mesh": "{cache}/{nodeType}/{uid0}/cleaned_mesh.ply"
-            }
-        },
         "RenderMesh_1": {
             "nodeType": "RenderMesh",
             "position": [
@@ -236,7 +172,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "c3617c46f9a2bb5492d795f235112da321afcc73"
+                "0": "6547701cf64d16b99cc52789764eca860542ee82"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -268,7 +204,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "19a5cc876a0d9c68762f7c3ca671f29360f51cec"
+                "0": "4ae3505d77c1720065e08fd0811b7402b3e7b037"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -286,6 +222,107 @@
             },
             "outputs": {
                 "outputMesh": "{cache}/{nodeType}/{uid0}/mesh.ply"
+            }
+        },
+        "CleanMesh_1": {
+            "nodeType": "CleanMesh",
+            "position": [
+                837,
+                104
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "2019b88a525b0bf39029ac71f29a746db39a128a"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input_mesh": "{Texturing_1.outputMesh}",
+                "face_index_images_folder": "{RenderMesh_1.output}",
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output_mesh": "{cache}/{nodeType}/{uid0}/cleaned_mesh.ply"
+            }
+        },
+        "MeshcomparisonBaptiste_1": {
+            "nodeType": "MeshcomparisonBaptiste",
+            "position": [
+                104,
+                261
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 1,
+                "split": 1
+            },
+            "uids": {
+                "0": "fcb9f9793ad5687f476651396bbfea1c3e2da7b6"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "input_path": "{Meshing_4.outputMesh}",
+                "gt_path": "{LoadDataset_1.mesh}",
+                "mode": "mesh",
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "output_dir": "{cache}/{nodeType}/{uid0}/",
+                "vizMeshtoGT": "{cache}/{nodeType}/{uid0}/vis_data2gt.ply",
+                "vizGTtoMesh": "{cache}/{nodeType}/{uid0}/vis_gt2data.ply"
+            }
+        },
+        "LoadDataset_1": {
+            "nodeType": "LoadDataset",
+            "position": [
+                -205,
+                100
+            ],
+            "parallelization": {
+                "blockSize": 0,
+                "size": 16,
+                "split": 1
+            },
+            "uids": {
+                "0": "2eb5ead93e7d3b1287d0a753d1e887de9dc814bc"
+            },
+            "internalFolder": "{cache}/{nodeType}/{uid0}/",
+            "inputs": {
+                "sfmData": "{CameraInit_2.output}",
+                "datasetType": "blendedMVG",
+                "initSfmLandmarksVertices": 1000,
+                "initMasks": true,
+                "verboseLevel": "info"
+            },
+            "internalInputs": {
+                "invalidation": "",
+                "comment": "",
+                "label": "",
+                "color": ""
+            },
+            "outputs": {
+                "outputSfMData": "{cache}/{nodeType}/{uid0}/sfm.sfm",
+                "depthMapsFolder": "{cache}/{nodeType}/{uid0}/depth_maps",
+                "mesh": "{cache}/{nodeType}/{uid0}/mesh.ply",
+                "maskFolder": "{cache}/{nodeType}/{uid0}/masks",
+                "depthmapsDisplay": "{cache}/{nodeType}/{uid0}/depth_maps/<VIEW_ID>_depthMap.exr",
+                "masksDisplay": "{cache}/{nodeType}/{uid0}/masks/<VIEW_ID>.png",
+                "meshDisplay": "{cache}/{nodeType}/{uid0}/mesh_display.ply"
             }
         },
         "CameraInit_2": {
@@ -527,7 +564,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "7e639a3ab05c628bd4e2ed39c1099a8e5edee166"
+                "0": "edf5da455d6340ff11689afd446f2a28a697fea2"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -603,38 +640,6 @@
             "outputs": {
                 "outputMesh": "{cache}/{nodeType}/{uid0}/mesh.{outputMeshFileTypeValue}",
                 "output": "{cache}/{nodeType}/{uid0}/densePointCloud.abc"
-            }
-        },
-        "MeshcomparisonBaptiste_1": {
-            "nodeType": "MeshcomparisonBaptiste",
-            "position": [
-                104,
-                261
-            ],
-            "parallelization": {
-                "blockSize": 0,
-                "size": 1,
-                "split": 1
-            },
-            "uids": {
-                "0": "549892f73785ba2dd76179be45b9d620872157bb"
-            },
-            "internalFolder": "{cache}/{nodeType}/{uid0}/",
-            "inputs": {
-                "input_path": "{Meshing_4.outputMesh}",
-                "gt_path": "{LoadDataset_1.mesh}",
-                "mode": "mesh"
-            },
-            "internalInputs": {
-                "invalidation": "",
-                "comment": "",
-                "label": "",
-                "color": ""
-            },
-            "outputs": {
-                "output_dir": "{cache}/{nodeType}/{uid0}/",
-                "vizMeshtoGT": "{cache}/{nodeType}/{uid0}/vis_data2gt.ply",
-                "vizGTtoMesh": "{cache}/{nodeType}/{uid0}/vis_gt2data.ply"
             }
         }
     }

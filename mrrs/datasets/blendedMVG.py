@@ -122,5 +122,6 @@ def open_dataset(sfm_data):
         "extrinsics" :  extrinsics,
         "intrinsics" :  intrinsics,
         "image_sizes":  images_sizes,
-        "mesh":mesh
+        "mesh":mesh,
+        # "sensor_size":1
         }

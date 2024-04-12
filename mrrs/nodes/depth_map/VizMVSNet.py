@@ -190,14 +190,25 @@ class VizMVSNet(CondaNode):
         # chunk.node.viewPairs.value
         with open(os.path.join(chunk.node.outputFolder.value, "pair.txt"), "w") as file:
             
-            file.write(str(nb_views)+"\n")#write numb images
             if chunk.node.viewPairs.value == '':#by default exhaustive matching
+                file.write(str(nb_views)+"\n")#write numb images
                 for i in range(nb_views):
                     file.write(str(i)+"\n")# index of reference image n
                     views_and_score = [" "+str(j)+" 1.0" for j in range(nb_views) if j != i]
                     file.write(str(nb_views-1)+"".join(views_and_score)+"\n")# 10 best source images for reference image 0  ID0 SCORE0 ID1 SCORE1 ...
             else:
-                raise NotImplementedError("bee")
+                #first element: view, other matching uid 
+                with open(chunk.node.viewPairs.value, "r") as f:
+                    pairs_raw = f.readlines()
+                file.write(str(len(pairs_raw))+"\n")#sume views may be discarded
+                pairs_uids={p[0]:p[1:] for p in [l.strip().strip("\n").split(' ') for l in pairs_raw]}
+                for uid_0 in pairs_uids.keys():
+                    uid_0_index = views_id.index(uid_0)
+                    uid_n_indices = [views_id.index(u) for u in pairs_uids[uid_0]]
+                    file.write(str(uid_0_index)+"\n")# index of reference image n
+                    views_and_score = [" "+str(j)+" 1.0" for j in uid_n_indices]
+                    file.write(str(len(uid_n_indices))+"".join(views_and_score)+"\n")
+           
 
         #run the CL
         super().processChunk(chunk)

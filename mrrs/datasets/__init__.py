@@ -4,7 +4,7 @@ from mrrs.datasets.eth3d import open_dataset as open_dataset_eth3d
 from mrrs.datasets.baptiste import open_dataset as open_dataset_baptiste
 from mrrs.datasets.blendedMVG import open_dataset as open_dataset_blended
 from mrrs.datasets.dtu import open_dataset as open_dataset_dtu
-from mrrs.datasets.vital import open_dataset as open_dataset_vital
+from mrrs.datasets.alab import open_dataset as open_dataset_alab
 from mrrs.datasets.nerf import open_dataset as open_dataset_nerf
 
 def load_dataset(sfm_data, dataset_type):
@@ -39,9 +39,9 @@ def load_dataset(sfm_data, dataset_type):
     elif dataset_type == "baptiste":
         print("**Importing Baptiste data")
         data = open_dataset_baptiste(sfm_data)
-    elif dataset_type == "vital":
-        print("**Importing Vital data")
-        data = open_dataset_vital(sfm_data)
+    elif dataset_type == "alab":
+        print("**Importing alab data")
+        data = open_dataset_alab(sfm_data)
     elif dataset_type == "NERF":
         print("**Importing NERF data")
         data = open_dataset_nerf(sfm_data)

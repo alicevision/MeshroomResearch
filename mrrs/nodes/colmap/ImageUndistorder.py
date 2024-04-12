@@ -37,13 +37,14 @@ class ColmapImageUndistorder(desc.CommandLineNode):
             uid=[0],
         ),
 
-        desc.File(
-            name='max_image_size',
-            label='Max Image Size',
-            description='''Used to downsample images''',
-            value='2000',
-            uid=[0],
-        ),
+        #FIXME: this does not update the files!
+        # desc.File(
+        #     name='max_image_size',
+        #     label='Max Image Size',
+        #     description='''Used to downsample images''',
+        #     value='2000',
+        #     uid=[0],
+        # ),
 
     ]
 

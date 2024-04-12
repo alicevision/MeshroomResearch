@@ -3,10 +3,14 @@ import os
 import json
 import shutil
 from meshroom.core import desc
+
+from mrrs.core.ios import open_image, save_image
+from mrrs.core.utils import cv2_resize_with_pad
+
 from . import COLMAP
 
 class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
-    commandLine = 'aliceVision_exportColmap {allParams}'
+    commandLine = 'aliceVision_exportColmap -i {preparedSfmValue} -o {outputValue} '
     size = desc.DynamicNodeSize('input')
 
     category = 'Colmap'
@@ -19,7 +23,19 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
             description='SfMData file.',
             value='',
             uid=[0],
+            group=""
         ),
+
+        desc.IntParam(
+            name='maxImageSize',
+            label='Max Image Width',
+            description='''Used to downsample images''',
+            value=0,
+            range=(0, 1000000000, 1),
+            uid=[0],
+            group=""
+            ),
+
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
@@ -32,6 +48,14 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
     ]
 
     outputs = [
+        desc.File(
+            name='preparedSfm',#ugly hack to have an input that can change
+            label='preparedSfm',
+            description='SfMData file prepared for colmap',
+            value=os.path.join(desc.Node.internalFolder, "prepared_sfm.json"),
+            uid=[],
+            advanced=True,
+        ),
         desc.File(
             name='output',
             label='Output Folder',
@@ -59,25 +83,62 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
 
 
     def processChunk(self, chunk):
+
+        # get image info
+        sfm_data = json.load(open(chunk.node.input.value))
+        views = sfm_data["views"]
+        images_path = [v["path"] for v in views]
+        image_sizes = [[int(v["width"]), int(v["height"])] for v in views]
+        images_base_folder = set([os.path.dirname(p) for p in images_path ])
+        if len(images_base_folder) > 1:
+            raise RuntimeError("Images from different folders not supported yet")
+        images_basename = [os.path.basename(p) for p in images_path ]
+        images_output_folder = os.path.join(chunk.node.output.value, "images")
+        new_images_path = [os.path.join( images_output_folder, basename) for basename in images_basename]
+        
+        #get if we must resize
+        do_resize = chunk.node.maxImageSize.value == 0 or image_sizes[0][0]>chunk.node.maxImageSize.value
+
+        #modify .sfm with new sizes and filepath
+        if do_resize:
+            #set input sfm to new file
+            print("Editting .sfm")
+            new_sizes = [ [chunk.node.maxImageSize.value, int(sz[1]*chunk.node.maxImageSize.value/sz[0])] for sz in image_sizes]
+            for (v,sz, p) in zip(views, new_sizes, new_images_path):
+                v["width"] = sz[0]
+                v["heigt"] = sz[1]
+                v["path"] = p
+
+            sfm_data["views"] = views
+            #FIXME: assumes one width
+            for intrinsic in sfm_data["intrinsics"]:
+                intrinsic["width"] = new_sizes[0][0]
+                intrinsic["height"] = new_sizes[0][1]
+            with open(os.path.join(chunk.node.preparedSfm.value), 'w') as f:
+                json.dump(sfm_data, f, indent=4)
+        else: #or ceate symlink stright to the sfm
+            os.symlink(chunk.node.input.value, chunk.node.preparedSfm.value)
+        #run the cl
         desc.CommandLineNode.processChunk(self, chunk)
+        
+        #create image folder from sfm (need to be done after the cl, otherwise bugs...)
+        os.makedirs(images_output_folder, exist_ok=True)
+        #FIXME: slow io bound
+        print("Exporting images")
+        for i, (img_path, new_img_path) in enumerate(zip(images_path, new_images_path)):
+            if do_resize:
+                image = open_image(img_path, to_srgb=True)
+                if do_resize:
+                    image, _ = cv2_resize_with_pad(image, new_sizes[i])
+                save_image(new_img_path, image)#SLOW
+            else:
+                os.symlink(img_path, new_img_path)
+
         #moves from sparse/0 to sparse
         shutil.copytree(os.path.join(chunk.node.output.value, 'sparse', '0'), 
                         os.path.join(chunk.node.output.value, 'sparse2'))
         shutil.rmtree(os.path.join(chunk.node.output.value, 'sparse', '0'))
         os.rename(os.path.join(chunk.node.output.value, 'sparse2'), os.path.join(chunk.node.output.value, 'sparse'))
         #os.rmdir(os.path.join(chunk.node.output.value,'dense'))
-        #create image folder from sfm
-        images_path = [v["path"] for v in json.load(open(chunk.node.input.value))["views"]]
-        images_base_folder = set([os.path.dirname(p) for p in images_path ])
-        images_basename = [os.path.basename(p) for p in images_path ]
-        images_output_folder = os.path.join(chunk.node.output.value, "images")
-        os.makedirs(images_output_folder, exist_ok=True)
-        for img, basename in zip(images_path, images_basename):
-            # shutil.copyfile(img, os.path.join( images_output_folder, basename))
-            os.symlink(img, os.path.join( images_output_folder, basename))
-        if len(images_base_folder) > 1:
-            raise RuntimeError("Images from different folders not supported yet")
-        
-        #create stereo match
 
-        
+ 

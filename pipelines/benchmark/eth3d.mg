@@ -6,12 +6,12 @@
         "template": false,
         "nodesVersions": {
             "CameraInit": "9.0",
+            "LoadDataset": "3.0",
             "FeatureMatching": "2.0",
             "StructureFromMotion": "3.3",
             "SfMAlignment": "2.0",
             "ImageMatching": "2.0",
-            "FeatureExtraction": "1.3",
-            "LoadDataset": "3.0"
+            "FeatureExtraction": "1.3"
         }
     },
     "graph": {
@@ -223,7 +223,7 @@
                 "split": 1
             },
             "uids": {
-                "0": "010128bfa17235576f6aa0076ed195abe2ef4b57"
+                "0": "4daea531e586855cad5031e00047018e5604e19e"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
@@ -685,14 +685,14 @@
                 "split": 1
             },
             "uids": {
-                "0": "be9df26d552d6a76127ab9fc964c81cb470c8e32"
+                "0": "cd29b4f1d1940024847c00e88d7c3d47004c044d"
             },
             "internalFolder": "{cache}/{nodeType}/{uid0}/",
             "inputs": {
                 "sfmData": "{CameraInit_2.output}",
                 "datasetType": "ETH3D",
-                "initSfmLandmarks": 0.0001,
-                "initMasks": true,
+                "initSfmLandmarks": 0,
+                "initMasks": false,
                 "verboseLevel": "info"
             },
             "internalInputs": {
@@ -706,8 +706,9 @@
                 "depthMapsFolder": "{cache}/{nodeType}/{uid0}/depth_maps",
                 "mesh": "{cache}/{nodeType}/{uid0}/mesh.ply",
                 "maskFolder": "{cache}/{nodeType}/{uid0}/masks",
-                "depthmaps": "{cache}/{nodeType}/{uid0}/depth_maps/<VIEW_ID>_depthMap.exr",
-                "masks": "{cache}/{nodeType}/{uid0}/masks/<VIEW_ID>.png"
+                "depthmapsDisplay": "{cache}/{nodeType}/{uid0}/depth_maps/<VIEW_ID>_depthMap.exr",
+                "masksDisplay": "{cache}/{nodeType}/{uid0}/masks/<VIEW_ID>.png",
+                "meshDisplay": "{cache}/{nodeType}/{uid0}/mesh_display.ply"
             }
         }
     }
