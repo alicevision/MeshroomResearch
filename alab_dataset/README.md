@@ -14,11 +14,11 @@ The ground truth mesh is provided as an obj file (with and without the faces vis
 Additionally, we provide depth, curvature, roughness, and transmission maps for each camera. 
 The original Blender project is also included in the dataset.
 
-You can easily load the dataset into meshroom using the [LoadDaset](TODO) node.
+You can easily load the dataset into meshroom using the [LoadDaset]([https://github.com/alicevision/MeshroomResearch/tree/main/mrrs/nodes#loaddataset) node.
 
 # Download
 
-The full dataset can be downloaded [here](TODO)
+The full dataset can be downloaded [here](https://zenodo.org/records/10964463?token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjQ0ZmZiMzBlLTczMjMtNGE3Yy1hNTZmLTU2MDdkZmUxNzNhOCIsImRhdGEiOnt9LCJyYW5kb20iOiI5Mzk2OTQ1NTdiMzVjNGEyMGQ3ZjEyM2UwMzFhZTM2NyJ9.II6TuWp5adDaji9Xeul6A5jsLwb5OS-vS4dMUlDY2VCwcZUWPGN8AlPyY7jdYt7VzS4RZW7qh6FFRw_Z7XhNaA).
 
 # Credits
 
@@ -31,12 +31,21 @@ This dataset is the result of a project done by students from [IMAC](https://www
 If you use this dataset to publish, we kindly ask you to cite it:
 
   ```
-  @online{alabr2024,
-    title={{A}Lab-R: 3D Reconstruction Dataset},
-    author={ Sara Lafleur,  Alexandre Miralles, Léa Touchard, Maxime Verna, Matthieu Hog, Fabien Castan, Benoit Meaujan},
-    doi = {},
-    url = {},
-    year = {2024}
+  @dataset{ alab_3dr,
+            author       = {Lafleur, Sara and
+                            Miralles, Alexandre and
+                            Touchard, Léa and
+                            Verna, Maxime and
+                            Hog, Matthieu and
+                            Castan, Fabien and
+                            Meaujan, Benoit},
+            title        = {ALab-R 3D Reconstruction Dataset},
+            month        = apr,
+            year         = 2024,
+            publisher    = {Technicolor},
+            version      = {0.0},
+            doi          = {10.5281/zenodo.10964463},
+            url          = {https://doi.org/10.5281/zenodo.10964463}
   }
   ```
 
