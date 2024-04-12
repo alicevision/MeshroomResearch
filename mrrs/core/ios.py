@@ -191,12 +191,8 @@ def save_image(image_path, np_array, orientation=None, auto_rotate=False):
             #but right meta
             image_buff.orientation=orientation
         image_buff.write(image_path)
- 
-
-# %%
 
 #%% SFM
-#FIXME: unify the sensor/pixel size, also we open it in mm but expect save from pixels
 def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
                             intrinsics_ids, images_size, sfm_data = {}, sensor_width = 1):
     '''
@@ -242,6 +238,28 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             pixel_size = (sensor_width/image_size[0])
             principal_point = intrinsic[0:2,2]-np.asarray(image_size)/2
             principal_point = (principal_point).astype(str).tolist()
+            #
+
+
+    #         "focalLength": "43.45584412271571",
+    #         "pixelRatio": "1",
+    #         "pixelRatioLocked": "true",
+    #         "principalPoint": [
+    #             "0",
+    #             "0"
+    #         ],
+    #         "distortionInitializationMode": "none",
+    #         "distortionParams": "",
+    #         "undistortionOffset": [
+    #             "0",
+    #             "0"
+    #         ],
+    #         "undistortionParams": "",
+    #         "distortionType": "none",
+    #         "undistortionType": "none",
+    #         "locked": "false"
+    #     }
+            #
             intrinsic_sfm = {
                             "intrinsicId": str(intrinsic_id),
                             'width':str(image_size[0]), 'height':str(image_size[1]),
@@ -254,11 +272,19 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
                             #pass focal into "mm"
                             "focalLength": str(intrinsic[0,0]*pixel_size),
                             "pixelRatio": "1", #FIXME: not matching the sfm
-                            "pixelRatioLocked": "false", #FIXME: not matching the sfm
+                            "pixelRatioLocked": "true", #FIXME: not matching the sfm
                             "principalPoint": principal_point,
                             "distortionParams": "", #FIXME: not matching the sfm
-                            "locked": "true" #FIXME: not matching the sfm
+                            "locked": "true", #FIXME: not matching the sfm
+                            #new fields
+                            "distortionInitializationMode": "none",
+                            "undistortionOffset": ["0","0"],
+                            "undistortionParams": "",
+                            "distortionType": "none",
+                            "undistortionType": "none",
                             }
+
+                            
             sfm_data['intrinsics'].append(intrinsic_sfm)
 
     return sfm_data
