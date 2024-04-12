@@ -14,7 +14,7 @@ The ground truth mesh is provided as an obj file (with and without the faces vis
 Additionally, we provide depth, curvature, roughness, and transmission maps for each camera. 
 The original Blender project is also included in the dataset.
 
-You can easily load the dataset into meshroom using the [LoadDaset]([https://github.com/alicevision/MeshroomResearch/tree/main/mrrs/nodes#loaddataset) node.
+You can easily load the dataset into meshroom using the [LoadDaset](https://github.com/alicevision/MeshroomResearch/tree/main/mrrs/nodes#loaddataset) node.
 
 # Download
 
