@@ -20,6 +20,7 @@ def open_dataset(sfm_data):
         sfm_data_alab_path = find_sfm(os.path.abspath(os.path.join(image_folder, "..", '..', 'sfm')))
     if sfm_data_alab_path is None:
         raise FileNotFoundError("Could not find sfmData") 
+    print("Sfm file found in "+sfm_data_alab_path)
     with open(sfm_data_alab_path, "r") as json_file:
         sfm_data_alab = json.load(json_file)
     #sort by filename to match the .sfm 
@@ -67,6 +68,7 @@ def open_dataset(sfm_data):
     else:
         print("GT mesh not found in "+mesh_folder)
 
+    #landmarks if any
     if "structure" in sfm_data_alab.keys():
         sfm_data["structure"] = sfm_data_alab["structure"]
 

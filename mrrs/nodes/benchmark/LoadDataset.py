@@ -126,6 +126,7 @@ class LoadDataset(desc.Node):
                                'depth_maps', '<VIEW_ID>_depthMap.exr'),
             uid=[],
             advanced=True,
+            visible=False
         ),
 
         desc.File(
@@ -136,7 +137,8 @@ class LoadDataset(desc.Node):
             value=os.path.join(desc.Node.internalFolder,
                                'masks', '<VIEW_ID>.png'),
             uid=[],
-            advanced=True
+            advanced=True,
+            visible=False
         ),
 
         desc.File(
@@ -149,6 +151,7 @@ class LoadDataset(desc.Node):
             uid=[],
             advanced=True,
             enabled=lambda attr: attr.node.landMarksProj.value,
+            visible=False
         ),
 
         desc.File(
@@ -159,7 +162,8 @@ class LoadDataset(desc.Node):
             value=os.path.join(desc.Node.internalFolder,
                                'mesh_display.ply'),
             uid=[],
-            advanced=True
+            advanced=True,
+            visible=False
         ),
     ]
 
@@ -210,7 +214,7 @@ class LoadDataset(desc.Node):
         #Exports
         if  chunk.node.initSfmLandmarksVertices.value != 0: 
             print("**Initialising random SfM landmarks from geometry")
-            if "landmarks" in gt_sfm_data:
+            if "structure" in gt_sfm_data:
                 raise RuntimeError("Landmarks already in sfmData")
             if gt_data["mesh"] is None:
                 raise RuntimeError("Cannot initialise landmarks with no geometry")
@@ -232,15 +236,18 @@ class LoadDataset(desc.Node):
             if chunk.node.landMarksProj.value:
                 print("**Exporting %d SfM landmarks projections"%(vertices.shape[0]))
                 os.makedirs(os.path.dirname(chunk.node.landMarksProjDisplay.value), exist_ok=True)
-                size_lm=int(np.ceil(gt_data["image_sizes"][0][0]/400))
+                size_lm=int(np.ceil(gt_data["image_sizes"][0][0]/800))
+                lm_color = np.random.random_integers(low=0, high=255, size=[vertices.shape[0], 3])
                 for projs, view in zip(vertices_projections, gt_sfm_data["views"]):
                     prj_img = open_image(view["path"], to_srgb=True)
-                    for (x,y) in projs[0]:
+                    for i, (x,y) in enumerate(projs[0]):
                         x=int(x)
                         y=int(y)
                         if x-size_lm<0 or y-size_lm<0 or x+size_lm >= gt_data["image_sizes"][0][0] or y+size_lm >= gt_data["image_sizes"][0][1]:
                             continue
-                        prj_img[y-size_lm:y+size_lm,x-size_lm:x+size_lm,1] = 255
+                        prj_img[y-size_lm:y+size_lm,x-size_lm:x+size_lm,0] = lm_color[i,0]
+                        prj_img[y-size_lm:y+size_lm,x-size_lm:x+size_lm,1] = lm_color[i,1]
+                        prj_img[y-size_lm:y+size_lm,x-size_lm:x+size_lm,2] = lm_color[i,2]
                     output_image = os.path.join(os.path.dirname(chunk.node.landMarksProjDisplay.value), view["viewId"]+".png")
                     save_image(output_image, prj_img)
 
@@ -346,36 +353,9 @@ class LoadDataset(desc.Node):
                 gt_data["mesh"].export(new_display_filename)
                 chunk.node.meshDisplay.value=new_display_filename
 
-                #Fit spheres
-                # SAMPLES = 10000
-
-                # print("Kmeans")
-                # from scipy.cluster.vq import  kmeans2
-                # # centroids, labels = trimesh.points.k_means(gt_data["mesh"].vertices, SAMPLES, iter=1)
-                # centroids, labels = kmeans2(gt_data["mesh"].vertices, SAMPLES, iter=1)
-
-                # print("Creating spheres")
-                # spheres = []   
-                # for label in range(SAMPLES):    
-                #     print("%d/%d"%(label,SAMPLES))
-                #     vertices = gt_data["mesh"].vertices[labels==label] 
-                #     if vertices.shape[0]>3:
-                #         # center, radius, error =trimesh.nsphere.fit_nsphere(vertices)
-                #         center = np.mean(vertices, axis=0)
-                #         #radius is s
-                #         radius = np.amin(np.amax(vertices, axis=0) - np.amin(vertices, axis=0))/2
-                #         sphere = trimesh.creation.uv_sphere(radius)
-                #         sphere.apply_translation(center)
-                #         spheres.append(sphere)
-                # display_mesh=trimesh.util.concatenate(spheres)
-                # display_mesh.export(chunk.node.meshDisplay.value)
-
       
             else:
                 gt_data["mesh"].export(chunk.node.meshDisplay.value)
 
-
-     
-            
         print("*LoadDataset ends")
 
