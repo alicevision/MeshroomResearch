@@ -49,6 +49,9 @@ def run(args: argparse.Namespace):
 
     from repo.models.dsine import DSINE
     import repo.utils.utils as utils
+    torchhub_cache = os.path.join(os.path.dirname(args.ckpt), 'torch', 'hub')
+    if os.path.exists(torchhub_cache):
+        torch.hub.set_dir(torchhub_cache)
     model = DSINE().to(device)
     model.pixel_coords = model.pixel_coords.to(device)
     model = utils.load_checkpoint(args.ckpt, model)
