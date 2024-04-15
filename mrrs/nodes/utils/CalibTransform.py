@@ -8,7 +8,7 @@ from meshroom.core import desc
 from mrrs.core.ios import *
 from mrrs.core.geometry import *
 
-from mrrs.core.geometry import GG_CV_MAT33
+from mrrs.core.geometry import CG_CV_MAT33
 
 class Transforms():
     """
@@ -24,7 +24,7 @@ class Transforms():
         """
         Swap from CG to CV coordinate system
         """
-        extrinsics=GG_CV_MAT33@extrinsics
+        extrinsics=CG_CV_MAT33@extrinsics
         return extrinsics, intrinsics
 
     def custom(extrinsics, intrinsics, param):

@@ -8,7 +8,7 @@ from meshroom.core import desc
 from mrrs.core.ios import *
 from mrrs.core.geometry import *
 
-from mrrs.core.geometry import GG_CV_MAT33
+from mrrs.core.geometry import CG_CV_MAT33
 
 class CutSfm(desc.Node):
 

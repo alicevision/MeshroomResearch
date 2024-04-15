@@ -2,16 +2,19 @@
 #     --workspace_path $DATASET_PATH/dense \
 #     --workspace_format COLMAP \
 #     --input_type geometric \
-#     --output_path $DATASET_PATH/dense/fused.ply
+#     --output_mesh $DATASET_PATH/dense/fused.ply
 
 __version__ = "2.0"
 
 import os
 from meshroom.core import desc
+
 from . import COLMAP
+import trimesh
+from mrrs.core.geometry import CG_CV_MAT44 
 
 class PoissonMesher(desc.CommandLineNode):
-    commandLine = COLMAP+' poisson_mesher {allParams}'
+    commandLine = COLMAP+' poisson_mesher {input_path} --PoissonMeshing.trim {trimValue} --output_path {output_meshValue}'
 
     category = 'Colmap'
     documentation = ''''''
@@ -31,15 +34,14 @@ class PoissonMesher(desc.CommandLineNode):
             value=0.0,
             range=(0.0, 100.0, 1.0),
             uid=[0],
-            group='',
             ),
     ]
 
     outputs = [
         desc.File(
-            name='output_path',
-            label='OutputPath',
-            description='Output path',
+            name='output_mesh',
+            label='OutputMesh',
+            description='Output mesh',
             value=os.path.join(desc.Node.internalFolder, "mesh_poisson.ply"),
             uid=[],
         ),
@@ -47,8 +49,9 @@ class PoissonMesher(desc.CommandLineNode):
     ]
 
     def processChunk(self, chunk):
-        append_param= " --PoissonMeshing.trim "+str(chunk.node.trim.value)
-        chunk.node._cmdVars["allParams"]+=append_param#FIXME: need to be done onoy once!! also messes up the save
         desc.CommandLineNode.processChunk(self, chunk)
-        chunk.node._cmdVars["allParams"]=chunk.node._cmdVars["allParams"][:-len(append_param)]
+        #re-orient mesh
+        mesh = trimesh.load(chunk.node.output_mesh.value)
+        mesh.apply_transform(CG_CV_MAT44)
+        mesh.export(chunk.node.output_mesh.value)
 
