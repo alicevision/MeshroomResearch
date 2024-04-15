@@ -1,2 +1,2 @@
 import os
-ENV_PATH = "/home/bbrument/anaconda3/envs/nerfstudio"
+ENV_FILE = os.path.join(os.path.dirname(__file__), 'env.yaml')

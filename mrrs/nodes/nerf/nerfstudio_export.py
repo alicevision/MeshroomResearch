@@ -1,13 +1,9 @@
-import json
+
 import os
-import numpy as np
-import cv2
 
 from meshroom.core import desc
-from mrrs.core.ios import matrices_from_sfm_data, open_depth_map, save_exr
 from mrrs.core.CondaNode import CondaNode
 from mrrs.nerf import ENV_PATH
-
 
 class NeRFStudioExport(CondaNode):
 
@@ -16,11 +12,6 @@ class NeRFStudioExport(CondaNode):
     gpu = desc.Level.INTENSIVE
 
     commandLine = "ns-export {methodValue} --load-config {configPathValue} {allParams}"
-
-    #overides the env path
-    # @property
-    # def env_file(self):
-    #     return ENV_FILE
     
     env_path = ENV_PATH
 

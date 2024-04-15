@@ -5,7 +5,6 @@ import cv2
 import shutil
 
 from meshroom.core import desc
-from mrrs.core.ios import matrices_from_sfm_data, open_depth_map, save_exr
 from mrrs.core.CondaNode import CondaNode
 from mrrs.nerf import ENV_PATH
 
@@ -124,11 +123,6 @@ class NeRFStudio(CondaNode):
 
     commandLine = "ns-train {methodValue} --viewer.quit-on-train-completion True {allParams} --data {outputFolderValue} --output-dir {outputFolderValue}"
 
-    #overides the env path
-    # @property
-    # def env_file(self):
-    #     return ENV_FILE
-    
     env_path = ENV_PATH
 
     inputs = [
