@@ -1,16 +1,14 @@
 
 # New MeshroomResearch nodes
 
-The following new nodes are added to Meshroom, you may find them by right click on the graph > MRRS.
+The following new nodes are added to Meshroom, you may find them by right click on the graph > Meshroom Research.
 
 ## Benchmark and data nodes
 
 ### LoadDataset
-TODO
-
-### InjectSFMData
-Meshroom relies internally on feature points from the SfM to initialise the depth estimation. Use this node with te option 'structure' to copy them into a ground truth .sfm.\
-You can also use this node to overwrite some fields in the .sfm.
+This node uses the relative path of the input images to load available ground truth data.
+The dataset type parameter must match the input dataset.
+You may use this node to initialise fake landmarks or masks from a ground truth mesh, if any.
 
 ### DepthMapTransform
 Meshroom does not represent the depth map using a conventional representation.\
@@ -32,10 +30,6 @@ This node can be used to benchmark the estimated mesh based on a ground truth me
 It will run n times the chamfer distance, using ramdom points sampled on the surface of the mesh.\
 This calls the core.metric package.
 
-## CleanMesh
-
-TBA
-
 ## Colmap Nodes
 
 You may use Colmap Nodes to run [Colmap](https://github.com/colmap/colmap) inside of Meshroom.
@@ -46,9 +40,37 @@ TBA list nodes
 
 ## Reality Capture Nodes
 
+Use ExportXMP or ImportXMP to export and import XMP calibration data to and from reality capture.
+Place the exported XMP in the image folder and it should be imported into reality capture.
+Beware that the poses may be refined by reality capture 3D reconstruction.
+
+## Depth Map
+
 TODO
 
 ## Render
 
-##
+TODO
+
+## Utility Nodes
+
+We also provide a list of utilisty nodes routinely used.
+
+### InjectSFMData
+Meshroom relies internally on feature points from the SfM to initialise the depth estimation. Use this node with te option 'structure' to copy them into a ground truth .sfm.\
+You can also use this node to overwrite some fields in the .sfm.
+
+### CalibTransform 
+Applies a transform to the input poses.
+
+
+### CopyData 
+Copy and exposes data from an input folder. Convenient to expose debuging data that are not node attributes.
+
+### CutSfm 
+Will extract only a part of the input view.
+
+### DepthMapTranform
+Will perform an operation on input depth maps. Used to convert the depth maps to and from meshroom's format.
+
 
