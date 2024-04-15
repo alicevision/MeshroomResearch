@@ -1,4 +1,4 @@
-# Meshroom Research ![](./assets/logo-inline.png)
+![](./assets/logo-inline.png) # Meshroom Research 
 
 Meshroom Research is a library and a plugin for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use [nodal](https://en.wikipedia.org/wiki/Node_graph_architecture) UI and architecture.
 Meshroom Research focuses on making, integrating, testing and benchmarking various methods easily into Meshroom's UI.
