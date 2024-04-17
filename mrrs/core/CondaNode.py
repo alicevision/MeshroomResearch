@@ -4,8 +4,7 @@ Conda needs to be installed and callable via "conda"
 """
 
 import os
-from meshroom.core import desc
-from meshroom.core import defaultCacheFolder
+from meshroom.core import desc, defaultCacheFolder, hashValue
 
 #TODO: add mode to not run as CLI to be able to debug
 class CondaNode(desc.CommandLineNode):
@@ -26,23 +25,26 @@ class CondaNode(desc.CommandLineNode):
         for env_var in os.environ.keys():
             if ((("py" in env_var) or  ("PY" in env_var)) 
                 and ("REZ" not in env_var) and ("." not in env_var) and ("-" not in env_var)):
-                if env_var.endswith("()"):#function get special treatment
-                    cmd+='unset -f '+env_var[10:-2]+'; '
+                if env_var.endswith("()"): #function get special treatment
+                    cmd += 'unset -f '+env_var[10:-2]+'; '
                 else:
-                    cmd+='unset '+env_var+'; '
+                    cmd += 'unset '+env_var+'; '
         return cmd
 
     def buildCommandLine(self, chunk):
         cmdPrefix = ''
         #create the env in the folder above the node
         if self.env_path is None:
-            env_path=os.path.join(defaultCacheFolder, "env_"+self.__class__.__name__)#env name from class
-        else:
-            env_path=self.env_path
-        if not os.path.exists(env_path):
-            chunk.logger.info("Creating conda env in "+env_path)
             if not os.path.exists(self.env_file):
-                raise RuntimeError('No yaml file found.')
+                raise RuntimeError('No YAML environment file, nor environment path are found.')
+            with open(self.env_file, 'r') as file:
+                env_content = file.read()
+            env_id = hashValue(env_content)
+            env_path = os.path.join(defaultCacheFolder, f"env_{self.__class__.__name__}_{env_id}") #env name from class
+        else:
+            env_path = self.env_path
+        if not os.path.exists(env_path):
+            chunk.logger.info("Creating conda env in " + env_path)
             make_env_command = self.curate_env_command()+" conda config --set channel_priority strict; "+" conda env create --prefix {env_path} --file {env_file}".format(env_path=env_path, env_file=self.env_file)   
             print("Building env")
             print(make_env_command)
