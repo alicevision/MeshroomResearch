@@ -113,7 +113,7 @@ Install openimageIO and its python bindings (e.g. [from conda](https://anaconda.
 Then clone and install Meshroom Research with pip:
 ```
 git clone https://github.com/alicevision/MeshroomResearch.git
-pip install -e MeshroomResearch
+pip install -e ./MeshroomResearch
 ```
 
 ## Dev quickstart
