@@ -3,7 +3,7 @@ import os
 
 from meshroom.core import desc
 from mrrs.core.CondaNode import CondaNode
-from mrrs.nerf import ENV_PATH
+from mrrs.nerf import ENV_FILE
 
 class NeRFStudioExport(CondaNode):
 
@@ -13,7 +13,7 @@ class NeRFStudioExport(CondaNode):
 
     commandLine = "ns-export {methodValue} --load-config {configPathValue} {allParams}"
     
-    env_path = ENV_PATH
+    env_file = ENV_FILE
 
     inputs = [
             desc.File(

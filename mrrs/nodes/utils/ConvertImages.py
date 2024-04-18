@@ -6,7 +6,8 @@ __version__ = "3.0"
 import os
 import json
 
-import cv2 
+import cv2
+from mrrs.core.utils import cv2_resize_with_pad 
 import numpy as np
 
 from mrrs.core.ios import open_image, save_image
@@ -60,6 +61,26 @@ class ConvertImages(desc.Node):
             range=(0, 4096, 1),
             uid=[0],
         ),
+
+        desc.IntParam(
+            name='forceWidth',
+            label='Force Width',
+            description='Will resize to the with by paddign or croping, if != 0',
+            value=0,
+            range=(0, 4096, 1),
+            uid=[0],
+        ),
+
+        desc.IntParam(
+            name='forceHeight',
+            label='Force Height',
+            description='Will resize to the height by paddign or croping, if != 0',
+            value=0,
+            range=(0, 4096, 1),
+            uid=[0],
+        ),
+
+
 
         desc.BoolParam(
             name='mergeInterinsics',
@@ -162,28 +183,34 @@ class ConvertImages(desc.Node):
                     resample_x = int(sfm_data["intrinsics"][0]["pixelRatio"])
                 input_image = input_image[::resample_x,::]#resample
                 new_filename = view_id+chunk.node.outputFormat.value
-                if chunk.node.maxWidth.value<input_image.shape[1]:#max sie
+                if chunk.node.maxWidth.value<input_image.shape[1]:#max size
                     height = int(input_image.shape[0]*chunk.node.maxWidth.value/input_image.shape[1])
                     original_dtype = input_image.dtype
                     input_image = cv2.resize(input_image.astype(np.float32), (chunk.node.maxWidth.value, height))
                     input_image = input_image.astype(original_dtype)   
                     chunk.logger.info('\tResizing to %d %d'%(chunk.node.maxWidth.value, height))
-                    #updating focal lenght FIXME: if we want to stay up to scale
-                    # sfm_data["intrinsics"]["focalLength"] = sfm_data["intrinsics"]["focalLength"]*(chunk.node.maxWidth.value/input_image.shape[1])
+                    
+                #force resize with pad and crop
+                if chunk.node.forceWidth.value  and chunk.node.forceHeight.value:
+                    input_image, pads= cv2_resize_with_pad(input_image, [ chunk.node.forceWidth.value  , chunk.node.forceHeight.value], interpolation=cv2.INTER_LINEAR)
                 if chunk.node.renameSequence.value:
                     new_filename = "frame_%05d"%frameId+chunk.node.outputFormat.value
                     chunk.logger.info("\tRenaming to to "+new_filename)
+
                 output_file = os.path.join(chunk.node.outputFolder.value, new_filename)
                 if chunk.node.autoRotate.value:
                     orientation=0
+    
                 save_image(output_file, input_image, orientation=orientation)
                 sfm_data["views"][index]["path"]     = output_file
+
                 #modify the view size
                 sfm_data["views"][index]["width"] = input_image.shape[1]
                 sfm_data["views"][index]["height"] = input_image.shape[0]
                 index_intrinsic = [i for i,intrinsic in enumerate(sfm_data["intrinsics"]) if intrinsic["intrinsicId"]==intrinsicId][0]
                 sfm_data["intrinsics"][index_intrinsic]["width"] = input_image.shape[1]
                 sfm_data["intrinsics"][index_intrinsic]["height"] = input_image.shape[0]
+                
                 #if has been rotated, swap sensor size (should be done only once per intrisics)
                 largets_dim_image=np.argmax([input_image.shape[0],input_image.shape[1]])
                 largets_dim_sfm=np.argmax([ sfm_data["intrinsics"][index_intrinsic]["sensorHeight"],
