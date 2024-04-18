@@ -2,7 +2,7 @@
 
 Meshroom Research is a library and a plugin for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use [nodal](https://en.wikipedia.org/wiki/Node_graph_architecture) UI and architecture.
 Meshroom Research focuses on making, integrating, testing and benchmarking various methods easily into Meshroom's UI.
-Dependencies are kept to a bare minimum, [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) is used extensivelly instead.  
+Dependencies are kept to a bare minimum, [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) is used extensively instead.  
 It is implemented in Python and will likely remain so.
 
 ## Features 
@@ -16,33 +16,15 @@ Meshroom Research supports opening and viewing the ground truth data of the foll
 - [BlendedMVG](https://github.com/YoYo000/BlendedMVS)
 - [Nerf synthetic](https://www.matthewtancik.com/nerf)
 - [ALab synthetic dataset](https://github.com/alicevision/MeshroomResearch/tree/main/alab_dataset)
-- [Tanks and Temples](https://www.tanksandtemples.org/) TBA
-- [Skoltech3D](https://github.com/Skoltech-3D/sk3d_data) TBA
+- [Tanks and Temples](https://www.tanksandtemples.org/) (TBA)
+- [Skoltech3D](https://github.com/Skoltech-3D/sk3d_data) (TBA)
 
 
 To do so, drag and drop the images from the dataset in Meshroom, as you would do for a normal dataset. 
 Add the node LoadDataset on the camera init's output and select the dataset type.
-
 You may now use meshroom's visualisation and nodes on the outputs. 
 
-You also have option to generate ground truth image masks and depth mapth TBA.
-
-:warning: TODO: add gif load demo
-
-### 3rd party imports and exports
-
-Meshroom Research can also import and export data from the following software:
-
-- [COLMAP](https://colmap.github.io/)
-  - Import SfM calibration (node [Colmap2MeshroomSfmConvertions](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Colmap2MeshroomSfmConvertions.py) )
-  - Import computed depth (node [ImportColmapDepthMaps](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/ImportColmapDepthMaps.py) )
-  - Export SfM Calibration (node [Meshroom2ColmapSfmConvertions](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Meshroom2ColmapSfmConvertions.py) )
-- [RealityCapture](https://www.capturingreality.com/)
-  - Import SfM calibration (node [ImportXMP](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ImportXMP.py))
-  - Export SfM Calibration (node [ExportXMP](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ExportXMP.py))
-- [Metashape](https://www.agisoft.com/) (TBA)
-
-:warning: TODO: explanation and GIF
+https://github.com/alicevision/MeshroomResearch/assets/72275161/974c2127-157c-43de-8898-26bcc9676b15
 
 ### 3D Reconstruction methods nodes
 
@@ -51,26 +33,17 @@ We integrated the following 3D reconstruction methods into their own node pipeli
 Classical photogrametry:
   - Meshroom
   - COLMAP
-  - ACMP TBA
 
 Deep-learning-based depth map estimation:
   - VIZ-mvsnet
 
-Implicit representations (NERFs):
-  - Instant-ngp TBA
-  - NeuS TBA
-  - NeuS2 TBA
-  - NeuralAngelo TBA
+Optimisation-based via NerfStudio  (TBA):
+  - Instant-ngp
+  - Gaussian Splatting
 
-Gaussian Splatting :
-  - Original paper TBA
-  - SUGAR TBA
+### Benchmarking
 
-:warning: TODO:  explanation and GIF
-
-### SfM, Depth maps, Meshing benchmarking
-
-Meshroom Research provides a way to evalutate the different steps of the photograpmetry pipeline (SfM, depth map estimation and meshing).
+Meshroom Research provides a way to evaluate the different steps of the photograpmetry pipeline (SfM, depth map estimation and meshing).
 The nodes [CalibrationComparison](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/CalibrationComparison.py), [DepthMapComparison](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/DepthMapComparison.py) and [MeshComparison](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/benchmark/MeshComparisonBaptise.py)
 
 You may use the provided Meshroom project and run the benchmark with the command line interface.
@@ -107,9 +80,20 @@ Options:
   --help                    Show this message and exit.
 ```
 
-:warning: TODO: explain benchmarking and cli, pipeline system etc..
-
 You may also create you own evaluation pipeline with the evaluation nodes.
+
+### 3rd party imports and exports
+
+Meshroom Research can also import and export data from the following software:
+
+- [COLMAP](https://colmap.github.io/)
+  - Import SfM calibration (node [Colmap2MeshroomSfmConvertions](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Colmap2MeshroomSfmConvertions.py) )
+  - Import computed depth (node [ImportColmapDepthMaps](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/ImportColmapDepthMaps.py) )
+  - Export SfM Calibration (node [Meshroom2ColmapSfmConvertions](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/colmap/Meshroom2ColmapSfmConvertions.py) )
+- [RealityCapture](https://www.capturingreality.com/)
+  - Import SfM calibration (node [ImportXMP](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ImportXMP.py))
+  - Export SfM Calibration (node [ExportXMP](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/nodes/reality_capture/ExportXMP.py))
+- [Metashape](https://www.agisoft.com/) (TBA)
 
 ### New nodes
 
@@ -118,32 +102,21 @@ The list of added nodes can be found in [nodes](mrrs/nodes/README.md).
 
 ## Install
 
-:warning: TODO: make proper install method
+:warning: The installation method is a work in progress 
 
-Install Meshroom: https://alicevision.org/#meshroom.
-Clone the repo and copy and paste the prebuild 
+:warning: Working in a virtual environment (e.g. conda) is highly recommended.
 
-Clone this repo:
-```
-git clone https://github.com/alicevision/MeshroomResearch
-```
-Then install Meshroom Research with pip:
-```
-cd MRRS
-pip install -e . [< optional features >]
-```
-< optional features > may need other packages.
+Install Meshroom and alicevision  by cloning the repo and downloading the binaries following [this procedure](https://github.com/alicevision/Meshroom).
 
-TODO: env var
+Install openimageIO and its python bindings (e.g. [from conda](https://anaconda.org/conda-forge/openimageio)).
 
-:warning: TODO: this probably needs to go
-
-On Mikros machines:
+Then clone and install Meshroom Research with pip:
 ```
-rez env meshroom mrrs
+git clone https://github.com/alicevision/MeshroomResearch.git
+pip install -e ./MeshroomResearch
 ```
 
-## Meshroom Dev quickstart
+## Dev quickstart
 
 You are very welcome to add your own method or dataset to Meshroom Research!
 
@@ -157,24 +130,10 @@ The organisation is the following:
 Meshroom was designed to interact with a nodal GUI; this organically defines the code's structure as independent modules with distinct inputs and outputs. All the intermetiates results of each node of the graph (the pipeline) are dumped into a cache folder eponypm to the node.\
 These files can be opened easily because they are in a standard format (exr, obj, abc, json, etc.).
 
-### Adding a Meshroom node
+Follow the guides on [Meshroom's repo](https://github.com/alicevision/Meshroom) to learn how to mak custom nodes.
 
-The best way to implement a new feature is to create a new node.\
-For this, one must create a new class inheriting `CliNode` or `Node` (`from meshroom.core.desc`), for a system call or a python node respectively.\
-Inputs and outputs are simply set by populating the lists `inputs` and `outputs` with ...tba \
-The function `processChunk(self, chunk)` is used for the callback of when a node needs to be computed.
-`chunk` is ...
-
-Custom nodes can be added to Meshroom by setting the environement variable `MESHROOM_NODES_PATH`.
-Don't forget to add the `__init__.py` in the node folder.
-
-[Meshroom node documentation](https://meshroom-manual.readthedocs.io/en/latest/feature-documentation/core/nodes.html)
-
-Tips:
-plugin QT_DEBUG_PLUGINS=1 to debug
-
-### Conda Nodes
-
+We have a new type of node [CondaNode](https://github.com/alicevision/MeshroomResearch/blob/main/mrrs/core/CondaNode.py), inheriting command line node, but automatically building conda environments and running the code from it.
+Just override the variables `env_file` or `env_path` with the path to your yaml file or the path to the built conda environments respectively. 
 
 
 
