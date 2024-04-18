@@ -35,9 +35,6 @@ This calls the core.metric package.
 You may use Colmap Nodes to run [Colmap](https://github.com/colmap/colmap) inside of Meshroom.
 For this, you need to add colmap to your path.
 
-TBA convertions
-TBA list nodes
-
 ## Reality Capture Nodes
 
 Use ExportXMP or ImportXMP to export and import XMP calibration data to and from reality capture.
@@ -45,12 +42,12 @@ Place the exported XMP in the image folder and it should be imported into realit
 Beware that the poses may be refined by reality capture 3D reconstruction.
 
 ## Depth Map
-
-TODO
+VizMVSNet  is integrated in the eponym node. You may use meshroom's node "SelectConnectedViews" to generate a list of views to match.
+(TBA)
 
 ## Render
-
-TODO
+This node uses blender to render a mesh from cameras defined in a .sfmdata.
+(TBA)
 
 ## Utility Nodes
 
