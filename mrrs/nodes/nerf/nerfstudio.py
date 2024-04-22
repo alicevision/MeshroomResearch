@@ -6,7 +6,7 @@ import shutil
 
 from meshroom.core import desc
 from mrrs.core.CondaNode import CondaNode
-from mrrs.nerf import ENV_PATH
+from mrrs.nerf import ENV_FILE
 
 def convert_sfmdata_to_nerf(sfm_data, actual_path):
 
@@ -123,7 +123,7 @@ class NeRFStudio(CondaNode):
 
     commandLine = "ns-train {methodValue} --viewer.quit-on-train-completion True {allParams} --data {outputFolderValue} --output-dir {outputFolderValue}"
 
-    env_path = ENV_PATH
+    env_file = ENV_FILE
 
     inputs = [
             desc.File(

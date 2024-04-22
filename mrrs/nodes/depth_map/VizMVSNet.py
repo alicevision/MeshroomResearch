@@ -146,6 +146,7 @@ class VizMVSNet(CondaNode):
         #set size param to avoid redim by default
         w=images_size[0][0]
         h=images_size[0][1]
+     
         # doesnt work
         # chunk.node.sizeParam.value="--resize %d,%d --crop %d,%d"%(w,h,w,h)
         chunk.node._cmdVars["sizeParamValue"]="--resize %d,%d --crop %d,%d"%(w,h,w,h)
