@@ -1,7 +1,7 @@
 # ![](./assets/logo-inline.png) Meshroom Research 
 
-Meshroom-Research is a set of plugins for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software leveraging an easy-to-use [nodal](https://en.wikipedia.org/wiki/Node_graph_architecture) UI and architecture.
-Meshroom-Research focuses on integrating, testing and benchmarking various methods easily into Meshroom's UI.
+Meshroom-Research is a set of plugins for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software that features an easy-to-use [nodal](https://en.wikipedia.org/wiki/Node_graph_architecture) UI and architecture.
+Meshroom-Research focuses on easily integrating, testing, and benchmarking various methods into Meshroom's UI.
 It is implemented in Python and the dependencies are managed using  [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
 ## Features 
