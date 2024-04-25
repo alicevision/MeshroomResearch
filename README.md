@@ -1,6 +1,6 @@
 # ![Meshroom Research Logo](./assets/logo-inline.png) Meshroom Research
 
-*The **Meshroom's innovation hub** for experimenting and nurturing new ideas.*
+**Meshroom's innovation hub** for experimenting and nurturing new ideas. 
 
 Meshroom-Research comprises a collection of plugins for [Meshroom](https://alicevision.org/#meshroom), an intuitive, open-source 3D Reconstruction Software characterized by its nodal UI and architecture.
 The primary focus of Meshroom-Research lies in seamlessly integrating, testing, and benchmarking various methods within Meshroom. Implemented in Python, it manages dependencies using [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
