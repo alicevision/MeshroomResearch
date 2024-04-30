@@ -15,7 +15,20 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'repo'))
 
 from utils.utils import get_intrins_from_fov
 
-def read_sfmData(sfmData_path: str, fov: int = 45):
+def read_sfmData(sfmData_path: str, images_folder: str, fov: int = 45):
+    custom_dir = False
+    if images_folder != "":
+        assert os.path.isdir(images_folder), f"imagesFolder doesn't exist: {images_folder}"
+        custom_dir = True
+        _, _, filenames = next(os.walk(images_folder))
+        paths = {}
+        for filename in filenames:
+            view_id, _ = os.path.splitext(filename)
+            path = paths.get(view_id, None)
+            if path is None:
+                paths[view_id] = os.path.join(images_folder, filename)
+            else:
+                paths[view_id] = ''
     with open(sfmData_path, "r") as sfm_file:
         sfm_data = json.load(sfm_file)
     
@@ -36,7 +49,10 @@ def read_sfmData(sfmData_path: str, fov: int = 45):
     data = []
     for view in sfm_data['views']:
         view_id = view['viewId']
-        img_path = view['path']
+        if custom_dir:
+            img_path = paths[view_id]
+        else:
+            img_path = view['path']
         intrinsic_matrix = intrinsics.get(view['intrinsicId'], None)
         if intrinsic_matrix is None:
             intrinsic_matrix = get_intrins_from_fov(fov, view['height'], view['width'], 'cpu')
@@ -61,7 +77,7 @@ def run(args: argparse.Namespace):
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
     with torch.no_grad():
-        data = read_sfmData(args.input, args.fov)
+        data = read_sfmData(args.input, args.imagesFolder, args.fov)
         rangeStart = args.rangeStart
         if rangeStart < 0: rangeStart = 0
         rangeSize = args.rangeSize
