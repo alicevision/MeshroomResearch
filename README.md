@@ -1,31 +1,32 @@
-# ![](./assets/logo-inline.png) Meshroom Research 
+# ![Meshroom Research Logo](./assets/logo-inline.png) Meshroom Research
 
-Meshroom-Research is a set of plugins for [Meshroom](https://alicevision.org/#meshroom), a free, open-source 3D Reconstruction Software that features an easy-to-use [nodal](https://en.wikipedia.org/wiki/Node_graph_architecture) UI and architecture.
-Meshroom-Research focuses on easily integrating, testing, and benchmarking various methods into Meshroom's UI.
-It is implemented in Python and the dependencies are managed using  [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+**Meshroom's innovation hub** for experimenting and nurturing new ideas. 
+
+Meshroom-Research comprises a collection of plugins for [Meshroom](https://alicevision.org/#meshroom), an intuitive, open-source 3D Reconstruction Software characterized by its nodal UI and architecture.
+The primary focus of Meshroom-Research lies in seamlessly integrating, testing, and benchmarking various methods within Meshroom. Implemented in Python, it manages dependencies using [Conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+
 
 ## Features 
 
-### Support for state-of-the-art datasets
+### Support for State-of-the-Art Datasets
 
-Meshroom-Research supports opening and viewing the ground truth data of the following datasets:
+Meshroom-Research facilitates the exploration of ground truth data from several prominent datasets:
 
 - [ETH3D](https://www.eth3d.net/overview)
 - [DTU](https://roboimagedata.compute.dtu.dk/?page_id=36)
 - [BlendedMVG](https://github.com/YoYo000/BlendedMVS)
 - [Nerf synthetic](https://www.matthewtancik.com/nerf)
 - [ALab synthetic dataset](alab_dataset)
-- [Tanks and Temples](https://www.tanksandtemples.org/) (TBA)
-- [Skoltech3D](https://github.com/Skoltech-3D/sk3d_data) (TBA)
+- [Tanks and Temples](https://www.tanksandtemples.org/) (Upcoming)
+- [Skoltech3D](https://github.com/Skoltech-3D/sk3d_data) (Upcoming)
 
+Simply drag and drop images from the desired dataset into Meshroom. Then, add the LoadDataset node to the camera init's output and select the dataset type. From there, leverage Meshroom's visualization capabilities and connect nodes to the outputs.
 
-Drag and drop the images from the dataset in Meshroom as usual. Add the node LoadDataset on the camera init's output and select the dataset type. You could now use Meshroom's visualization and connect nodes on the outputs. 
+[Example](https://github.com/alicevision/MeshroomResearch/assets/72275161/974c2127-157c-43de-8898-26bcc9676b15)
 
-https://github.com/alicevision/MeshroomResearch/assets/72275161/974c2127-157c-43de-8898-26bcc9676b15
+### 3D Reconstruction Method Nodes
 
-### 3D Reconstruction methods nodes
-
-We integrated the following 3D reconstruction methods into their own node pipelines.
+Meshroom-Research seamlessly integrates various 3D reconstruction methods into distinct node pipelines, including:
 
 Classical photogrammetry:
   - Meshroom
@@ -34,100 +35,66 @@ Classical photogrammetry:
 Deep-learning-based depth map estimation:
   - VIZ-mvsnet
 
-Optimisation-based via NerfStudio (TBA):
+Optimization-based via NerfStudio (Upcoming):
   - Instant-ngp
   - 3D Gaussian Splatting
 
 ### Benchmarking
 
-Meshroom-Research provides a way to evaluate the different steps of the photogrammetry pipeline (SfM, depth map estimation and meshing).
-The nodes [CalibrationComparison](mrrs/nodes/benchmark/CalibrationComparison.py), [DepthMapComparison](/mrrs/nodes/benchmark/DepthMapComparison.py) and [MeshComparison](mrrs/nodes/benchmark/MeshComparisonBaptise.py)
+Evaluate different stages of the photogrammetry pipeline (SfM, depth map estimation, and meshing) with Meshroom-Research's benchmarking capabilities. Utilize nodes such as CalibrationComparison, DepthMapComparison, and MeshComparison to assess performance. You can run benchmarks via the command line interface using the provided Meshroom project.
 
-You may use the provided Meshroom project and run the benchmark with the command line interface.
-
-```
-Usage: python -m benchmark run [OPTIONS] DATASET_PATH
-
-  Will run the passed pipeline on the passed dataset.
-
-Options:
-  -o, --output_folder TEXT        Output folder to generate results into.
-  -p, --pipeline TEXT             Path to the benchmark pipeline.
-  -r, --remove_folders            Force clean the content of outputs folder.
-  -t, --dataset_type [blendedMVS]
-  -c, --compute                   Runs the computation. Will just create
-                                  project otherwise.
-  -r, --resume                    Resumes computation if a folder exists, will
-                                  skip folder otherwise.
-  -s, --submit                    Will submit the computation on the grid.
-  -u, --up_to_node TEXT           If computation is enabled, will compute up
-                                  to the passed node.
-  -e, --environnement TEXT        Runs in the specified environnement
-  --help                          Show this message and exit.
-```
-You need to set your environment variables as if you are running Meshroom and Meshroom-Research.
-You may then aggregate the result with
-```
-Usage: python -m benchmark report [OPTIONS] COMPUTED_OUTPUTS_PATH
-
-  Generate a report from a computed benchmark.
-
-Options:
-  -o, --output_folder TEXT  Output folder to generate reports into.
-  --help                    Show this message and exit.
+```bash
+# Example usage
+python -m benchmark run [OPTIONS] DATASET_PATH
 ```
 
-You could also create your own evaluation pipeline with the evaluation nodes.
+Aggregate results with:
 
-### 3rd party imports and exports
+```bash
+# Example usage
+python -m benchmark report [OPTIONS] COMPUTED_OUTPUTS_PATH
+```
 
-With Meshroom-Research, you can also import and export data from the following software:
+Customize your evaluation pipeline with the available evaluation nodes.
+
+### 3rd Party Imports and Exports
+
+Meshroom-Research facilitates data import and export with various software:
 
 - [COLMAP](https://colmap.github.io/)
-  - Import SfM calibration (node [Colmap2MeshroomSfmConvertions](mrrs/nodes/colmap/Colmap2MeshroomSfmConvertions.py) )
-  - Import computed depth (node [ImportColmapDepthMaps](mrrs/nodes/colmap/ImportColmapDepthMaps.py) )
-  - Export SfM Calibration (node [Meshroom2ColmapSfmConvertions](mrrs/nodes/colmap/Meshroom2ColmapSfmConvertions.py) )
+  - Import SfM calibration
+  - Import computed depth
+  - Export SfM Calibration
 - [RealityCapture](https://www.capturingreality.com/)
-  - Import SfM calibration (node [ImportXMP](mrrs/nodes/reality_capture/ImportXMP.py))
-  - Export SfM Calibration (node [ExportXMP](mrrs/nodes/reality_capture/ExportXMP.py))
-- [Metashape](https://www.agisoft.com/) (TBA)
+  - Import SfM calibration
+  - Export SfM Calibration
+- [Metashape](https://www.agisoft.com/) (Upcoming)
 
-### New nodes
+### New Nodes
 
-Meshroom-Research also adds a few new nodes to make it easy to play with 3D reconstruction data.
-The list of added nodes can be found in [nodes](mrrs/nodes/README.md).
+Enhance your 3D reconstruction workflow with additional nodes provided by Meshroom-Research. Refer to the [nodes](mrrs/nodes/README.md) directory for a comprehensive list.
 
-## Install
+## Installation
 
-Working in a virtual environment (e.g. Conda) is highly recommended.
+We strongly recommend working within a virtual environment (e.g., Conda).
 
-Install Meshroom and AliceVision by cloning the repo and downloading the binaries following [this procedure](https://github.com/alicevision/Meshroom).
+1. Install Meshroom and AliceVision by following [this procedure](https://github.com/alicevision/Meshroom).
+2. Install openimageIO and its Python bindings, e.g., [from Conda](https://anaconda.org/conda-forge/openimageio).
+3. Clone and install Meshroom-Research with pip:
 
-Install openimageIO and its Python bindings (e.g. [from conda](https://anaconda.org/conda-forge/openimageio)).
-
-Then clone and install Meshroom-Research with pip:
-```
+```bash
 git clone https://github.com/alicevision/MeshroomResearch.git
 pip install -e ./MeshroomResearch
 ```
 
-## Dev quickstart
+## Developer Quickstart
 
-You are very welcome to add your own method or dataset to Meshroom-Research!
+Contributions to Meshroom-Research are welcomed! Here's a quick overview of the project structure:
 
-The organization is the following:
-- `mrrs/core` contains all the basic IOs, utils and common geometrical functions used through the library
-- `mrrs/pipeline` contains Meshrom pipeline files
-- `mrrs/scripts` contains all the scripts, including those used to run the benchmark
-- `mrrs/nodes` contains the interface nodes for integration in Meshroom
-- `mrrs/< feature >` contains code related to the target feature.
-  
-Meshroom was designed to interact with a nodal UI; this organically defines the code's structure as independent modules with distinct inputs and outputs. All the intermediate results of each node of the graph (the pipeline) are dumped into a cache folder with the name of the node.\
-These files can be opened easily because they are in a standard format (exr, obj, abc, json, etc.).
+- `mrrs/core`: Basic IOs, utilities, and common geometrical functions.
+- `mrrs/pipeline`: Meshroom pipeline files.
+- `mrrs/scripts`: Scripts, including benchmarking tools.
+- `mrrs/nodes`: Interface nodes for integration into Meshroom.
+- `mrrs/<feature>`: Code related to specific features.
 
-Follow the guides on [Meshroom's repo](https://github.com/alicevision/Meshroom) to learn how to make custom nodes.
-
-We have a new type of node [CondaNode](mrrs/core/CondaNode.py), inheriting command line node, but automatically building Conda environments and running the code from it.
-Just override the variables `env_file` or `env_path` with the path to your yaml file or the path to the built Conda environments respectively. 
-
-
+Utilize Meshroom's nodal UI for seamless integration, and refer to the [Meshroom's repo](https://github.com/alicevision/Meshroom) for creating custom nodes. We've introduced a new type of node, CondaNode, which automates Conda environment management for your convenience.
