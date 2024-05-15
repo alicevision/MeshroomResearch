@@ -219,25 +219,25 @@ class LoadDataset(desc.Node):
             if gt_data["mesh"] is None:
                 raise RuntimeError("Cannot initialise landmarks with no geometry")
             
-            vertices = gt_data["mesh"].vertices.copy()
+            vertices_lm = gt_data["mesh"].vertices.copy()
             #meshes in meshroom are in the CG cs, landmarks are CV
-            vertices=transform_cg_cv(vertices)
+            vertices_lm=transform_cg_cv(vertices_lm)
 
             #sampling from mesh or or point cloud
             if isinstance(gt_data["mesh"], trimesh.PointCloud) :
-                vertices_indxs = np.random.choice(list(range(vertices.shape[0])), chunk.node.initSfmLandmarksVertices.value)
-                vertices = vertices[vertices_indxs]
+                vertices_indxs = np.random.choice(list(range(vertices_lm.shape[0])), chunk.node.initSfmLandmarksVertices.value)
+                vertices_lm = vertices_lm[vertices_indxs]
             else:
-                vertices =  random_sample_points_mesh_2([vertices, gt_data["mesh"].faces],
+                vertices_lm =  random_sample_points_mesh_2([vertices_lm, gt_data["mesh"].faces],
                                                         chunk.node.initSfmLandmarksVertices.value)
             #compute projections
-            vertices_projections = [camera_projection(vertices, gt_data["extrinsics"][oi], gt_data["intrinsics"][oi]) for oi in range(len(views_id))]
+            vertices_projections = [camera_projection(vertices_lm, gt_data["extrinsics"][oi], gt_data["intrinsics"][oi]) for oi in range(len(views_id))]
 
             if chunk.node.landMarksProj.value:
-                print("**Exporting %d SfM landmarks projections"%(vertices.shape[0]))
+                print("**Exporting %d SfM landmarks projections"%(vertices_lm.shape[0]))
                 os.makedirs(os.path.dirname(chunk.node.landMarksProjDisplay.value), exist_ok=True)
                 size_lm=int(np.ceil(gt_data["image_sizes"][0][0]/800))
-                lm_color = np.random.random_integers(low=0, high=255, size=[vertices.shape[0], 3])
+                lm_color = np.random.random_integers(low=0, high=255, size=[vertices_lm.shape[0], 3])
                 for projs, view in zip(vertices_projections, gt_sfm_data["views"]):
                     prj_img = open_image(view["path"], to_srgb=True)
                     for i, (x,y) in enumerate(projs[0]):
@@ -251,9 +251,9 @@ class LoadDataset(desc.Node):
                     output_image = os.path.join(os.path.dirname(chunk.node.landMarksProjDisplay.value), view["viewId"]+".png")
                     save_image(output_image, prj_img)
 
-            print("**Exporting %d SfM landmarks"%(vertices.shape[0]))
+            print("**Exporting %d SfM landmarks"%(vertices_lm.shape[0]))
             structure = []
-            for vi, v in enumerate(vertices):#FIXME: slow  
+            for vi, v in enumerate(vertices_lm):#FIXME: slow  
                 landmark = {}
                 landmark["landmarkId"] = str(vi)
                 landmark["descType"] = "unknown" 
