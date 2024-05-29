@@ -4,11 +4,13 @@ import numpy as np
 import cv2
 
 from meshroom.core import desc
-from mrrs.core.ios import matrices_from_sfm_data, open_depth_map, save_exr
-from mrrs.core.CondaNode import CondaNode
-from mrrs.core.utils import format_float_array
-from mrrs.depth_maps.vismvsnet import ENV_FILE, EXEC, MODEL_PATH
+from meshroom.core.plugin import CondaNode
 
+from mrrs.core.ios import matrices_from_sfm_data, open_depth_map, save_exr
+from mrrs.core.utils import format_float_array
+
+EXEC = "python "+ os.path.join(os.path.dirname(__file__), "Vis-MVSNet/test.py")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "Vis-MVSNet/pretrained_model/vis")
 
 # parser.add_argument('--data_root', type=str, help='The root dir of the data.')
 # parser.add_argument('--dataset_name', type=str, default='tanksandtemples', help='The name of the dataset. Should be identical to the dataloader source file. e.g. blended refers to data/blended.py.')
@@ -34,7 +36,7 @@ from mrrs.depth_maps.vismvsnet import ENV_FILE, EXEC, MODEL_PATH
 
 class VizMVSNet(CondaNode):
 
-    category = 'Meshroom Research'
+    category = 'VizMVSNet'
     documentation = ''' '''
     gpu = desc.Level.INTENSIVE
 
@@ -43,9 +45,7 @@ class VizMVSNet(CondaNode):
 
 
     #overides the env path
-    @property
-    def env_file(self):
-        return ENV_FILE
+    envfile = os.path.join(os.path.dirname(__file__), 'env.yaml')
     
     inputs = [
         desc.File(

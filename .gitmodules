@@ -7,3 +7,6 @@
 [submodule "mrrs/depth_maps/vismvsnet/Vis-MVSNet"]
 	path = mrrs/depth_maps/vismvsnet/Vis-MVSNet
 	url = https://github.com/jzhangbs/Vis-MVSNet
+[submodule "mrrs/deep_depth_map/Vis-MVSNet"]
+	path = mrrs/deep_depth_map/Vis-MVSNet
+	url = https://github.com/jzhangbs/Vis-MVSNet
