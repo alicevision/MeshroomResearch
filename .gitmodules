@@ -1,12 +1,3 @@
-[submodule "mrrs/deep_mvs/robust_mvd/robustmvd"]
-	path = mrrs/deep_mvs/robust_mvd/robustmvd
-	url = https://github.com/lmb-freiburg/robustmvd
-[submodule "mrrs/implicit_mesh/instant_ngp/instant-ngp"]
-	path = mrrs/implicit_mesh/instant_ngp/instant-ngp
-	url = https://github.com/NVlabs/instant-ngp.git
-[submodule "mrrs/depth_maps/vismvsnet/Vis-MVSNet"]
-	path = mrrs/depth_maps/vismvsnet/Vis-MVSNet
-	url = https://github.com/jzhangbs/Vis-MVSNet
 [submodule "mrrs/deep_depth_map/Vis-MVSNet"]
 	path = mrrs/deep_depth_map/Vis-MVSNet
 	url = https://github.com/jzhangbs/Vis-MVSNet
