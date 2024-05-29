@@ -1,0 +1,10 @@
+[
+	{
+        "pluginName":"Gaussian Splatting",
+        "nodesFolder":"gaussian_splat"
+        },
+        {
+        "pluginName":"Dummy",
+        "nodesFolder":"dummy"
+        }
+]
