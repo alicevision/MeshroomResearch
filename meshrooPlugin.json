@@ -1,5 +1,9 @@
 [
 	{
+                "pluginName":"3DR Benchmark",
+                "nodesFolder":"3DR_benchmark"
+        },
+        {
         "pluginName":"Gaussian Splatting",
         "nodesFolder":"gaussian_splat"
         },
