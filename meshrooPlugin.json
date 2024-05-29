@@ -1,14 +1,38 @@
 [
+        {
+        "pluginName":"MRRS Core",
+        "nodesFolder":"core"
+        },
 	{
-                "pluginName":"3DR Benchmark",
-                "nodesFolder":"3DR_benchmark"
+        "pluginName":"3DR Benchmark",
+        "nodesFolder":"3DR_benchmark"
         },
         {
         "pluginName":"Gaussian Splatting",
         "nodesFolder":"gaussian_splat"
         },
         {
-        "pluginName":"Dummy",
-        "nodesFolder":"dummy"
+        "pluginName":"Colmap",
+        "nodesFolder":"colmap"
+        },
+        {
+        "pluginName":"Deep Depth Maps",
+        "nodesFolder":"deep_depth_map"
+        },
+        {
+        "pluginName":"Nerfstudio",
+        "nodesFolder":"nerfstudio"
+        },
+        {
+        "pluginName":"Reality Capture",
+        "nodesFolder":"reality_capture"
+        },
+        {
+        "pluginName":"Stereo Photometry",
+        "nodesFolder":"stereo_photometry"
+        },
+        {
+        "pluginName":"Utils",
+        "nodesFolder":"utils"
         }
 ]
