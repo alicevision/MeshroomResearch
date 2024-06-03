@@ -5,7 +5,8 @@
         },
 	{
         "pluginName":"3DR Benchmark",
-        "nodesFolder":"mrrs/3DR_benchmark"
+        "nodesFolder":"mrrs/3DR_benchmark",
+        "pipelineFolder":"mrrs/3DR_benchmark/pipelines"
         },
         {
         "pluginName":"Gaussian Splatting",
@@ -13,7 +14,8 @@
         },
         {
         "pluginName":"Colmap",
-        "nodesFolder":"mrrs/colmap"
+        "nodesFolder":"mrrs/colmap",
+        "pipelineFolder":"mrrs/colmap/pipelines"
         },
         {
         "pluginName":"Deep Depth Maps",
@@ -25,7 +27,8 @@
         },
         {
         "pluginName":"Reality Capture",
-        "nodesFolder":"mrrs/reality_capture"
+        "nodesFolder":"mrrs/reality_capture",
+        "pipelineFolder":"mrrs/reality_capture/pipelines"
         },
         {
         "pluginName":"Stereo Photometry",
@@ -34,5 +37,5 @@
         {
         "pluginName":"Utils",
         "nodesFolder":"mrrs/utils"
-        }
+       }
 ]
