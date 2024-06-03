@@ -14,7 +14,7 @@ from .datasets import load_dataset
 
 #FIXME:move this into  a command line node?
 class LoadDataset(desc.Node):
-    category = 'Meshroom Research'
+    category = 'MRRS - Benchmark'
 
     documentation = '''Util node to open datasets with different data from the images in the .sfm'''
 
