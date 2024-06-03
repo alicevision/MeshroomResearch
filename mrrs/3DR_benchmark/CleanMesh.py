@@ -1,8 +1,9 @@
 __version__ = "1.0"
 import os
 from meshroom.core import desc
-from mrrs.core.CondaNode import CondaNode
-from mrrs.metrics.chamfer_distance import ENV_FILE
+from meshroom.core.plugin import CondaNode
+
+from .metrics.chamfer_distance import ENV_FILE
 
 class CleanMesh(CondaNode):
 
