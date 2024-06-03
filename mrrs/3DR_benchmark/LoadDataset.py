@@ -9,7 +9,8 @@ import trimesh
 
 from mrrs.core.geometry import *
 from mrrs.core.ios import *
-from mrrs.datasets import load_dataset
+
+from .datasets import load_dataset
 
 #FIXME:move this into  a command line node?
 class LoadDataset(desc.Node):

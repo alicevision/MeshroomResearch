@@ -91,10 +91,10 @@ pip install -e ./MeshroomResearch
 
 Contributions to Meshroom-Research are welcomed! Here's a quick overview of the project structure:
 
-- `mrrs/core`: Basic IOs, utilities, and common geometrical functions.
-- `mrrs/pipeline`: Meshroom pipeline files.
-- `mrrs/scripts`: Scripts, including benchmarking tools.
-- `mrrs/nodes`: Interface nodes for integration into Meshroom.
-- `mrrs/<feature>`: Code related to specific features.
+- `mrrs/core`: The library side of MRRS, it contains basic IOs, utilities, and common geometrical functions to be used in other plugins.
+- `mrrs/<feature_plugin>`: Contains the code and the nodes related to a plugin feature.
+- `mrrs/meshrooPlugin.json`: Contains the list of plugins in this collection.
 
-Utilize Meshroom's nodal UI for seamless integration, and refer to the [Meshroom's repo](https://github.com/alicevision/Meshroom) for creating custom nodes. We've introduced a new type of node, CondaNode, which automates Conda environment management for your convenience.
+See meshroom's [plugin documentation](https://github.com/alicevision/Meshroom/tree/dev/plugin_system/meshroom/core) to leanrn how to make your own plugins.
+
+Utilize Meshroom's nodal UI for seamless integration, and refer to the [Meshroom's repo](https://github.com/alicevision/Meshroom) for creating custom nodes. We've introduced new types of node (eg. CondaNode and DockerNode), which automates  environment management for your convenience.
