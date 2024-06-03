@@ -1,7 +1,7 @@
 __version__ = "1.0"
 
 from meshroom.core import desc
-from mrrs.core.CondaNode import CondaNode
+from meshroom.core.plugin import CondaNode
 
 class ExecuteCmdConda(CondaNode):
     commandLine = '{commandLineValue}'

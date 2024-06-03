@@ -9,7 +9,7 @@ import json
 from meshroom.core import desc
 
 from mrrs.core.ios import *
-from mrrs.metrics.metrics import *
+from .metrics.metrics import *
 
 class CalibrationComparison(desc.Node):
     category = 'Meshroom Research'

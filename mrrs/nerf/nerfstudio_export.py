@@ -2,7 +2,7 @@
 import os
 
 from meshroom.core import desc
-from mrrs.core.CondaNode import CondaNode
+from meshroom.core.plugin import CondaNode
 from mrrs.nerf import ENV_FILE
 
 class NeRFStudioExport(CondaNode):
