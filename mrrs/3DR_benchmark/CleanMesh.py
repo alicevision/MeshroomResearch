@@ -10,7 +10,7 @@ class CleanMesh(CondaNode):
     #overides the env path
     env_file = ENV_FILE
 
-    category = 'Meshroom Research'
+    category = 'MRRS - Benchmark'
     commandLine = 'python "'+os.path.join(os.path.dirname(__file__),"..", "..", "metrics", "baptiste", "remove_invisible_faces.py")+'" {allParams}'
     gpu = desc.Level.NONE
     documentation = ''' '''

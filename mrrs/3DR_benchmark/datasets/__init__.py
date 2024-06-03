@@ -1,11 +1,12 @@
 
 from mrrs.core.geometry import is_rotation_mat
-from mrrs.datasets.eth3d import open_dataset as open_dataset_eth3d
-from mrrs.datasets.baptiste import open_dataset as open_dataset_baptiste
-from mrrs.datasets.blendedMVG import open_dataset as open_dataset_blended
-from mrrs.datasets.dtu import open_dataset as open_dataset_dtu
-from mrrs.datasets.alab import open_dataset as open_dataset_alab
-from mrrs.datasets.nerf import open_dataset as open_dataset_nerf
+
+from .eth3d import open_dataset as open_dataset_eth3d
+from .baptiste import open_dataset as open_dataset_baptiste
+from .blendedMVG import open_dataset as open_dataset_blended
+from .dtu import open_dataset as open_dataset_dtu
+from .alab import open_dataset as open_dataset_alab
+from .nerf import open_dataset as open_dataset_nerf
 
 def load_dataset(sfm_data, dataset_type):
     """

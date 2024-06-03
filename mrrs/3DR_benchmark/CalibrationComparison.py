@@ -12,7 +12,7 @@ from mrrs.core.ios import *
 from .metrics.metrics import *
 
 class CalibrationComparison(desc.Node):
-    category = 'Meshroom Research'
+    category = 'MRRS - Benchmark'
 
     documentation = '''For each camera, compare its estimated parameters with a given groud truth.'''
 

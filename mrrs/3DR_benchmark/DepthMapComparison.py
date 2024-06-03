@@ -13,7 +13,7 @@ from .metrics.metrics import compute_depth_metric
 class DepthMapComparison(desc.Node):
 
     # size = desc.DynamicNodeSize('inputSfM')
-    category = 'Meshroom Research'
+    category = 'MRRS - Benchmark'
 
     documentation = '''For each camera, compare its depth maps to a given ground truth.
 The names of the original inputSfM file is used to retrieve the GT file, therefore must match.

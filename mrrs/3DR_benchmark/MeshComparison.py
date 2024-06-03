@@ -15,7 +15,7 @@ class MeshcomparisonBaptiste(CondaNode):
     commandLine = 'python "'+os.path.join(os.path.dirname(__file__),"..", "..", "metrics", "chamfer_distance", "eval_pcd.py")+'" {allParams}'
     gpu = desc.Level.NONE
 
-    category = 'Meshroom Research'
+    category = 'MRRS - Benchmark'
     documentation = '''Calls the dtu benchmark metrics between two meshes'''
 
     inputs = [
