@@ -1,7 +1,6 @@
 import json
 import os
 import numpy as np
-import cv2
 import shutil
 
 from meshroom.core import desc

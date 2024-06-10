@@ -60,3 +60,6 @@ def load_dataset(sfm_data, dataset_type):
         print("Sensor size set to default (35mm)")
 
     return data, sfm_data
+
+if __name__ == "__main__":
+    pass

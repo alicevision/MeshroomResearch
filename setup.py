@@ -17,5 +17,5 @@ setup(
     install_requires=["numpy", "pillow",
                       "opencv-python-headless",
                       "trimesh", "click"],
-                     # "oiio-python"], #FIXME: no pypy pacjages! need conda env or external install
-    )
+                     # "oiio-python" py-openimageio], #FIXME: no pypy pacjages! need conda env or external install
+    ) 

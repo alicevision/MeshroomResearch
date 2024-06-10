@@ -6,10 +6,9 @@ import os
 import argparse
 import numpy as np
 
-import open3d as o3d
-import igl
-
 if __name__ == '__main__':
+    import open3d as o3d
+    import igl
 
     # Input arguments
     parser = argparse.ArgumentParser()
