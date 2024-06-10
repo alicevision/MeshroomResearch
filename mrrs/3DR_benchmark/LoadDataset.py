@@ -7,18 +7,20 @@ import numpy as np
 from meshroom.core import desc
 import trimesh
 
-from mrrs.core.geometry import *
-from mrrs.core.ios import *
+from mrrs.core.geometry import camera_projection, random_sample_points_mesh_2, transform_cg_cv
+from mrrs.core.ios import open_depth_map, open_image, save_exr, save_image, sfm_data_from_matrices
 
 from .datasets import load_dataset
 
 #FIXME:move this into  a command line node?
+# Pros: can install mrrs via condanode
+# Cons: no debugging for us, or just switch Node to CondaNode? quid processchunk?
 class LoadDataset(desc.Node):
     category = 'MRRS - Benchmark'
 
     documentation = '''Util node to open datasets with different data from the images in the .sfm'''
 
-    size = desc.DynamicNodeSize('sfmData')
+    envFile = os.path.join(os.path.dirname(__file__), "general_env.yaml")
 
     inputs = [
 

@@ -4,8 +4,6 @@ from meshroom.core import desc
 from meshroom.core.plugin import DockerNode
 from distutils.dir_util import copy_tree
 
-
-from collections import namedtuple
 from trimesh.exchange.ply import _parse_header, _ply_binary
 import numpy as np
 

@@ -6,11 +6,6 @@ import os
 import numpy as np
 import trimesh
 
-# FIXME: not sure why i cannot do that in the yaml
-mrrs_path=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-print("mrrs path "+mrrs_path)
-import sys 
-sys.path.insert(0, mrrs_path)
 from mrrs.core.ios import open_image
 from mrrs.core.utils import listdir_fullpath
 

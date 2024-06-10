@@ -1,8 +1,4 @@
 [
-        {
-        "pluginName":"MRRS",
-        "nodesFolder":"mrrs/core"
-        },
 	{
         "pluginName":"3DR Benchmark",
         "nodesFolder":"mrrs/3DR_benchmark",

@@ -3,18 +3,25 @@ This node runs comparison between two input calibration.
 """
 __version__ = "3.0"
 
+import logging
 import os
 import json
 
+import numpy as np
+
 from meshroom.core import desc
 
-from mrrs.core.ios import *
-from .metrics.metrics import *
+from meshroom.core.plugin import CondaNode
+from mrrs.core.ios import matrices_from_sfm_data
+from .metrics.metrics import compute_calib_metric
 
-class CalibrationComparison(desc.Node):
+
+class CalibrationComparison(CondaNode):
     category = 'MRRS - Benchmark'
 
     documentation = '''For each camera, compare its estimated parameters with a given groud truth.'''
+
+    envFile = os.path.join(os.path.dirname(__file__), "general_env.yaml")
 
     inputs = [
         desc.File(

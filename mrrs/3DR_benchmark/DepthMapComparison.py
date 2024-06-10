@@ -21,6 +21,9 @@ The depth maps are assumed to be estimated with the same inputSfM poses.
 Autorescale may be used otherwise but it is far from ideal.
 '''
 
+    envFile = os.path.join(os.path.dirname(__file__), "general_env.yaml")
+
+
     inputs = [
         desc.File(
             name='inputSfM',
