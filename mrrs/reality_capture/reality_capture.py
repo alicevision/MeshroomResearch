@@ -1,11 +1,15 @@
 import re
-import os 
+import os
 import numpy as np
+import click
+import json
+
+from mrrs.core.ios import get_image_sizes, matrices_from_sfm_data, sfm_data_from_matrices 
 
 #in RC the sensor size is set to 35mm
 SENSOR_SIZE = 35
 
-def parse_xmp(xmp_file):
+def _parse_xmp(xmp_file):
     """
     Parses the xmp from reality capture.
     """
@@ -21,19 +25,20 @@ def parse_xmp(xmp_file):
             "PrincipalPointV=\"([+-]?([0-9]*[.])?[0-9]+)\"", xmp_lines)
         focalLength_35mm = re.search(
             "xcr:FocalLength35mm=\"([+-]?([0-9]*[.])?[0-9]+)\"", xmp_lines)
-        if camera_center is None or rotation_matrix is None or principal_point_u is None or principal_point_v is None or focalLength_35mm is None:
+        if (camera_center is None or rotation_matrix is None or principal_point_u is None 
+            or principal_point_v is None or focalLength_35mm is None):
             return None, None
         # DistortionCoeficients InMeshing
         camera_center = np.asarray(
-            camera_center.group(1).split(" "), dtype=np.float32)
+            camera_center.group(1).strip().split(" "), dtype=np.float32)
         rotation_matrix = np.asarray(rotation_matrix.group(
-            1).split(" "), dtype=np.float32).reshape([3, 3])
+            1).strip().split(" "), dtype=np.float32).reshape([3, 3])
         principal_point_u = np.asarray(
-            principal_point_u.group(1).split(" "), dtype=np.float32)
+            principal_point_u.group(1).strip().split(" "), dtype=np.float32)
         principal_point_v = np.asarray(
-            principal_point_v.group(1).split(" "), dtype=np.float32)
+            principal_point_v.group(1).strip().split(" "), dtype=np.float32)
         focalLength_35mm = np.asarray(
-            focalLength_35mm.group(1).split(" "), dtype=np.float32)
+            focalLength_35mm.group(1).strip().split(" "), dtype=np.float32)
         # TODO if needed, xcr:DistortionModel="brown3" xcr:Skew="0" xcr:AspectRatio="1"
         intrinsics = np.zeros([3, 3])
         extrinsics = np.zeros([4, 4])
@@ -47,7 +52,7 @@ def parse_xmp(xmp_file):
         extrinsics[3, 3] = 1
         return extrinsics, intrinsics
 
-def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size, image_size):
+def _export_xmp(xmp_file, extrinsics, intrinsics, pixel_size, image_size):
     """
     Saves the xmp for reality capture.
     Will convert meshroom sfm extrinsics and intrinsics converted to mrrs, into reality capture format.
@@ -92,7 +97,7 @@ def export_reality_capture(xmp_file, extrinsics, intrinsics, pixel_size, image_s
     with open(xmp_file, "w") as f:
        f.write(xmp_string)
 
-def import_xmp(sfm_data, xmp_folder):
+def _import_xmp(sfm_data, xmp_folder):
     """
     Will import XMPs based on the path in sfmdata
     """
@@ -102,7 +107,7 @@ def import_xmp(sfm_data, xmp_folder):
     intrinsics_ids = []
     images_size = []
     for i, view in enumerate(sfm_data["views"]):
-        print("Loading xmp for view "+view["viewId"])
+        print("Loading xmp for view "+view["viewId"]+" "+view["path"])
         scene_image = view["path"]
         image_size = (int(view["width"]),int(view["height"]))#FIXME: check
         images_size.append(image_size)
@@ -118,7 +123,7 @@ def import_xmp(sfm_data, xmp_folder):
             intrinsics.append(None)
             continue
         
-        e, i = parse_xmp(scenes_calib)
+        e, i = _parse_xmp(scenes_calib)
         if e is None:
             raise RuntimeError("Invalid XMP "+scenes_calib)
            
@@ -144,4 +149,48 @@ def import_xmp(sfm_data, xmp_folder):
         extrinsics.append(e)
         intrinsics.append(i)
     return extrinsics, intrinsics, poses_ids, intrinsics_ids, images_size
-                
+
+@click.group()
+def rc():
+    pass
+
+@rc.command()
+@click.argument("sfmdata")
+@click.argument("xmpdata")
+@click.argument("outputsfmdata")
+def importXMP(sfmdata, xmpdata, outputsfmdata):
+    xmp_folder = xmpdata
+    with open(sfmdata, "r") as json_file:
+        sfm_data = json.load(json_file)
+    #ifxmp folder not set, assumes it is with the images
+    if xmp_folder == "":
+        xmp_folder = os.path.dirname(sfm_data["views"][0]["path"])
+    #note: focal already in pixels
+    extrinsics, intrinsics, poses_ids, intrinsics_ids, images_size  = _import_xmp(sfm_data, xmp_folder)
+    sfm_data = sfm_data_from_matrices(extrinsics, intrinsics, 
+                                        poses_ids, intrinsics_ids, images_size,
+                                        sfm_data=sfm_data, sensor_width = SENSOR_SIZE
+                                        )
+    # Save the generated SFM data to JSON file
+    with open(os.path.join(outputsfmdata), 'w') as f:
+        json.dump(sfm_data, f, indent=4)
+
+@rc.command()
+@click.argument("sfmdata")
+@click.argument("outputfolder")
+def exportXMP(sfmdata, outputfolder):
+    sfm_data = json.load(open(sfmdata, "r"))
+    (extrinsics_all_cams, intrinsics_all_cams, views_id,
+    poses_id, intrinsics_id, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
+    image_sizes = get_image_sizes(sfm_data)
+    images_names = [os.path.basename(view["path"])[:-4] for view in sfm_data["views"]]
+    for image_name, extrinsics, intrinsics, pixel_size, image_size in zip(images_names, extrinsics_all_cams, 
+                                                                intrinsics_all_cams, pixel_sizes_all_cams, image_sizes):
+        if extrinsics is not None:
+            xmp_file = os.path.join(outputfolder, image_name+".xmp")
+            _export_xmp(xmp_file, extrinsics, intrinsics, pixel_size,image_size )
+
+ 
+
+if __name__ == '__main__':
+    rc()
