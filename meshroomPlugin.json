@@ -1,11 +1,11 @@
 [
 	{
-        "pluginName":"3DR Benchmark",
+        "pluginName":"3DR_Benchmark",
         "nodesFolder":"mrrs/3DR_benchmark",
         "pipelineFolder":"mrrs/3DR_benchmark/pipelines"
         },
         {
-        "pluginName":"Gaussian Splatting",
+        "pluginName":"Gaussian_Splatting",
         "nodesFolder":"mrrs/gaussian_splatting"
         },
         {
@@ -14,20 +14,20 @@
         "pipelineFolder":"mrrs/colmap/pipelines"
         },
         {
-        "pluginName":"Deep Depth Maps",
+        "pluginName":"Deep_Depth_Maps",
         "nodesFolder":"mrrs/deep_depth_map"
         },
         {
-        "pluginName":"Nerfstudio",
-        "nodesFolder":"mrrs/nerfstudio"
+        "pluginName":"Nerf_studio",
+        "nodesFolder":"mrrs/nerf"
         },
         {
-        "pluginName":"Reality Capture",
+        "pluginName":"Reality_Capture",
         "nodesFolder":"mrrs/reality_capture",
         "pipelineFolder":"mrrs/reality_capture/pipelines"
         },
         {
-        "pluginName":"Stereo Photometry",
+        "pluginName":"Stereo_Photometry",
         "nodesFolder":"mrrs/stereo_photometry"
         },
         {

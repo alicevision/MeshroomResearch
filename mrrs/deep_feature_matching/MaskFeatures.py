@@ -7,7 +7,7 @@ import numpy as np
 from meshroom.core import desc
 
 from mrrs.core.ios import *
-from .utils import open_descriptor_file, write_descriptor_file
+from .kornia_wrappers.utils import open_descriptor_file, write_descriptor_file
 
 class MaskFeatures(desc.Node):
 
