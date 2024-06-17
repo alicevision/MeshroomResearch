@@ -10,7 +10,7 @@ from meshroom.core.plugin import CondaNode
 
 class ExportXMP(CondaNode):
 
-    category = 'Meshroom Research'
+    category = 'MRRS - Reality Capture'
 
     documentation = '''Node to create an XMP file from camera calibration.'''
 

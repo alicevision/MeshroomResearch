@@ -10,7 +10,7 @@ import os
 
 class ImportXMP(CondaNode):
 
-    category = 'Meshroom Research'
+    category = 'MRRS - Reality Capture'
 
     documentation = '''Node to import a camera calibration from an XMP'''
 
