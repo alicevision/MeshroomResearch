@@ -1,22 +1,17 @@
-# $ colmap stereo_fusion \
-#     --workspace_path $DATASET_PATH/dense \
-#     --workspace_format COLMAP \
-#     --input_type geometric \
-#     --output_mesh $DATASET_PATH/dense/fused.ply
-
 __version__ = "2.0"
 
 import os
 from meshroom.core import desc
 
-from . import COLMAP
 import trimesh
+
+from . import COLMAP
 from mrrs.core.geometry import CG_CV_MAT44 
 
 class PoissonMesher(desc.CommandLineNode):
     commandLine = COLMAP+' poisson_mesher {input_path} --PoissonMeshing.trim {trimValue} --output_path {output_meshValue}'
 
-    category = 'Colmap'
+    category = 'MRRS - Colmap'
     documentation = ''''''
 
     inputs = [

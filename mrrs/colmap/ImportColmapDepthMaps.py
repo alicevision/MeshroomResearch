@@ -8,8 +8,6 @@ __version__ = "1.0"
 
 import os
 import json
-import re
-import cv2
 import glob
 
 from meshroom.core import desc
@@ -36,7 +34,7 @@ def read_array(path):
 
 
 class ImportColmapDepthMaps(desc.Node):
-    category = 'Meshroom Research'
+    category = 'MRRS - Colmap'
 
     documentation = ''''''
 

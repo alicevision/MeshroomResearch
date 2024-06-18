@@ -8,7 +8,7 @@ from . import COLMAP
 class ColmapAutomaticReconstructor(desc.CommandLineNode):
     commandLine = COLMAP+' automatic_reconstructor  {allParams}'
 
-    category = 'Colmap'
+    category = 'MRRS - Colmap'
     documentation = ''''''
 
     inputs = [
