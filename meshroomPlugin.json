@@ -22,6 +22,10 @@
         "nodesFolder":"mrrs/deep_depth_map"
         },
         {
+        "pluginName":"Deep_Feature_Matching",
+        "nodesFolder":"mrrs/deep_feature_matching"
+        },
+        {
         "pluginName":"Nerf_studio",
         "nodesFolder":"mrrs/nerf"
         },
