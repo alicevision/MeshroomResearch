@@ -1,7 +1,6 @@
 __version__ = "4.0"
 
 import os
-from sys import platform
 
 from meshroom.core import desc
 from . import COLMAP
@@ -19,7 +18,6 @@ class ColmapAutomaticReconstructor(desc.CommandLineNode):
             description='''Path to images.''',
             value='',
         ),
-
     ]
 
     outputs = [

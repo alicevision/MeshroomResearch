@@ -72,12 +72,7 @@ class CalibrationComparison(CondaNode):
             name='outputCsv',
             label='Output Csv',
             description='Output file to generated results.',
-<<<<<<< HEAD
             value=lambda attr: os.path.join(desc.Node.internalFolder, attr.node.csv_name.value),
-=======
-            value=lambda attr: os.path.join(desc.Node.internalFolder, attr.node.csvName.value),
-            uid=[],
->>>>>>> calibration comparison cli
         )
     ]
 

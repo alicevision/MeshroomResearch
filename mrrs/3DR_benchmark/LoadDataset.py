@@ -56,7 +56,6 @@ class LoadDataset(CondaNode):
             description='''Will display point cloud or landmarks projection.''',
             value=False,
             advanced=True
-<<<<<<< HEAD
         ),
 
         desc.ChoiceParam(
@@ -68,9 +67,6 @@ class LoadDataset(CondaNode):
             exclusive=True,
             advanced=True
         ),
-=======
-        )
->>>>>>> ported load dataset
     ]
 
     outputs = [
@@ -133,11 +129,7 @@ class LoadDataset(CondaNode):
         desc.File(
             name='landMarksProjDisplay',
             label='landMarksProjDisplay',
-<<<<<<< HEAD
             description='Generated images for landmarl projection.',
-=======
-            description='Generated images for landmark projection',
->>>>>>> ported load dataset
             semantic='image',
             value=os.path.join(desc.Node.internalFolder,
                                'lm_projs', '<VIEW_ID>.png'),
