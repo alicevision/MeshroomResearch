@@ -1,15 +1,6 @@
-# $ colmap image_undistorter \
-#     --image_path $DATASET_PATH/images \
-#     --input_path $DATASET_PATH/sparse/0 \
-#     --output_path $DATASET_PATH/dense \
-#     --output_type COLMAP \
-#     --max_image_size 2000
-
 __version__ = "1.1"
 
 import os
-from sys import platform
-
 
 from meshroom.core import desc
 from . import COLMAP
@@ -17,7 +8,7 @@ from . import COLMAP
 class ColmapImageUndistorder(desc.CommandLineNode):
     commandLine = COLMAP+' image_undistorter {allParams}'
 
-    category = 'Colmap'
+    category = 'MRRS - Colmap'
     documentation = ''''''
 
     inputs = [

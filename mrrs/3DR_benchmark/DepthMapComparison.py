@@ -6,7 +6,6 @@ from meshroom.core.plugin import CondaNode
 
 class DepthMapComparison(CondaNode):
 
-    # size = desc.DynamicNodeSize('inputSfM')
     category = 'MRRS - Benchmark'
 
     documentation = '''For each camera, compare its depth maps to a given ground truth.

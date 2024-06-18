@@ -22,7 +22,7 @@ class SyntheticDataset(desc.InitNode, desc.CommandLineNode):
 
     size = SyntheticDatasetNodeSize('')
 
-    category = 'Evaluation'
+    category = 'MRRS - Blender'
     documentation = 'Utility node to load an evaluation dataset from a given folder.'
 
     inputs = [

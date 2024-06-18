@@ -11,7 +11,7 @@ from . import COLMAP
 class ColmapFeatureExtraction(desc.CommandLineNode):
     commandLine = COLMAP+' feature_extractor {allParams}' #FIXME --ImageReader.single_camera 1
 
-    category = 'Colmap'
+    category = 'MRRS - Colmap'
     documentation = ''''''
 
     inputs = [

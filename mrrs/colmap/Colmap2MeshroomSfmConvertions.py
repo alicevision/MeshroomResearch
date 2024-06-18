@@ -6,6 +6,7 @@ import json
 import os
 
 import numpy as np
+
 from meshroom.core import desc
 
 
@@ -231,7 +232,7 @@ class Colmap2MeshroomSfmConvertion(desc.Node):
     Converts colmap's sfm infos into meshroom format
     """
 
-    category = 'Colmap'
+    category = 'MRRS - Colmap'
     documentation = '''Converts colmap's sfm infos into meshroom format'''
 
     inputs = [

@@ -1,14 +1,7 @@
-# $ colmap stereo_fusion \
-#     --workspace_path $DATASET_PATH/dense \
-#     --workspace_format COLMAP \
-#     --input_type geometric \
-#     --output_path $DATASET_PATH/dense/fused.ply
-
 __version__ = "2.0"
 
 import shutil
 import os
-from sys import platform
 
 from meshroom.core import desc
 from . import COLMAP
@@ -16,7 +9,7 @@ from . import COLMAP
 class StereoFusion(desc.CommandLineNode):
     commandLine = COLMAP+' stereo_fusion {allParams}'
 
-    category = 'Colmap'
+    category = 'MRRS - Colmap'
     documentation = ''''''
 
     inputs = [

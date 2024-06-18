@@ -13,7 +13,7 @@ from . import COLMAP
 class DelaunayMesher(desc.CommandLineNode):
     commandLine = COLMAP+' delaunay_mesher {allParams} --input_type dense'
 
-    category = 'Colmap'
+    category = 'MRRS - Colmap'
     documentation = ''''''
 
     inputs = [

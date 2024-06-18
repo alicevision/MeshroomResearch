@@ -10,7 +10,7 @@ from . import COLMAP
 class ColmapFeatureMatching(desc.CommandLineNode):
     commandLine = COLMAP+' exhaustive_matcher {allParams}'
 
-    category = 'Colmap'
+    category = 'MRRS - Colmap'
     documentation = ''''''
 
     inputs = [

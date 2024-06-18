@@ -7,13 +7,11 @@ from meshroom.core import desc
 from mrrs.core.ios import open_image, save_image
 from mrrs.core.utils import cv2_resize_with_pad
 
-from . import COLMAP
-
 class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
     commandLine = 'aliceVision_exportColmap -i {preparedSfmValue} -o {outputValue} '
     size = desc.DynamicNodeSize('input')
 
-    category = 'Colmap'
+    category = 'MRRS - Colmap'
     documentation = ''' '''
 
     inputs = [
