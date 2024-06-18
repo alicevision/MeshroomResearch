@@ -5,13 +5,17 @@
         "pipelineFolder":"mrrs/3DR_benchmark/pipelines"
         },
         {
-        "pluginName":"Gaussian_Splatting",
-        "nodesFolder":"mrrs/gaussian_splatting"
+        "pluginName":"Blender",
+        "nodesFolder":"mrrs/blender"
         },
         {
         "pluginName":"Colmap",
         "nodesFolder":"mrrs/colmap",
         "pipelineFolder":"mrrs/colmap/pipelines"
+        },
+        {
+        "pluginName":"Gaussian_Splatting",
+        "nodesFolder":"mrrs/gaussian_splatting"
         },
         {
         "pluginName":"Deep_Depth_Maps",
