@@ -3,7 +3,7 @@ __version__ = "1.1"
 from meshroom.core import desc
 import os
 
-RENDER_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../blender/render_mesh.py'))
+RENDER_SCRIPT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), './scripts/render_mesh.py'))
 
 class RenderMesh(desc.CommandLineNode):
     commandLine = 'blender -b -P {scriptValue} -- \
