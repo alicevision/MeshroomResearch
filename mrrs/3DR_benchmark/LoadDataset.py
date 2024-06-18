@@ -1,0 +1,156 @@
+__version__ = "3.0"
+
+import os 
+
+from meshroom.core import desc
+from meshroom.core.plugin import CondaNode
+
+class LoadDataset(CondaNode):
+    category = 'MRRS - Benchmark'
+
+    documentation = '''Util node to open datasets with different data from the images in the .sfm'''
+
+    envFile = os.path.join(os.path.dirname(__file__), "general_env.yaml")
+
+    commandLine = 'python "'+os.path.join(os.path.dirname(__file__), "load_dataset.py")+'" {allParams}'
+    
+    inputs = [
+
+        desc.File(
+            name="inputSfM",
+            label="inputSfM",
+            description="Input sfmData",
+            value="",
+            uid=[0],
+        ),
+
+        desc.ChoiceParam(
+            name='datasetType',
+            label='Dataset Type',
+            description='''Dataset type''',
+            value='blendedMVG',
+            values=['blendedMVG', 'DTU', 'ETH3D', 'baptiste', 'alab', 'NERF'],
+            exclusive=True,
+            uid=[0],
+        ),
+
+        desc.IntParam(
+            name='initSfmLandmarksVertices',
+            label='Init Landmarks Vertices',
+            description='''Will initalise sfmLandmarks by sampling points on mesh. 0 to deactivate''',
+            value=1,
+            range=(0, 1000000000, 1),
+            uid=[0],
+            advanced=True
+        ),
+        
+
+        desc.BoolParam(
+            name='initMasks',
+            label='Init Masks',
+            description='''If no masks in dataset, will initialise the masks using the values from the depth map (<=0) or the images (alpha<=0)''',
+            value=True,
+            uid=[0],
+            advanced=True
+        ),
+
+        desc.BoolParam(
+            name='landMarksProj',
+            label='Landmarks Projections',
+            description='''Will display point cloud or landmarks projection''',
+            value=False,
+            uid=[0],
+            advanced=True
+        )
+    ]
+
+    outputs = [
+        desc.File(
+            name='outputSfMData',
+            label='SfM Data',
+            description='Path to the output sfmdata file',
+            value=desc.Node.internalFolder + 'sfm.sfm',
+            uid=[],
+        ),
+
+        desc.File(
+            name='depthMapsFolder',
+            label='Depth map folder',
+            description='Output folder for loaded depth maps',
+            value=os.path.join(desc.Node.internalFolder, 'depth_maps'),
+            uid=[],
+            # enabled=lambda attr: (attr.node.datasetType.value=='blendedMVG'), #FIXME: does not work!! doesnt actually hides in the node
+        ),
+
+        desc.File(
+            name='mesh',
+            label='Mesh',
+            description='Loaded mesh.',
+            value=os.path.join(desc.Node.internalFolder, 'mesh.ply'),
+            # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
+            uid=[],
+        ),
+
+        desc.File(
+            name='maskFolder',
+            label='Mask Folder',
+            description='Image mask folder. The mask describes the visibility of the object to be observed, on each view.',
+            value=os.path.join(desc.Node.internalFolder,'masks'),
+            uid=[],
+            # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
+        ),
+
+        #used for display
+        desc.File(
+            name='depthmapsDisplay',
+            label='DepthMapsDisplay',
+            description='Generated depth maps.',
+            semantic='image',
+            value=os.path.join(desc.Node.internalFolder,
+                               'depth_maps', '<VIEW_ID>_depthMap.exr'),
+            uid=[],
+            advanced=True,
+            visible=False,
+            group=""
+        ),
+
+        desc.File(
+            name='masksDisplay',
+            label='MasksDisplay',
+            description='Generated masks',
+            semantic='image',
+            value=os.path.join(desc.Node.internalFolder,
+                               'masks', '<VIEW_ID>.png'),
+            uid=[],
+            advanced=True,
+            visible=False,
+            group=""
+        ),
+
+        desc.File(
+            name='landMarksProjDisplay',
+            label='landMarksProjDisplay',
+            description='Generated images for landmark projection',
+            semantic='image',
+            value=os.path.join(desc.Node.internalFolder,
+                               'lm_projs', '<VIEW_ID>.png'),
+            uid=[],
+            advanced=True,
+            enabled=lambda attr: attr.node.landMarksProj.value,
+            visible=False,
+        ),
+
+        desc.File(
+            name='meshDisplay',
+            label='MeshDisplay',
+            description='MeshDisplay',
+            semantic='3D',
+            value=os.path.join(desc.Node.internalFolder,
+                               'mesh_display.ply'),
+            uid=[],
+            advanced=True,
+            visible=False
+        ),
+    ]
+
+   

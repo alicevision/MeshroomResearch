@@ -1,0 +1,58 @@
+"""
+This nodes make an sfm data from an xmp 
+"""
+__version__ = "3.0"
+
+from meshroom.core import desc
+from meshroom.core.plugin import CondaNode 
+
+import os
+
+class ImportXMP(CondaNode):
+
+    category = 'MRRS - Reality Capture'
+
+    documentation = '''Node to import a camera calibration from an XMP'''
+
+    commandLine = 'python "'+os.path.join(os.path.dirname(__file__), "reality_capture.py")+'" importxmp {sfmDataValue} {xmpDataValue} {outputSfMDataValue}'
+
+    envFile = os.path.join(os.path.dirname(__file__), "env.yaml")
+
+    inputs = [
+
+        desc.File(
+            name="sfmData",
+            label="sfmData",
+            description="Input sfmData",
+            value="",
+            uid=[0],
+        ),
+
+        desc.File(
+            name="xmpData",
+            label="xmpData",
+            description="Input xmpData",
+            value="",
+            uid=[0],
+        ),
+
+        desc.File(
+            name="meshData",
+            label="meshData",
+            description="Input mesh",
+            value="",
+            group="",
+            uid=[0],
+        ),
+
+    ]
+
+    outputs = [
+        desc.File(
+            name='outputSfMData',
+            label='outputSfMData',
+            description='Path to the outputSfMData',
+            value=os.path.join(desc.Node.internalFolder, "outputSfMData.sfm"),
+            uid=[],
+        ),
+    ]
