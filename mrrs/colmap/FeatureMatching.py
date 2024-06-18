@@ -2,7 +2,6 @@ __version__ = "2.0"
 
 import os
 import shutil
-from sys import platform
 
 from meshroom.core import desc
 from . import COLMAP
