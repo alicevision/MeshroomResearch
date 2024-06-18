@@ -1,9 +1,3 @@
-# $ colmap stereo_fusion \
-#     --workspace_path $DATASET_PATH/dense \
-#     --workspace_format COLMAP \
-#     --input_type geometric \
-#     --output_path $DATASET_PATH/dense/fused.ply
-
 __version__ = "2.0"
 
 import os
