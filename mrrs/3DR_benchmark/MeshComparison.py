@@ -5,18 +5,16 @@ from meshroom.core.plugin import CondaNode
 
 from .metrics.chamfer_distance import ENV_FILE
 
-class MeshcomparisonBaptiste(CondaNode):
+class MeshComparison(CondaNode):
 
-    #overides the env path
-    @property
-    def env_file(self):
-        return ENV_FILE
-    
-    commandLine = 'python "'+os.path.join(os.path.dirname(__file__),"..", "..", "metrics", "chamfer_distance", "eval_pcd.py")+'" {allParams}'
     gpu = desc.Level.NONE
 
     category = 'MRRS - Benchmark'
-    documentation = '''Calls the dtu benchmark metrics between two meshes'''
+    documentation = '''Computes the champfer distance between two meshes'''
+
+    commandLine = 'python "'+os.path.join(os.path.dirname(__file__), "metrics", "chamfer_distance", "eval_pcd.py")+'" {allParams}'
+
+    envFile=ENV_FILE
 
     inputs = [
         desc.File(
