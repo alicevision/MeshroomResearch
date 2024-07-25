@@ -3,14 +3,15 @@ __version__ = "3.0"
 import os 
 
 from meshroom.core import desc
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginCommandLineNode, EnvType
 
-class LoadDataset(CondaNode):
+class LoadDataset(PluginCommandLineNode):
     category = 'MRRS - Benchmark'
 
     documentation = '''Util node to open datasets with different data from the images in the .sfm'''
 
     envFile = os.path.join(os.path.dirname(__file__), "general_env.yaml")
+    envType = EnvType.CONDA
 
     commandLine = 'python "'+os.path.join(os.path.dirname(__file__), "load_dataset.py")+'" {allParams}'
     

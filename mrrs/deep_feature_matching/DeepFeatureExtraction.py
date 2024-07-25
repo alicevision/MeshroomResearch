@@ -3,12 +3,12 @@ import os
 
 from meshroom.core import desc
 
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginNode
 
 
 EXEC = "python "+ os.path.join(os.path.dirname(__file__), "kornia_wrappers/deep_feature_extraction.py")
 
-class DeepFeatureExtraction(CondaNode):
+class DeepFeatureExtraction(PluginNode):
 
     category = 'Sparse Reconstruction'
     documentation = ''' '''

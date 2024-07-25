@@ -3,19 +3,22 @@ This node injects some fields from a source sfm data to a target sfm data.
 """
 __version__ = "3.0"
 
-import os
-import json
-from meshroom.core import desc
-from mrrs.core.geometry import *
-from mrrs.core.ios import *
 
-class InjectSfmData(desc.Node):
+import json
+import os 
+
+from meshroom.core import desc
+from meshroom.core.plugin import PluginNode
+
+class InjectSfmData(PluginNode):
 
     category = 'Meshroom Research'#Machine Learning Effort for Meshroom #'Sparse Reconstruction'
 
     documentation = '''This node injects some fields from a source sfm data to a target sfm data.'''
 
     size = desc.DynamicNodeSize('sourceSfmData')
+
+    envFile = os.path.join(os.path.dirname(__file__), "utils_env.yaml")
 
     inputs = [
 
@@ -61,59 +64,36 @@ class InjectSfmData(desc.Node):
         ),
     ]
 
-    def check_inputs(self, chunk):
-        """
-        Checks that all inputs are properly set.
-        """
-        if not chunk.node.sourceSfmData.value:
-            chunk.logger.warning('No input sourceSfmData in node InjectSfmData, skipping')
-            return False
-        if not chunk.node.targetSfmData.value:
-            chunk.logger.warning('No input targetSfmData in node InjectSfmData, skipping')
-            return False
-        return True
-
-    def processChunk(self, chunk):
+    def pythonProcessChunk(self, args):
         """
         Opens the dataset data.
         """
-        try:
-            chunk.logManager.start(chunk.node.verboseLevel.value)
-            #check inputs
-            if not self.check_inputs(chunk):
-                return
-            chunk.logger.info("Starts to inject sfm data")
-            with open(chunk.node.sourceSfmData.value,"r") as json_file:
-                source_sfm_data= json.load(json_file)
-            with open(chunk.node.targetSfmData.value,"r") as json_file:
-                target_sfm_data= json.load(json_file)
-            # output_sfm = target_sfm_data.copy()
+        print("Starts to inject sfm data")
+        with open(args.sourceSfmData.value,"r") as json_file:
+            source_sfm_data= json.load(json_file)
+        with open(args.targetSfmData.value,"r") as json_file:
+            target_sfm_data= json.load(json_file)
+   
+        for field in args.exportedFields.value:
+            print("Injecting "+field)
+            if field not in source_sfm_data.keys():
+                print("Field "+field+" not found in "+args.sourceSfmData.value+", skipping")
+                continue
+            if field =="structure":#filter out
+                print('Removing structure with no matching views')
+                #make sure the viewid in obeservation is in the lisy of views, otherwise remove
+                view_id = [view["viewId"] for view in target_sfm_data['views'] ]
+                for landmark in source_sfm_data[field]:
+                    valid_observations =[]
+                    for observation in landmark["observations"]:
+                        if observation["observationId"]  in view_id:
+                            valid_observations.append(observation)
+                        # else:
+                        #     print('Removing obervation')
+                    landmark["observations"]=valid_observations
 
-            for field in chunk.node.exportedFields.value:
-                chunk.logger.info("Injecting "+field)
-                if field not in source_sfm_data.keys():
-                    chunk.logger.info("Field "+field+" not found in "+chunk.node.sourceSfmData.value+", skipping")
-                    continue
-                if field =="structure":#filter out
-                    chunk.logger.info('Removing structure with no matching views')
-                    #make sure the viewid in obeservation is in the lisy of views, otherwise remove
-                    view_id = [view["viewId"] for view in target_sfm_data['views'] ]
-                    for landmark in source_sfm_data[field]:
-                        valid_observations =[]
-                        for observation in landmark["observations"]:
-                            if observation["observationId"]  in view_id:
-                                valid_observations.append(observation)
-                            # else:
-                            #     chunk.logger.info('Removing obervation')
-                        landmark["observations"]=valid_observations
+            target_sfm_data[field]=source_sfm_data[field]
 
-                target_sfm_data[field]=source_sfm_data[field]
-
-            with open(chunk.node.outputSfMData.value,"w") as json_file:
-                json_file.write(json.dumps(target_sfm_data, indent=2))
-            chunk.logger.info('')
-        finally:
-            chunk.logManager.end()
-
-
-
+        with open(args.outputSfMData.value,"w") as json_file:
+            json_file.write(json.dumps(target_sfm_data, indent=2))
+   

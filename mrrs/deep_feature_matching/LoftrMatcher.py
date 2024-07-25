@@ -3,11 +3,11 @@ import os
 
 from meshroom.core import desc
 
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginNode
 
 LOFTR_EXEC = "python "+ os.path.join(os.path.dirname(__file__), "kornia_wrappers/loftr_matcher.py")
 
-class LoftrMatcher(CondaNode):
+class LoftrMatcher(PluginNode):
 
     category = 'Sparse Reconstruction'
     documentation = ''' '''

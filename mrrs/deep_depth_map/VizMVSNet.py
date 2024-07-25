@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 
 from meshroom.core import desc
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginNode
 
 from mrrs.core.ios import matrices_from_sfm_data, open_depth_map, save_exr
 from mrrs.core.utils import format_float_array
@@ -12,31 +12,9 @@ from mrrs.core.utils import format_float_array
 EXEC = "python "+ os.path.join(os.path.dirname(__file__), "Vis-MVSNet/test.py")
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "Vis-MVSNet/pretrained_model/vis")
 
-# parser.add_argument('--data_root', type=str, help='The root dir of the data.')
-# parser.add_argument('--dataset_name', type=str, default='tanksandtemples', help='The name of the dataset. Should be identical to the dataloader source file. e.g. blended refers to data/blended.py.')
-# parser.add_argument('--model_name', type=str, default='model_cas', help='The name of the model. Should be identical to the model source file. e.g. model_cas refers to core/model_cas.py.')
+class VizMVSNet(PluginNode):
 
-# parser.add_argument('--num_src', type=int, default=7, help='The number of source views.')
-# parser.add_argument('--max_d', type=int, default=256, help='The standard max depth number.')
-# parser.add_argument('--interval_scale', type=float, default=1., help='The standard interval scale.')
-# parser.add_argument('--cas_depth_num', type=str, default='64,32,16', help='The depth number for each stage.')
-# parser.add_argument('--cas_interv_scale', type=str, default='4,2,1', help='The interval scale for each stage.')
-# parser.add_argument('--resize', type=str, default='1920,1080', help='The size of the preprocessed input resized from the original one.')
-# parser.add_argument('--crop', type=str, default='1920,1056', help='The size of the preprocessed input cropped from the resized one.')
-
-# parser.add_argument('--mode', type=str, default='soft', choices=['soft', 'hard', 'uwta', 'maxpool', 'average'], help='The fusion strategy.')
-# parser.add_argument('--occ_guide', action='store_true', default=False, help='Deprecated')
-
-# parser.add_argument('--load_path', type=str, default=None, help='The dir of the folder containing the pretrained checkpoints.')
-# parser.add_argument('--load_step', type=int, default=-1, help='The step to load. -1 for the latest one.')
-
-# parser.add_argument('--show_result', action='store_true', default=False, help='Set to show the results.')
-# parser.add_argument('--write_result', action='store_true', default=False, help='Set to save the results.')
-# parser.add_argument('--result_dir', type=str, help='The dir to save the results.')
-
-class VizMVSNet(CondaNode):
-
-    category = 'VizMVSNet'
+    category = 'MRRS - Deep depth'
     documentation = ''' '''
     gpu = desc.Level.INTENSIVE
 

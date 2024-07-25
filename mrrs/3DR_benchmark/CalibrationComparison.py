@@ -7,9 +7,9 @@ __version__ = "3.0"
 import os
 
 from meshroom.core import desc
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginCommandLineNode, EnvType
 
-class CalibrationComparison(CondaNode):
+class CalibrationComparison(PluginCommandLineNode):
     category = 'MRRS - Benchmark'
 
     documentation = '''For each camera, compare its estimated parameters with a given groud truth.'''
@@ -17,6 +17,7 @@ class CalibrationComparison(CondaNode):
     commandLine = 'python "'+os.path.join(os.path.dirname(__file__), "calibration_comparison.py")+'" {allParams}'
     
     envFile = os.path.join(os.path.dirname(__file__), "general_env.yaml")
+    envType = EnvType.CONDA
 
     inputs = [
         desc.File(

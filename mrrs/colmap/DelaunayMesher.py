@@ -4,7 +4,7 @@ import os
 from meshroom.core import desc
 from . import COLMAP
 
-class DelaunayMesher(desc.CommandLineNode):
+class ColmapDelaunayMesher(desc.CommandLineNode):
     commandLine = COLMAP+' delaunay_mesher {allParams} --input_type dense'
 
     category = 'MRRS - Colmap'

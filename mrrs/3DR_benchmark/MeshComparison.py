@@ -1,11 +1,11 @@
 __version__ = "1.0"
 import os
 from meshroom.core import desc
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginCommandLineNode, EnvType
 
 from .metrics.chamfer_distance import ENV_FILE
 
-class MeshComparison(CondaNode):
+class MeshComparison(PluginCommandLineNode):
 
     gpu = desc.Level.NONE
 
@@ -15,6 +15,7 @@ class MeshComparison(CondaNode):
     commandLine = 'python "'+os.path.join(os.path.dirname(__file__), "metrics", "chamfer_distance", "eval_pcd.py")+'" {allParams}'
 
     envFile=ENV_FILE
+    envType = EnvType.CONDA
 
     inputs = [
         desc.File(

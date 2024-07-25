@@ -9,8 +9,7 @@ dependencies:
   - openimageio
   - py-openimageio
   - pip
+  - psutil
   - pip:
-    - trimesh
-    - psutil #needed by meshroom
     #- git+https://github.com/alicevision/MeshroomResearch.git
     - /s/apps/users/multiview/mrrs/hogm/MeshroomResearch #

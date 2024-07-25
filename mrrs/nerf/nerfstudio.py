@@ -4,7 +4,7 @@ import numpy as np
 import shutil
 
 from meshroom.core import desc
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginNode
 from mrrs.nerf import ENV_FILE
 
 def convert_sfmdata_to_nerf(sfm_data, actual_path):
@@ -114,7 +114,7 @@ def copy_recursive_walk(root_path, path):
         for f in files:
             shutil.move(os.path.join(root, f), root_path)
 
-class NeRFStudio(CondaNode):
+class NeRFStudio(PluginNode):
 
     category = 'Meshroom Research'
     documentation = ''' '''

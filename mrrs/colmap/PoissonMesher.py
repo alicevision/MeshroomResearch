@@ -2,14 +2,16 @@ __version__ = "2.0"
 
 import os
 from meshroom.core import desc
-
-import trimesh
+from meshroom.core.plugin import PluginCommandLineNode, EnvType
 
 from . import COLMAP
-from mrrs.core.geometry import CG_CV_MAT44 
 
-class PoissonMesher(desc.CommandLineNode):
+class ColmapPoissonMesher(PluginCommandLineNode):
     commandLine = COLMAP+' poisson_mesher {input_path} --PoissonMeshing.trim {trimValue} --output_path {output_meshValue}'
+
+    envType = EnvType.CONDA
+    envFile = os.path.join(os.path.dirname(__file__), "env.yaml")
+
 
     category = 'MRRS - Colmap'
     documentation = ''''''
@@ -42,6 +44,9 @@ class PoissonMesher(desc.CommandLineNode):
 
     def processChunk(self, chunk):
         desc.CommandLineNode.processChunk(self, chunk)
+        import trimesh
+        from mrrs.core.geometry import CG_CV_MAT44 
+        #! env
         #re-orient mesh
         mesh = trimesh.load(chunk.node.output_mesh.value)
         mesh.apply_transform(CG_CV_MAT44)

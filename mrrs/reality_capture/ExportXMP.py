@@ -6,9 +6,9 @@ __version__ = "3.0"
 import os 
 
 from meshroom.core import desc
-from meshroom.core.plugin import CondaNode 
+from meshroom.core.plugin import PluginNode 
 
-class ExportXMP(CondaNode):
+class ExportXMP(PluginNode):
 
     category = 'MRRS - Reality Capture'
 

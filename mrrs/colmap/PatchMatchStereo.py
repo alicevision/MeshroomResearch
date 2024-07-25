@@ -6,7 +6,7 @@ import os
 from meshroom.core import desc
 from . import COLMAP
 
-class PatchMatchStereo(desc.CommandLineNode):
+class ColmapPatchMatchStereo(desc.CommandLineNode):
     commandLine = COLMAP+' patch_match_stereo {allParams} --PatchMatchStereo.gpu_index 0'
     gpu = desc.Level.INTENSIVE
     category = 'MRRS - Colmap'

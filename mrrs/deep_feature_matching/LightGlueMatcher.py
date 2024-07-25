@@ -3,11 +3,11 @@ import os
 
 from meshroom.core import desc
 
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginNode
 
 EXEC = "python "+ os.path.join(os.path.dirname(__file__), "kornia_wrappers/light_glue_matcher.py")
 
-class LightGlueMatching(CondaNode):
+class LightGlueMatching(PluginNode):
 
     category = 'Sparse Reconstruction'
     documentation = ''' '''

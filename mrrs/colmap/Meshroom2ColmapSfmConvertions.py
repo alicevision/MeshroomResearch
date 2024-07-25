@@ -2,21 +2,22 @@ __version__ = "2.0"
 import os 
 import json
 import shutil
+
 from meshroom.core import desc
+from meshroom.core.plugin import PluginCommandLineNode, EnvType
 
-from mrrs.core.ios import open_image, save_image
-from mrrs.core.utils import cv2_resize_with_pad
-
-class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
-    commandLine = 'aliceVision_exportColmap -i {preparedSfmValue} -o {outputValue} '
-    size = desc.DynamicNodeSize('input')
+class Meshroom2ColmapSfmConvertions(PluginCommandLineNode):
+    commandLine = 'aliceVision_exportColmap -i {preparedSfmValue} -o {outputValue}'
 
     category = 'MRRS - Colmap'
     documentation = ''' '''
 
+    envType = EnvType.CONDA
+    envFile = os.path.join(os.path.dirname(__file__), "env.yaml")
+
     inputs = [
         desc.File(
-            name='input',
+            name='inputSfm',
             label='Input',
             description='SfMData file.',
             value='',
@@ -74,9 +75,11 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
 
 
     def processChunk(self, chunk):
+        from mrrs.core.ios import open_image, save_image
+        from mrrs.core.utils import cv2_resize_with_pad
 
         # get image info
-        sfm_data = json.load(open(chunk.node.input.value))
+        sfm_data = json.load(open(chunk.node.inputSfm.value))
         views = sfm_data["views"]
         images_path = [v["path"] for v in views]
         image_sizes = [[int(v["width"]), int(v["height"])] for v in views]
@@ -88,7 +91,7 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
         new_images_path = [os.path.join( images_output_folder, basename) for basename in images_basename]
         
         #get if we must resize
-        do_resize = chunk.node.maxImageSize.value == 0 or image_sizes[0][0]>chunk.node.maxImageSize.value
+        do_resize = (chunk.node.maxImageSize.value == 0) and (image_sizes[0][0]>chunk.node.maxImageSize.value)
 
         #modify .sfm with new sizes and filepath
         if do_resize:
@@ -108,7 +111,8 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
             with open(os.path.join(chunk.node.preparedSfm.value), 'w') as f:
                 json.dump(sfm_data, f, indent=4)
         else: #or ceate symlink stright to the sfm
-            os.symlink(chunk.node.input.value, chunk.node.preparedSfm.value)
+            os.symlink(chunk.node.inputSfm.value, chunk.node.preparedSfm.value)
+
         #run the cl
         desc.CommandLineNode.processChunk(self, chunk)
         

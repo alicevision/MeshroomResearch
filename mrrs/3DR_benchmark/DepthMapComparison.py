@@ -2,9 +2,9 @@ __version__ = "3.0"
 
 import os
 from meshroom.core import desc
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginCommandLineNode, EnvType
 
-class DepthMapComparison(CondaNode):
+class DepthMapComparison(PluginCommandLineNode):
 
     category = 'MRRS - Benchmark'
 
@@ -17,6 +17,7 @@ Autorescale may be used otherwise but it is far from ideal.
     commandLine = 'python "'+os.path.join(os.path.dirname(__file__), "depth_map_comparison.py")+'" {allParams}'
     
     envFile = os.path.join(os.path.dirname(__file__), "general_env.yaml")
+    envType = EnvType.CONDA
 
     inputs = [
         desc.File(

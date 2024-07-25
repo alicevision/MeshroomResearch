@@ -4,11 +4,11 @@ This nodes make an sfm data from an xmp
 __version__ = "3.0"
 
 from meshroom.core import desc
-from meshroom.core.plugin import CondaNode 
+from meshroom.core.plugin import PluginNode 
 
 import os
 
-class ImportXMP(CondaNode):
+class ImportXMP(PluginNode):
 
     category = 'MRRS - Reality Capture'
 

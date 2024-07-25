@@ -6,14 +6,15 @@ __version__ = "3.0"
 import os
 import json
 from meshroom.core import desc
-from mrrs.core.geometry import *
-import trimesh
+from meshroom.core.plugin import PluginNode
 
-class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...?
+class MeshTransform(PluginNode):#FIXME: abstract this Dataset, scan folder etc...?
 
     category = 'Meshroom Research'#Machine Learning Effort for Meshroom #'Sparse Reconstruction'
 
     documentation = '''.'''
+
+    envFile = os.path.join(os.path.dirname(__file__), "utils_env.yaml")
 
     inputs = [
 
@@ -71,56 +72,48 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
         ),
     ]
 
-    def check_inputs(self, chunk):
-        """
-        Checks that all inputs are properly set.
-        """
-        if not chunk.node.inputMesh.value:
-            chunk.logger.warning('No input inputMesh in node MeshTransform, skipping')
-            return False
-        return True
-
-    def processChunk(self, chunk):
+    def pythonProcessChunk(self, args):
         """
         Applies transform to a mesh.
         """
-        chunk.logManager.start(chunk.node.verboseLevel.value)
-        mesh_file = chunk.node.inputMesh.value
+        from mrrs.core.geometry import mesh_transform, transform_cg_cv
+        import trimesh
+        import numpy as np
 
+        mesh_file = args.inputMesh
+
+        #FIXME: dep to blender
         if mesh_file.endswith(".abc"):
             #make sure blender is in path
             #FIXME: todo
             #export with blender
-            script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../blender/alembic_convert.py"))
+            script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../blender/alembic_convert.py"))
             command_line = "blender -b -P "+script_path+" -- "+mesh_file+" "+\
-                            chunk.node.outputMesh.value[:-4]+".obj"
+                            args.outputMesh[:-4]+".obj"
             print(command_line)
             # os.popen(command_line).read()
             os.system(command_line)
-            mesh_file = chunk.node.outputMesh.value[:-4]+".obj"
+            mesh_file = args.outputMesh[:-4]+".obj"
 
 
         mesh = trimesh.load(mesh_file)
-        if chunk.node.inputTransform.value != '':
-            #check inputs
-            if not self.check_inputs(chunk):
-                return
-            chunk.logger.info("Starts mesh transfrom")
+        if args.inputTransform != '':
+            print("Starts mesh transfrom")
 
             # Load transform
-            with open(chunk.node.inputTransform.value, "r") as json_file:
+            with open(args.inputTransform, "r") as json_file:
                 T_dict = json.load(json_file)
                 T = np.asarray(T_dict['transform'], np.float32)
 
             # Load, apply transform and save mesh
             mesh = mesh_transform(mesh,T)
 
-        if chunk.node.flipCG_CV.value:
+        if args.flipCG_CV:
             mesh.vertices = transform_cg_cv(mesh.vertices)
 
         #apply noise if any
-        if chunk.node.addGaussianNoise.value > 0:
-            mesh.vertices += chunk.node.addGaussianNoise.value*np.random.random(size=mesh.vertices.shape)
+        if args.addGaussianNoise > 0:
+            mesh.vertices += args.addGaussianNoise*np.random.random(size=mesh.vertices.shape)
 
         #save
-        mesh.export(chunk.node.outputMesh.value)
+        mesh.export(args.outputMesh)

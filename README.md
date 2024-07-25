@@ -95,7 +95,7 @@ Contributions to Meshroom-Research are welcomed! Here's a quick overview of the 
 - `mrrs/<feature_plugin>`: Contains the code and the nodes related to a plugin feature.
 - `mrrs/meshrooPlugin.json`: Contains the list of plugins in this collection.
 
-Utilize Meshroom's nodal UI for seamless integration, and refer to the [Meshroom's repo](https://github.com/alicevision/Meshroom) for creating custom nodes. We've introduced new types of node (eg. CondaNode and DockerNode), which automates  environment management for your convenience.
+Utilize Meshroom's nodal UI for seamless integration, and refer to the [Meshroom's repo](https://github.com/alicevision/Meshroom) for creating custom nodes. We've introduced new types of node (eg. PluginNode and DockerNode), which automates  environment management for your convenience.
 
 See meshroom's [plugin documentation](https://github.com/alicevision/Meshroom/tree/dev/plugin_system/meshroom/core) to leanrn how to make your own plugins.
 

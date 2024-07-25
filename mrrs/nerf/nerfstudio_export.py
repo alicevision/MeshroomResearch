@@ -2,10 +2,10 @@
 import os
 
 from meshroom.core import desc
-from meshroom.core.plugin import CondaNode
+from meshroom.core.plugin import PluginNode
 from mrrs.nerf import ENV_FILE
 
-class NeRFStudioExport(CondaNode):
+class NeRFStudioExport(PluginNode):
 
     category = 'Meshroom Research'
     documentation = ''' '''

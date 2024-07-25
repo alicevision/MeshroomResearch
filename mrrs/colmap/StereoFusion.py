@@ -6,7 +6,7 @@ import os
 from meshroom.core import desc
 from . import COLMAP
 
-class StereoFusion(desc.CommandLineNode):
+class ColmapStereoFusion(desc.CommandLineNode):
     commandLine = COLMAP+' stereo_fusion {allParams}'
 
     category = 'MRRS - Colmap'
