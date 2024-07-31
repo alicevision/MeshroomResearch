@@ -6,7 +6,9 @@ import numpy as np
 import kornia
 import torch
 
-from .utils import time_it, open_image_grapĥ, open_descriptor_file
+import sys
+sys.path.insert(0,os.path.dirname(__file__))
+from utils import time_it, open_and_prepare_image, write_descriptor_file
 
 @click.command()
 @click.option('--inputSfMData', help='Input sfm data')

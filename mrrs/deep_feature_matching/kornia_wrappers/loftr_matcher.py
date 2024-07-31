@@ -8,7 +8,9 @@ import torch
 from kornia.feature.loftr.loftr import LoFTR
 from kornia.feature.loftr.loftr import default_cfg#the default config file
 
-from .utils import time_it, open_and_prepare_image, open_image_grapĥ, write_descriptor_file
+import sys
+sys.path.insert(0,os.path.dirname(__file__))
+from utils import time_it, open_and_prepare_image, write_descriptor_file
 
 def get_all_keypoints(feature_map_size):
     """
