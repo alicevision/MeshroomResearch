@@ -2,12 +2,15 @@ import json
 import os
 import click
 import numpy as np
+import sys
 
 import kornia
 import torch 
 from torch.nn.functional import pad
 
-from .utils import time_it, open_and_prepare_image, write_descriptor_file
+import sys
+sys.path.insert(0,os.path.dirname(__file__))
+from utils import time_it, open_and_prepare_image, write_descriptor_file
 
 FEATURE_SIZE = 128
 
