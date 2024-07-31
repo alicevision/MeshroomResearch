@@ -1,33 +1,17 @@
 __version__ = "3.0"
 
 import os
-import json
 
-import cv2
-from mrrs.deep_feature_matching.utils import open_matches
-import numpy as np
-
+from meshroom.core.plugin import PluginNode, EnvType
 from meshroom.core import desc
 
-from mrrs.core.ios import *
-from mrrs.core.geometry import *
+class VizFeatures(PluginNode):
 
-def draw_keypoints(image, keypoints, downsample=1, p = 2, o = 0):
-    for kp in keypoints[::downsample]:
-        image[int(kp[1])-p:int(kp[1])+p, o+int(kp[0])-p:o+int(kp[0])+p, :]=[0,255,0]
-    return image 
-
-def get_best_matching_view(view_matches):
-    values = list(view_matches.values())
-    lengths = [v.shape[0] for v in values]
-    keys = list(view_matches.keys())
-    index_max = np.argmax(lengths)
-    return keys[index_max], values[index_max]
-
-class VizFeatures(desc.Node):
-
-    category = 'Meshroom Research'
+    category = 'MRRS - Deep Matching'
     documentation = ''''''
+
+    envFile=os.path.dirname(__file__), 'env.yaml'
+    envType=EnvType.CONDA
 
     inputs = [
         desc.File(
@@ -125,6 +109,24 @@ class VizFeatures(desc.Node):
     def processChunk(self, chunk):
         """
         """
+        import numpy as np
+        import json
+        import cv2
+        from mrrs.core.ios import open_image, save_image
+        from mrrs.deep_feature_matching.kornia_wrappers.utils import open_matches
+        
+        def draw_keypoints(image, keypoints, downsample=1, p = 2, o = 0):
+            for kp in keypoints[::downsample]:
+                image[int(kp[1])-p:int(kp[1])+p, o+int(kp[0])-p:o+int(kp[0])+p, :]=[0,255,0]
+            return image 
+
+        def get_best_matching_view(view_matches):
+            values = list(view_matches.values())
+            lengths = [v.shape[0] for v in values]
+            keys = list(view_matches.keys())
+            index_max = np.argmax(lengths)
+            return keys[index_max], values[index_max]
+
         chunk.logManager.start(chunk.node.verboseLevel.value)
         if chunk.node.inputSfM.value == '':
             raise RuntimeError("No inputSfM specified")

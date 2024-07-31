@@ -3,19 +3,20 @@ import os
 
 from meshroom.core import desc
 
-from meshroom.core.plugin import PluginNode
+from meshroom.core.plugin import PluginCommandLineNode, EnvType
 
 EXEC = "python "+ os.path.join(os.path.dirname(__file__), "kornia_wrappers/light_glue_matcher.py")
 
-class LightGlueMatching(PluginNode):
+class LightGlueMatching(PluginCommandLineNode):
 
-    category = 'Sparse Reconstruction'
+    category = 'MRRS - Deep Matching'
     documentation = ''' '''
     gpu = desc.Level.INTENSIVE
 
     commandLine = EXEC+" {allParams}"
 
-    envFile=os.path.dirname(__file__), 'env.yaml'
+    envFile=os.path.join(os.path.dirname(__file__), 'env.yaml')
+    envType=EnvType.CONDA
     
     inputs = [
         desc.File(

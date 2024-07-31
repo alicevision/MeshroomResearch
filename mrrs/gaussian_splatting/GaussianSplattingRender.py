@@ -1,11 +1,12 @@
 
 import os
-from meshroom.core import desc
-from meshroom.core.plugin import DockerNode
 from distutils.dir_util import copy_tree
 from shutil import move
 
-class GaussianSplattingRender(DockerNode):
+from meshroom.core import desc
+from meshroom.core.plugin import PluginNode, EnvType
+
+class GaussianSplattingRender(PluginNode):
 
     category = 'GaussianSplatting'
     documentation = '''Node to render frames from a .sfm and the optimised gaussian splats.'''
@@ -13,7 +14,8 @@ class GaussianSplattingRender(DockerNode):
 
     commandLine = "python gaussian-splatting/render.py -s /node_folder/input_scene -m /node_folder/input_model"
 
-    envFile = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Dockerfile'))
+    envFile = os.path.join(os.path.dirname(__file__), 'Dockerfile')
+    envType = EnvType.DOCKER
 
     inputs = [
             desc.File(

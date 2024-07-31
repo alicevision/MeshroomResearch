@@ -5,9 +5,6 @@ import json
 
 from meshroom.core import desc
 
-from mrrs.core.ios import *
-from mrrs.core.geometry import *
-
 from mrrs.core.geometry import CG_CV_MAT33
 
 class Transforms():
@@ -128,6 +125,10 @@ class CalibTransform(desc.Node):
         """
         Computes the different transforms
         """
+    
+        import numpy as np
+        from mrrs.core.geometry import sfm_data_from_matrices, matrices_from_sfm_data
+
         chunk.logManager.start(chunk.node.verboseLevel.value)
         if chunk.node.inputSfM.value == '':
             raise RuntimeError("No inputSfM specified")

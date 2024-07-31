@@ -2,20 +2,20 @@ __version__ = "2.0"
 import os 
 
 from meshroom.core import desc
-
-from meshroom.core.plugin import PluginNode
+from meshroom.core.plugin import PluginCommandLineNode, EnvType
 
 LOFTR_EXEC = "python "+ os.path.join(os.path.dirname(__file__), "kornia_wrappers/loftr_matcher.py")
 
-class LoftrMatcher(PluginNode):
+class LoftrMatcher(PluginCommandLineNode):
 
-    category = 'Sparse Reconstruction'
+    category = 'MRRS - Deep Matching'
     documentation = ''' '''
     gpu = desc.Level.INTENSIVE
 
     commandLine = LOFTR_EXEC+" {allParams}"
 
-    envFile=os.path.dirname(__file__), 'env.yaml'
+    envFile=os.path.join(os.path.dirname(__file__), 'env.yaml')
+    envType=EnvType.CONDA
     
     inputs = [
         desc.File(

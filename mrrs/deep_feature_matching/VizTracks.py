@@ -3,19 +3,16 @@ __version__ = "3.0"
 import os
 import json
 
-import cv2
-
-import numpy as np
-
+from meshroom.core.plugin import PluginNode, EnvType
 from meshroom.core import desc
 
-from mrrs.core.ios import *
-from mrrs.core.geometry import *
+class VizTracks(PluginNode):
 
-class VizTracks(desc.Node):
-
-    category = 'Meshroom Research'
+    category = 'MRRS - Deep Matching'
     documentation = ''''''
+
+    envFile=os.path.dirname(__file__), 'env.yaml'
+    envType=EnvType.CONDA
 
     inputs = [
         desc.File(
@@ -89,6 +86,11 @@ class VizTracks(desc.Node):
     def processChunk(self, chunk):
         """
         """
+        import numpy as np
+        import json
+        import cv2
+        from mrrs.core.ios import open_image, save_image
+
         chunk.logManager.start(chunk.node.verboseLevel.value)
         if chunk.node.inputSfM.value == '':
             raise RuntimeError("No inputSfM specified")

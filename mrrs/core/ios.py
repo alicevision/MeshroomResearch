@@ -5,7 +5,6 @@ Module handling the inputs and outputs from and to Meshroom.
 import logging
 import re
 from struct import unpack
-import OpenImageIO as oiio
 
 import numpy as np
 
@@ -16,6 +15,8 @@ def open_exr(exr_path):
     '''
     Uses oiio to import an EXR file.
     '''
+    #lazy import to avoid strong dep 
+    import OpenImageIO as oiio
     exr_file = oiio.ImageInput.open(exr_path)
     if exr_file is None :
         raise RuntimeError("Could not open exr file "+exr_path)
@@ -36,6 +37,8 @@ def save_exr(input_array, output_file,
     """
     Saves an exr for meshroom, using different formats.
     """
+    #lazy import to avoid strong dep 
+    import OpenImageIO as oiio
     if len(input_array.shape)<2 or len(input_array.shape)>3:
         raise RuntimeError('Data type not suported for save_exr')
     elif len(input_array.shape)==2:#gray level case
@@ -154,6 +157,8 @@ def save_image(image_path, np_array, orientation=None, auto_rotate=False):
     Save an image in a numpy array.
     Range must be 0-255 and channel 1 or 3.
     """
+    #lazy import to avoid strong dep 
+    import OpenImageIO as oiio
     if len(np_array.shape)==2:
         np_array=np.expand_dims(np_array, axis = -1)
     out = oiio.ImageOutput.create(image_path)

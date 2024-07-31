@@ -1,29 +1,22 @@
-import json
 import os
-import numpy as np
-import cv2
 
 from meshroom.core import desc
-from meshroom.core.plugin import PluginNode
-
-from mrrs.core.ios import matrices_from_sfm_data, open_depth_map, save_exr
-from mrrs.core.utils import format_float_array
+from meshroom.core.plugin import PluginCommandLineNode, EnvType
 
 EXEC = "python "+ os.path.join(os.path.dirname(__file__), "Vis-MVSNet/test.py")
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "Vis-MVSNet/pretrained_model/vis")
 
-class VizMVSNet(PluginNode):
+class VizMVSNet(PluginCommandLineNode):
 
-    category = 'MRRS - Deep depth'
+    category = 'MRRS - Depth Maps'
     documentation = ''' '''
     gpu = desc.Level.INTENSIVE
 
     commandLine = EXEC+" --data_root {outputFolderValue} --result_dir {outputFolderValue}  --load_path "+MODEL_PATH\
                       +" {sizeParamValue} --write_result --dataset_name 'general' "
 
-
-    #overides the env path
-    envfile = os.path.join(os.path.dirname(__file__), 'env.yaml')
+    envType = EnvType.CONDA
+    envFile = os.path.join(os.path.dirname(__file__), 'env.yaml')
     
     inputs = [
         desc.File(
@@ -101,11 +94,17 @@ class VizMVSNet(PluginNode):
     ]
 
     def processChunk(self, chunk):
+        import json
+        import numpy as np
+        import cv2
+
+        from mrrs.core.ios import matrices_from_sfm_data, open_depth_map, save_exr
+        from mrrs.core.utils import format_float_array
+
         chunk.logManager.start(chunk.node.verboseLevel.value)
         if chunk.node.inputSfMData.value == "":
             raise RuntimeError('Must input SfM data')
 
-        #FIXME: move this to mvsnet
         sfm_data=json.load(open(chunk.node.inputSfMData.value,"r"))
         (extrinsics, intrinsics, views_id, poses_ids, 
         intrinsics_ids, pixel_sizes_all_cams, images_size) = matrices_from_sfm_data(sfm_data, True)

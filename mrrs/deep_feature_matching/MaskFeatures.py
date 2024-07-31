@@ -1,17 +1,13 @@
 __version__ = "3.0"
 
 import os
-import json
 
-import numpy as np
 from meshroom.core import desc
+from meshroom.core.plugin import PluginNode, EnvType
 
-from mrrs.core.ios import *
-from .kornia_wrappers.utils import open_descriptor_file, write_descriptor_file
+class MaskFeatures(PluginNode):
 
-class MaskFeatures(desc.Node):
-
-    category = 'Meshroom Research'
+    category = 'MRRS - Deep Matching'
     documentation = ''''''
 
     inputs = [
@@ -65,6 +61,12 @@ class MaskFeatures(desc.Node):
     def processChunk(self, chunk):
         """
         """
+
+        import json
+        import numpy as np
+        from mrrs.core.ios import open_image
+        from .kornia_wrappers.utils import open_descriptor_file, write_descriptor_file
+
         chunk.logManager.start(chunk.node.verboseLevel.value)
         if chunk.node.inputSfM.value == '':
             raise RuntimeError("No inputSfM specified")
