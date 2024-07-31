@@ -6,23 +6,19 @@ __version__ = "3.0"
 import os
 import json
 
-import cv2
-from mrrs.core.utils import cv2_resize_with_pad 
-import numpy as np
-
-from mrrs.core.ios import open_image, save_image
 from meshroom.core import desc
+from meshroom.core.plugin import PluginNode, EnvType
 
-
-class ConvertImages(desc.Node):
+class ConvertImages(PluginNode):
     """
     Generic node to perform segmentation.
     """
-    size = desc.DynamicNodeSize('input')
-    category = 'Meshroom Research'
-    documentation = '''Node to convert images into a specific file format'''
 
-    size = desc.DynamicNodeSize('input')
+    category = 'MRRS - Utils'
+    documentation = ''''''
+
+    envType = EnvType.CONDA
+    envFile = os.path.join(os.path.dirname(__file__), "utils_env.yaml")
 
     inputs = [
         desc.File(
@@ -146,6 +142,11 @@ class ConvertImages(desc.Node):
         return True
 
     def processChunk(self, chunk):
+        import cv2
+        from mrrs.core.utils import cv2_resize_with_pad 
+        import numpy as np
+        from mrrs.core.ios import open_image, save_image
+   
         try:
             chunk.logManager.start(chunk.node.verboseLevel.value)
             if not self.check_inputs(chunk):

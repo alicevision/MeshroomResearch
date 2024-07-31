@@ -6,14 +6,15 @@ __version__ = "3.0"
 import os
 import json
 from meshroom.core import desc
-from meshroom.core.plugin import PluginNode
+from meshroom.core.plugin import PluginNode, EnvType
 
 class MeshTransform(PluginNode):#FIXME: abstract this Dataset, scan folder etc...?
 
-    category = 'Meshroom Research'#Machine Learning Effort for Meshroom #'Sparse Reconstruction'
+    category = 'MRRS - Utils'#Machine Learning Effort for Meshroom #'Sparse Reconstruction'
 
-    documentation = '''.'''
+    documentation = ''''''
 
+    envType = EnvType.CONDA
     envFile = os.path.join(os.path.dirname(__file__), "utils_env.yaml")
 
     inputs = [

@@ -4,76 +4,18 @@ import os
 import json
 
 from meshroom.core import desc
+from meshroom.core.plugin import PluginNode, EnvType
 
-from mrrs.core.geometry import CG_CV_MAT33
+transforms_names = ["id", "cg2cv", "custom", "inv", 
+                    "scale", "center", "set_focal"]#[f for f in Transforms.__dict__.keys() if not f.startswith("__")]
 
-class Transforms():
-    """
-    class used as namespace to automatically include in gui
-    """
-    def id(extrinsics, intrinsics, param):
-        """
-        Identity transform, does nothing
-        """
-        return extrinsics, intrinsics
+class CalibTransform(PluginNode):
 
-    def cg2cv(extrinsics, intrinsics, param):
-        """
-        Swap from CG to CV coordinate system
-        """
-        extrinsics=CG_CV_MAT33@extrinsics
-        return extrinsics, intrinsics
-
-    def custom(extrinsics, intrinsics, param):
-        """
-        Will use the passed param_array to transform the poses
-        """
-        extrinsics=param@extrinsics
-        return extrinsics, intrinsics
-
-    def inv(extrinsics, intrinsics, param):
-        """
-        Inv of the poses
-        """
-        extrinsics = [np.linalg.inv(np.concatenate( [e,[[0,0,0,1]]] )) for e in extrinsics]
-        return extrinsics, intrinsics
-    
-    def scale(extrinsics, intrinsics, param):
-        """
-        """
-        extrinsics=np.asarray(extrinsics)
-        center = np.mean(extrinsics[:,0:3,3], axis=0 )
-        for i in range(len(extrinsics)):
-            extrinsics[i][0:3,3] -= center
-            extrinsics[i][0:3,3] *= param
-            extrinsics[i][0:3,3] += center
-        return extrinsics, intrinsics
-    
-    def center(extrinsics, intrinsics, param):
-        """
-        Will normalise the calib such that the camera centers are between -1 and 1
-        """
-        extrinsics=np.asarray(extrinsics)
-        center = np.mean(extrinsics[:,0:3,3], axis=0 )
-        for i in range(len(extrinsics)):
-            extrinsics[i][0:3,3] -= center
-        return extrinsics, intrinsics
-
-    def set_focal(extrinsics, intrinsics, param):
-        """
-        Set focal 
-        """
-        intrinsics=np.asarray(intrinsics)
-        intrinsics[:,0,0] = param
-        intrinsics[:,1,1] = param
-        return extrinsics, intrinsics
-
-transforms_names = [f for f in Transforms.__dict__.keys() if not f.startswith("__")]
-
-class CalibTransform(desc.Node):
-
-    category = 'Meshroom Research'
+    category = 'MRRS - Utils'
     documentation = ''''''
+
+    envType = EnvType.CONDA
+    envFile = os.path.join(os.path.dirname(__file__), "utils_env.yaml")
 
     inputs = [
         desc.File(
@@ -128,6 +70,69 @@ class CalibTransform(desc.Node):
     
         import numpy as np
         from mrrs.core.geometry import sfm_data_from_matrices, matrices_from_sfm_data
+        from mrrs.core.geometry import CG_CV_MAT33
+
+        class Transforms():
+            """
+            class used as namespace to automatically include in gui
+            """
+
+            def id(extrinsics, intrinsics, param):
+                """
+                Identity transform, does nothing
+                """
+                return extrinsics, intrinsics
+
+            def cg2cv(extrinsics, intrinsics, param):
+                """
+                Swap from CG to CV coordinate system
+                """
+                extrinsics=CG_CV_MAT33@extrinsics
+                return extrinsics, intrinsics
+
+            def custom(extrinsics, intrinsics, param):
+                """
+                Will use the passed param_array to transform the poses
+                """
+                extrinsics=param@extrinsics
+                return extrinsics, intrinsics
+
+            def inv(extrinsics, intrinsics, param):
+                """
+                Inv of the poses
+                """
+                extrinsics = [np.linalg.inv(np.concatenate( [e,[[0,0,0,1]]] )) for e in extrinsics]
+                return extrinsics, intrinsics
+            
+            def scale(extrinsics, intrinsics, param):
+                """
+                """
+                extrinsics=np.asarray(extrinsics)
+                center = np.mean(extrinsics[:,0:3,3], axis=0 )
+                for i in range(len(extrinsics)):
+                    extrinsics[i][0:3,3] -= center
+                    extrinsics[i][0:3,3] *= param
+                    extrinsics[i][0:3,3] += center
+                return extrinsics, intrinsics
+            
+            def center(extrinsics, intrinsics, param):
+                """
+                Will normalise the calib such that the camera centers are between -1 and 1
+                """
+                extrinsics=np.asarray(extrinsics)
+                center = np.mean(extrinsics[:,0:3,3], axis=0 )
+                for i in range(len(extrinsics)):
+                    extrinsics[i][0:3,3] -= center
+                return extrinsics, intrinsics
+
+            def set_focal(extrinsics, intrinsics, param):
+                """
+                Set focal 
+                """
+                intrinsics=np.asarray(intrinsics)
+                intrinsics[:,0,0] = param
+                intrinsics[:,1,1] = param
+                return extrinsics, intrinsics
 
         chunk.logManager.start(chunk.node.verboseLevel.value)
         if chunk.node.inputSfM.value == '':

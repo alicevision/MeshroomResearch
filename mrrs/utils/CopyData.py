@@ -11,9 +11,9 @@ import shutil
 from distutils.dir_util import copy_tree
 
 class CopyData(desc.Node):
-    category = 'Meshroom Research'
 
-    documentation = ''' '''
+    category = 'MRRS - Utils'
+    documentation = ''''''
 
     inputs = [
 

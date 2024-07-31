@@ -8,16 +8,15 @@ import json
 import os 
 
 from meshroom.core import desc
-from meshroom.core.plugin import PluginNode
+from meshroom.core.plugin import PluginNode, EnvType
 
 class InjectSfmData(PluginNode):
 
-    category = 'Meshroom Research'#Machine Learning Effort for Meshroom #'Sparse Reconstruction'
+    category = 'MRRS - Utils'
 
     documentation = '''This node injects some fields from a source sfm data to a target sfm data.'''
 
-    size = desc.DynamicNodeSize('sourceSfmData')
-
+    envType = EnvType.CONDA
     envFile = os.path.join(os.path.dirname(__file__), "utils_env.yaml")
 
     inputs = [

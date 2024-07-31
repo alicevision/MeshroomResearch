@@ -4,16 +4,15 @@ import os
 import json
 
 from meshroom.core import desc
+from meshroom.core.plugin import PluginNode, EnvType
 
-from mrrs.core.ios import *
-from mrrs.core.geometry import *
+class CutSfm(PluginNode):
 
-from mrrs.core.geometry import CG_CV_MAT33
-
-class CutSfm(desc.Node):
-
-    category = 'Meshroom Research'
+    category = 'MRRS - Utils'
     documentation = ''''''
+
+    envType = EnvType.CONDA
+    envFile = os.path.join(os.path.dirname(__file__), "utils_env.yaml")
 
     inputs = [
         desc.File(
@@ -57,19 +56,12 @@ class CutSfm(desc.Node):
         )
     ]
 
-    def extract_frames(extrinsics, intrinsics, param):
-        """
-        Extract a set of frames from the .sfm
-        """
-        param=param.astype(np.int32)
-        extrinsics = np.asarray(extrinsics)[param]
-        return extrinsics, intrinsics
-
-
     def processChunk(self, chunk):
         """
         Computes the different transforms
         """
+        import numpy as np
+
         chunk.logManager.start(chunk.node.verboseLevel.value)
         if chunk.node.inputSfM.value == '':
             raise RuntimeError("No inputSfM specified")
