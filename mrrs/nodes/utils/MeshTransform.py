@@ -22,21 +22,18 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             label='Input mesh',
             description='Input mesh.',
             value=desc.Node.internalFolder,
-            uid=[0],
         ),
         desc.File(
             name='inputTransform',
             label='Input transform',
             description='Input transform.',
             value='',
-            uid=[0],
         ),
         desc.BoolParam(
             name='flipCG_CV',
             label='flipCG_CV',
-            description='Flip from a CG to a CV cs or vice versa',
+            description='Flip from a CG to a CV cs or vice versa.',
             value=False,
-            uid=[0],
         ),
         desc.FloatParam(
             name='addGaussianNoise',
@@ -44,27 +41,24 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             description='Add Gaussian Noise to the mesh vertices.',
             value=-1.0,
             range=(-1.0, 100.0, 1.0),
-            uid=[0],
-            ),
+        ),
 
         # desc.ChoiceParam(
         #     name='extention',
         #     label='Extention',
-        #     description='''File format for the ouptut mesh ''',
+        #     description='''File format for the ouptut mesh.''',
         #     value='.ply',
         #     values=['.ply', '.obj'],
         #     exclusive=True,
-        #     uid=[0],
         # ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -74,7 +68,6 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             label='Output mesh',
             description='Output Mesh.',
             value=desc.Node.internalFolder + 'mesh.ply',#pb: not extention!!! variable output
-            uid=[],
         ),
     ]
 

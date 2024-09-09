@@ -22,7 +22,6 @@ class CalibrationComparison(desc.Node):
             label='SfMData',
             description='SfMData file.',
             value='',
-            uid=[0],
         ),
 
         desc.File(
@@ -30,26 +29,23 @@ class CalibrationComparison(desc.Node):
             label='GtSfMData',
             description='Ground Truth SfMData file.',
             value='',
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='metrics',
             label='Metrics',
-            description='Metrics to be used in the comparison',
+            description='Metrics to be used in the comparison.',
             value=['MSECameraCenter'],
             values=['MSECameraCenter','AngleBetweenRotations','MSEFocal', 'MSEPrincipalPoint', 'validCams'],
             exclusive=False,
-            uid=[0],
             joinChar=',',
         ),
 
          desc.StringParam(
             name='csv_name',
             label='CsvName',
-            description='Name for the csv file to be used',
+            description='Name for the csv file to be used.',
             value="calibration_comparison.csv",
-            uid=[0]
         ),
 
         desc.ChoiceParam(
@@ -59,7 +55,6 @@ class CalibrationComparison(desc.Node):
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -69,14 +64,12 @@ class CalibrationComparison(desc.Node):
             label='Output Folder',
             description='Output folder for generated results.',
             value=desc.Node.internalFolder,
-            uid=[],
         ),
         desc.File(
             name='outputCsv',
             label='Output Csv',
             description='Output file to generated results.',
             value=lambda attr: os.path.join(desc.Node.internalFolder, attr.node.csv_name.value),
-            uid=[],
         )
     ]
 

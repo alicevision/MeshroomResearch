@@ -166,36 +166,32 @@ class CreateTrackingMarkers(desc.Node):
         desc.File(
             name='sfmData',
             label='SfmData',
-            description='Input sfm file.',
+            description='Input SfM file.',
             value=desc.Node.internalFolder,
-            uid=[0],
         ),
 
         desc.File(
             name='objFile',
             label='3D Object',
-            description='Input obj file to display (optional)',
+            description='Input obj file to display (optional).',
             value="",
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='track_mode',
             label='Track Mode',
-            description='''Mode to display over the images''',
+            description='''Mode to display over the images.''',
             value='display_track_cones',
             values=['display_track_cones', 'display_track_spheres', 'display_no_tracks'],
             exclusive=True,
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='track_param_sort_mode',
             label='Sorting Mode',
-            description='''Sort Mode to display Track Cones''',
+            description='''Sort Mode to display Track Cones.''',
             value='longest',
             values=['longest', 'scale'],
-            uid=[0],
             enabled=lambda node: node.track_mode.value=='display_track_cones' or node.track_mode.value=='display_track_spheres',
             exclusive=True
         ),
@@ -207,7 +203,6 @@ class CreateTrackingMarkers(desc.Node):
             description=''' ''',
             value=1,
             range=(0, 10000, 1),
-            uid=[0],
             enabled=lambda node: node.track_mode.value=='display_track_cones' or node.track_mode.value=='display_track_spheres'
         ),
 
@@ -217,37 +212,33 @@ class CreateTrackingMarkers(desc.Node):
             description='''Grid size to be used. Will only keep N landmarks per voxel.''',
             value=10,
             range=(0, 10000, 1),
-            uid=[0],
             enabled=lambda node: node.track_mode.value=='display_track_cones' or node.track_mode.value=='display_track_spheres'
         ),
 
         desc.IntParam(
             name='param_min_landmark_per_voxel',
             label='Minimum landmark per voxel',
-            description='''Will only display landmarks if the voxel as this amount of ttal landmarks''',
+            description='''Will only display landmarks if the voxel as this amount of total landmarks.''',
             value=10,
             range=(0, 10000, 1),
-            uid=[0],
             enabled=lambda node: node.track_mode.value=='display_track_cones' or node.track_mode.value=='display_track_spheres'
         ),
 
         desc.BoolParam(
             name="render",
             label = "Generate 2D renders",
-            description='''Will render the markers directly on frames ''',
+            description='''Will render the markers directly on frames.''',
             value=False,
-            uid=[0],
             group='',
         ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -255,16 +246,14 @@ class CreateTrackingMarkers(desc.Node):
         desc.File(
             name='outputFile',
             label='Output Json',
-            description='Output file to place track info to',
+            description='Output file to place track info to.',
             value=os.path.join(desc.Node.internalFolder, "track_objects.json"),
-            uid=[],
         ),
         desc.File(
             name='outputImages',
             label='Output Images',
             description='Output image regex if any',
             value=os.path.join(desc.Node.internalFolder, "*.png"),
-            uid=[],
         ),
     ]
 

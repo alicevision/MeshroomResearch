@@ -20,23 +20,20 @@ class CleanMesh(CondaNode):
             label='Input Mesh',
             description='',
             value='',
-            uid=[0],
             ),
         desc.File(
             name="face_index_images_folder",
             label='Faces Index Images',
             description='',
             value='',
-            uid=[0],
             ),
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
             group=""
         ),
     ]
@@ -47,7 +44,6 @@ class CleanMesh(CondaNode):
             label="Ouput Mesh",
             description="",
             value=os.path.join(desc.Node.internalFolder, "cleaned_mesh.ply"),
-            uid=[],
             ),
     ]
 

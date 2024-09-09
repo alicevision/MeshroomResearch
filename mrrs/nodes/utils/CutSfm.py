@@ -21,7 +21,6 @@ class CutSfm(desc.Node):
             label='SfMData',
             description='SfMData file.',
             value='',
-            uid=[0],
         ),
 
     
@@ -30,36 +29,31 @@ class CutSfm(desc.Node):
             label='Parameter',
             description='',
             value='',
-            uid=[0],
         ),
 
     desc.BoolParam(
             name='removeImagePath',
             label='removeImagePath',
-            description='Will remove the fullpath to images',
+            description='Will remove the fullpath to images.',
             value=True,
-            uid=[0],
         ),
 
     desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
-
     ]
 
     outputs = [
         desc.File(
             name='outputSfMData',
             label='Output',
-            description='Output sfm data',
+            description='Output SfM data.',
             value=os.path.join(desc.Node.internalFolder, "sfm.sfm"),
-            uid=[]
         )
     ]
 

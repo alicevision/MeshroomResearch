@@ -22,37 +22,33 @@ class InjectSfmData(desc.Node):
         desc.File(
             name='sourceSfmData',
             label='Source SfmData',
-            description='Input sfm file containing the fields to be injected in target sfmdata.',
+            description='Input sfm file containing the fields to be injected in target SfMData.',
             value=desc.Node.internalFolder,
-            uid=[0],
         ),
 
         desc.File(
             name='targetSfmData',
             label='Target SfmData',
-            description='Input sfm file containing the sfm data to be injected with fata from the source sfm data.',
+            description='Input SfM file containing the SfM data to be injected with data from the source SfMData.',
             value=desc.Node.internalFolder,
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='exportedFields',
             label='Exported Fields',
-            description='''Fields of the .sfm to export''',
+            description='''Fields of the .sfm to export.''',
             value=['structure'],
             values=['poses', 'views' ,'intrinsics', 'structure', 'version', 'featuresFolders', 'matchesFolders'],
             exclusive=False,
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -60,9 +56,8 @@ class InjectSfmData(desc.Node):
         desc.File(
             name='outputSfMData',
             label='SfMData',
-            description='Path to the output sfmdata file',
+            description='Path to the output SfMData file.',
             value=desc.Node.internalFolder + 'sfm.sfm',
-            uid=[],
         ),
     ]
 

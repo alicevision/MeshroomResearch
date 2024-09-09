@@ -22,9 +22,8 @@ class PatchMatchStereo(desc.CommandLineNode):
         desc.File(
             name='input_folder',
             label='Input Folder',
-            description='Input Folder (output of undisto)',
+            description='Input Folder (output of undisto).',
             value='',
-            uid=[0],
             group=""
         ),
     ]
@@ -33,9 +32,8 @@ class PatchMatchStereo(desc.CommandLineNode):
         desc.File(
             name='workspace_path',
             label='OutputPath',
-            description='Output path',
+            description='Output path.',
             value=os.path.join(desc.Node.internalFolder, "workspace"),
-            uid=[],
         ),
 
     ]

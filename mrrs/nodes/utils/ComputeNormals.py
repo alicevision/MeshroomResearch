@@ -25,23 +25,20 @@ class ComputeNormals(desc.Node):
             label='SfMData',
             description='SfMData file.',
             value='',
-            uid=[0],
         ),
         desc.File(
             name="depthMapsFolder",
             label="DepthMaps Folder",
-            description="Input depth maps folder",
+            description="Input depth maps folder.",
             value="",
-            uid=[0],
         ),
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[],
         ),
     ]
 
@@ -51,7 +48,6 @@ class ComputeNormals(desc.Node):
             label='Output normal Folder',
             description='Output folder for refined depth maps.',
             value=desc.Node.internalFolder,
-            uid=[],
         ),
         desc.File(
             name='normals',
@@ -59,7 +55,6 @@ class ComputeNormals(desc.Node):
             description='Generated depth maps.',
             semantic='image',
             value=desc.Node.internalFolder + '<VIEW_ID>.exr',
-            uid=[],
             group='', # do not export on the command line
         ),
     ]

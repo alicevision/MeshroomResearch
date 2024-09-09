@@ -23,9 +23,8 @@ class StereoFusion(desc.CommandLineNode):
         desc.File(
             name='input_folder',
             label='Input Folder',
-            description='Input Workspace Folder (output of patch match)',
+            description='Input Workspace Folder (output of patch match).',
             value='',
-            uid=[0],
             group=""
         ),
 
@@ -35,20 +34,17 @@ class StereoFusion(desc.CommandLineNode):
         desc.File(
             name='output_path',
             label='OutputPath',
-            description='Output point cloud path',
+            description='Output point cloud path.',
             value=os.path.join(desc.Node.internalFolder,  "workspace", "fused.ply"),
-            uid=[],
         ),
 
 
         desc.File(
             name='workspace_path',
             label='Output Workspace Folder',
-            description='Output workspace path',
+            description='Output workspace path.',
             value=os.path.join(desc.Node.internalFolder, "workspace"),
-            uid=[],
         ),
-
     ]
 
     def processChunk(self, chunk):

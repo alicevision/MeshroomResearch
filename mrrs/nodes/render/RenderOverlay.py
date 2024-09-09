@@ -14,48 +14,42 @@ class RenderOverlay(desc.CommandLineNode):
         desc.File(
             name='script',
             label='Script',
-            description='Python script to render markers',
+            description='Python script to render markers.',
             value=DEFAULT_RENDER_SCRIPT,
-            uid=[0]
         ),
         desc.File(
             name='markers',
             label='Markers',
-            description='3D markers to render',
+            description='3D markers to render.',
             value='',
-            uid=[0]
         ),
         desc.FloatParam(
             name='sizeFactor',
             label='Size Factor',
-            description='Marker size factor',
+            description='Marker size factor.',
             value=1.0,
             range=(0.0, 10.0, 0.1),
-            uid=[0]
         ),
         desc.File(
             name='sfmData',
             label='SfM Data',
-            description='Views, intrinsincs and estimated poses',
+            description='Views, intrinsincs and estimated poses.',
             value='',
-            uid=[0]
         ),
     ]
     outputs = [
         desc.File(
             name='outputFolder',
             label='Folder',
-            description='Output folder for generated images',
+            description='Output folder for generated images.',
             value=desc.Node.internalFolder,
-            uid=[]
         ),
 
         desc.File(
             name='overlay',
             label='Overlay',
-            description='Rendered views with markers overlay',
+            description='Rendered views with markers overlay.',
             semantic='image',
             value=desc.Node.internalFolder + '<VIEW_ID>.jpg',
-            uid=[]
         ),
     ]

@@ -20,35 +20,31 @@ class CopyData(desc.Node):
         desc.File(
             name='inputFolder',
             label='Input Folder',
-            description='''Get the input folder from any node output''',
+            description='''Get the input folder from any node output.''',
             value='',
-            uid=[0],
         ),
 
         desc.StringParam(
             name='inputFile',
             label='Input File',
-            description='''Input file to copy''',
+            description='''Input file to copy.''',
             value='',
-            uid=[0],
         ),
 
         desc.StringParam(
             name='outputName',
             label='outputName',
-            description='''Output name''',
+            description='''Output name.''',
             value='',
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -56,9 +52,8 @@ class CopyData(desc.Node):
         desc.File(
             name='outputFile',
             label='Output File',
-            description='Path to the output file',
+            description='Path to the output file.',
             value=lambda attr: os.path.join(desc.Node.internalFolder, os.path.basename(attr.node.inputFile.value) if attr.node.outputName.value =="" else attr.node.outputName.value),
-            uid=[],
         ),
 
     ]

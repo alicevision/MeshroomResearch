@@ -48,60 +48,54 @@ class VizMVSNet(CondaNode):
         return ENV_FILE
     
     inputs = [
-            desc.File(
-                name="inputSfMData",
-                label="SfMData",
-                description="Input SfMData file.",
-                value="",
-                uid=[0],
-                group=""
-            ),
-            desc.File(
-                name="viewPairs",
-                label="viewPairs",
-                description="View pairs",
-                value="",
-                uid=[0],
-            ),
+        desc.File(
+            name="inputSfMData",
+            label="SfMData",
+            description="Input SfMData file.",
+            value="",
+            group=""
+        ),
+        desc.File(
+            name="viewPairs",
+            label="viewPairs",
+            description="View pairs.",
+            value="",
+        ),
 
-            desc.FloatParam(
-                name="minD",
-                label="min depth",
-                description="Min Depth",
-                value=0.0,
-                range=(0.0, 2048.0, 1.0),
-                uid=[0],
-                group=""
-            ),
-            desc.IntParam(
-                name="stepsD",
-                label="depth steps",
-                description="depth steps",
-                value=256,
-                range=(0, 2048, 1),
-                uid=[0],
-                group=""
-            ),
-            desc.FloatParam(
-                name="maxD",
-                label="max depth",
-                description="Max Depth",
-                value=10.0,
-                range=(0.0, 2048.0, 1.0),
-                uid=[0],
-                group=""
-            ),
-        
-            desc.ChoiceParam(
-                name='verboseLevel',
-                label='Verbose Level',
-                description='''verbosity level (fatal, error, warning, info, debug, trace).''',
-                value='info',
-                values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
-                exclusive=True,
-                uid=[0],
-                )
-            ]
+        desc.FloatParam(
+            name="minD",
+            label="min depth",
+            description="Min Depth.",
+            value=0.0,
+            range=(0.0, 2048.0, 1.0),
+            group=""
+        ),
+        desc.IntParam(
+            name="stepsD",
+            label="Depth Steps",
+            description="Depth steps.",
+            value=256,
+            range=(0, 2048, 1),
+            group=""
+        ),
+        desc.FloatParam(
+            name="maxD",
+            label="Max Depth",
+            description="Max Depth.",
+            value=10.0,
+            range=(0.0, 2048.0, 1.0),
+            group=""
+        ),
+    
+        desc.ChoiceParam(
+            name='verboseLevel',
+            label='Verbose Level',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
+            value='info',
+            values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
+            exclusive=True,
+        )
+    ]
 
     outputs = [
         desc.File(
@@ -109,15 +103,13 @@ class VizMVSNet(CondaNode):
             label="Output Folder",
             description="Path to a folder in which the computed results are stored.",
             value=desc.Node.internalFolder,
-            uid=[],
         ),
 
         desc.StringParam(
             name="sizeParam",
             label="sizeParam",
-            description="sizeParam",
+            description="Size.",
             value="",
-            uid=[],
         ),
 
         desc.File(
@@ -126,7 +118,6 @@ class VizMVSNet(CondaNode):
             description='Generated depth maps.',
             semantic='image',
             value=desc.Node.internalFolder + '<VIEW_ID>_depthMap.exr',
-            uid=[],
             group='',
             )   
     ]
