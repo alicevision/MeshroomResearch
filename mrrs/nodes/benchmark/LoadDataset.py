@@ -24,28 +24,25 @@ class LoadDataset(desc.Node):
         desc.File(
             name="sfmData",
             label="sfmData",
-            description="Input sfmData",
+            description="Input SfMData.",
             value="",
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='datasetType',
             label='Dataset Type',
-            description='''Dataset type''',
+            description='''Dataset type.''',
             value='blendedMVG',
             values=['blendedMVG', 'DTU', 'ETH3D', 'baptiste', 'alab', 'NERF'],
             exclusive=True,
-            uid=[0],
         ),
 
         desc.IntParam(
             name='initSfmLandmarksVertices',
             label='Init Landmarks Vertices',
-            description='''Will initalise sfmLandmarks by sampling points on mesh. 0 to deactivate''',
+            description='''Will initalise sfmLandmarks by sampling points on mesh. 0 to deactivate.''',
             value=1,
             range=(0, 1000000000, 1),
-            uid=[0],
             advanced=True
         ),
         
@@ -53,29 +50,26 @@ class LoadDataset(desc.Node):
         desc.BoolParam(
             name='initMasks',
             label='Init Masks',
-            description='''If no masks in dataset, will initialise the masks using the values from the depth map (<=0) or the images (alpha<=0)''',
+            description='''If no masks in dataset, will initialise the masks using the values from the depth map (<=0) or the images (alpha<=0).''',
             value=True,
-            uid=[0],
             advanced=True
         ),
 
         desc.BoolParam(
             name='landMarksProj',
             label='Landmarks Projections',
-            description='''Will display point cloud or landmarks projection''',
+            description='''Will display point cloud or landmarks projection.''',
             value=False,
-            uid=[0],
             advanced=True
         ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
             advanced=True
         ),
     ]
@@ -84,17 +78,15 @@ class LoadDataset(desc.Node):
         desc.File(
             name='outputSfMData',
             label='SfM Data',
-            description='Path to the output sfmdata file',
+            description='Path to the output sfmdata file.',
             value=desc.Node.internalFolder + 'sfm.sfm',
-            uid=[],
         ),
 
         desc.File(
             name='depthMapsFolder',
             label='Depth map folder',
-            description='Output folder for loaded depth maps',
+            description='Output folder for loaded depth maps.',
             value=os.path.join(desc.Node.internalFolder, 'depth_maps'),
-            uid=[],
             # enabled=lambda attr: (attr.node.datasetType.value=='blendedMVG'), #FIXME: does not work!! doesnt actually hides in the node
         ),
 
@@ -104,7 +96,6 @@ class LoadDataset(desc.Node):
             description='Loaded mesh.',
             value=os.path.join(desc.Node.internalFolder, 'mesh.ply'),
             # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
-            uid=[],
         ),
 
         desc.File(
@@ -112,7 +103,6 @@ class LoadDataset(desc.Node):
             label='Mask Folder',
             description='Image mask folder. The mask describes the visibility of the object to be observed, on each view.',
             value=os.path.join(desc.Node.internalFolder,'masks'),
-            uid=[],
             # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
         ),
 
@@ -124,7 +114,6 @@ class LoadDataset(desc.Node):
             semantic='image',
             value=os.path.join(desc.Node.internalFolder,
                                'depth_maps', '<VIEW_ID>_depthMap.exr'),
-            uid=[],
             advanced=True,
             visible=False
         ),
@@ -132,11 +121,10 @@ class LoadDataset(desc.Node):
         desc.File(
             name='masksDisplay',
             label='MasksDisplay',
-            description='Generated masks',
+            description='Generated masks.',
             semantic='image',
             value=os.path.join(desc.Node.internalFolder,
                                'masks', '<VIEW_ID>.png'),
-            uid=[],
             advanced=True,
             visible=False
         ),
@@ -144,11 +132,10 @@ class LoadDataset(desc.Node):
         desc.File(
             name='landMarksProjDisplay',
             label='landMarksProjDisplay',
-            description='Generated images for landmarl projection',
+            description='Generated images for landmarl projection.',
             semantic='image',
             value=os.path.join(desc.Node.internalFolder,
                                'lm_projs', '<VIEW_ID>.png'),
-            uid=[],
             advanced=True,
             enabled=lambda attr: attr.node.landMarksProj.value,
             visible=False
@@ -161,7 +148,6 @@ class LoadDataset(desc.Node):
             semantic='3D',
             value=os.path.join(desc.Node.internalFolder,
                                'mesh_display.ply'),
-            uid=[],
             advanced=True,
             visible=False
         ),

@@ -126,61 +126,55 @@ class NeRFStudio(CondaNode):
     env_file = ENV_FILE
 
     inputs = [
-            desc.File(
-                name="inputSfMData",
-                label="SfMData",
-                description="Input SfMData file.",
-                value="",
-                uid=[0],
-                group=""
-            ),
-            desc.ChoiceParam(
-                name='method',
-                label='Method',
-                description='Method',
-                value='nerfacto',
-                values=['dnerf', 'generfacto', 'instant-ngp', 'instant-ngp-bounded', 'mipnerf', 'nerfacto', 'nerfacto-big', 'nerfacto-huge', 'neus', 'neus-facto', 'splatfacto', 'splatfacto-big', 'tensorf', 'vanilla-nerf'],
-                exclusive=True,
-                uid=[0],
-                group=""
-            ),
-            desc.IntParam(
-                name='max-num-iterations',
-                label='Number of Iterations',
-                description='Maximum number of iterations to run.',
-                value=30000,
-                range=(5000, 100000, 5000),
-                uid=[0],
-            ),
-            # desc.BoolParam(
-            #     name='pipeline.model.predict-normals',
-            #     label='Predict Normals',
-            #     description='Predict normals.',
-            #     value=True,
-            #     uid=[0],
-            #     enabled=lambda attr: (attr.node.method.value=='nerfacto' or attr.node.method.value=='nerfacto-big' or attr.node.method.value=='nerfacto-huge'),
-            # ),
-            desc.ChoiceParam(
-                name='verboseLevel',
-                label='Verbose Level',
-                description='''verbosity level (fatal, error, warning, info, debug, trace).''',
-                value='info',
-                values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
-                exclusive=True,
-                uid=[0],
-                group="",
-                )
-            ]
+        desc.File(
+            name="inputSfMData",
+            label="SfMData",
+            description="Input SfMData file.",
+            value="",
+            group=""
+        ),
+        desc.ChoiceParam(
+            name='method',
+            label='Method',
+            description='Method.',
+            value='nerfacto',
+            values=['dnerf', 'generfacto', 'instant-ngp', 'instant-ngp-bounded', 'mipnerf', 'nerfacto', 'nerfacto-big', 'nerfacto-huge', 'neus', 'neus-facto', 'splatfacto', 'splatfacto-big', 'tensorf', 'vanilla-nerf'],
+            exclusive=True,
+            group=""
+        ),
+        desc.IntParam(
+            name='max-num-iterations',
+            label='Number of Iterations',
+            description='Maximum number of iterations to run.',
+            value=30000,
+            range=(5000, 100000, 5000),
+        ),
+        # desc.BoolParam(
+        #     name='pipeline.model.predict-normals',
+        #     label='Predict Normals',
+        #     description='Predict normals.',
+        #     value=True,
+        #     enabled=lambda attr: (attr.node.method.value=='nerfacto' or attr.node.method.value=='nerfacto-big' or attr.node.method.value=='nerfacto-huge'),
+        # ),
+        desc.ChoiceParam(
+            name='verboseLevel',
+            label='Verbose Level',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
+            value='info',
+            values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
+            exclusive=True,
+            group="",
+        )
+    ]
 
     outputs = [
-            desc.File(
-                name='output',
-                label='Output',
-                description='Output folder.',
-                value=desc.Node.internalFolder,
-                uid=[],
-                group="",
-            ),
+        desc.File(
+            name='output',
+            label='Output',
+            description='Output folder.',
+            value=desc.Node.internalFolder,
+            group="",
+        ),
     ]
 
     def processChunk(self, chunk):

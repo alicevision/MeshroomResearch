@@ -16,7 +16,6 @@ class ExecuteCmdConda(CondaNode):
             label='commandLine',
             description=''' ''',
             value='echo "Hello"',
-            uid=[0],
             ),
 
         desc.StringParam(
@@ -24,17 +23,15 @@ class ExecuteCmdConda(CondaNode):
             label='condaEnv',
             description='''''',
             value='',
-            uid=[0],
             group=''
             ),
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 

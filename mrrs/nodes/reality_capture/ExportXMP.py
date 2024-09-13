@@ -23,29 +23,26 @@ class ExportXMP(desc.Node):
         desc.ChoiceParam(
             name='targetXMP',
             label='target XMP',
-            description='''Target XMP format to be used''',
+            description='''Target XMP format to be used.''',
             value='export_reality_capture',
             values=['export_reality_capture'],
             exclusive=True,
-            uid=[0],
         ),
 
         desc.File(
             name="sfmData",
             label="sfmData",
-            description="Input sfmData",
+            description="Input sfmData.",
             value="",
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -55,7 +52,6 @@ class ExportXMP(desc.Node):
             label='Output folder',
             description='Path to the XMP folder',
             value=desc.Node.internalFolder,
-            uid=[],
         ),
     ]
 

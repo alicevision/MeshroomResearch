@@ -27,7 +27,6 @@ The lighting conditions are assumed to be known.
             label="SfMData",
             description="Input SfMData file.",
             value="",
-            uid=[0]
         ),
         desc.File(
             name="pathToJSONLightFile",
@@ -35,7 +34,6 @@ The lighting conditions are assumed to be known.
             description="Path to a JSON file containing the lighting information.\n"
                         "If empty, .txt files are expected in the image folder.",
             value="defaultJSON.txt",
-            uid=[0]
         )
     ]
 
@@ -45,6 +43,5 @@ The lighting conditions are assumed to be known.
             label="Output Folder",
             description="Path to the output folder.",
             value=desc.Node.internalFolder,
-            uid=[],
         ),
     ]

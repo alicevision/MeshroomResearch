@@ -20,25 +20,22 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         #     label='Images Directory',
         #     description='''Path to images directory.''',
         #     value="",
-        #     uid=[0],
         # ), #FIXME: issue there, cannot be updated by node for next nodes, if uid !=0 then it changes the uid without notifuying next nodes
         #dirty fix: copy images to this folder in outputss
 
         desc.File(
             name='input_sfm',
             label='Input Sfm',
-            description='''Extracts the image path from an input sfm''',
+            description='''Extracts the image path from an input SfM.''',
             value='',
-            uid=[0],
             group=''
         ),
 
         desc.BoolParam(
             name="use_gpu",
             label = "Use GPU",
-            description='''Will use GPU for feature extraction''',
+            description='''Will use GPU for feature extraction.''',
             value=False,
-            uid=[0],
             group='',
         ),
 
@@ -51,7 +48,6 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
         #     values=['PINHOLE', 'SIMPLE_PINHOLE', 'RADIAL', 'SIMPLE_RADIAL', 'OPENCV', 'FULL_OPENCV',
         #             'SIMPLE_RADIAL_FISHEYE', 'RADIAL_FISHEYE', 'OPENCV_FISHEYE', 'FOV', 'THIN_PRISM_FISHEYE'],
         #     exclusive=True,
-        #     uid=[],
         # ),
 
         desc.BoolParam(
@@ -59,7 +55,6 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             label='SingleCamera',
             description='''If the scene has be shot with a single camera.''',
             value=False,
-            uid=[0],
             group=''
         ),
     ]
@@ -70,21 +65,18 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             label='Sensor Database',
             description='''Camera sensor width database path.''',
             value=os.path.join(desc.Node.internalFolder, "colmap_database.db"),
-            uid=[],
         ),
         desc.File(
             name='image_list_path',
             label='Used Images',
             description='''Used images (if from .sfm)''',
             value=os.path.join(desc.Node.internalFolder, "used_images.txt"),
-            uid=[],
         ),
         desc.File(
             name='image_path',
             label='Images Directory',
             description='''Path to images directory.''',
             value=os.path.join(desc.Node.internalFolder, "images"),
-            uid=[],
         ),
     ]
 

@@ -23,7 +23,6 @@ class MeshcomparisonBaptiste(CondaNode):
             label='Input Mesh',
             description='''''',
             value='',
-            uid=[0],
             ),
 
         desc.File(
@@ -31,27 +30,24 @@ class MeshcomparisonBaptiste(CondaNode):
             label='GroundTruthMesh',
             description='''''',
             value='',
-            uid=[0],
             ),
 
         desc.ChoiceParam(
             name='mode',
             label='Mode',
-            description='''Chose mesh or point cloud''',
+            description='''Choose mesh or point cloud.''',
             value='mesh',
             values=['mesh', 'pcd'],
             exclusive=True,
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
             group=""
         ),
     ]
@@ -62,7 +58,6 @@ class MeshcomparisonBaptiste(CondaNode):
             label='Output Directory',
             description='''''',
             value=desc.Node.internalFolder,
-            uid=[],
             ),
 
             desc.File(
@@ -70,7 +65,6 @@ class MeshcomparisonBaptiste(CondaNode):
             label='Distance Mesh to GT',
             description='''''',
             value=os.path.join(desc.Node.internalFolder, "vis_data2gt.pc.ply"),
-            uid=[],
             semantic="3D",
             group='',
             ),
@@ -80,7 +74,6 @@ class MeshcomparisonBaptiste(CondaNode):
             label='Distance GT to Mesg',
             description='''''',
             value=os.path.join(desc.Node.internalFolder, "vis_gt2data.pc.ply"),
-            uid=[],
             semantic="3D",
             group='',
             ),

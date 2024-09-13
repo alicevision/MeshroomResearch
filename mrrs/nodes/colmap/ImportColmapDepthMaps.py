@@ -45,28 +45,25 @@ class ImportColmapDepthMaps(desc.Node):
         desc.File(
             name="input",
             label="Input",
-            description="COLMAP Dense folder in workspace",
+            description="COLMAP Dense folder in workspace.",
             value="",
-            uid=[0],
         ),
 
         desc.File(
             name="inputSfm",
             label="InputSfm",
-            description="Input sfm data, used to match the views",
+            description="Input SfM data, used to match the views.",
             value="",
-            uid=[0],
         ),
 
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -74,9 +71,8 @@ class ImportColmapDepthMaps(desc.Node):
         desc.File(
             name='depthMapFolder',
             label='Depth maps folder',
-            description='Generated depth maps folder',
+            description='Generated depth maps folder.',
             value=desc.Node.internalFolder,
-            uid=[],
         ),
         #for viz
         desc.File(
@@ -85,7 +81,6 @@ class ImportColmapDepthMaps(desc.Node):
             description='Generated depth maps.',
             semantic='image',
             value=desc.Node.internalFolder + '<VIEW_ID>_depthMap.exr',
-            uid=[],
         ),
 
     ]

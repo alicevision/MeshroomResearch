@@ -22,35 +22,31 @@ class ImportXMP(desc.Node):
         desc.File(
             name="sfmData",
             label="sfmData",
-            description="Input sfmData",
+            description="Input sfmData.",
             value="",
-            uid=[0],
         ),
 
         desc.File(
             name="xmpData",
             label="xmpData",
-            description="Input xmpData",
+            description="Input xmpData.",
             value="",
-            uid=[0],
         ),
 
         desc.File(
             name="meshData",
             label="meshData",
-            description="Input mesh",
+            description="Input mesh.",
             value="",
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -58,9 +54,8 @@ class ImportXMP(desc.Node):
         desc.File(
             name='outputSfMData',
             label='outputSfMData',
-            description='Path to the outputSfMData',
+            description='Path to the outputSfMData.',
             value=os.path.join(desc.Node.internalFolder, "outputSfMData.sfm"),
-            uid=[],
         ),
     ]
 

@@ -17,17 +17,15 @@ class ColmapFeatureMatching(desc.CommandLineNode):
         desc.File(
             name='input_database_path',
             label='InputDatabase',
-            description='Input database path',
+            description='Input database path.',
             value='',
-            uid=[0],
             group='',
         ),
         desc.BoolParam(
             name="use_gpu",
             label = "Use GPU",
-            description='''Will use GPU for feature extraction''',
+            description='''Will use GPU for feature extraction.''',
             value=False,
-            uid=[0],
             group='',
         )
     ]
@@ -36,10 +34,8 @@ class ColmapFeatureMatching(desc.CommandLineNode):
         desc.File(
             name='database_path',
             label='OutputDatabasePath',
-            description='Output database path',
+            description='Output database path.',
             value=os.path.join(desc.Node.internalFolder, 'colmap_database_matches.db'),
-            uid=[],
-
         ),
     ]
 

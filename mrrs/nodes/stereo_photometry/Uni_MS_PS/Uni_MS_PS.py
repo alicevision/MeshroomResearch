@@ -26,7 +26,6 @@ Reconstruction using Photometric Stereo. A normal map is evaluated from several 
             label="SfMData",
             description="Input SfMData file.",
             value="",
-            uid=[0]
         )
     ]
 
@@ -36,6 +35,5 @@ Reconstruction using Photometric Stereo. A normal map is evaluated from several 
             label="Output Folder",
             description="Path to the output folder.",
             value=desc.Node.internalFolder,
-            uid=[],
         )
     ]

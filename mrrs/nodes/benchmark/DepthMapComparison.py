@@ -27,33 +27,29 @@ Autorescale may be used otherwise but it is far from ideal.
             label='SfMData',
             description='SfMData file.',
             value='',
-            uid=[0],
         ),
 
         desc.File(
             name="depthMapsFolder",
             label="DepthMaps Folder",
-            description="Input depth maps folder",
+            description="Input depth maps folder.",
             value="",
-            uid=[0],
         ),
 
         desc.File(
             name="depthMapsFolderGT",
             label="GT DepthMaps Folder",
-            description="Input ground truth depth maps folder",
+            description="Input ground truth depth maps folder.",
             value="",
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='metrics',
             label='Metrics',
-            description='Metrics to be used in the comparison',
+            description='Metrics to be used in the comparison.',
             value=['RMSE', 'MAE', 'validity_ratio'],
             values=['RMSE', 'MAE', 'validity_ratio'],
             exclusive=False,
-            uid=[0],
             joinChar=',',
         ),
 
@@ -62,7 +58,6 @@ Autorescale may be used otherwise but it is far from ideal.
             label='Auto Rescale',
             description='''Will attempt to find a scale factor between GT depth maps and estimated depth maps. To be used when the depth maps have not been estimated from the same camera coordinate system.''',
             value=False,
-            uid=[0],
         ),
 
         desc.StringParam(
@@ -70,25 +65,22 @@ Autorescale may be used otherwise but it is far from ideal.
             label='Mask Value',
             description='''If this is not None, will mask the pixels with value bellow this (in gt and estimated).''',
             value='0',
-            uid=[0],
         ),
 
         desc.StringParam(
             name='csv_name',
             label='CsvName',
-            description='Name for the csv file to be used',
+            description='Name for the csv file to be used.',
             value="depth_map_comparison.csv",
-            uid=[0]
         ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -98,14 +90,12 @@ Autorescale may be used otherwise but it is far from ideal.
             label='Output',
             description='Output folder for generated results.',
             value=desc.Node.internalFolder,
-            uid=[],
         ),
         desc.File(
             name='outputCsv',
             label='Output Csv',
             description='Output file to generated results.',
             value=lambda attr: os.path.join(desc.Node.internalFolder, attr.node.csv_name.value),
-            uid=[],
         )
     ]
 

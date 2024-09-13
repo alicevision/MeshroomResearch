@@ -115,36 +115,32 @@ class DepthMapTransform(desc.Node):
             label='SfMData',
             description='SfMData file.',
             value='',
-            uid=[0],
         ),
 
         desc.File(
             name="depthMapsFolder",
             label="DepthMaps Folder",
-            description="Input depth maps folder",
+            description="Input depth maps folder.",
             value="",
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='transform',
             label='Tranform',
-            description='Transformation to apply to the depth maps',
+            description='Transformation to apply to the depth maps.',
             values=['meshroom2normal', 'normal2meshroom', 'id'],#TODO: project?
             value='meshroom2normal',
             exclusive=True,
-            uid=[0],
             joinChar=',',
         ),
 
         desc.ChoiceParam(
                 name='verboseLevel',
                 label='Verbose Level',
-                description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+                description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
                 value='info',
                 values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
                 exclusive=True,
-                uid=[0],
             ),
 
     ]
@@ -155,7 +151,6 @@ class DepthMapTransform(desc.Node):
             label='Output',
             description='Output folder for generated results.',
             value=desc.Node.internalFolder,
-            uid=[],
         ),
         desc.File(
             name='depth',
@@ -163,7 +158,6 @@ class DepthMapTransform(desc.Node):
             description='Generated depth maps.',
             semantic='image',
             value=desc.Node.internalFolder + '<VIEW_ID>_depthMap.exr',
-            uid=[],
             group='',
         ),
     ]

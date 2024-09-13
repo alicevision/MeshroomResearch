@@ -23,17 +23,15 @@ class PoissonMesher(desc.CommandLineNode):
         desc.File(
             name='input_path',
             label='Input Point Cloud',
-            description='Input Point Cloud',
+            description='Input Point Cloud.',
             value='',
-            uid=[0],
         ),
         desc.FloatParam(
             name='trim',
             label='trim',
-            description='Poisson Meshing Triming parameters',
+            description='Poisson Meshing Triming parameters.',
             value=0.0,
             range=(0.0, 100.0, 1.0),
-            uid=[0],
             ),
     ]
 
@@ -41,9 +39,8 @@ class PoissonMesher(desc.CommandLineNode):
         desc.File(
             name='output_mesh',
             label='OutputMesh',
-            description='Output mesh',
+            description='Output mesh.',
             value=os.path.join(desc.Node.internalFolder, "mesh_poisson.ply"),
-            uid=[],
         ),
 
     ]

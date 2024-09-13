@@ -15,49 +15,43 @@ class RenderMesh(desc.CommandLineNode):
         desc.File(
             name='script',
             label='Script',
-            description='Python script to render markers',
+            description='Python script to render markers.',
             value=RENDER_SCRIPT,
-            uid=[0]
         ),
         desc.File(
             name='model',
             label='Model',
-            description='Model to render',
+            description='Model to render.',
             value='',
-            uid=[0]
         ),
         desc.File(
             name='cameras',
             label='SfM Data',
-            description='Views, intrinsincs and estimated poses',
+            description='Views, intrinsincs and estimated poses.',
             value='',
-            uid=[0]
         ),
         desc.ChoiceParam(
             name='renderMode',
             label='Render Mode',
-            description='Rendering mode',
+            description='Rendering mode.',
             values=["MESH", "FACES", "DEPTH"],
             value='MESH',
             exclusive=True,
-            uid=[0]
         ),
     ]
     outputs = [
         desc.File(
             name='output',
             label='OutputFolder',
-            description='Output folder for generated images',
+            description='Output folder for generated images.',
             value=desc.Node.internalFolder,
-            uid=[]
         ),
 
         desc.File(
             name='overlay',
             label='Overlay',
-            description='Rendered views',
+            description='Rendered views.',
             semantic='image',
             value=desc.Node.internalFolder + '<VIEW_ID>.exr',
-            uid=[]
         ),
     ]

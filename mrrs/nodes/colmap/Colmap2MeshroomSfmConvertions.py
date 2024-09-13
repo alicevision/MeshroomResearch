@@ -238,32 +238,28 @@ class Colmap2MeshroomSfmConvertion(desc.Node):
         desc.File(
             name='input',
             label='Input',
-            description='Input sparse folder',
+            description='Input sparse folder.',
             value='',
-            uid=[0],
         ),
         desc.File(
             name='inputSfm',
             label='InputSfm',
-            description='Input sfm from cameraInit',
+            description='Input sfm from cameraInit.',
             value='',
-            uid=[0],
         ),
         desc.File(
             name='imageFolder',
             label='ImageFolder',
-            description='Input image folder (needed if you dont use a SfM)',
+            description='Input image folder (needed if you dont use a SfM).',
             value='',
-            uid=[0],
         ),
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='verbosity level (fatal, error, warning, info, debug, trace).',
+            description='Verbosity level (fatal, error, warning, info, debug, trace).',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -273,7 +269,6 @@ class Colmap2MeshroomSfmConvertion(desc.Node):
             label='Output Sfm',
             description='Path to the output SfM file.',
             value=os.path.join(desc.Node.internalFolder, "sfmdata.sfm"),
-            uid=[],
             ),
     ]
 

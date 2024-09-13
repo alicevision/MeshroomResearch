@@ -18,7 +18,6 @@ class ColmapAutomaticReconstructor(desc.CommandLineNode):
             label='Image Directory',
             description='''Path to images.''',
             value='',
-            uid=[0],
         ),
 
     ]
@@ -30,14 +29,12 @@ class ColmapAutomaticReconstructor(desc.CommandLineNode):
             label='Output Folder',
             description='''Output Folder.''',
             value=desc.Node.internalFolder,
-            uid=[],
         ),
         desc.File(
             name='output_pc',
             label='Output point cloud',
-            description='''Output point cloud''',
+            description='''Output point cloud.''',
             value=os.path.join(desc.Node.internalFolder, 'dense\\0\\fused.ply'),
-            uid=[],
             group='',
         ),
     ]

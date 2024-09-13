@@ -30,17 +30,15 @@ class ConvertImages(desc.Node):
             label='SfMData',
             description='SfMData file.',
             value='',
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='outputFormat',
             label='Output Format',
-            description='''Output format to be used''',
+            description='''Output format to be used.''',
             value='.png',
             values=['.png', '.jpg', '.exr'],
             exclusive=True,
-            uid=[0],
         ),
 
         #TODO: mode auto
@@ -50,34 +48,30 @@ class ConvertImages(desc.Node):
             description='Resample by a given factor along the x dim.',
             value=1,
             range=(0, 100, 1),
-            uid=[0],
         ),
 
         desc.IntParam(
             name='maxWidth',
             label='Maximum Width',
-            description='Will resize to the max width (keep the aspect ratio)',
+            description='Will resize to the max width (keep the aspect ratio).',
             value=1000000000,
             range=(0, 4096, 1),
-            uid=[0],
         ),
 
         desc.IntParam(
             name='forceWidth',
             label='Force Width',
-            description='Will resize to the with by paddign or croping, if != 0',
+            description='Will resize to the width by padding or cropping, if != 0.',
             value=0,
             range=(0, 4096, 1),
-            uid=[0],
         ),
 
         desc.IntParam(
             name='forceHeight',
             label='Force Height',
-            description='Will resize to the height by paddign or croping, if != 0',
+            description='Will resize to the height by padding or cropping, if != 0.',
             value=0,
             range=(0, 4096, 1),
-            uid=[0],
         ),
 
 
@@ -85,51 +79,45 @@ class ConvertImages(desc.Node):
         desc.BoolParam(
             name='mergeInterinsics',
             label='mergeInterinsics',
-            description='Will merge all intrinsics by taking the first one',
+            description='Will merge all intrinsics by taking the first one.',
             value=False,
-            uid=[0],
         ),
 
         desc.BoolParam(
             name='autoRotate',
             label='autoRotate',
-            description='Rotates the frames using the exif flag',
+            description='Rotates the frames using the EXIF flag.',
             value=True,
-            uid=[0],
         ),
 
         desc.BoolParam(
             name='convertSRGB',
             label='convertSRGB',
-            description='Will convert to srgb',
+            description='Will convert to srgb.',
             value=True,
-            uid=[0],
         ),
 
         desc.BoolParam(
             name='renameSequence',
             label='Rename Sequence',
-            description='Renames the frames by order',
+            description='Renames the frames by order.',
             value=False,
-            uid=[0],
         ),
 
         desc.BoolParam(
             name='autoPixelRatio',
             label='autoPixelRatio',
-            description='Will automatically set pixel ratio (will overwrite resample)',
+            description='Will automatically set pixel ratio (will overwrite resample).',
             value=True,
-            uid=[0],
         ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='''verbosity level (fatal, error, warning, info, debug, trace).''',
+            description='''Verbosity level (fatal, error, warning, info, debug, trace).''',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         )
     ]
 
@@ -139,14 +127,12 @@ class ConvertImages(desc.Node):
             label='Output Folder',
             description='Output folder for converted images.',
             value=desc.Node.internalFolder,
-            uid=[],
         ),
         desc.File(
             name='outputSfMData',
             label='SfMData',
-            description='Path to the output sfmdata file',
+            description='Path to the output sfmdata file.',
             value=desc.Node.internalFolder + 'sfm.sfm',
-            uid=[],
         )
         ]
 

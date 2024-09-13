@@ -89,9 +89,8 @@ class ColmapMapper(desc.CommandLineNode):
         desc.File(
             name='input_database_path',
             label='InputDatabase',
-            description='Input database path',
+            description='Input database path.',
             value='',
-            uid=[0],
             group='',
         ),
         desc.File(
@@ -99,7 +98,6 @@ class ColmapMapper(desc.CommandLineNode):
             label='Image Directory',
             description='''Path to images.''',
             value='',
-            uid=[0],
         ),
     ]
 
@@ -107,16 +105,14 @@ class ColmapMapper(desc.CommandLineNode):
         desc.File(
             name='output_path',
             label='BaseOutputPath',
-            description='Base Output path',
+            description='Base Output path.',
             value=desc.Node.internalFolder,
-            uid=[],
         ),
         desc.File(
             name='output_path0',
             label='OutputPath0',
-            description='Output path 0',
+            description='Output path 0.',
             value=os.path.join(desc.Node.internalFolder, "0"),
-            uid=[],
             group=""
         ),
         # desc.File(
@@ -124,7 +120,6 @@ class ColmapMapper(desc.CommandLineNode):
         #     label='Cameras',
         #     description='Ouptut camera file',
         #     value=os.path.join(desc.Node.internalFolder, "0", "cameras.bin"),
-        #     uid=[],
         #     group=""
         # ),
         desc.File(
@@ -132,7 +127,6 @@ class ColmapMapper(desc.CommandLineNode):
             label='OutputDatabasePath',
             description='Output database path',
             value=os.path.join(desc.Node.internalFolder, 'colmap_database_mapper.db'),
-            uid=[],
         ),
 
     ]

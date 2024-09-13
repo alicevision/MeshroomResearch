@@ -26,7 +26,6 @@ class ColmapImageUndistorder(desc.CommandLineNode):
             label='Image Directory',
             description='''Path to images.''',
             value='',
-            uid=[0],
         ),
 
         desc.File(
@@ -34,7 +33,6 @@ class ColmapImageUndistorder(desc.CommandLineNode):
             label='Input Directory',
             description='''Path to input directory (from matcher).''',
             value='',
-            uid=[0],
         ),
 
         #FIXME: this does not update the files!
@@ -43,7 +41,6 @@ class ColmapImageUndistorder(desc.CommandLineNode):
         #     label='Max Image Size',
         #     description='''Used to downsample images''',
         #     value='2000',
-        #     uid=[0],
         # ),
 
     ]
@@ -54,7 +51,6 @@ class ColmapImageUndistorder(desc.CommandLineNode):
             label='Ouptut Path',
             description='''Output path path.''',
             value=os.path.join(desc.Node.internalFolder),
-            uid=[],
         ),
     ]
 

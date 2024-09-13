@@ -22,28 +22,25 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
             label='Input',
             description='SfMData file.',
             value='',
-            uid=[0],
             group=""
         ),
 
         desc.IntParam(
             name='maxImageSize',
             label='Max Image Width',
-            description='''Used to downsample images''',
+            description='''Used to downsample images.''',
             value=0,
             range=(0, 1000000000, 1),
-            uid=[0],
             group=""
             ),
 
         desc.ChoiceParam(
             name='verboseLevel',
             label='Verbose Level',
-            description='verbosity level (fatal, error, warning, info, debug, trace).',
+            description='Verbosity level (fatal, error, warning, info, debug, trace).',
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
-            uid=[0],
         ),
     ]
 
@@ -51,9 +48,8 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
         desc.File(
             name='preparedSfm',#ugly hack to have an input that can change
             label='preparedSfm',
-            description='SfMData file prepared for colmap',
+            description='SfMData file prepared for colmap.',
             value=os.path.join(desc.Node.internalFolder, "prepared_sfm.json"),
-            uid=[],
             advanced=True,
         ),
         desc.File(
@@ -61,14 +57,12 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
             label='Output Folder',
             description='Path to the output SfM Data file.',
             value=desc.Node.internalFolder,
-            uid=[],
             ),
         desc.File(
             name='imageDirectory',
             label='Image Directory',
             description='',
             value=os.path.join(desc.Node.internalFolder, "images"),
-            uid=[],
             group=""
             ),
         desc.File(
@@ -76,7 +70,6 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
             label='Sparse Directory',
             description='',
             value=os.path.join(desc.Node.internalFolder, "sparse"),
-            uid=[],
             group=""
             ),
     ]

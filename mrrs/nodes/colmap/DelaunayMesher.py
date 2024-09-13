@@ -20,9 +20,8 @@ class DelaunayMesher(desc.CommandLineNode):
         desc.File(
             name='input_path',
             label='Input path',
-            description='Path to either the dense workspace folder',
+            description='Path to either the dense workspace folder.',
             value='',
-            uid=[0],
         ),
     ]
 
@@ -30,9 +29,8 @@ class DelaunayMesher(desc.CommandLineNode):
         desc.File(
             name='output_path',
             label='OutputPath',
-            description='Output path',
+            description='Output path.',
             value=os.path.join(desc.Node.internalFolder, "mesh_delaunay.ply"),
-            uid=[],
         ),
 
     ]
