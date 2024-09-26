@@ -1,3 +1,5 @@
+from enum import unique
+from pathlib import Path
 import re
 import os
 import numpy as np
@@ -7,7 +9,7 @@ import json
 from mrrs.core.ios import get_image_sizes, matrices_from_sfm_data, sfm_data_from_matrices 
 
 #in RC the sensor size is set to 35mm
-SENSOR_SIZE = 35
+SENSOR_SIZE = 36
 
 def _parse_xmp(xmp_file):
     """
@@ -61,17 +63,16 @@ def _export_xmp(xmp_file, extrinsics, intrinsics, pixel_size, image_size):
     our_sensor_width = pixel_size*image_size[0]
     our_sensor_height = pixel_size*image_size[1]
     our_focal = intrinsics[0,0]
+    
     #turn focal from unit sensor into equivalent 35mm
     focal = our_focal*SENSOR_SIZE/our_sensor_width
-    #convert pp in mm into offset from center in mm
-    principal_point_u = intrinsics[0,2]-our_sensor_height/2
-    principal_point_v = intrinsics[1,2]-our_sensor_width/2
-    #pass it into relative 
-    principal_point_u /= our_sensor_height
-    principal_point_v /= our_sensor_width
 
-    rotation = np.linalg.inv(extrinsics[0:3,0:3])
-    position = extrinsics[0:3, 3]
+    # convert pp in pixel,     
+    principal_point_u = (intrinsics[0,2] - (our_sensor_width/2.0)) / our_sensor_width 
+    principal_point_v = (intrinsics[1,2] - (our_sensor_height/2.0)) / our_sensor_width
+
+    rotation = extrinsics[0:3,0:3]
+    position = -extrinsics[0:3, 0:3].transpose()@extrinsics[0:3, 3]
 
     def format_array(array):
         formated_str = ""
@@ -94,6 +95,8 @@ def _export_xmp(xmp_file, extrinsics, intrinsics, pixel_size, image_size):
 </x:xmpmeta>
 """.format(str(focal), principal_point_u, principal_point_v, format_array(rotation.flatten()), format_array(position), '0 0 0 0 0 0')#FIXME: for now we dont support distortion
 
+    if not os.path.exists(os.path.dirname(xmp_file)):
+        os.makedirs(os.path.dirname(xmp_file))
     with open(xmp_file, "w") as f:
        f.write(xmp_string)
 
@@ -134,7 +137,7 @@ def _import_xmp(sfm_data, xmp_folder):
         i[0, 0] /= pixel_size
         i[1, 1] /= pixel_size
         # convert principal point in pixels
-        # https://support.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
+        # https://sup7port.capturingreality.com/hc/en-us/community/posts/115002199052-Unit-and-convention-of-PrincipalPointU-and-PrincipalPointV
         # dimentionless because already /35 => we pass it into pixels, and offset from top image
 
         #lookign for  "-0.75009676916349455", "-5.1187297220630112"
@@ -178,19 +181,37 @@ def importXMP(sfmdata, xmpdata, outputsfmdata):
 @rc.command()
 @click.argument("sfmdata")
 @click.argument("outputfolder")
-def exportXMP(sfmdata, outputfolder):
+@click.argument("exportimage",type=bool)
+@click.argument("useuid",type=bool)
+def exportXMP(sfmdata, outputfolder, exportimage, useuid):
     sfm_data = json.load(open(sfmdata, "r"))
+    
     (extrinsics_all_cams, intrinsics_all_cams, views_id,
     poses_id, intrinsics_id, pixel_sizes_all_cams) = matrices_from_sfm_data(sfm_data)
+
     image_sizes = get_image_sizes(sfm_data)
-    images_names = [os.path.basename(view["path"])[:-4] for view in sfm_data["views"]]
-    for image_name, extrinsics, intrinsics, pixel_size, image_size in zip(images_names, extrinsics_all_cams, 
-                                                                intrinsics_all_cams, pixel_sizes_all_cams, image_sizes):
+    
+    for view_idx, view in enumerate(sfm_data["views"]):
+        image_name = os.path.join(
+                                os.path.basename(os.path.dirname(view["path"])),
+                                os.path.basename(view["path"])[:-4]
+                                ) 
+        extrinsics = extrinsics_all_cams[view_idx]
+        intrinsics = intrinsics_all_cams[view_idx]
+        pixel_size = pixel_sizes_all_cams[view_idx]
+        image_size = image_sizes[view_idx]
+
         if extrinsics is not None:
-            xmp_file = os.path.join(outputfolder, image_name+".xmp")
+            if useuid:
+                xmp_file = os.path.join(outputfolder, views_id[view_idx]+".xmp")
+            else: 
+                xmp_file = os.path.join(outputfolder, image_name+".xmp")
             _export_xmp(xmp_file, extrinsics, intrinsics, pixel_size,image_size )
 
- 
+        if exportimage:
+            image_file = os.path.join(outputfolder, os.path.basename(view["path"]))
+            if not os.path.exists(image_file):
+                os.symlink(view["path"], image_file)
 
 if __name__ == '__main__':
     rc()

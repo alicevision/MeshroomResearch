@@ -164,6 +164,7 @@ class ConvertImages(PluginNode):
                 #modify the corresponding intrinsic (! done multiple time becasue sevearl view share one intricic)
                 intrinsicId = sfm_data["views"][index]["intrinsicId"]
                 frameId  = int(sfm_data["views"][index]["frameId"])
+                print(orientation)
                 chunk.logger.info('\tOrientation %d'%orientation)
                 resample_x=chunk.node.resampleX.value
                 if chunk.node.autoPixelRatio.value:

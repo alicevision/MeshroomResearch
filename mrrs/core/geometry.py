@@ -45,7 +45,7 @@ def camera_projection(vertices, extrinsic, intrinsic, pixel_size=0):
     vertices_homo = vertices
     if vertices.shape[-1] != 4:#if not homo make homo
         vertices_homo = make_homogeneous(vertices)
-    # project vertices into the camera
+    # project vertices into the camera FIXME: extrinsic are supposed to be world to cam, so no inv
     extrinsic = np.linalg.inv(np.concatenate([extrinsic[0:3, 0:4], [[0, 0, 0, 1]]], axis=0))[0:3, 0:4]
     # vertices in camera CS
     vertices_camera_cs = extrinsic @ np.transpose(vertices_homo)
