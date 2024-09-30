@@ -5,7 +5,6 @@ Module handling the inputs and outputs from and to Meshroom.
 import logging
 import re
 from struct import unpack
-import OpenImageIO as oiio
 
 import numpy as np
 
@@ -16,6 +15,8 @@ def open_exr(exr_path):
     '''
     Uses oiio to import an EXR file.
     '''
+    #lazy import to avoid strong dep 
+    import OpenImageIO as oiio
     exr_file = oiio.ImageInput.open(exr_path)
     if exr_file is None :
         raise RuntimeError("Could not open exr file "+exr_path)
@@ -36,6 +37,8 @@ def save_exr(input_array, output_file,
     """
     Saves an exr for meshroom, using different formats.
     """
+    #lazy import to avoid strong dep 
+    import OpenImageIO as oiio
     if len(input_array.shape)<2 or len(input_array.shape)>3:
         raise RuntimeError('Data type not suported for save_exr')
     elif len(input_array.shape)==2:#gray level case
@@ -145,7 +148,7 @@ def open_image(image_path, auto_rotate=False, return_orientation=False, to_srgb=
     if len(image.shape)==2:
         image = np.expand_dims(image, -1)
     if return_orientation:
-        return image, orientation
+        return image, int(orientation)
     else:
         return image
 
@@ -154,6 +157,8 @@ def save_image(image_path, np_array, orientation=None, auto_rotate=False):
     Save an image in a numpy array.
     Range must be 0-255 and channel 1 or 3.
     """
+    #lazy import to avoid strong dep 
+    import OpenImageIO as oiio
     if len(np_array.shape)==2:
         np_array=np.expand_dims(np_array, axis = -1)
     out = oiio.ImageOutput.create(image_path)
@@ -294,12 +299,39 @@ def parse_extrisic_sfm_data(sfm_pose):
     Extracts the relevant items from a sfm pose dictionary.
     The pose is camera to world.
     """
+    # pose_id = sfm_pose['poseId']
+    # rotation = np.asarray(sfm_pose['pose']['transform']['rotation'], dtype=np.float32)
+    # rotation = rotation.reshape([3,3], order='F')
+    # center = np.asarray(sfm_pose['pose']['transform']['center'], dtype=np.float32)
+    # translation = - rotation @ center
+    # extrinsic = np.concatenate([rotation, np.expand_dims(translation, axis=-1)], axis=-1)
+
+    # pose_id = sfm_pose['poseId']
+    # rotation = np.asarray(sfm_pose['pose']['transform']['rotation'], dtype=np.float32)
+    # rotation = rotation.reshape([3,3])
+    # translation = np.asarray(sfm_pose['pose']['transform']['center'], dtype=np.float32)
+    # extrinsic = np.concatenate([rotation, np.expand_dims(translation, axis=-1)], axis=-1)
+
     pose_id = sfm_pose['poseId']
     rotation = np.asarray(sfm_pose['pose']['transform']['rotation'], dtype=np.float32)
-    rotation = rotation.reshape([3,3])
-    translation = np.asarray(sfm_pose['pose']['transform']['center'], dtype=np.float32)
+    rotation = rotation.reshape([3,3]).transpose()
+    center = np.asarray(sfm_pose['pose']['transform']['center'], dtype=np.float32)
+    translation = -rotation@center
     extrinsic = np.concatenate([rotation, np.expand_dims(translation, axis=-1)], axis=-1)
+
     return  extrinsic, pose_id
+    
+def parse_subpose_sfm_data(sfm_pose):
+    """
+    Parse pose from rig
+    """
+    rotation = np.asarray(sfm_pose['pose']['rotation'], dtype=np.float32)
+    rotation = rotation.reshape([3,3]).transpose()
+    center = np.asarray(sfm_pose['pose']['center'], dtype=np.float32)
+    translation = -rotation@center
+
+    extrinsic = np.concatenate([rotation, np.expand_dims(translation, axis=-1)], axis=-1)
+    return  extrinsic
 
 def get_image_sizes(sfm_data):
     return [ (int(view["width"]), int(view["height"])) for view in sfm_data["views"] ]
@@ -331,6 +363,12 @@ def matrices_from_sfm_data(sfm_data, return_image_sizes=False):
         intrinsics_id.append(intrinsic_id)
         pixel_sizes.append(pixel_size)
 
+    #rig case
+    is_rig = False
+    if 'rigs' in sfm_data :
+        is_rig = True
+        rigs = sfm_data["rigs"]
+
     #returns view and poses for each view
     poses_id = np.asarray(poses_id)
     intrinsics_id=np.asarray(intrinsics_id)
@@ -338,6 +376,7 @@ def matrices_from_sfm_data(sfm_data, return_image_sizes=False):
     extrinsics_all_cams = []
     pixel_sizes_all_cams = []
     image_sizes = []
+
     for view in sfm_data["views"]:
         view_id = view["viewId"]
         views_id.append(view_id)
@@ -353,7 +392,14 @@ def matrices_from_sfm_data(sfm_data, return_image_sizes=False):
         intrinsic_index = np.where(intrinsics_id==intrinsic_id)[0]
         #fetch the correspoding poses and intrinsics
         intrinsics_all_cams.append(intrinsics[intrinsic_index[0]].copy())
-        extrinsics_all_cams.append(extrinsics[pose_index[0]].copy())
+        extrinsic = extrinsics[pose_index[0]].copy()
+        if is_rig:
+            rig_id = view["rigId"]
+            sub_pose_index=view["subPoseId"]
+            rig = [r for r in rigs if r["rigId"] == rig_id][0] #NOTE: error if more than 1? 
+            sub_pose=parse_subpose_sfm_data(rig["subPoses"][int(sub_pose_index)])
+            extrinsic = np.concatenate([sub_pose, [[0,0,0,1]]])@np.concatenate([extrinsic, [[0,0,0,1]]])
+        extrinsics_all_cams.append(extrinsic)
         pixel_sizes_all_cams.append(pixel_sizes[intrinsic_index[0]])
         image_sizes.append([int(view["width"]), int(view["height"])])
     pixel_sizes_all_cams=np.asarray(pixel_sizes_all_cams)
