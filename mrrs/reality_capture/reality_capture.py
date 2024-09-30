@@ -63,14 +63,15 @@ def _export_xmp(xmp_file, extrinsics, intrinsics, pixel_size, image_size):
     our_sensor_width = pixel_size*image_size[0]
     our_sensor_height = pixel_size*image_size[1]
     our_focal = intrinsics[0,0]
-    
+
     #turn focal from unit sensor into equivalent 35mm
     focal = our_focal*SENSOR_SIZE/our_sensor_width
 
-    # convert pp in pixel,     
+    # pp relative   
     principal_point_u = (intrinsics[0,2] - (our_sensor_width/2.0)) / our_sensor_width 
     principal_point_v = (intrinsics[1,2] - (our_sensor_height/2.0)) / our_sensor_width
 
+    #-R^tT 
     rotation = extrinsics[0:3,0:3]
     position = -extrinsics[0:3, 0:3].transpose()@extrinsics[0:3, 3]
 
