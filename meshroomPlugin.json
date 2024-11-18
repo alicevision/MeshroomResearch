@@ -41,5 +41,9 @@
         {
         "pluginName":"Utils",
         "nodesFolder":"mrrs/utils"
-       }
+        },
+        {
+        "pluginName":"Stable_Normal",
+        "nodesFolder":"mrrs/normal_maps/StableNormal"
+        }
 ]
