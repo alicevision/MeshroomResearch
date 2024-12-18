@@ -1,4 +1,4 @@
-__version__ = "1.0"
+__version__ = "2.0"
 
 import logging
 import os
@@ -37,6 +37,21 @@ class StableNormal(PluginCommandLineNode):
             description="Use images from a specific folder instead of those specified in the SfMData file.\n"
                         "Filename should be the image UID.",
             value="",
+        ),
+
+        desc.BoolParam(
+            name="useTiling",
+            label = "Use Tiling",
+            description='''Process the image by tiles.''',
+            value=False,
+        ),
+
+        desc.IntParam(
+            name='size',
+            label='Input Size',
+            description='Size of model input to use.',
+            value=768,
+            range=(64,1024,64),
         ),
 
         desc.ChoiceParam(

@@ -9,11 +9,23 @@ os.environ['TORCH_HOME'] = "/s/prods/mvg/_source_global/users/almarouka/3rd_part
 
 import torch
 from PIL import Image
-from argparse import ArgumentParser, ArgumentError
+from argparse import ArgumentParser, ArgumentTypeError
 import json
 
 # redundant, just to be sure XD
 torch.hub.set_dir("/s/prods/mvg/_source_global/users/almarouka/3rd_party/torch/hub")
+
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, str):
+        v = v.lower()
+        if v in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif v in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise ArgumentTypeError('Boolean value expected.')
 
 def read_sfmData(sfmData_path: str, images_folder: str):
     custom_dir = False
@@ -45,10 +57,41 @@ def read_sfmData(sfmData_path: str, images_folder: str):
 
     return data
 
+def tile_image(image, tile_size):
+    width, height = image.size
+    tiles = []
+    for y in range(0, height, tile_size):
+        for x in range(0, width, tile_size):
+            box = (x, y, x + tile_size, y + tile_size)
+            tile = image.crop(box)
+            tiles.append((tile, box))
+    return tiles
+
+def process_tile(tile, model, args):
+    processed_tile = model(tile, image_resolution=args.size)
+    return processed_tile
+
+def reconstruct_image(tiles, image_size):
+    output_image = Image.new('RGB', image_size)
+    for tile, box in tiles:
+        output_image.paste(tile, box)
+    return output_image
+
+def process_image(image, model, args):
+    if args.useTiling:
+        tiles = tile_image(image, args.size)
+        processed_tiles = [(process_tile(tile, model, args), box) for tile, box in tiles]
+        output_image = reconstruct_image(processed_tiles, image.size)
+    else:
+        output_image = process_tile(image, model, args)
+    return output_image
+
 def run():
     parser = ArgumentParser()
     parser.add_argument('--input', type=str, required=True)
     parser.add_argument('--imagesFolder', type=str, required=True)
+    parser.add_argument('--useTiling', type=str2bool, default=False)
+    parser.add_argument('--size', type=int, default=768)
     parser.add_argument('--output', type=str, required=True)
     parser.add_argument("--rangeStart", default=-1, type=int, help="Compute a sub-range of images from index rangeStart to rangeStart+rangeSize.")
     parser.add_argument("--rangeSize", default=-1, type=int, help="Compute a sub-range of N images (N=rangeSize).")
@@ -68,6 +111,7 @@ def run():
 
     # Create predictor instance
     predictor = torch.hub.load("Stable-X/StableNormal", "StableNormal", trust_repo=True)
+    predictor.model.default_processing_resolution = args.size
 
     for view_id, img_path in data[rangeStart:min(rangeStart + rangeSize, len(data))]:
         if img_path == '':
@@ -78,7 +122,7 @@ def run():
         input_image = Image.open(img_path)
 
         # Apply the model to the image
-        normal_image = predictor(input_image)
+        normal_image = process_image(input_image, predictor, args)
 
         # Save or display the result
         normal_image.save(os.path.join(args.output, view_id + '_normalMap.png'))
