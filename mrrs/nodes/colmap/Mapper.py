@@ -106,27 +106,27 @@ class ColmapMapper(desc.CommandLineNode):
             name='output_path',
             label='BaseOutputPath',
             description='Base Output path.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
         desc.File(
             name='output_path0',
             label='OutputPath0',
             description='Output path 0.',
-            value=os.path.join(desc.Node.internalFolder, "0"),
+            value=os.path.join("{nodeCacheFolder}", "0"),
             group=""
         ),
         # desc.File(
         #     name='cameras',
         #     label='Cameras',
         #     description='Ouptut camera file',
-        #     value=os.path.join(desc.Node.internalFolder, "0", "cameras.bin"),
+        #     value=os.path.join("{nodeCacheFolder}", "0", "cameras.bin"),
         #     group=""
         # ),
         desc.File(
             name='database_path',
             label='OutputDatabasePath',
             description='Output database path',
-            value=os.path.join(desc.Node.internalFolder, 'colmap_database_mapper.db'),
+            value=os.path.join('{nodeCacheFolder}', 'colmap_database_mapper.db'),
         ),
 
     ]

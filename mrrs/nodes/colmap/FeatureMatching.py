@@ -35,7 +35,7 @@ class ColmapFeatureMatching(desc.CommandLineNode):
             name='database_path',
             label='OutputDatabasePath',
             description='Output database path.',
-            value=os.path.join(desc.Node.internalFolder, 'colmap_database_matches.db'),
+            value=os.path.join('{nodeCacheFolder}', 'colmap_database_matches.db'),
         ),
     ]
 

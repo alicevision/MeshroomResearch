@@ -167,7 +167,7 @@ class CreateTrackingMarkers(desc.Node):
             name='sfmData',
             label='SfmData',
             description='Input SfM file.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
 
         desc.File(
@@ -247,13 +247,13 @@ class CreateTrackingMarkers(desc.Node):
             name='outputFile',
             label='Output Json',
             description='Output file to place track info to.',
-            value=os.path.join(desc.Node.internalFolder, "track_objects.json"),
+            value=os.path.join("{nodeCacheFolder}", "track_objects.json"),
         ),
         desc.File(
             name='outputImages',
             label='Output Images',
             description='Output image regex if any',
-            value=os.path.join(desc.Node.internalFolder, "*.png"),
+            value=os.path.join("{nodeCacheFolder}", "*.png"),
         ),
     ]
 

@@ -83,19 +83,19 @@ class SyntheticDataset(desc.InitNode, desc.CommandLineNode):
             name='outputFolder',
             label='Folder',
             description='Output folder for generated ground truth files.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
         desc.File(
             name='fakeCameraInit',
             label='Fake Camera Init',
             description='Sfm file containing the ground truth views and intrinsics (without poses).',
-            value=desc.Node.internalFolder+'/gt_no_pose.sfm'
+            value='{nodeCacheFolder}/gt_no_pose.sfm'
         ),
         desc.File(
             name='groundTruth',
             label='Ground truth',
             description='Sfm file containing the ground truth views, intrinsics and poses.',
-            value=desc.Node.internalFolder+'/gt.sfm',
+            value='{nodeCacheFolder}/gt.sfm',
         ),
     ]
 

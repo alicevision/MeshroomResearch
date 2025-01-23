@@ -102,7 +102,7 @@ class VizMVSNet(CondaNode):
             name="outputFolder",
             label="Output Folder",
             description="Path to a folder in which the computed results are stored.",
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
 
         desc.StringParam(
@@ -117,9 +117,9 @@ class VizMVSNet(CondaNode):
             label='Depth maps',
             description='Generated depth maps.',
             semantic='image',
-            value=desc.Node.internalFolder + '<VIEW_ID>_depthMap.exr',
+            value='{nodeCacheFolder}/<VIEW_ID>_depthMap.exr',
             group='',
-            )   
+        ),
     ]
 
     def processChunk(self, chunk):

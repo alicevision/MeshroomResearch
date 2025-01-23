@@ -21,7 +21,7 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             name='inputMesh',
             label='Input mesh',
             description='Input mesh.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
         desc.File(
             name='inputTransform',
@@ -67,7 +67,7 @@ class MeshTransform(desc.Node):#FIXME: abstract this Dataset, scan folder etc...
             name='outputMesh',
             label='Output mesh',
             description='Output Mesh.',
-            value=desc.Node.internalFolder + 'mesh.ply',#pb: not extention!!! variable output
+            value='{nodeCacheFolder}/mesh.ply',#pb: not extention!!! variable output
         ),
     ]
 

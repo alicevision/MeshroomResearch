@@ -23,14 +23,14 @@ class InjectSfmData(desc.Node):
             name='sourceSfmData',
             label='Source SfmData',
             description='Input sfm file containing the fields to be injected in target SfMData.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
 
         desc.File(
             name='targetSfmData',
             label='Target SfmData',
             description='Input SfM file containing the SfM data to be injected with data from the source SfMData.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
 
         desc.ChoiceParam(
@@ -57,7 +57,7 @@ class InjectSfmData(desc.Node):
             name='outputSfMData',
             label='SfMData',
             description='Path to the output SfMData file.',
-            value=desc.Node.internalFolder + 'sfm.sfm',
+            value='{nodeCacheFolder}/sfm.sfm',
         ),
     ]
 

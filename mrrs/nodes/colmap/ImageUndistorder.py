@@ -50,7 +50,7 @@ class ColmapImageUndistorder(desc.CommandLineNode):
             name='output_path',
             label='Ouptut Path',
             description='''Output path path.''',
-            value=os.path.join(desc.Node.internalFolder),
+            value='{nodeCacheFolder}',
         ),
     ]
 
