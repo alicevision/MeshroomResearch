@@ -55,7 +55,7 @@ class ImportXMP(desc.Node):
             name='outputSfMData',
             label='outputSfMData',
             description='Path to the outputSfMData.',
-            value=os.path.join(desc.Node.internalFolder, "outputSfMData.sfm"),
+            value=os.path.join("{nodeCacheFolder}", "outputSfMData.sfm"),
         ),
     ]
 

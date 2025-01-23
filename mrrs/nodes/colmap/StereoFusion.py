@@ -35,7 +35,7 @@ class StereoFusion(desc.CommandLineNode):
             name='output_path',
             label='OutputPath',
             description='Output point cloud path.',
-            value=os.path.join(desc.Node.internalFolder,  "workspace", "fused.ply"),
+            value=os.path.join("{nodeCacheFolder}",  "workspace", "fused.ply"),
         ),
 
 
@@ -43,7 +43,7 @@ class StereoFusion(desc.CommandLineNode):
             name='workspace_path',
             label='Output Workspace Folder',
             description='Output workspace path.',
-            value=os.path.join(desc.Node.internalFolder, "workspace"),
+            value=os.path.join("{nodeCacheFolder}", "workspace"),
         ),
     ]
 

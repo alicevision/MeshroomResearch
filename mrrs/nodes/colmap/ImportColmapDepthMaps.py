@@ -72,7 +72,7 @@ class ImportColmapDepthMaps(desc.Node):
             name='depthMapFolder',
             label='Depth maps folder',
             description='Generated depth maps folder.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
         #for viz
         desc.File(
@@ -80,7 +80,7 @@ class ImportColmapDepthMaps(desc.Node):
             label='Depth maps',
             description='Generated depth maps.',
             semantic='image',
-            value=desc.Node.internalFolder + '<VIEW_ID>_depthMap.exr',
+            value='{nodeCacheFolder}/<VIEW_ID>_depthMap.exr',
         ),
 
     ]

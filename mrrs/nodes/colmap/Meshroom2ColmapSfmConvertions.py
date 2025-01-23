@@ -49,27 +49,27 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
             name='preparedSfm',#ugly hack to have an input that can change
             label='preparedSfm',
             description='SfMData file prepared for colmap.',
-            value=os.path.join(desc.Node.internalFolder, "prepared_sfm.json"),
+            value=os.path.join("{nodeCacheFolder}", "prepared_sfm.json"),
             advanced=True,
         ),
         desc.File(
             name='output',
             label='Output Folder',
             description='Path to the output SfM Data file.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
             ),
         desc.File(
             name='imageDirectory',
             label='Image Directory',
             description='',
-            value=os.path.join(desc.Node.internalFolder, "images"),
+            value=os.path.join("{nodeCacheFolder}", "images"),
             group=""
             ),
         desc.File(
             name='sparseDirectory',
             label='Sparse Directory',
             description='',
-            value=os.path.join(desc.Node.internalFolder, "sparse"),
+            value=os.path.join("{nodeCacheFolder}", "sparse"),
             group=""
             ),
     ]

@@ -64,19 +64,19 @@ class ColmapFeatureExtraction(desc.CommandLineNode):
             name='database_path',
             label='Sensor Database',
             description='''Camera sensor width database path.''',
-            value=os.path.join(desc.Node.internalFolder, "colmap_database.db"),
+            value=os.path.join("{nodeCacheFolder}", "colmap_database.db"),
         ),
         desc.File(
             name='image_list_path',
             label='Used Images',
             description='''Used images (if from .sfm)''',
-            value=os.path.join(desc.Node.internalFolder, "used_images.txt"),
+            value=os.path.join("{nodeCacheFolder}", "used_images.txt"),
         ),
         desc.File(
             name='image_path',
             label='Images Directory',
             description='''Path to images directory.''',
-            value=os.path.join(desc.Node.internalFolder, "images"),
+            value=os.path.join("{nodeCacheFolder}", "images"),
         ),
     ]
 

@@ -28,13 +28,13 @@ class ColmapAutomaticReconstructor(desc.CommandLineNode):
             name='workspace_path',
             label='Output Folder',
             description='''Output Folder.''',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
         desc.File(
             name='output_pc',
             label='Output point cloud',
             description='''Output point cloud.''',
-            value=os.path.join(desc.Node.internalFolder, 'dense\\0\\fused.ply'),
+            value=os.path.join('{nodeCacheFolder}', 'dense\\0\\fused.ply'),
             group='',
         ),
     ]

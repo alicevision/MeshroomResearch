@@ -42,7 +42,7 @@ class RenderOverlay(desc.CommandLineNode):
             name='outputFolder',
             label='Folder',
             description='Output folder for generated images.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
 
         desc.File(
@@ -50,6 +50,6 @@ class RenderOverlay(desc.CommandLineNode):
             label='Overlay',
             description='Rendered views with markers overlay.',
             semantic='image',
-            value=desc.Node.internalFolder + '<VIEW_ID>.jpg',
+            value='{nodeCacheFolder}/<VIEW_ID>.jpg',
         ),
     ]

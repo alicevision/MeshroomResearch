@@ -79,14 +79,14 @@ class LoadDataset(desc.Node):
             name='outputSfMData',
             label='SfM Data',
             description='Path to the output sfmdata file.',
-            value=desc.Node.internalFolder + 'sfm.sfm',
+            value='{nodeCacheFolder}/sfm.sfm',
         ),
 
         desc.File(
             name='depthMapsFolder',
             label='Depth map folder',
             description='Output folder for loaded depth maps.',
-            value=os.path.join(desc.Node.internalFolder, 'depth_maps'),
+            value=os.path.join('{nodeCacheFolder}', 'depth_maps'),
             # enabled=lambda attr: (attr.node.datasetType.value=='blendedMVG'), #FIXME: does not work!! doesnt actually hides in the node
         ),
 
@@ -94,7 +94,7 @@ class LoadDataset(desc.Node):
             name='mesh',
             label='Mesh',
             description='Loaded mesh.',
-            value=os.path.join(desc.Node.internalFolder, 'mesh.ply'),
+            value=os.path.join('{nodeCacheFolder}', 'mesh.ply'),
             # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
         ),
 
@@ -102,7 +102,7 @@ class LoadDataset(desc.Node):
             name='maskFolder',
             label='Mask Folder',
             description='Image mask folder. The mask describes the visibility of the object to be observed, on each view.',
-            value=os.path.join(desc.Node.internalFolder,'masks'),
+            value=os.path.join('{nodeCacheFolder}', 'masks'),
             # enabled=lambda attr: (attr.node.datasetType.value=='DTU'),
         ),
 
@@ -112,7 +112,7 @@ class LoadDataset(desc.Node):
             label='DepthMapsDisplay',
             description='Generated depth maps.',
             semantic='image',
-            value=os.path.join(desc.Node.internalFolder,
+            value=os.path.join('{nodeCacheFolder}',
                                'depth_maps', '<VIEW_ID>_depthMap.exr'),
             advanced=True,
             visible=False
@@ -123,7 +123,7 @@ class LoadDataset(desc.Node):
             label='MasksDisplay',
             description='Generated masks.',
             semantic='image',
-            value=os.path.join(desc.Node.internalFolder,
+            value=os.path.join('{nodeCacheFolder}',
                                'masks', '<VIEW_ID>.png'),
             advanced=True,
             visible=False
@@ -134,7 +134,7 @@ class LoadDataset(desc.Node):
             label='landMarksProjDisplay',
             description='Generated images for landmarl projection.',
             semantic='image',
-            value=os.path.join(desc.Node.internalFolder,
+            value=os.path.join('{nodeCacheFolder}',
                                'lm_projs', '<VIEW_ID>.png'),
             advanced=True,
             enabled=lambda attr: attr.node.landMarksProj.value,
@@ -146,7 +146,7 @@ class LoadDataset(desc.Node):
             label='MeshDisplay',
             description='MeshDisplay',
             semantic='3D',
-            value=os.path.join(desc.Node.internalFolder,
+            value=os.path.join('{nodeCacheFolder}',
                                'mesh_display.ply'),
             advanced=True,
             visible=False

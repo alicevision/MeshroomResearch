@@ -150,14 +150,14 @@ class DepthMapTransform(desc.Node):
             name='output',
             label='Output',
             description='Output folder for generated results.',
-            value=desc.Node.internalFolder,
+            value="{nodeCacheFolder}",
         ),
         desc.File(
             name='depth',
             label='Depth maps',
             description='Generated depth maps.',
             semantic='image',
-            value=desc.Node.internalFolder + '<VIEW_ID>_depthMap.exr',
+            value='{nodeCacheFolder}/<VIEW_ID>_depthMap.exr',
             group='',
         ),
     ]

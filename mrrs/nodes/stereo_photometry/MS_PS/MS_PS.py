@@ -42,6 +42,6 @@ The lighting conditions are assumed to be known.
             name="outputPath",
             label="Output Folder",
             description="Path to the output folder.",
-            value=desc.Node.internalFolder,
+            value="{nodeCacheFolder}",
         ),
     ]
