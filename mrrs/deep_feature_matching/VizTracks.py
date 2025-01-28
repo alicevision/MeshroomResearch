@@ -20,7 +20,6 @@ class VizTracks(PluginNode):
             label='SfMData',
             description='SfMData file.',
             value='',
-            uid=[0],
         ),
 
         desc.File(
@@ -28,7 +27,7 @@ class VizTracks(PluginNode):
             label='inputTracks',
             description='inputTracks',
             value='',
-            uid=[0],
+
         ),
 
         desc.File(
@@ -36,7 +35,7 @@ class VizTracks(PluginNode):
             label="Feature Folder",
             description="Featurefolder",
             value="",
-            uid=[0],
+
         ),
 
     desc.ChoiceParam(
@@ -49,7 +48,6 @@ class VizTracks(PluginNode):
                     "akaze_mldb", "cctag3", "cctag4", "sift_ocv", 
                     "akaze_ocv", "tag16h5", "unknown"],
             exclusive=True,
-            uid=[0]
         ),
 
     desc.ChoiceParam(
@@ -59,7 +57,6 @@ class VizTracks(PluginNode):
             value="info",
             values=["fatal", "error", "warning", "info", "debug", "trace"],
             exclusive=True,
-            uid=[],
         )
     ]
 
@@ -69,7 +66,6 @@ class VizTracks(PluginNode):
             label='outputFolder',
             description='outputFolder',
             value=desc.Node.internalFolder,
-            uid=[],
             group='',
         ),
         desc.File(
@@ -78,7 +74,6 @@ class VizTracks(PluginNode):
             description='trackViz',
             semantic='image',
             value=os.path.join(desc.Node.internalFolder, 'tracks_<VIEW_ID>.png'),
-            uid=[],
             group='',
         ),
     ]
