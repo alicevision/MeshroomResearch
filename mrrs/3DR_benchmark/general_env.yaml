@@ -1,0 +1,16 @@
+name: 3drBench
+channels:
+  - conda-forge
+  - open3d-admin
+  - defaults
+dependencies:
+  - python #=3.9
+  - numpy
+  - openimageio
+  - py-openimageio
+  - pip
+  - pip:
+    - trimesh
+    - psutil #needed by meshroom
+    #- git+https://github.com/alicevision/MeshroomResearch.git
+    - /s/apps/users/multiview/mrrs/hogm/MeshroomResearch #
