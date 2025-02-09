@@ -67,7 +67,7 @@ Copy and exposes data from an input folder. Convenient to expose debuging data t
 ### CutSfm 
 Will extract only a part of the input view.
 
-### DepthMapTranform
+### DepthMapTransform
 Will perform an operation on input depth maps. Used to convert the depth maps to and from meshroom's format.
 
 
