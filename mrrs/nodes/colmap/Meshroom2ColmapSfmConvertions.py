@@ -90,7 +90,7 @@ class Meshroom2ColmapSfmConvertions(desc.CommandLineNode):
         new_images_path = [os.path.join( images_output_folder, basename) for basename in images_basename]
         
         #get if we must resize
-        do_resize = chunk.node.maxImageSize.value == 0 or image_sizes[0][0]>chunk.node.maxImageSize.value
+        do_resize = (chunk.node.maxImageSize.value != 0) and (image_sizes[0][0]>chunk.node.maxImageSize.value)
 
         #modify .sfm with new sizes and filepath
         if do_resize:
