@@ -181,7 +181,8 @@ def open_dataset(sfm_data):
 
     # re-order the camera parameters using filename
     if len(image_names) != len(sfm_data["views"]):
-        raise RuntimeError("Different number of images in the sfm and the GT")
+        print("Warning: different number of images in the sfm and the GT")
+        # raise RuntimeError("Different number of images in the sfm and the GT")
     extrinsics=[]
     intrinsics=[]
     image_sizes=[]

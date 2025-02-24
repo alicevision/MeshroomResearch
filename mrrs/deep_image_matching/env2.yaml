@@ -1,0 +1,31 @@
+name: deepImageMatching
+channels:
+    - nvidia
+    - pytorch
+    - conda-forge
+dependencies:
+  # deps moved to conda 
+  - python=3.8.15
+  - numpy
+  - pytorch
+  - torchvision
+  - opencv
+  - kornia
+  - matplotlib
+  - transforms3d
+  - tqdm
+  - einops
+  - scikit-learn 
+  - scikit-image
+
+  #for meshroom & mrrs
+  - openimageio
+  - py-openimageio
+  - pip
+  - pip:
+    - psutil
+    - setuptools
+    - /s/apps/users/multiview/mrrs/hogm/MeshroomResearch #FIXME 
+   # - --no-dependencies git+https://github.com/gmberton/image-matching-mo  dels.git
+    - py3_wget
+    - kornia_moons

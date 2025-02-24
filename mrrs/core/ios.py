@@ -2,9 +2,11 @@
 Module handling the inputs and outputs from and to Meshroom.
 """
 
+from fileinput import filename
 import logging
 import re
-from struct import unpack
+from struct import unpack, iter_unpack, calcsize, pack
+import typing
 
 import numpy as np
 
@@ -117,6 +119,8 @@ def open_depth_map(depth_file, raise_exception=True):
             print('Depth file format not recognised for '+depth_file)
     return depth_map
 
+# from simple_cache import cache_it
+# @cache_it()
 def open_image(image_path, auto_rotate=False, return_orientation=False, to_srgb=False):
     """
     Opens an image and returns it as a np array.
@@ -217,16 +221,18 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
             print('No extrinsic for view pose '+pose_id)
             continue
 
-        translation = format_float_array(extrinsic[0:3,3])
+        # translation = format_float_array(extrinsic[0:3,3])
+        center = format_float_array(-np.linalg.inv(extrinsic[0:3,0:3])@extrinsic[0:3,3])
         rotation = format_float_array(extrinsic[0:3,0:3])
         pose = {
                 'poseId':str(pose_id),
                 "pose": {
                         "transform":{
                                     "rotation": rotation,
-                                    "center": translation
+                                    "center": center
                                     },
-                        "locked": "1"
+                        "locked": "false",
+                       # "rotationOnly": "false"
                         }
                 }
         sfm_data['poses'].append(pose)
@@ -249,26 +255,27 @@ def sfm_data_from_matrices(extrinsics, intrinsics, poses_ids,
                             'width':str(image_size[0]), 'height':str(image_size[1]),
                             "sensorWidth": str(sensor_width),
                             "sensorHeight": str(sensor_width*image_size[1]/image_size[0]),
-                            "serialNumber": "0", #FIXME: not matching the sfm
-                            "type": "pinhole",#FIXME: not matching the sfm
-                            "initializationMode": "unknown", #FIXME: not matching the sfm
-                            "initialFocalLength": "0", #FIXME: not matching the sfm
+                            "serialNumber": "0",
+                            "type": "pinhole",
+                            "initializationMode": "unknown",
+                            "initialFocalLength": "-1",
                             #pass focal into "mm"
                             "focalLength": str(intrinsic[0,0]*pixel_size),
-                            "pixelRatio": "1", #FIXME: not matching the sfm
-                            "pixelRatioLocked": "true", #FIXME: not matching the sfm
+                            "pixelRatio": "1", 
+                            "pixelRatioLocked": "true",
+                            "offsetLocked": "false",
+                            "scaleLocked": "false",
                             "principalPoint": principal_point,
-                            "distortionParams": "", #FIXME: not matching the sfm
-                            "locked": "true", #FIXME: not matching the sfm
-                            #new fields
+                            "distortionLocked": "false",
                             "distortionInitializationMode": "none",
+                            "distortionParams": "", #FIXME: not matching the sfm
                             "undistortionOffset": ["0","0"],
                             "undistortionParams": "",
                             "distortionType": "none",
                             "undistortionType": "none",
+                            "locked": "false", 
                             }
-
-                            
+       
             sfm_data['intrinsics'].append(intrinsic_sfm)
 
     return sfm_data
@@ -447,3 +454,121 @@ def save_obj(file, scene_points, scene_faces=None, points_colors=None):
             for face_index, face in enumerate(scene_faces):
                 face_string = "f "+' '.join(map(str, face))
                 objfile.write(face_string+"\n")
+
+#matches
+
+#FIXME: all of this should be in core
+def open_image_grapĥ(imagepairs, nb_image):
+    with open(imagepairs, 'r') as matchfile:
+        matches_raw = matchfile.readlines()
+    #one line per image
+    image_pairs = [line.strip().split(" ") for line in matches_raw]
+    if len(image_pairs) !=  nb_image:
+        if len(image_pairs) ==  nb_image-1:#file is not properly written in AV, if last image no match, no \n
+            image_pairs.append("")
+        else:
+            raise RuntimeError("Malformed image match file, %d vs %d images"%(len(image_pairs), nb_image-1))
+    return image_pairs
+
+def open_descriptor_file(descriptor_file):
+    with open(descriptor_file, "rb") as df:
+        #read number of desc from first byte
+        nb_desv_encoded = unpack('N', df.read(calcsize('N')))[0]
+        #read rematinign floats
+        descriptors = np.asarray(list(iter_unpack('f', df.read())))
+        descriptors=np.reshape(descriptors, (nb_desv_encoded, -1))
+    return descriptors
+    
+def write_descriptor_file(descriptors, desk_filename):
+    with open(desk_filename, "wb") as df:
+        #nb of desc, as size_t (should be 1 byte)
+        nb_desv_encoded = pack('N', int(descriptors.shape[0]))
+        df.write(nb_desv_encoded)
+        for descriptor in descriptors:#write descriptor as floats (4 bytes)
+            for d in descriptor:
+                d=pack('f', d)
+                df.write(d)
+
+def parse_line(line):
+    result = [m.strip() for m in line.split(" ")]
+    if len(result) == 1:
+        if result[0] == "":
+            return None
+        result = result[0]
+    return result
+
+def flatten_matches(matches, images_uids):
+    matches_flatten=[]
+    total_nb_match_per_view={v:0 for v in images_uids} 
+    for i, view_id_0 in enumerate(matches.keys()):
+        #chunk.logger.info("  %d/%d"%(i, len(matches.keys())))
+        for j, view_id_1 in enumerate(matches[view_id_0].keys()):
+            # chunk.logger.info("  %d/%d"%(j, len(matches[view_id_0].keys())))
+            matches_0_to_1 = matches[view_id_0][view_id_1]
+            nb_match=len(matches_0_to_1)
+            total_nb_match_per_view[view_id_0]+=nb_match
+            total_nb_match_per_view[view_id_1]+=nb_match  
+            if matches_0_to_1.shape[-1] == 2:
+                view_matches = np.zeros([nb_match,4])
+            else:
+                view_matches = np.zeros([nb_match,5])
+            view_matches[:,0]=view_id_0
+            view_matches[:,1]=view_id_1
+            view_matches[:,2:]=matches_0_to_1
+            matches_flatten.append(view_matches)
+    matches_flatten=np.concatenate(matches_flatten, axis = 0)
+    return matches_flatten, total_nb_match_per_view
+
+# from simple_cache import cache_it
+# @cache_it()#(filename="tmp", ttl=120)
+def open_matches(match_file, key_dtype=None, flatten=False):
+    """
+    Open matches from file. Will cast is key_dtype is specified, will flatten and sort if flatten is specified 
+    """
+    print("Reading text file")
+    with open(match_file, "r") as match_file:
+        all_lines = match_file.readlines()
+    print("Parsing lines ")
+    match_data = {}
+    i=0
+    images_uids = set()
+    while i<len(all_lines):
+        view_ids = parse_line(all_lines[i])
+        if view_ids is None:
+            break
+        view_id_0, view_id_1 = view_ids
+        images_uids.add(view_id_0)
+        images_uids.add(view_id_1)
+        if key_dtype is not None:
+            view_id_0=typing.cast(view_id_0, key_dtype)
+            view_id_1=typing.cast(view_id_1, key_dtype)
+        nb_type_feat = parse_line(all_lines[i+1])
+        if nb_type_feat != "1":
+            raise RuntimeError("Only supports one descriptor type at the time")
+        type_feat, nb_match = parse_line(all_lines[i+2])
+        nb_match = int(nb_match)
+        # matches_raw = match_file.readlines() #FIXME: need to read n next lines, dont know how many bytes
+        matches_raw = all_lines[i+3:i+3+nb_match] #[match_file.readline() for _ in range(nb_match)]#FIXME: slow
+        #avoid the squeeze when onlly one match
+        if len(matches_raw)  == 1:
+            matches = np.expand_dims(np.loadtxt(matches_raw), axis=0)
+        else: 
+            matches = np.loadtxt(matches_raw)
+        if matches.shape[0] != nb_match:
+            raise RuntimeError("Unexpected number of matches for view %s %d vs %d"%(view_id_0, matches.shape[0], nb_match))
+        #save result
+        if not (view_id_0 in match_data.keys()):
+            match_data[view_id_0]={}
+        match_data[view_id_0][view_id_1] = matches
+        i+=3+nb_match
+    images_uids=list(images_uids)
+    if not flatten:
+        return match_data, images_uids
+    else:
+        print("Flattening")
+        matches_flatten, total_nb_match_per_view= flatten_matches(match_data, images_uids)
+        print("Sorting")
+        sort_idx = np.argsort(matches_flatten[:,-1])
+        matches_flatten = matches_flatten[sort_idx, :]
+        return matches_flatten, images_uids, total_nb_match_per_view
+    

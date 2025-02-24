@@ -49,6 +49,7 @@ class CalibrationComparison(PluginCommandLineNode):
             label='CsvName',
             description='Name for the csv file to be used.',
             value="calibration_comparison.csv",
+            group=""
         ),
 
         desc.ChoiceParam(
@@ -69,11 +70,11 @@ class CalibrationComparison(PluginCommandLineNode):
             group="",
             value=desc.Node.internalFolder,
         ),
-        desc.File(
+        desc.StringParam(
             name='outputCsv',
             label='Output Csv',
             description='Output file to generated results.',
-            value=lambda attr: os.path.join(desc.Node.internalFolder, attr.node.csv_name.value),
+            value=lambda attr: os.path.join(desc.Node.internalFolder, attr.node.csvName.value),
         )
     ]
 

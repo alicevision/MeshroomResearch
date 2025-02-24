@@ -44,6 +44,7 @@ class DeepImageMatching(PluginNode):
         #     value="",
         # ),
 
+
         desc.ChoiceParam(
             name="matcher",
             label="matcher",
@@ -177,13 +178,17 @@ class DeepImageMatching(PluginNode):
                     if i!=j:
                         image_pairs.append((i,j))
         elif chunk.node.imageMatching.value == "star":
-            raise RuntimeError('not implemented yet')
+            image_pairs = []
             STEP = 20
+            last_keyframe_idx = 0
+            next_keyframe_idx = 0
             for i in range(nb_image):
                 if i%STEP == 0:
-                    pass
+                    pass #keyframe is passed
                 else:
-                    pass
+                    #if not keyframe, compute match from reference to prev and next kf
+                    image_pairs.append((i,last_keyframe_idx))
+                    image_pairs.append((i,next_keyframe_idx))
             
 
 

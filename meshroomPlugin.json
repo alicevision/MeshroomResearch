@@ -1,5 +1,5 @@
 [
-	{
+	    {
         "pluginName":"3DR_Benchmark",
         "nodesFolder":"mrrs/3DR_benchmark",
         "pipelineFolder":"mrrs/3DR_benchmark/pipelines"
@@ -26,6 +26,10 @@
         "nodesFolder":"mrrs/deep_feature_matching"
         },
         {
+            "pluginName":"Deep_Image_Matching",
+            "nodesFolder":"mrrs/deep_image_matching"
+        },
+        {
         "pluginName":"Nerf_studio",
         "nodesFolder":"mrrs/nerf"
         },
@@ -41,5 +45,9 @@
         {
         "pluginName":"Utils",
         "nodesFolder":"mrrs/utils"
-       }
+       },
+       {
+        "pluginName":"Gaussian_Splatting_Inpaint",
+        "nodesFolder":"mrrs/gs_inpaint"
+        }
 ]

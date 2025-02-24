@@ -1,0 +1,16 @@
+name: deepFeatures
+channels:
+    - nvidia
+    - conda-forge
+dependencies:
+  - python=3.9
+  #for meshroom & mrrs
+  - opencv
+  - openimageio
+  - py-openimageio
+  - pip
+  - pip:
+    - psutil
+    - setuptools
+    - -e /s/apps/users/multiview/mrrs/hogm/MeshroomResearch #FIXME
+

@@ -10,7 +10,8 @@ dependencies:
   - pip
   - psutil
   - trimesh
+  - opencv
   - pip:
     #- git+https://github.com/alicevision/MeshroomResearch.git
-    - -e /s/apps/users/multiview/mrrs/hogm/MeshroomResearch #
+    - /s/apps/users/multiview/mrrs/hogm/MeshroomResearch #
     - setuptools

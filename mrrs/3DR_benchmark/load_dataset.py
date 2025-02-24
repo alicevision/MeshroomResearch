@@ -64,7 +64,7 @@ init_sfm_lm_vertices = int(args.initSfmLandmarksVertices)
 lm_proj = args.landMarksProj
 outputSfMData = args.outputSfMData
 depthMapsFolder = args.depthMapsFolder
-initMasks = bool(args.initMasks)
+initMasks = bool(args.initMasks=="True")
 maskFolder=args.maskFolder
 mesh = args.mesh
 meshDisplay = args.meshDisplay
@@ -87,7 +87,8 @@ views_id = [v["viewId"] for v in sfm_data["views"]]
 print("**Exporting data")
 #Generate SFM data from matrices
 if not (len(gt_data["intrinsics"]) == len(gt_data["extrinsics"]) ==  len(gt_data["image_sizes"])):
-    raise RuntimeError("Mismatching number of parameters for the sfmData ")
+    #raise RuntimeError("Mismatching number of parameters for the sfmData ")
+    print("[Warning]: mismatching number of parameters for the sfmData")
 #note: will copy sfm_data
 gt_sfm_data = sfm_data_from_matrices(gt_data["extrinsics"], gt_data["intrinsics"], extrinsics_id, instrinsics_id, 
                                         gt_data["image_sizes"], sfm_data, sensor_width=gt_data["sensor_size"])
@@ -163,7 +164,7 @@ print("**Writting sfm")
 with open(os.path.join(outputSfMData), 'w') as f:
     json.dump(gt_sfm_data, f, indent=4)
 
-# Save depth maps if any
+# Save depth maps if anyS
 if "depth_maps" in gt_data:
     print("**Writting depth maps")
     os.makedirs(depthMapsFolder, exist_ok=True)
@@ -187,7 +188,7 @@ if "depth_maps" in gt_data:
         save_exr(depth_map_gt, os.path.join(depthMapsFolder, 
                 str(view_id) + "_depthMap.exr"), custom_header=depth_meta)
 
-if "masks" not in gt_data and initMasks :
+if ("masks" not in gt_data) and initMasks :
     from concurrent.futures import ThreadPoolExecutor
     from threading import Thread
     #try to see if image has alpha
@@ -234,9 +235,9 @@ if "mesh" in gt_data :
         print("***Writting point cloud preview")
 
         #We have a special viewer for point cloud in ply
-        new_display_filename = meshDisplay.value.split(".")[0]+".pc.ply"
+        new_display_filename = meshDisplay.split(".")[0]+".pc.ply"
         gt_data["mesh"].export(new_display_filename)
-        meshDisplay.value=new_display_filename
+        # meshDisplay.value=new_display_filename
 
 
     else:

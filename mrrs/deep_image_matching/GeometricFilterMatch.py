@@ -106,7 +106,7 @@ class GeometricFilterMatch(PluginNode):
         ),
     ]
 
-    def open_matches_from_warp():
+    # def open_matches_from_warp():
 
 
 

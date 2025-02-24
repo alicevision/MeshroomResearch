@@ -58,6 +58,7 @@ class ExportXMP(PluginCommandLineNode):
             value='info',
             values=['fatal', 'error', 'warning', 'info', 'debug', 'trace'],
             exclusive=True,
+            group=""
         ),
     ]
 
