@@ -53,7 +53,7 @@ class CopyData(desc.Node):
             name='outputFile',
             label='Output File',
             description='Path to the output file.',
-            value=lambda attr: os.path.join(desc.Node.internalFolder, os.path.basename(attr.node.inputFile.value) if attr.node.outputName.value =="" else attr.node.outputName.value),
+            value=lambda attr: os.path.join('{nodeCacheFolder}', os.path.basename(attr.node.inputFile.value) if attr.node.outputName.value =="" else attr.node.outputName.value),
         ),
 
     ]

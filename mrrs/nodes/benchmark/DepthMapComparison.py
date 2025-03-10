@@ -89,13 +89,13 @@ Autorescale may be used otherwise but it is far from ideal.
             name='output',
             label='Output',
             description='Output folder for generated results.',
-            value=desc.Node.internalFolder,
+            value="{nodeCacheFolder}",
         ),
         desc.File(
             name='outputCsv',
             label='Output Csv',
             description='Output file to generated results.',
-            value=lambda attr: os.path.join(desc.Node.internalFolder, attr.node.csv_name.value),
+            value=lambda attr: os.path.join("{nodeCacheFolder}", attr.node.csv_name.value),
         )
     ]
 

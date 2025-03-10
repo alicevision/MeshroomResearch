@@ -268,7 +268,7 @@ class Colmap2MeshroomSfmConvertion(desc.Node):
             name='outputSfm',
             label='Output Sfm',
             description='Path to the output SfM file.',
-            value=os.path.join(desc.Node.internalFolder, "sfmdata.sfm"),
+            value=os.path.join("{nodeCacheFolder}", "sfmdata.sfm"),
             ),
     ]
 

@@ -51,7 +51,7 @@ class ExportXMP(desc.Node):
             name='outputFolder',
             label='Output folder',
             description='Path to the XMP folder',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
     ]
 

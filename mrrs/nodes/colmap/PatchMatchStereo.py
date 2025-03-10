@@ -33,7 +33,7 @@ class PatchMatchStereo(desc.CommandLineNode):
             name='workspace_path',
             label='OutputPath',
             description='Output path.',
-            value=os.path.join(desc.Node.internalFolder, "workspace"),
+            value=os.path.join("{nodeCacheFolder}", "workspace"),
         ),
 
     ]

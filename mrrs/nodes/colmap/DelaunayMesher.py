@@ -30,7 +30,7 @@ class DelaunayMesher(desc.CommandLineNode):
             name='output_path',
             label='OutputPath',
             description='Output path.',
-            value=os.path.join(desc.Node.internalFolder, "mesh_delaunay.ply"),
+            value=os.path.join("{nodeCacheFolder}", "mesh_delaunay.ply"),
         ),
 
     ]

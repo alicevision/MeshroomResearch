@@ -172,7 +172,7 @@ class NeRFStudio(CondaNode):
             name='output',
             label='Output',
             description='Output folder.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
             group="",
         ),
     ]

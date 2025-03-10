@@ -47,14 +47,14 @@ class ComputeNormals(desc.Node):
             name='outputNormalFolder',
             label='Output normal Folder',
             description='Output folder for refined depth maps.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
         desc.File(
             name='normals',
             label='Normal maps',
             description='Generated depth maps.',
             semantic='image',
-            value=desc.Node.internalFolder + '<VIEW_ID>.exr',
+            value='{nodeCacheFolder}/<VIEW_ID>.exr',
             group='', # do not export on the command line
         ),
     ]

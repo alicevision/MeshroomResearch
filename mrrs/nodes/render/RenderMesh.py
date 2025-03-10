@@ -44,7 +44,7 @@ class RenderMesh(desc.CommandLineNode):
             name='output',
             label='OutputFolder',
             description='Output folder for generated images.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
 
         desc.File(
@@ -52,6 +52,6 @@ class RenderMesh(desc.CommandLineNode):
             label='Overlay',
             description='Rendered views.',
             semantic='image',
-            value=desc.Node.internalFolder + '<VIEW_ID>.exr',
+            value='{nodeCacheFolder}/<VIEW_ID>.exr',
         ),
     ]

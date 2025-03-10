@@ -44,6 +44,6 @@ class Seq2Video(desc.CommandLineNode):
             name='outputVideo',
             label='Output Video',
             description='''  ''',
-            value=os.path.join(desc.Node.internalFolder, 'video'),
-            ),
+            value=os.path.join('{nodeCacheFolder}', 'video'),
+        ),
     ]

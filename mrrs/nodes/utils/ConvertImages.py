@@ -126,13 +126,13 @@ class ConvertImages(desc.Node):
             name='outputFolder',
             label='Output Folder',
             description='Output folder for converted images.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
         desc.File(
             name='outputSfMData',
             label='SfMData',
             description='Path to the output sfmdata file.',
-            value=desc.Node.internalFolder + 'sfm.sfm',
+            value='{nodeCacheFolder}/sfm.sfm',
         )
         ]
 

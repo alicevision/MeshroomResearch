@@ -39,13 +39,13 @@ class Render360(desc.CommandLineNode):
             name='outputFolder',
             label='Folder',
             description='Output folder for generated images.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
 
         desc.File(
             name='outputImages',
             label='outputImages',
             description='Output generated images.',
-            value=os.path.join(desc.Node.internalFolder, "*.png"),
+            value=os.path.join("{nodeCacheFolder}", "*.png"),
         ),
     ]

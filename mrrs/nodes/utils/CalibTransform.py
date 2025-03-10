@@ -120,7 +120,7 @@ class CalibTransform(desc.Node):
             name='outputSfMData',
             label='Output',
             description='Output SfM data.',
-            value=os.path.join(desc.Node.internalFolder, "sfm.sfm"),
+            value=os.path.join("{nodeCacheFolder}", "sfm.sfm"),
         )
     ]
 

@@ -34,6 +34,6 @@ Reconstruction using Photometric Stereo. A normal map is evaluated from several 
             name="outputPath",
             label="Output Folder",
             description="Path to the output folder.",
-            value=desc.Node.internalFolder,
+            value="{nodeCacheFolder}",
         )
     ]

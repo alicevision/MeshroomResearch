@@ -43,7 +43,6 @@ class CleanMesh(CondaNode):
             name="output_mesh",
             label="Ouput Mesh",
             description="",
-            value=os.path.join(desc.Node.internalFolder, "cleaned_mesh.ply"),
+            value=os.path.join("{nodeCacheFolder}", "cleaned_mesh.ply"),
             ),
     ]
-

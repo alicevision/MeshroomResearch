@@ -40,7 +40,7 @@ class PoissonMesher(desc.CommandLineNode):
             name='output_mesh',
             label='OutputMesh',
             description='Output mesh.',
-            value=os.path.join(desc.Node.internalFolder, "mesh_poisson.ply"),
+            value=os.path.join("{nodeCacheFolder}", "mesh_poisson.ply"),
         ),
 
     ]

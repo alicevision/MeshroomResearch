@@ -117,7 +117,7 @@ class NeRFStudioExport(CondaNode):
             name='output-dir',
             label='Output',
             description='Output folder.',
-            value=desc.Node.internalFolder,
+            value='{nodeCacheFolder}',
         ),
     ]
 
